@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pip Companion</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+body{margin:0}
+a{color:#5B3DF5}a:hover{color:#3A22C7}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;overflow:hidden;background:#F5F2FF;display:flex;flex-direction:column;font-family:'DM Sans',sans-serif;color:#17123A">
+
+  <div style="flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 20px 10px 20px;box-sizing:border-box;overflow:hidden">
+
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <h1 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;line-height:36px">Pip</h1>
+      <span style="font-size:13px;font-weight:500;color:#5A5478">Your cheering squad of one</span>
+    </div>
+
+    <section aria-label="Pip's mood" style="position:relative;background:#FFC83D;border:2.5px solid #17123A;border-radius:22px;box-shadow:4px 4px 0 #17123A;padding:12px 14px 12px 6px;display:flex;align-items:center;gap:6px;overflow:hidden">
+      <svg aria-hidden="true" width="330" height="170" viewBox="0 0 330 170" style="position:absolute;left:0;top:0;pointer-events:none">
+        <circle cx="16" cy="18" r="5" fill="#5B3DF5" stroke="#17123A" stroke-width="2"></circle>
+        <path d="M150 10 L160 24 L142 24 Z" fill="#FF7AB0" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path>
+        <circle cx="140" cy="150" r="4.5" fill="#2EC4A6" stroke="#17123A" stroke-width="2"></circle>
+        <path d="M14 140 L26 146 L14 154 Z" fill="#7FC8FF" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path>
+        <circle cx="314" cy="16" r="5" fill="#FF7AB0" stroke="#17123A" stroke-width="2"></circle>
+        <path d="M262 8 L272 20 L256 22 Z" fill="#2EC4A6" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path>
+        <circle cx="168" cy="60" r="3.5" fill="#7FC8FF" stroke="#17123A" stroke-width="2"></circle>
+        <path d="M300 150 L312 156 L300 164 Z" fill="#5B3DF5" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path>
+      </svg>
+
+      <svg role="img" aria-label="Pip, your companion" width="150" height="150" viewBox="0 0 120 120" style="flex:none;position:relative">
+        <path d="M60 25 C60 20 60 16 61 12" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round"></path>
+        <path d="M61 14 C66 4 78 4 82 8 C76 16 68 18 61 14 Z" fill="#2EC4A6" stroke="#17123A" stroke-width="2.5" stroke-linejoin="round"></path>
+        <circle cx="60" cy="66" r="41" fill="#FFC83D" stroke="#17123A" stroke-width="2.5"></circle>
+        <ellipse cx="46" cy="62" rx="5" ry="7" fill="#17123A"></ellipse>
+        <ellipse cx="74" cy="62" rx="5" ry="7" fill="#17123A"></ellipse>
+        <circle cx="47.6" cy="59" r="1.8" fill="#FFFFFF"></circle>
+        <circle cx="75.6" cy="59" r="1.8" fill="#FFFFFF"></circle>
+        <circle cx="35" cy="76" r="5" fill="#FF7AB0"></circle>
+        <circle cx="85" cy="76" r="5" fill="#FF7AB0"></circle>
+        <path d="M51 79 Q60 87 69 79" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round"></path>
+        <sc-if value="{{ wearScarf }}" hint-placeholder-val="{{ true }}">
+          <path d="M27 90 Q60 108 93 90 L96 99 Q60 120 24 99 Z" fill="#5B3DF5" stroke="#17123A" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M78 102 L86 117 L76 119 L70 105 Z" fill="#5B3DF5" stroke="#17123A" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M40 98 L44 103 M52 101 L55 106" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"></path>
+        </sc-if>
+        <sc-if value="{{ wearShades }}" hint-placeholder-val="{{ false }}">
+          <rect x="34" y="54" width="22" height="15" rx="6" fill="#17123A" stroke="#17123A" stroke-width="2.5"></rect>
+          <rect x="64" y="54" width="22" height="15" rx="6" fill="#17123A" stroke="#17123A" stroke-width="2.5"></rect>
+          <path d="M56 59 Q60 56 64 59" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M34 58 L22 55 M86 58 L98 55" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round"></path>
+          <path d="M39 58 L44 58 M69 58 L74 58" fill="none" stroke="#7FC8FF" stroke-width="2" stroke-linecap="round"></path>
+        </sc-if>
+      </svg>
+
+      <div style="position:relative;display:flex;flex-direction:column;gap:6px;min-width:0">
+        <span style="align-self:flex-start;background:#FFFFFF;border:2px solid #17123A;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700">{{ wearingLabel }}</span>
+        <h2 style="margin:0;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;line-height:27px">Pip is glowing</h2>
+        <p style="margin:0;font-size:14px;line-height:19px;font-weight:500">You showed up 5 of the last 7 days. That's real momentum.</p>
+      </div>
+    </section>
+
+    <section aria-label="Momentum" style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5A5478">Momentum</span>
+        <span style="background:#5B3DF5;color:#FFFFFF;border:2.5px solid #17123A;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700">Strong</span>
+      </div>
+      <div role="meter" aria-label="Momentum" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" aria-valuetext="Strong" style="height:24px;background:#FFFFFF;border:2.5px solid #17123A;border-radius:999px;box-shadow:3px 3px 0 #17123A;overflow:hidden;display:flex">
+        <div style="width:72%;display:flex;height:100%;border-right:2.5px solid #17123A;box-sizing:border-box">
+          <div style="flex:5;background:#5B3DF5;border-right:2.5px solid #17123A"></div>
+          <div style="flex:3;background:#FF7AB0"></div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:13px;color:#5A5478">Momentum fades slowly, one quiet day won't reset it.</p>
+    </section>
+
+    <section aria-label="This week" style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5A5478">This week</span>
+      <div style="background:#FFFFFF;border:2.5px solid #17123A;border-radius:22px;box-shadow:4px 4px 0 #17123A;padding:10px 12px 8px 12px;display:flex;flex-direction:column;gap:6px">
+        <div role="img" aria-label="Focus minutes per day this week. Wednesday was a rest day." style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:84px">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:62px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:48px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%"><span style="font-size:11px;font-weight:500;color:#5A5478;white-space:nowrap">rest day</span><div style="width:26px;height:14px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:7px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:72px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:54px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:36px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="width:26px;height:44px;background:#2EC4A6;border:2.5px solid #17123A;border-radius:9px;box-sizing:border-box"></div></div>
+        </div>
+        <div aria-hidden="true" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-size:12px;font-weight:700">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <p style="margin:0;font-size:12px;color:#5A5478;text-align:center">Focus minutes per day</p>
+      </div>
+    </section>
+
+    <section aria-label="Wins you logged" style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5A5478">Wins you logged</span>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div style="background:#FFFFFF;border:2.5px solid #17123A;border-radius:16px;box-shadow:3px 3px 0 #17123A;padding:8px 9px;display:flex;flex-direction:column;gap:4px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2EC4A6" stroke="#17123A" stroke-width="2.5"></circle><path d="M7.5 12.5 L10.5 15.5 L16.5 9" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size:13px;font-weight:700;line-height:16px">Sent the thesis outline</span>
+        </div>
+        <div style="background:#FFFFFF;border:2.5px solid #17123A;border-radius:16px;box-shadow:3px 3px 0 #17123A;padding:8px 9px;display:flex;flex-direction:column;gap:4px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#7FC8FF" stroke="#17123A" stroke-width="2.5"></circle><path d="M7.5 12.5 L10.5 15.5 L16.5 9" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size:13px;font-weight:700;line-height:16px">Finished DL lab 3</span>
+        </div>
+        <div style="background:#FFFFFF;border:2.5px solid #17123A;border-radius:16px;box-shadow:3px 3px 0 #17123A;padding:8px 9px;display:flex;flex-direction:column;gap:4px">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FF7AB0" stroke="#17123A" stroke-width="2.5"></circle><path d="M7.5 12.5 L10.5 15.5 L16.5 9" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size:13px;font-weight:700;line-height:16px">Went to the gym twice</span>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Unlocks" style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5A5478">Unlocks</span>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+          <button type="button" onClick="{{ equipScarf }}" aria-pressed="{{ scarfPressed }}" aria-label="Scarf, unlocked. Tap to wear" style="{{ scarfStyle }}">
+            <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24"><path d="M4 8 Q12 12 20 8 L20 12 Q12 16 4 12 Z" fill="#5B3DF5" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path><path d="M14 13 L16 21 L12.5 21 L11.5 14" fill="#5B3DF5" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path></svg>
+          </button>
+          <span style="font-size:11px;font-weight:700;text-align:center;line-height:13px">Scarf</span>
+          <span style="{{ scarfTagStyle }}">{{ scarfTag }}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+          <button type="button" onClick="{{ equipShades }}" aria-pressed="{{ shadesPressed }}" aria-label="Sunglasses, unlocked. Tap to wear" style="{{ shadesStyle }}">
+            <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24"><rect x="3" y="9" width="7.5" height="6" rx="2.5" fill="#17123A"></rect><rect x="13.5" y="9" width="7.5" height="6" rx="2.5" fill="#17123A"></rect><path d="M10.5 11 Q12 10 13.5 11" fill="none" stroke="#17123A" stroke-width="2" stroke-linecap="round"></path></svg>
+          </button>
+          <span style="font-size:11px;font-weight:700;text-align:center;line-height:13px">Sunglasses</span>
+          <span style="{{ shadesTagStyle }}">{{ shadesTag }}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+          <div role="img" aria-label="Party hat, unlocks in 3 more sessions" style="position:relative;width:56px;height:56px">
+            <svg aria-hidden="true" width="56" height="56" viewBox="0 0 56 56" style="position:absolute;left:0;top:0">
+              <circle cx="28" cy="28" r="25.5" fill="#FFFFFF" stroke="#17123A" stroke-width="2.5"></circle>
+              <circle cx="28" cy="28" r="20" fill="none" stroke="#E4DFF7" stroke-width="5"></circle>
+              <circle cx="28" cy="28" r="20" fill="none" stroke="#5B3DF5" stroke-width="5" stroke-linecap="round" stroke-dasharray="50.3 125.7" transform="rotate(-90 28 28)"></circle>
+              <path d="M28 17 L35 36 L21 36 Z" fill="#FF7AB0" stroke="#17123A" stroke-width="2" stroke-linejoin="round"></path>
+              <circle cx="28" cy="16" r="2.5" fill="#FFC83D" stroke="#17123A" stroke-width="1.8"></circle>
+              <path d="M24 30 L32 30" stroke="#17123A" stroke-width="1.8" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <span style="font-size:11px;font-weight:700;text-align:center;line-height:13px">Party hat</span>
+          <span style="font-size:11px;color:#5A5478;text-align:center;line-height:13px">3 more sessions</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+          <div role="img" aria-label="Rain boots, locked" style="position:relative;width:56px;height:56px;box-sizing:border-box;border-radius:999px;border:2.5px dashed #5A5478;background:#ECE8F8;display:flex;align-items:center;justify-content:center">
+            <svg aria-hidden="true" width="30" height="30" viewBox="0 0 24 24"><path d="M5 3 L11 3 L11 14 L19 15 Q21 16 21 19 L21 21 L5 21 Z" fill="#5A5478"></path></svg>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" style="position:absolute;right:-4px;bottom:-4px;background:#FFFFFF;border:2px solid #17123A;border-radius:999px;padding:1px"><rect x="5" y="11" width="14" height="10" rx="2.5" fill="none" stroke="#17123A" stroke-width="2.5"></rect><path d="M8 11 V8 a4 4 0 0 1 8 0 V11" fill="none" stroke="#17123A" stroke-width="2.5" stroke-linecap="round"></path></svg>
+          </div>
+          <span style="font-size:11px;font-weight:700;text-align:center;line-height:13px">Rain boots</span>
+          <span style="font-size:11px;color:#5A5478;text-align:center;line-height:13px">Coming soon</span>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <nav aria-label="Main" style="flex:none;height:66px;background:#FFFFFF;border-top:2.5px solid #17123A;display:grid;grid-template-columns:repeat(5,1fr);box-sizing:border-box;padding:6px 6px 8px 6px">
+    <button type="button" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#5A5478;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;min-height:44px">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+      Today
+    </button>
+    <button type="button" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#5A5478;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;min-height:44px">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+      Plan
+    </button>
+    <button type="button" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#5A5478;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;min-height:44px">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M10 2h4"></path></svg>
+      Focus
+    </button>
+    <button type="button" aria-current="page" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#5B3DF5;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;min-height:44px">
+      <span style="display:flex;align-items:center;justify-content:center;width:44px;height:26px;border-radius:999px;background:#5B3DF5;border:2px solid #17123A;box-sizing:border-box">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"></circle><path d="M12 7c0-2 1-3.5 3-4"></path><path d="M9.5 16.5q2.5 2 5 0"></path></svg>
+      </span>
+      Pip
+    </button>
+    <button type="button" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#5A5478;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;min-height:44px">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"></path><path d="M9 10h6"></path></svg>
+      Ask
+    </button>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(...args) {
+    super(...args);
+    this.state = { equipped: 'scarf' };
+  }
+  tokenStyle(on) {
+    return 'width:56px;height:56px;padding:0;border-radius:999px;border:2.5px solid #17123A;box-shadow:3px 3px 0 #17123A;display:flex;align-items:center;justify-content:center;cursor:pointer;box-sizing:border-box;' +
+      (on ? 'background:#FFC83D;outline:3px solid #5B3DF5;outline-offset:2px;' : 'background:#FFFFFF;');
+  }
+  tagStyle(on) {
+    return 'font-size:11px;line-height:13px;text-align:center;font-weight:700;' + (on ? 'color:#5B3DF5;' : 'color:#5A5478;font-weight:500;');
+  }
+  renderVals() {
+    const eq = (this.state && this.state.equipped) || 'scarf';
+    const scarfOn = eq === 'scarf';
+    const shadesOn = eq === 'sunglasses';
+    return {
+      wearScarf: scarfOn,
+      wearShades: shadesOn,
+      wearingLabel: 'wearing: ' + eq,
+      equipScarf: () => this.setState({ equipped: 'scarf' }),
+      equipShades: () => this.setState({ equipped: 'sunglasses' }),
+      scarfPressed: scarfOn ? 'true' : 'false',
+      shadesPressed: shadesOn ? 'true' : 'false',
+      scarfStyle: this.tokenStyle(scarfOn),
+      shadesStyle: this.tokenStyle(shadesOn),
+      scarfTagStyle: this.tagStyle(scarfOn),
+      shadesTagStyle: this.tagStyle(shadesOn),
+      scarfTag: scarfOn ? 'Wearing' : 'Tap to wear',
+      shadesTag: shadesOn ? 'Wearing' : 'Tap to wear'
+    };
+  }
+}
+</script>
+</body>
+</html>
