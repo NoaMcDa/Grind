@@ -2,6 +2,8 @@
 
 Oct 29, 2026 · @Noa David
 
+> **Update, 2 Nov 2026.** The app must ship on the App Store *and* on the web, so the native-Swift recommendation in Part 2A/2C no longer holds. The build moves to **Flutter** (iOS + web from one codebase) with a hosted backend and a cloud assistant; iOS-only frameworks (ActivityKit, App Intents, Screen Time) are reached through small native plugins. The research, feature catalogue, behavioural evidence and layer design still apply. Details in `HANDOFF.md` §6.
+
 ## Part 1A — The landscape: 20 apps, four camps
 
 The iOS time-management market in late 2026 splits into four camps, and no single app covers all four of your goals (reminders, cheering, productivity, assistant). Task managers own capture and reminders; AI planners own scheduling; focus blockers own distraction; companion apps own encouragement. Prices below are as listed by the cited pages in 2026 and change often.
