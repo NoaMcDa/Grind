@@ -7,7 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'occurrence_completion.dart';
 import 'occurrence_expander.dart';
-import 'recurrence_strings.dart';
+import 'package:grind/l10n/l10n.dart';
 import 'package:grind/core/notifications/time_zones.dart';
 
 /// Which part of a recurring series an edit applies to.
@@ -15,7 +15,7 @@ enum SeriesEditChoice { thisOne, allFuture }
 
 /// Asks "This one" or "All future". Null when dismissed.
 Future<SeriesEditChoice?> showSeriesEditChoice(BuildContext context) {
-  final s = RecurrenceStrings.of(Localizations.localeOf(context));
+  final s = context.l10n;
   return showStickerSheet<SeriesEditChoice>(
     context,
     (ctx) => Column(
@@ -23,19 +23,19 @@ Future<SeriesEditChoice?> showSeriesEditChoice(BuildContext context) {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 8),
-        Text(s.editTitle, style: AppText.display(size: 22)),
+        Text(s.recurrenceEditTitle, style: AppText.display(size: 22)),
         const SizedBox(height: 6),
-        Text(s.editHint, style: AppText.body(color: AppColors.muted)),
+        Text(s.recurrenceEditHint, style: AppText.body(color: AppColors.muted)),
         const SizedBox(height: 16),
         PillButton(
-          label: s.editThisOne,
+          label: s.recurrenceEditThisOne,
           color: AppColors.violet,
           textColor: Colors.white,
           onPressed: () => Navigator.pop(ctx, SeriesEditChoice.thisOne),
         ),
         const SizedBox(height: 10),
         PillButton(
-          label: s.editAllFuture,
+          label: s.recurrenceEditAllFuture,
           onPressed: () => Navigator.pop(ctx, SeriesEditChoice.allFuture),
         ),
       ],

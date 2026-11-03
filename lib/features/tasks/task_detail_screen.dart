@@ -8,7 +8,7 @@ import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
 import '../plan/plan_replan_sheet.dart' show scheduleTaskForMe;
-import '../plan/plan_strings.dart';
+import '../plan/plan_l10n.dart';
 import '../recurrence/providers.dart';
 import '../recurrence/recurrence.dart';
 import '../recurrence/recurrence_picker.dart';
@@ -16,7 +16,7 @@ import 'day_bounds.dart';
 import 'task_actions.dart';
 import 'task_form.dart';
 import 'task_providers.dart';
-import 'tasks_strings.dart';
+import '../../l10n/l10n.dart';
 
 /// One task with Edit / Complete / Delete. Routed as `/task/:id` and also
 /// pushed from the Today list.
@@ -44,10 +44,10 @@ class TaskDetailScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(TasksStrings.deleteTitle, style: AppText.display(size: 22)),
+          Text(context.l10n.tasksDeleteTitle, style: AppText.display(size: 22)),
           const SizedBox(height: 6),
           Text(
-            TasksStrings.deleteBody,
+            context.l10n.tasksDeleteBody,
             style: AppText.body(color: AppColors.muted),
           ),
           const SizedBox(height: 16),
@@ -55,14 +55,14 @@ class TaskDetailScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: PillButton(
-                  label: TasksStrings.keep,
+                  label: context.l10n.tasksKeep,
                   onPressed: () => Navigator.of(ctx).pop(false),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: PillButton(
-                  label: TasksStrings.delete,
+                  label: context.l10n.commonDelete,
                   color: AppColors.pink,
                   onPressed: () => Navigator.of(ctx).pop(true),
                 ),
@@ -148,9 +148,9 @@ class TaskDetailScreen extends ConsumerWidget {
       body = loading
           ? const Center(child: CircularProgressIndicator())
           : EmptyState(
-              title: TasksStrings.notFound,
+              title: context.l10n.tasksNotFound,
               body: '',
-              actionLabel: TasksStrings.backToToday,
+              actionLabel: context.l10n.tasksBackToToday,
               onAction: () => context.go('/today'),
             );
     } else {
@@ -224,7 +224,7 @@ class TaskDetailScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
       children: [
-        SectionLabel(TasksStrings.detailTitle),
+        SectionLabel(context.l10n.tasksDetailTitle),
         const SizedBox(height: 4),
         Text(
           task.title,
@@ -239,10 +239,10 @@ class TaskDetailScreen extends ConsumerWidget {
           runSpacing: 8,
           children: [
             task.energy == Energy.deep
-                ? IconChip.deep(label: TasksStrings.deep, height: 28)
-                : IconChip.light(label: TasksStrings.light, height: 28),
-            Pill(label: TasksStrings.minutes(task.estimatedMinutes)),
-            if (done) const Pill(label: 'Done', color: AppColors.mint),
+                ? IconChip.deep(label: context.l10n.energyDeep, height: 28)
+                : IconChip.light(label: context.l10n.energyLight, height: 28),
+            Pill(label: context.l10n.commonMinutes(task.estimatedMinutes)),
+            if (done) Pill(label: 'Done', color: AppColors.mint),
           ],
         ),
         const SizedBox(height: 16),
@@ -251,32 +251,33 @@ class TaskDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _field(
-                TasksStrings.dueLabel,
+                context.l10n.tasksDueLabel,
                 due == null
-                    ? TasksStrings.noDate
+                    ? context.l10n.tasksNoDate
                     : dueHasTime
-                    ? '${TasksStrings.date(due)} · ${formatTime(due)}'
-                    : TasksStrings.date(due),
+                    ? '${formatPlanDay(context.l10n, due)} · ${formatTime(due)}'
+                    : formatPlanDay(context.l10n, due),
               ),
               const SizedBox(height: 12),
               _field(
-                TasksStrings.reminderTime,
+                context.l10n.tasksReminderTime,
                 remind == null
                     ? '—'
-                    : '${TasksStrings.date(remind)} · ${formatTime(remind)}',
+                    : '${formatPlanDay(context.l10n, remind)} · ${formatTime(remind)}',
               ),
               const SizedBox(height: 12),
               _field(
-                TasksStrings.scheduledLabel,
+                context.l10n.tasksScheduledLabel,
                 task.isScheduled
-                    ? PlanStrings.slot(
+                    ? formatPlanSlot(
+                        context.l10n,
                         wall(task.scheduledStart)!,
                         wall(task.scheduledEnd)!,
                       )
-                    : TasksStrings.notScheduled,
+                    : context.l10n.tasksNotScheduled,
               ),
               const SizedBox(height: 12),
-              const SectionLabel(TasksStrings.repeatsLabel),
+              SectionLabel(context.l10n.tasksRepeatsLabel),
               const SizedBox(height: 2),
               RecurrenceSummaryChip(
                 key: const Key('task-recurrence'),
@@ -286,18 +287,18 @@ class TaskDetailScreen extends ConsumerWidget {
               ),
               if (task.firstAction != null) ...[
                 const SizedBox(height: 12),
-                _field(TasksStrings.firstActionLabel, task.firstAction!),
+                _field(context.l10n.tasksFirstActionLabel, task.firstAction!),
               ],
               if (task.notes != null) ...[
                 const SizedBox(height: 12),
-                _field(TasksStrings.notesLabel, task.notes!),
+                _field(context.l10n.tasksNotesLabel, task.notes!),
               ],
             ],
           ),
         ),
         const SizedBox(height: 20),
         PillButton(
-          label: done ? TasksStrings.reopen : TasksStrings.complete,
+          label: done ? context.l10n.tasksReopen : context.l10n.tasksComplete,
           color: done ? AppColors.card : AppColors.mint,
           display: true,
           fontSize: 16,
@@ -307,7 +308,7 @@ class TaskDetailScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           PillButton(
             key: const Key('task-schedule-for-me'),
-            label: PlanStrings.scheduleForMe,
+            label: context.l10n.planScheduleForMe,
             color: AppColors.lilac,
             icon: const Icon(Icons.auto_awesome),
             onPressed: () => scheduleTaskForMe(context, ref, task.id),
@@ -318,14 +319,14 @@ class TaskDetailScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: PillButton(
-                label: TasksStrings.edit,
+                label: context.l10n.edit,
                 onPressed: () => showTaskSheet(context, existing: task),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: PillButton(
-                label: TasksStrings.delete,
+                label: context.l10n.commonDelete,
                 color: AppColors.pink,
                 onPressed: () => _confirmDelete(context, ref, task),
               ),

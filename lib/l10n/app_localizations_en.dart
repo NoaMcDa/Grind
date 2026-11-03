@@ -2227,4 +2227,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'Sent from Grind';
+
+  @override
+  String get tasksGoalLabel => 'Goal';
+
+  @override
+  String get tasksNoGoal => 'No goal';
+
+  @override
+  String get tasksRepeatsLabel => 'Repeats';
+
+  @override
+  String get tasksScheduledLabel => 'On the plan';
+
+  @override
+  String get tasksNotScheduled => 'Not placed yet';
+
+  @override
+  String get tasksNextOneSet => 'Nicely done. The next one is lined up.';
+
+  @override
+  String get planScheduleForMe => 'Schedule it for me';
+
+  @override
+  String get planDetails => 'Details';
+
+  @override
+  String get planOpenInCalendarApple =>
+      'Open the Calendar app to see this one. A direct link is coming.';
+
+  @override
+  String get planOpenInCalendarLocal => 'This one lives in Grind only.';
+
+  @override
+  String get planOpenInCalendarFailed =>
+      'The calendar didn\'t open just now. Worth a try in a moment.';
 }

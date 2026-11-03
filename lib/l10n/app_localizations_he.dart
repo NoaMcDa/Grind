@@ -2207,4 +2207,39 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'נשלח מ-Grind';
+
+  @override
+  String get tasksGoalLabel => 'מטרה';
+
+  @override
+  String get tasksNoGoal => 'בלי מטרה';
+
+  @override
+  String get tasksRepeatsLabel => 'חוזרת';
+
+  @override
+  String get tasksScheduledLabel => 'בתוכנית';
+
+  @override
+  String get tasksNotScheduled => 'עוד לא שובצה';
+
+  @override
+  String get tasksNextOneSet => 'כל הכבוד. הבאה כבר מחכה.';
+
+  @override
+  String get planScheduleForMe => 'לשבץ בשבילי';
+
+  @override
+  String get planDetails => 'פרטים';
+
+  @override
+  String get planOpenInCalendarApple =>
+      'אפשר לפתוח את אפליקציית היומן כדי לראות את זה. קישור ישיר בדרך.';
+
+  @override
+  String get planOpenInCalendarLocal => 'זה חי רק בתוך Grind.';
+
+  @override
+  String get planOpenInCalendarFailed =>
+      'היומן לא נפתח כרגע. אפשר לנסות עוד רגע.';
 }

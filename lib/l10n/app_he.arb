@@ -603,5 +603,16 @@
   "recapShareHits": "מכסות שהושגו: {list}",
   "recapShareMoved": "יעדים שזזו: {list}",
   "recapShareDone": "משימות שהושלמו: {count}",
-  "recapShareFooter": "נשלח מ-Grind"
+  "recapShareFooter": "נשלח מ-Grind",
+  "tasksGoalLabel": "מטרה",
+  "tasksNoGoal": "בלי מטרה",
+  "tasksRepeatsLabel": "חוזרת",
+  "tasksScheduledLabel": "בתוכנית",
+  "tasksNotScheduled": "עוד לא שובצה",
+  "tasksNextOneSet": "כל הכבוד. הבאה כבר מחכה.",
+  "planScheduleForMe": "לשבץ בשבילי",
+  "planDetails": "פרטים",
+  "planOpenInCalendarApple": "אפשר לפתוח את אפליקציית היומן כדי לראות את זה. קישור ישיר בדרך.",
+  "planOpenInCalendarLocal": "זה חי רק בתוך Grind.",
+  "planOpenInCalendarFailed": "היומן לא נפתח כרגע. אפשר לנסות עוד רגע."
 }
