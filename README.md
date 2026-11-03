@@ -20,6 +20,5 @@ flutter build web --release  # output in build/web
 - `lib/widgets` — sticker cards, pill buttons, momentum meter, Pip
 - `lib/app` — app root (`GrindApp`), go_router routes and tab bar, test helpers (`pumpGrindApp`), demo seed data, errors and logging
 - `lib/core` — contracts: domain model, repository and service interfaces, DI providers
-- `lib/shell` — the old five-tab shell (replaced by `lib/app`)
 - `lib/features/<name>` — Today · Plan · Focus · Pip · Ask; new features follow `data/`, `domain/`, `presentation/` (see `docs/adr/0002-state-management.md`)
 - `docs/handoff` — product handoff, market research, mockups and renders

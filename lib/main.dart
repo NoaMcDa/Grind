@@ -1,22 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'shell/app_shell.dart';
-import 'theme/app_theme.dart';
+import 'app/app.dart';
+import 'app/demo_seed.dart';
 
 void main() {
-  runApp(const GrindApp());
-}
-
-class GrindApp extends StatelessWidget {
-  const GrindApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Grind',
-      debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      home: const AppShell(),
-    );
-  }
+  // Demo data until the real database (#2) and services (#5) are wired in.
+  runApp(GrindApp(overrides: [...demoOverrides()]));
 }
