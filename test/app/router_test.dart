@@ -42,10 +42,10 @@ void main() {
     expect(find.text('FOCUS 2 OF 4'), findsOneWidget);
   });
 
-  testWidgets('deep link /task/abc opens the placeholder', (tester) async {
-    await pumpGrindApp(tester, initialLocation: '/task/abc');
-    expect(find.text('abc'), findsOneWidget);
-    expect(find.text('Task details are coming soon.'), findsOneWidget);
+  testWidgets('deep link /task/:id opens the task detail', (tester) async {
+    await pumpGrindApp(tester, initialLocation: '/task/gym');
+    expect(find.text('Gym'), findsWidgets);
+    expect(find.text('Good morning!'), findsNothing);
   });
 
   testWidgets('Today add button opens the task sheet', (tester) async {

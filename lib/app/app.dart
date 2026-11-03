@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/core.dart';
 import '../core/notifications/notifications.dart';
+import '../features/calendar/sync/providers.dart';
 import '../features/onboarding/onboarding_providers.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
@@ -65,6 +66,7 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
   );
 
   StreamSubscription<String>? _focusSub;
+  StreamSubscription<NotificationResponse>? _openedSub;
 
   @override
   void initState() {
@@ -76,15 +78,23 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
       _focusSub = router.focusRequests.listen(
         (taskId) => _router.go(NotificationRouter.focusLocation(taskId)),
       );
+      // Body taps and "Pick a time" open the task; prompts open Today.
+      _openedSub = router.opened.listen((response) {
+        final location = NotificationRouter.openLocation(response);
+        _router.go(location ?? '/today');
+      });
       // Keep the pending notifications in step with tasks and preferences.
       final sync = ref.read(notificationSyncProvider)..bindAppLifecycle();
       unawaited(sync.refresh());
+      // Pull external calendars on start, on foreground and every 15 min.
+      startCalendarSync(ref);
     }
   }
 
   @override
   void dispose() {
     _focusSub?.cancel();
+    _openedSub?.cancel();
     _router.dispose();
     super.dispose();
   }

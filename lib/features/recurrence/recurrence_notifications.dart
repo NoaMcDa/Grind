@@ -43,38 +43,27 @@ ExtraNotifications recurrenceExtraNotifications(
         timeZoneName: prefs.timeZoneName,
       );
       for (final fire in fires) {
-        final occurrence = tz.TZDateTime.from(
-          fire.add(Duration(minutes: rule.leadMinutes)),
-          location,
+        // Same copy (and smart-snooze actions) as one-time reminders; the
+        // if-then time in the body is the occurrence, not the lead-shifted
+        // fire time.
+        final occurrence = fire.add(Duration(minutes: rule.leadMinutes));
+        final copy = NotificationScheduler.copyFor(
+          task,
+          prefs,
+          tz.TZDateTime.from(occurrence, location),
         );
         out.add(
           ScheduledNotification(
             id: NotificationScheduler.taskNotificationId(task.id, fire),
             taskId: task.id,
             fireAt: fire.toUtc(),
-            title: _title(task),
-            body: _body(task, occurrence),
+            title: copy.title,
+            body: copy.body,
+            actions: copy.actions,
           ),
         );
       }
     }
     return out;
   };
-}
-
-// Mirrors NotificationScheduler's private copy builder (title "Grind" plus
-// the task title, or the task title plus an if-then "HH:mm — step." body).
-String _title(Task task) => _step(task) == null ? 'Grind' : task.title;
-
-String _body(Task task, tz.TZDateTime local) {
-  final step = _step(task);
-  if (step == null) return task.title;
-  String two(int v) => v.toString().padLeft(2, '0');
-  final stop = RegExp(r'[.!?]$').hasMatch(step) ? '' : '.';
-  return '${two(local.hour)}:${two(local.minute)} — $step$stop';
-}
-
-String? _step(Task task) {
-  final s = task.firstAction?.trim();
-  return s == null || s.isEmpty ? null : s;
 }

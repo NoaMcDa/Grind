@@ -34,7 +34,10 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter test
-      - run: flutter build web --release --no-web-resources-cdn --base-href /Grind/
+      # GOOGLE_CLIENT_ID_WEB is a repository variable (Settings > Secrets and
+      # variables > Actions > Variables); without it Google Calendar stays
+      # disconnected with a setup hint in the app.
+      - run: flutter build web --release --no-web-resources-cdn --base-href /Grind/ --dart-define=GOOGLE_CLIENT_ID_WEB=${{ vars.GOOGLE_CLIENT_ID_WEB }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

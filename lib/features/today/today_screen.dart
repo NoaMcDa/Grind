@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/core.dart';
+import '../reminders/reminder_now_card.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
@@ -16,8 +16,6 @@ import '../../widgets/momentum_meter.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
-
-enum _ReminderState { open, done, snoozed }
 
 /// Reminders layer: the if-then reminder of the moment, momentum, up next.
 ///
@@ -33,9 +31,11 @@ class TodayScreen extends ConsumerStatefulWidget {
 }
 
 class _TodayScreenState extends ConsumerState<TodayScreen> {
-  _ReminderState _reminder = _ReminderState.open;
-
-  void _startFocus() => (widget.onStartFocus ?? () => context.go('/focus'))();
+  /// Null lets the reminder card navigate with go_router (`/focus?taskId=`).
+  ValueChanged<String>? get _startFocus {
+    final custom = widget.onStartFocus;
+    return custom == null ? null : (_) => custom();
+  }
 
   /// Ids swiped away; hidden at once so the Dismissible leaves the tree
   /// before the repository stream catches up.
@@ -83,7 +83,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
               ],
             ),
             const SizedBox(height: 18),
-            _reminderCard(),
+            ReminderNowCard(onStartFocus: _startFocus),
             const SizedBox(height: 18),
             StickerCard(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -148,137 +148,6 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
         ),
       ],
     );
-  }
-
-  Widget _reminderCard() {
-    switch (_reminder) {
-      case _ReminderState.open:
-        return StickerCard(
-          color: AppColors.violet,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.notifications_none,
-                    color: AppColors.sun,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'REMINDER · NOW',
-                    style: AppText.label(size: 12, color: Colors.white),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '7:00 — open the thesis file.',
-                style: AppText.display(
-                  size: 21,
-                  color: Colors.white,
-                  height: 1.2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '25 minutes is enough to start. Pip has the timer ready.',
-                style: AppText.body(color: Colors.white),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 10,
-                    child: PillButton(
-                      label: 'Done',
-                      horizontalPadding: 8,
-                      color: AppColors.sun,
-                      onPressed: () =>
-                          setState(() => _reminder = _ReminderState.done),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 10,
-                    child: PillButton(
-                      label: 'Snooze 15',
-                      horizontalPadding: 8,
-                      onPressed: () =>
-                          setState(() => _reminder = _ReminderState.snoozed),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 13,
-                    child: PillButton(
-                      label: 'Start focus',
-                      color: AppColors.mint,
-                      icon: const Icon(Icons.play_arrow),
-                      horizontalPadding: 8,
-                      onPressed: _startFocus,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      case _ReminderState.done:
-        return StickerCard(
-          color: AppColors.sun,
-          child: Row(
-            children: [
-              const Icon(
-                Icons.auto_awesome_outlined,
-                size: 40,
-                color: AppColors.ink,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Nice start!', style: AppText.display(size: 20)),
-                    Text(
-                      'Pip is doing a little happy dance.',
-                      style: AppText.body(size: 14),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      case _ReminderState.snoozed:
-        return StickerCard(
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('See you at 7:15', style: AppText.display(size: 20)),
-                    Text(
-                      'Snooze again and Pip will offer to move it instead.',
-                      style: AppText.body(size: 14, color: AppColors.muted),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              PillButton(
-                label: 'Undo',
-                color: AppColors.ground,
-                shadow: 0,
-                onPressed: () =>
-                    setState(() => _reminder = _ReminderState.open),
-              ),
-            ],
-          ),
-        );
-    }
   }
 
   Widget _taskRow(Task t) {

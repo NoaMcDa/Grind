@@ -9,6 +9,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_date_time_picker.dart';
+import '../tasks/task_form.dart';
 import 'plan_layout.dart';
 import 'plan_providers.dart';
 import 'plan_strings.dart';
@@ -53,7 +54,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   }
 
   void _startFocus() => (widget.onStartFocus ?? () => context.go('/focus'))();
-  void _add() => (widget.onAdd ?? () => context.go('/ask'))();
+  void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
 
   Future<void> _toggle(Task task) async {
     final repo = ref.read(taskRepositoryProvider);

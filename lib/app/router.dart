@@ -7,17 +7,17 @@ import '../features/onboarding/onboarding_flow.dart';
 import '../features/pip/pip_screen.dart';
 import '../features/plan/plan_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/tasks/task_detail_screen.dart';
 import '../features/today/today_screen.dart';
 import '../theme/tokens.dart';
 import 'tab_bar.dart';
-import 'task_placeholder.dart';
 
 /// Builds the app router: five tabs in a [StatefulShellRoute.indexedStack]
 /// plus deep links.
 ///
 /// - `/today`, `/plan`, `/focus`, `/pip`, `/ask`: the tabs
 /// - `/focus?taskId=abc`: Focus tab for a task
-/// - `/task/:id`: task detail (placeholder until the tasks feature lands)
+/// - `/task/:id`: task detail
 /// - `/onboarding`: first-run flow; `/settings`
 ///
 /// [onboardingDone] returns null while unknown, false to force `/onboarding`.
@@ -55,7 +55,7 @@ GoRouter createRouter({
       GoRoute(
         path: '/task/:id',
         builder: (context, state) =>
-            TaskPlaceholderPage(taskId: state.pathParameters['id']!),
+            TaskDetailScreen(taskId: state.pathParameters['id']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => _Shell(shell: shell),

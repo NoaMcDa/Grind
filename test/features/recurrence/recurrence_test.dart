@@ -309,8 +309,10 @@ void main() {
         horizonDays: 2,
         clock: clock,
       )([t], prefs);
-      expect(out.first.title, 'Take meds');
-      expect(out.first.body, '07:00 — open the app.');
+      // Same builder as one-time reminders (NotificationScheduler.copyFor):
+      // if-then body at the occurrence time plus an encouraging line.
+      expect(out.first.title, isNotEmpty);
+      expect(out.first.body, startsWith('07:00 — open the app.'));
       expect(out.first.fireAt, at(2026, 3, 23, 6, 50));
     });
   });

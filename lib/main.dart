@@ -5,6 +5,9 @@ import 'app/app.dart';
 import 'app/backup_actions_adapter.dart';
 import 'core/data/data.dart';
 import 'core/notifications/notifications.dart';
+import 'features/calendar/apple/providers.dart';
+import 'features/calendar/google/providers.dart';
+import 'features/recurrence/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +23,13 @@ Future<void> main() async {
       overrides: [
         ...dataProvidersOverrides(db),
         ...notificationOverrides(),
+        // Recurring reminders feed their occurrences into the scheduler.
+        notificationExtraProvider.overrideWith(
+          (ref) => ref.watch(recurrenceExtraProvider),
+        ),
         backupActionsOverride(),
+        googleCalendarOverride(),
+        appleCalendarOverride(),
       ],
     ),
   );
