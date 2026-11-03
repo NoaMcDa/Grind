@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:grind/core/core.dart';
+import 'package:grind/features/pip/pip_screen.dart';
+
+import '../../test_fonts.dart';
+
+final _now = DateTime(2026, 11, 3, 12);
+
+Task _done(String id, DateTime at) => Task(
+  id: id,
+  title: 'Win $id',
+  status: TaskStatus.done,
+  completedAt: at,
+  createdAt: at,
+  updatedAt: at,
+);
+
+Future<void> _pump(
+  WidgetTester tester,
+  List<Task> tasks, {
+  TextDirection dir = TextDirection.ltr,
+}) async {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        clockProvider.overrideWithValue(FixedClock(_now)),
+        taskRepositoryProvider.overrideWithValue(InMemoryTaskRepository(tasks)),
+      ],
+      child: MaterialApp(
+        home: Directionality(
+          textDirection: dir,
+          child: const Scaffold(body: PipScreen()),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  setUpAll(loadAppFonts);
+
+  testWidgets('real data: mood, showed-up line, wins, rest days', (
+    tester,
+  ) async {
+    final tasks = [
+      for (var i = 0; i < 6; i++) _done('a$i', _now),
+      _done('b', DateTime(2026, 11, 1, 9)),
+      _done('c', DateTime(2026, 10, 30, 9)),
+    ];
+    await _pump(tester, tasks);
+    expect(find.text('Pip is glowing'), findsOneWidget);
+    expect(
+      find.textContaining('You showed up 3 of the last 7 days'),
+      findsOneWidget,
+    );
+    expect(find.text('Strong'), findsOneWidget);
+    expect(find.text('rest day'), findsNWidgets(4));
+    expect(find.textContaining('Win '), findsNWidgets(3));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('no activity: gentle copy, no zeros, still all rest days', (
+    tester,
+  ) async {
+    await _pump(tester, const []);
+    expect(find.text('Pip is resting'), findsOneWidget);
+    expect(find.text('Quiet'), findsOneWidget);
+    expect(find.text('rest day'), findsNWidgets(7));
+    expect(find.text('Your first win will land here.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping an unlock changes what Pip wears', (tester) async {
+    await _pump(tester, const []);
+    expect(find.text('wearing: scarf'), findsOneWidget);
+    await tester.tap(find.text('Sunglasses'));
+    await tester.pumpAndSettle();
+    expect(find.text('wearing: sunglasses'), findsOneWidget);
+  });
+
+  testWidgets('RTL at 390x844 has no overflow', (tester) async {
+    await _pump(tester, [_done('a', _now)], dir: TextDirection.rtl);
+    expect(tester.takeException(), isNull);
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+}
