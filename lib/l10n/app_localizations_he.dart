@@ -2427,4 +2427,133 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get recapNotificationTitle => 'השבוע שלך עם פיפ';
+
+  @override
+  String get goalsMilestones => 'אבני דרך';
+
+  @override
+  String goalsMilestonesProgress(int done, int total) {
+    return '$done מתוך $total הושגו';
+  }
+
+  @override
+  String get goalsMilestonesEmpty =>
+      'אפשר לפרק יעד ארוך לכמה צעדים. לכל צעד יש משימות שבועיות משלו.';
+
+  @override
+  String get goalsMilestoneAdd => 'הוספת אבן דרך';
+
+  @override
+  String get goalsMilestoneNew => 'אבן דרך חדשה';
+
+  @override
+  String get goalsMilestoneEdit => 'עריכת אבן דרך';
+
+  @override
+  String get goalsMilestoneTitleLabel => 'אבן דרך';
+
+  @override
+  String get goalsMilestoneTitleHint => 'לסיים את מודול 3';
+
+  @override
+  String get goalsMilestoneTitleRequired => 'כדאי לתת לה שם קצר';
+
+  @override
+  String get goalsMilestoneDateLabel => 'תאריך';
+
+  @override
+  String get goalsMilestoneNoDate => 'בלי תאריך';
+
+  @override
+  String goalsMilestoneNextLine(String title, String date) {
+    return 'הבא: $title, $date';
+  }
+
+  @override
+  String goalsMilestoneNextNoDate(String title) {
+    return 'הבא: $title';
+  }
+
+  @override
+  String get goalsMilestoneMoved => 'הוזז';
+
+  @override
+  String goalsMilestoneMovedBody(String date) {
+    return 'התאריך עבר. מה דעתך על $date?';
+  }
+
+  @override
+  String goalsMilestoneMoveAccept(String date) {
+    return 'להעביר ל-$date';
+  }
+
+  @override
+  String goalsMilestoneMovedToast(String date) {
+    return 'הועבר ל-$date. יש מספיק זמן.';
+  }
+
+  @override
+  String goalsMilestoneReachedToast(String title) {
+    return 'הגעת לאבן דרך: $title';
+  }
+
+  @override
+  String get goalsMilestoneMoveUp => 'להזיז למעלה';
+
+  @override
+  String get goalsMilestoneMoveDown => 'להזיז למטה';
+
+  @override
+  String get goalsMilestoneDeleteTitle => 'למחוק את אבן הדרך?';
+
+  @override
+  String get goalsMilestoneDeleteBody => 'המשימות שלה נשארות עם היעד.';
+
+  @override
+  String get goalsMilestoneDeleted => 'אבן הדרך נמחקה';
+
+  @override
+  String get goalsMilestoneAddTask => 'הוספת משימה';
+
+  @override
+  String goalsMilestoneTaskSheetTitle(String title) {
+    return 'משימה בשביל $title';
+  }
+
+  @override
+  String get goalsMilestoneTaskHint => 'לצפות בשיעור 7';
+
+  @override
+  String get goalsMilestoneWeekLabel => 'באיזה שבוע';
+
+  @override
+  String get goalsMilestoneThisWeek => 'השבוע';
+
+  @override
+  String get goalsMilestoneNextWeek => 'בשבוע הבא';
+
+  @override
+  String get goalsMilestoneEstimateLabel => 'בערך כמה זמן';
+
+  @override
+  String get goalsMilestoneTaskAdded => 'המשימה נוספה. התוכנית תמצא לה מקום.';
+
+  @override
+  String goalsMilestoneTasksCount(int done, int total) {
+    return '$done מתוך $total משימות הושלמו';
+  }
+
+  @override
+  String get goalsNextTask => 'המשימה המתוכננת הבאה';
+
+  @override
+  String get goalsNextTaskNone => 'עדיין אין כלום ביומן. מתי שנוח לך.';
+
+  @override
+  String goalsNextTaskWhen(String date, String time) {
+    return '$date, $time';
+  }
+
+  @override
+  String get goalsMilestoneOptions => 'אפשרויות לאבן הדרך';
 }

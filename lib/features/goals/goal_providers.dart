@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/core.dart';
 import '../review/review_providers.dart';
 import '../review/review_repository.dart';
-import '../tasks/day_bounds.dart' show zoneLocationProvider;
+import '../tasks/day_bounds.dart' show utcOf, zoneLocationProvider;
 import 'domain/goal_metric.dart';
 import 'domain/goal_progress.dart';
 import 'domain/goal_record.dart';
@@ -15,6 +15,7 @@ import 'domain/goal_repository.dart';
 import 'domain/highlights.dart';
 import 'domain/metric_period.dart';
 import 'domain/metric_ticks.dart';
+import 'domain/milestone_plan.dart';
 import 'domain/weekly_recap.dart';
 
 /// The goal store. In memory by default; `main.dart` overrides it with
@@ -248,6 +249,7 @@ final goalActionsProvider = Provider<GoalActions>(
     ref.watch(goalRepositoryProvider),
     ref.watch(taskRepositoryProvider),
     ref.watch(clockProvider),
+    milestones: ref.watch(milestoneRepositoryProvider),
     periodContext: () => PeriodContext(
       now: ref.read(clockProvider).now().toUtc(),
       location: ref.read(zoneLocationProvider),
@@ -266,9 +268,12 @@ class GoalActions {
     this._tasks,
     this._clock, {
     PeriodContext Function()? periodContext,
-  }) : _periodContext = periodContext;
+    MilestoneRepository? milestones,
+  }) : _periodContext = periodContext,
+       _milestones = milestones;
 
   final GoalRepository _goals;
+  final MilestoneRepository? _milestones;
   final TaskRepository _tasks;
   final Clock _clock;
   final PeriodContext Function()? _periodContext;
@@ -305,9 +310,16 @@ class GoalActions {
   Future<void> save(GoalRecord goal) =>
       _goals.upsert(goal.copyWith(updatedAt: _now));
 
-  /// Soft-deletes the goal and unlinks its tasks (its +1 ticks go too).
+  /// Soft-deletes the goal and its milestones and unlinks its tasks (its
+  /// +1 ticks go too).
   Future<void> delete(GoalRecord goal) async {
     await _goals.delete(goal.id);
+    final milestones = _milestones;
+    if (milestones != null) {
+      for (final m in await milestones.getAll()) {
+        if (m.goalId == goal.id) await milestones.delete(m.id);
+      }
+    }
     final tasks = await _tasks.getAll();
     final now = _now;
     final mine = tasks.where((t) => t.goalId == goal.id).toList();
@@ -426,4 +438,192 @@ class GoalActions {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------- Milestones (#25)
+
+/// The milestone store. In memory by default; `main.dart` overrides it
+/// with `DriftMilestoneRepository(db, clock: ...)`, next to the goal
+/// repository override.
+final milestoneRepositoryProvider = Provider<MilestoneRepository>(
+  (ref) => InMemoryMilestoneRepository(clock: ref.watch(clockProvider)),
+);
+
+/// Live list of every goal's milestones.
+final milestonesProvider = StreamProvider<List<Milestone>>(
+  (ref) => ref.watch(milestoneRepositoryProvider).watchAll(),
+);
+
+/// Live milestone → task links.
+final milestoneLinksProvider = StreamProvider<List<MilestoneTaskLink>>(
+  (ref) => ref.watch(milestoneRepositoryProvider).watchLinks(),
+);
+
+/// The goal's milestones with their tasks, progress, rollover suggestions
+/// and the goal's next scheduled task.
+final goalMilestonePlanProvider = Provider.autoDispose
+    .family<MilestonePlan, String>((ref, goalId) {
+      final milestones = ref.watch(milestonesProvider).valueOrNull;
+      final links = ref.watch(milestoneLinksProvider).valueOrNull ?? const [];
+      final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+      return buildMilestonePlan(
+        milestones: milestones ?? const [],
+        links: links,
+        tasks: tasks,
+        goalId: goalId,
+        ctx: periodContextOf(ref),
+      );
+    });
+
+final milestoneActionsProvider = Provider<MilestoneActions>(
+  (ref) => MilestoneActions(
+    ref.watch(milestoneRepositoryProvider),
+    ref.watch(taskRepositoryProvider),
+    ref.watch(clockProvider),
+    periodContext: () => PeriodContext(
+      now: ref.read(clockProvider).now().toUtc(),
+      location: ref.read(zoneLocationProvider),
+      weekStart: ref.read(goalWeekStartProvider),
+    ),
+  ),
+);
+
+/// Writes for the milestone block of the goal screen.
+class MilestoneActions {
+  MilestoneActions(
+    this._milestones,
+    this._tasks,
+    this._clock, {
+    PeriodContext Function()? periodContext,
+  }) : _periodContext = periodContext;
+
+  final MilestoneRepository _milestones;
+  final TaskRepository _tasks;
+  final Clock _clock;
+  final PeriodContext Function()? _periodContext;
+
+  DateTime get _now => _clock.now().toUtc();
+
+  PeriodContext get _ctx => _periodContext?.call() ?? PeriodContext.utc(_now);
+
+  Future<List<Milestone>> _ofGoal(String goalId) async => [
+    for (final m in await _milestones.getAll())
+      if (m.goalId == goalId) m,
+  ]..sort(compareMilestones);
+
+  /// A new milestone at the end of [goalId]'s list.
+  Future<Milestone> add({
+    required String goalId,
+    required String title,
+    DateTime? dueAt,
+  }) async {
+    final mine = await _ofGoal(goalId);
+    final now = _now;
+    final m = Milestone(
+      id: const Uuid().v4(),
+      goalId: goalId,
+      title: title,
+      dueAt: dueAt,
+      sortOrder: mine.isEmpty ? 0 : mine.last.sortOrder + 1,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await _milestones.upsert(m);
+    return m;
+  }
+
+  Future<void> edit(Milestone m, {required String title, DateTime? dueAt}) =>
+      _milestones.upsert(
+        m.copyWith(title: title, dueAt: dueAt, updatedAt: _now),
+      );
+
+  /// Done ↔ open.
+  Future<Milestone> toggleDone(Milestone m) async {
+    final now = _now;
+    final next = m.isDone
+        ? m.copyWith(
+            status: MilestoneStatus.open,
+            completedAt: null,
+            updatedAt: now,
+          )
+        : m.copyWith(
+            status: MilestoneStatus.done,
+            completedAt: now,
+            updatedAt: now,
+          );
+    await _milestones.upsert(next);
+    return next;
+  }
+
+  /// Accepts the rollover: the milestone takes its suggested date. No-op
+  /// when it is not moved.
+  Future<void> acceptMove(Milestone m) async {
+    final date = suggestedMoveDate(m, _ctx);
+    if (date == null) return;
+    await _milestones.upsert(m.copyWith(dueAt: date, updatedAt: _now));
+  }
+
+  /// Moves [m] [by] places (negative: up) and renumbers the goal's list
+  /// 0..n-1. Out-of-range moves stop at the ends.
+  Future<void> reorder(Milestone m, int by) async {
+    final mine = await _ofGoal(m.goalId);
+    final from = mine.indexWhere((x) => x.id == m.id);
+    if (from < 0) return;
+    final to = (from + by).clamp(0, mine.length - 1);
+    if (to == from) return;
+    final moved = mine.removeAt(from);
+    mine.insert(to, moved);
+    final now = _now;
+    await _milestones.upsertAll([
+      for (final (i, x) in mine.indexed)
+        if (x.sortOrder != i) x.copyWith(sortOrder: i, updatedAt: now),
+    ]);
+  }
+
+  /// Soft-deletes [m]; its tasks stay with the goal.
+  Future<void> delete(Milestone m) => _milestones.delete(m.id);
+
+  /// A weekly task for [m]: linked to its goal and to it, due at the end
+  /// of [week] and, for next week, not planned before that week starts.
+  Future<Task> addTask(
+    Milestone m, {
+    required String title,
+    int estimatedMinutes = 30,
+    MilestoneTaskWeek week = MilestoneTaskWeek.thisWeek,
+  }) async {
+    final ctx = _ctx;
+    final bounds = weekFor(week, ctx);
+    final now = _now;
+    final task = Task(
+      id: const Uuid().v4(),
+      title: title,
+      goalId: m.goalId,
+      dueAt: endOfLocalDay(bounds.lastDay, ctx.location),
+      notBefore: week == MilestoneTaskWeek.nextWeek
+          ? utcOf(bounds.start)
+          : null,
+      estimatedMinutes: estimatedMinutes,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await _tasks.upsert(task);
+    await _milestones.linkTask(task.id, m.id);
+    return task;
+  }
+
+  /// Ticks a milestone task on or off.
+  Future<void> toggleTask(Task task) {
+    final now = _now;
+    final done = !task.isDone;
+    return _tasks.upsert(
+      task.copyWith(
+        status: done ? TaskStatus.done : TaskStatus.open,
+        completedAt: done ? now : null,
+        updatedAt: now,
+      ),
+    );
+  }
+
+  /// Takes the task off the milestone; it stays linked to the goal.
+  Future<void> unlinkTask(Task task) => _milestones.unlinkTask(task.id);
 }

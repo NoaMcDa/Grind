@@ -4,5 +4,6 @@ library;
 
 export 'di.dart';
 export 'domain/domain.dart';
+export 'domain/milestone.dart';
 export 'repositories/repositories.dart';
 export 'services/services.dart';

@@ -8,6 +8,7 @@ import '../domain/domain.dart'
         GoalHorizon,
         GoalStatus,
         TaskStatus;
+import '../domain/milestone.dart' show MilestoneStatus;
 
 part 'database.g.dart';
 
@@ -120,6 +121,36 @@ class Goals extends Table with _Row {
   TextColumn get metricPeriod => text().nullable()();
 }
 
+/// Steps of a long goal (#25, schema v4). Soft-deleted like goals.
+@DataClassName('MilestoneRow')
+@TableIndex(name: 'milestones_goal_id', columns: {#goalId})
+class Milestones extends Table with _Row {
+  TextColumn get goalId =>
+      text().references(Goals, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text()();
+  IntColumn get dueAt => integer().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  TextColumn get status => textEnum<MilestoneStatus>().withDefault(
+    Constant(MilestoneStatus.open.name),
+  )();
+  IntColumn get completedAt => integer().nullable()();
+}
+
+/// Which milestone a task is a weekly step of (#25, schema v4). One row per
+/// task; removing the link is a hard delete.
+@DataClassName('MilestoneTaskRow')
+@TableIndex(name: 'milestone_tasks_milestone_id', columns: {#milestoneId})
+class MilestoneTasks extends Table {
+  TextColumn get taskId =>
+      text().references(Tasks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get milestoneId =>
+      text().references(Milestones, #id, onDelete: KeyAction.cascade)();
+  IntColumn get createdAt => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {taskId};
+}
+
 /// One finished evening review per local day (`yyyy-MM-dd`).
 @DataClassName('ReviewEntryRow')
 class ReviewEntries extends Table {
@@ -196,13 +227,15 @@ abstract final class PreferencesRows {
     PreferencesTable,
     ReviewEntries,
     ReviewHandledDays,
+    Milestones,
+    MilestoneTasks,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// Bump on every schema change and add a step in [migration].
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -249,6 +282,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(reviewEntries);
         await m.createTable(reviewHandledDays);
       }
+      if (from < 4) {
+        await m.createTable(milestones);
+        await m.createTable(milestoneTasks);
+        await m.createIndex(milestonesGoalId);
+        await m.createIndex(milestoneTasksMilestoneId);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -260,6 +299,8 @@ class AppDatabase extends _$AppDatabase {
   List<TableInfo<Table, Object?>> get tablesChildrenFirst => [
     reviewEntries,
     reviewHandledDays,
+    milestoneTasks,
+    milestones,
     reminderRules,
     focusSessions,
     calendarEvents,

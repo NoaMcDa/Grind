@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../domain/domain.dart';
+import '../domain/milestone.dart';
 import 'database.dart';
 
 /// Mapping between Drift rows, domain objects and the backup JSON.
@@ -546,6 +547,102 @@ Goal goalFromJson(Map<String, Object?> map) {
     createdAt: j.time('createdAt'),
     updatedAt: j.time('updatedAt'),
     deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
+
+// ---------------------------------------------------------------- Milestone
+
+extension MilestoneRowMapper on MilestoneRow {
+  Milestone toDomain() => Milestone(
+    id: id,
+    goalId: goalId,
+    title: title,
+    dueAt: fromMillisOrNull(dueAt),
+    sortOrder: sortOrder,
+    status: status,
+    completedAt: fromMillisOrNull(completedAt),
+    createdAt: fromMillis(createdAt),
+    updatedAt: fromMillis(updatedAt),
+    deletedAt: fromMillisOrNull(deletedAt),
+  );
+}
+
+extension MilestoneMapper on Milestone {
+  MilestonesCompanion toCompanion() => MilestonesCompanion.insert(
+    id: id,
+    goalId: goalId,
+    title: title,
+    dueAt: Value(toMillisOrNull(dueAt)),
+    sortOrder: Value(sortOrder),
+    status: Value(status),
+    completedAt: Value(toMillisOrNull(completedAt)),
+    createdAt: toMillis(createdAt),
+    updatedAt: toMillis(updatedAt),
+    deletedAt: Value(toMillisOrNull(deletedAt)),
+  );
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'goalId': goalId,
+    'title': title,
+    'dueAt': _isoOrNull(dueAt),
+    'sortOrder': sortOrder,
+    'status': status.name,
+    'completedAt': _isoOrNull(completedAt),
+    'createdAt': _iso(createdAt),
+    'updatedAt': _iso(updatedAt),
+    'deletedAt': _isoOrNull(deletedAt),
+  };
+}
+
+Milestone milestoneFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return Milestone(
+    id: j.nonEmpty('id'),
+    goalId: j.nonEmpty('goalId'),
+    title: j.str('title'),
+    dueAt: j.timeOrNull('dueAt'),
+    sortOrder: j.integer('sortOrder', or: 0),
+    status: j.enumOf(
+      MilestoneStatus.values,
+      'status',
+      or: MilestoneStatus.open,
+    ),
+    completedAt: j.timeOrNull('completedAt'),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
+
+extension MilestoneTaskRowMapper on MilestoneTaskRow {
+  MilestoneTaskLink toDomain() => MilestoneTaskLink(
+    taskId: taskId,
+    milestoneId: milestoneId,
+    createdAt: fromMillis(createdAt),
+  );
+}
+
+extension MilestoneTaskLinkMapper on MilestoneTaskLink {
+  MilestoneTasksCompanion toCompanion() => MilestoneTasksCompanion.insert(
+    taskId: taskId,
+    milestoneId: milestoneId,
+    createdAt: toMillis(createdAt),
+  );
+
+  Map<String, Object?> toJson() => {
+    'taskId': taskId,
+    'milestoneId': milestoneId,
+    'createdAt': _iso(createdAt),
+  };
+}
+
+MilestoneTaskLink milestoneTaskLinkFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return MilestoneTaskLink(
+    taskId: j.nonEmpty('taskId'),
+    milestoneId: j.nonEmpty('milestoneId'),
+    createdAt: j.time('createdAt'),
   );
 }
 

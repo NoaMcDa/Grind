@@ -6510,6 +6510,901 @@ class ReviewHandledDaysCompanion extends UpdateCompanion<ReviewHandledDayRow> {
   }
 }
 
+class $MilestonesTable extends Milestones
+    with TableInfo<$MilestonesTable, MilestoneRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MilestonesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAt = GeneratedColumn<int>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _goalIdMeta = const VerificationMeta('goalId');
+  @override
+  late final GeneratedColumn<String> goalId = GeneratedColumn<String>(
+    'goal_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES goals (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueAtMeta = const VerificationMeta('dueAt');
+  @override
+  late final GeneratedColumn<int> dueAt = GeneratedColumn<int>(
+    'due_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<MilestoneStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(MilestoneStatus.open.name),
+      ).withConverter<MilestoneStatus>($MilestonesTable.$converterstatus);
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<int> completedAt = GeneratedColumn<int>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    goalId,
+    title,
+    dueAt,
+    sortOrder,
+    status,
+    completedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'milestones';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MilestoneRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('goal_id')) {
+      context.handle(
+        _goalIdMeta,
+        goalId.isAcceptableOrUnknown(data['goal_id']!, _goalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_goalIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('due_at')) {
+      context.handle(
+        _dueAtMeta,
+        dueAt.isAcceptableOrUnknown(data['due_at']!, _dueAtMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MilestoneRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MilestoneRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      goalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}goal_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      dueAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_at'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      status: $MilestonesTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}completed_at'],
+      ),
+    );
+  }
+
+  @override
+  $MilestonesTable createAlias(String alias) {
+    return $MilestonesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<MilestoneStatus, String, String> $converterstatus =
+      const EnumNameConverter<MilestoneStatus>(MilestoneStatus.values);
+}
+
+class MilestoneRow extends DataClass implements Insertable<MilestoneRow> {
+  final String id;
+  final int createdAt;
+  final int updatedAt;
+  final int? deletedAt;
+  final String goalId;
+  final String title;
+  final int? dueAt;
+  final int sortOrder;
+  final MilestoneStatus status;
+  final int? completedAt;
+  const MilestoneRow({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.goalId,
+    required this.title,
+    this.dueAt,
+    required this.sortOrder,
+    required this.status,
+    this.completedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<int>(createdAt);
+    map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
+    }
+    map['goal_id'] = Variable<String>(goalId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || dueAt != null) {
+      map['due_at'] = Variable<int>(dueAt);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    {
+      map['status'] = Variable<String>(
+        $MilestonesTable.$converterstatus.toSql(status),
+      );
+    }
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<int>(completedAt);
+    }
+    return map;
+  }
+
+  MilestonesCompanion toCompanion(bool nullToAbsent) {
+    return MilestonesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      goalId: Value(goalId),
+      title: Value(title),
+      dueAt: dueAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueAt),
+      sortOrder: Value(sortOrder),
+      status: Value(status),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+    );
+  }
+
+  factory MilestoneRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MilestoneRow(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+      updatedAt: serializer.fromJson<int>(json['updatedAt']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
+      goalId: serializer.fromJson<String>(json['goalId']),
+      title: serializer.fromJson<String>(json['title']),
+      dueAt: serializer.fromJson<int?>(json['dueAt']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      status: $MilestonesTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+      completedAt: serializer.fromJson<int?>(json['completedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<int>(createdAt),
+      'updatedAt': serializer.toJson<int>(updatedAt),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
+      'goalId': serializer.toJson<String>(goalId),
+      'title': serializer.toJson<String>(title),
+      'dueAt': serializer.toJson<int?>(dueAt),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'status': serializer.toJson<String>(
+        $MilestonesTable.$converterstatus.toJson(status),
+      ),
+      'completedAt': serializer.toJson<int?>(completedAt),
+    };
+  }
+
+  MilestoneRow copyWith({
+    String? id,
+    int? createdAt,
+    int? updatedAt,
+    Value<int?> deletedAt = const Value.absent(),
+    String? goalId,
+    String? title,
+    Value<int?> dueAt = const Value.absent(),
+    int? sortOrder,
+    MilestoneStatus? status,
+    Value<int?> completedAt = const Value.absent(),
+  }) => MilestoneRow(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    goalId: goalId ?? this.goalId,
+    title: title ?? this.title,
+    dueAt: dueAt.present ? dueAt.value : this.dueAt,
+    sortOrder: sortOrder ?? this.sortOrder,
+    status: status ?? this.status,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+  );
+  MilestoneRow copyWithCompanion(MilestonesCompanion data) {
+    return MilestoneRow(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      goalId: data.goalId.present ? data.goalId.value : this.goalId,
+      title: data.title.present ? data.title.value : this.title,
+      dueAt: data.dueAt.present ? data.dueAt.value : this.dueAt,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      status: data.status.present ? data.status.value : this.status,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneRow(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('goalId: $goalId, ')
+          ..write('title: $title, ')
+          ..write('dueAt: $dueAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('status: $status, ')
+          ..write('completedAt: $completedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    goalId,
+    title,
+    dueAt,
+    sortOrder,
+    status,
+    completedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MilestoneRow &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.goalId == this.goalId &&
+          other.title == this.title &&
+          other.dueAt == this.dueAt &&
+          other.sortOrder == this.sortOrder &&
+          other.status == this.status &&
+          other.completedAt == this.completedAt);
+}
+
+class MilestonesCompanion extends UpdateCompanion<MilestoneRow> {
+  final Value<String> id;
+  final Value<int> createdAt;
+  final Value<int> updatedAt;
+  final Value<int?> deletedAt;
+  final Value<String> goalId;
+  final Value<String> title;
+  final Value<int?> dueAt;
+  final Value<int> sortOrder;
+  final Value<MilestoneStatus> status;
+  final Value<int?> completedAt;
+  final Value<int> rowid;
+  const MilestonesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.goalId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.dueAt = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.status = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MilestonesCompanion.insert({
+    required String id,
+    required int createdAt,
+    required int updatedAt,
+    this.deletedAt = const Value.absent(),
+    required String goalId,
+    required String title,
+    this.dueAt = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.status = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       goalId = Value(goalId),
+       title = Value(title);
+  static Insertable<MilestoneRow> custom({
+    Expression<String>? id,
+    Expression<int>? createdAt,
+    Expression<int>? updatedAt,
+    Expression<int>? deletedAt,
+    Expression<String>? goalId,
+    Expression<String>? title,
+    Expression<int>? dueAt,
+    Expression<int>? sortOrder,
+    Expression<String>? status,
+    Expression<int>? completedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (goalId != null) 'goal_id': goalId,
+      if (title != null) 'title': title,
+      if (dueAt != null) 'due_at': dueAt,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (status != null) 'status': status,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MilestonesCompanion copyWith({
+    Value<String>? id,
+    Value<int>? createdAt,
+    Value<int>? updatedAt,
+    Value<int?>? deletedAt,
+    Value<String>? goalId,
+    Value<String>? title,
+    Value<int?>? dueAt,
+    Value<int>? sortOrder,
+    Value<MilestoneStatus>? status,
+    Value<int?>? completedAt,
+    Value<int>? rowid,
+  }) {
+    return MilestonesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      goalId: goalId ?? this.goalId,
+      title: title ?? this.title,
+      dueAt: dueAt ?? this.dueAt,
+      sortOrder: sortOrder ?? this.sortOrder,
+      status: status ?? this.status,
+      completedAt: completedAt ?? this.completedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<int>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
+    }
+    if (goalId.present) {
+      map['goal_id'] = Variable<String>(goalId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (dueAt.present) {
+      map['due_at'] = Variable<int>(dueAt.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $MilestonesTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<int>(completedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestonesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('goalId: $goalId, ')
+          ..write('title: $title, ')
+          ..write('dueAt: $dueAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('status: $status, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MilestoneTasksTable extends MilestoneTasks
+    with TableInfo<$MilestoneTasksTable, MilestoneTaskRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MilestoneTasksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _taskIdMeta = const VerificationMeta('taskId');
+  @override
+  late final GeneratedColumn<String> taskId = GeneratedColumn<String>(
+    'task_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tasks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _milestoneIdMeta = const VerificationMeta(
+    'milestoneId',
+  );
+  @override
+  late final GeneratedColumn<String> milestoneId = GeneratedColumn<String>(
+    'milestone_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES milestones (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [taskId, milestoneId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'milestone_tasks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MilestoneTaskRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('task_id')) {
+      context.handle(
+        _taskIdMeta,
+        taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskIdMeta);
+    }
+    if (data.containsKey('milestone_id')) {
+      context.handle(
+        _milestoneIdMeta,
+        milestoneId.isAcceptableOrUnknown(
+          data['milestone_id']!,
+          _milestoneIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_milestoneIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {taskId};
+  @override
+  MilestoneTaskRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MilestoneTaskRow(
+      taskId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_id'],
+      )!,
+      milestoneId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}milestone_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $MilestoneTasksTable createAlias(String alias) {
+    return $MilestoneTasksTable(attachedDatabase, alias);
+  }
+}
+
+class MilestoneTaskRow extends DataClass
+    implements Insertable<MilestoneTaskRow> {
+  final String taskId;
+  final String milestoneId;
+  final int createdAt;
+  const MilestoneTaskRow({
+    required this.taskId,
+    required this.milestoneId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['task_id'] = Variable<String>(taskId);
+    map['milestone_id'] = Variable<String>(milestoneId);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  MilestoneTasksCompanion toCompanion(bool nullToAbsent) {
+    return MilestoneTasksCompanion(
+      taskId: Value(taskId),
+      milestoneId: Value(milestoneId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory MilestoneTaskRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MilestoneTaskRow(
+      taskId: serializer.fromJson<String>(json['taskId']),
+      milestoneId: serializer.fromJson<String>(json['milestoneId']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'taskId': serializer.toJson<String>(taskId),
+      'milestoneId': serializer.toJson<String>(milestoneId),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  MilestoneTaskRow copyWith({
+    String? taskId,
+    String? milestoneId,
+    int? createdAt,
+  }) => MilestoneTaskRow(
+    taskId: taskId ?? this.taskId,
+    milestoneId: milestoneId ?? this.milestoneId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  MilestoneTaskRow copyWithCompanion(MilestoneTasksCompanion data) {
+    return MilestoneTaskRow(
+      taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      milestoneId: data.milestoneId.present
+          ? data.milestoneId.value
+          : this.milestoneId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneTaskRow(')
+          ..write('taskId: $taskId, ')
+          ..write('milestoneId: $milestoneId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(taskId, milestoneId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MilestoneTaskRow &&
+          other.taskId == this.taskId &&
+          other.milestoneId == this.milestoneId &&
+          other.createdAt == this.createdAt);
+}
+
+class MilestoneTasksCompanion extends UpdateCompanion<MilestoneTaskRow> {
+  final Value<String> taskId;
+  final Value<String> milestoneId;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const MilestoneTasksCompanion({
+    this.taskId = const Value.absent(),
+    this.milestoneId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MilestoneTasksCompanion.insert({
+    required String taskId,
+    required String milestoneId,
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : taskId = Value(taskId),
+       milestoneId = Value(milestoneId),
+       createdAt = Value(createdAt);
+  static Insertable<MilestoneTaskRow> custom({
+    Expression<String>? taskId,
+    Expression<String>? milestoneId,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (taskId != null) 'task_id': taskId,
+      if (milestoneId != null) 'milestone_id': milestoneId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MilestoneTasksCompanion copyWith({
+    Value<String>? taskId,
+    Value<String>? milestoneId,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return MilestoneTasksCompanion(
+      taskId: taskId ?? this.taskId,
+      milestoneId: milestoneId ?? this.milestoneId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (taskId.present) {
+      map['task_id'] = Variable<String>(taskId.value);
+    }
+    if (milestoneId.present) {
+      map['milestone_id'] = Variable<String>(milestoneId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MilestoneTasksCompanion(')
+          ..write('taskId: $taskId, ')
+          ..write('milestoneId: $milestoneId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6524,6 +7419,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ReviewEntriesTable reviewEntries = $ReviewEntriesTable(this);
   late final $ReviewHandledDaysTable reviewHandledDays =
       $ReviewHandledDaysTable(this);
+  late final $MilestonesTable milestones = $MilestonesTable(this);
+  late final $MilestoneTasksTable milestoneTasks = $MilestoneTasksTable(this);
   late final Index tasksRemindAt = Index(
     'tasks_remind_at',
     'CREATE INDEX tasks_remind_at ON tasks (remind_at)',
@@ -6544,6 +7441,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'calendar_events_external',
     'CREATE INDEX calendar_events_external ON calendar_events (source, external_id)',
   );
+  late final Index milestonesGoalId = Index(
+    'milestones_goal_id',
+    'CREATE INDEX milestones_goal_id ON milestones (goal_id)',
+  );
+  late final Index milestoneTasksMilestoneId = Index(
+    'milestone_tasks_milestone_id',
+    'CREATE INDEX milestone_tasks_milestone_id ON milestone_tasks (milestone_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6557,11 +7462,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     preferencesTable,
     reviewEntries,
     reviewHandledDays,
+    milestones,
+    milestoneTasks,
     tasksRemindAt,
     tasksScheduledStart,
     reminderRulesTaskId,
     calendarEventsStartAt,
     calendarEventsExternal,
+    milestonesGoalId,
+    milestoneTasksMilestoneId,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6578,6 +7487,27 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('focus_sessions', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'goals',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('milestones', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'tasks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('milestone_tasks', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'milestones',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('milestone_tasks', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -6678,6 +7608,24 @@ final class $$TasksTableReferences
     ).filter((f) => f.taskId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_focusSessionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$MilestoneTasksTable, List<MilestoneTaskRow>>
+  _milestoneTasksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.milestoneTasks,
+    aliasName: $_aliasNameGenerator(db.tasks.id, db.milestoneTasks.taskId),
+  );
+
+  $$MilestoneTasksTableProcessedTableManager get milestoneTasksRefs {
+    final manager = $$MilestoneTasksTableTableManager(
+      $_db,
+      $_db.milestoneTasks,
+    ).filter((f) => f.taskId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_milestoneTasksRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -6865,6 +7813,31 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
           }) => $$FocusSessionsTableFilterComposer(
             $db: $db,
             $table: $db.focusSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> milestoneTasksRefs(
+    Expression<bool> Function($$MilestoneTasksTableFilterComposer f) f,
+  ) {
+    final $$MilestoneTasksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestoneTasks,
+      getReferencedColumn: (t) => t.taskId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestoneTasksTableFilterComposer(
+            $db: $db,
+            $table: $db.milestoneTasks,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7175,6 +8148,31 @@ class $$TasksTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> milestoneTasksRefs<T extends Object>(
+    Expression<T> Function($$MilestoneTasksTableAnnotationComposer a) f,
+  ) {
+    final $$MilestoneTasksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestoneTasks,
+      getReferencedColumn: (t) => t.taskId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestoneTasksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.milestoneTasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TasksTableTableManager
@@ -7193,6 +8191,7 @@ class $$TasksTableTableManager
           PrefetchHooks Function({
             bool reminderRulesRefs,
             bool focusSessionsRefs,
+            bool milestoneTasksRefs,
           })
         > {
   $$TasksTableTableManager(_$AppDatabase db, $TasksTable table)
@@ -7329,12 +8328,17 @@ class $$TasksTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({reminderRulesRefs = false, focusSessionsRefs = false}) {
+              ({
+                reminderRulesRefs = false,
+                focusSessionsRefs = false,
+                milestoneTasksRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (reminderRulesRefs) db.reminderRules,
                     if (focusSessionsRefs) db.focusSessions,
+                    if (milestoneTasksRefs) db.milestoneTasks,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -7381,6 +8385,27 @@ class $$TasksTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (milestoneTasksRefs)
+                        await $_getPrefetchedData<
+                          TaskRow,
+                          $TasksTable,
+                          MilestoneTaskRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TasksTableReferences
+                              ._milestoneTasksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TasksTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).milestoneTasksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.taskId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -7401,7 +8426,11 @@ typedef $$TasksTableProcessedTableManager =
       $$TasksTableUpdateCompanionBuilder,
       (TaskRow, $$TasksTableReferences),
       TaskRow,
-      PrefetchHooks Function({bool reminderRulesRefs, bool focusSessionsRefs})
+      PrefetchHooks Function({
+        bool reminderRulesRefs,
+        bool focusSessionsRefs,
+        bool milestoneTasksRefs,
+      })
     >;
 typedef $$ReminderRulesTableCreateCompanionBuilder =
     ReminderRulesCompanion Function({
@@ -8713,6 +9742,29 @@ typedef $$GoalsTableUpdateCompanionBuilder =
       Value<int> rowid,
     });
 
+final class $$GoalsTableReferences
+    extends BaseReferences<_$AppDatabase, $GoalsTable, GoalRow> {
+  $$GoalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$MilestonesTable, List<MilestoneRow>>
+  _milestonesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.milestones,
+    aliasName: $_aliasNameGenerator(db.goals.id, db.milestones.goalId),
+  );
+
+  $$MilestonesTableProcessedTableManager get milestonesRefs {
+    final manager = $$MilestonesTableTableManager(
+      $_db,
+      $_db.milestones,
+    ).filter((f) => f.goalId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_milestonesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
   $$GoalsTableFilterComposer({
     required super.$db,
@@ -8817,6 +9869,31 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
     column: $table.metricPeriod,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> milestonesRefs(
+    Expression<bool> Function($$MilestonesTableFilterComposer f) f,
+  ) {
+    final $$MilestonesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestones,
+      getReferencedColumn: (t) => t.goalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestonesTableFilterComposer(
+            $db: $db,
+            $table: $db.milestones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$GoalsTableOrderingComposer
@@ -9007,6 +10084,31 @@ class $$GoalsTableAnnotationComposer
     column: $table.metricPeriod,
     builder: (column) => column,
   );
+
+  Expression<T> milestonesRefs<T extends Object>(
+    Expression<T> Function($$MilestonesTableAnnotationComposer a) f,
+  ) {
+    final $$MilestonesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestones,
+      getReferencedColumn: (t) => t.goalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestonesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.milestones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$GoalsTableTableManager
@@ -9020,9 +10122,9 @@ class $$GoalsTableTableManager
           $$GoalsTableAnnotationComposer,
           $$GoalsTableCreateCompanionBuilder,
           $$GoalsTableUpdateCompanionBuilder,
-          (GoalRow, BaseReferences<_$AppDatabase, $GoalsTable, GoalRow>),
+          (GoalRow, $$GoalsTableReferences),
           GoalRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool milestonesRefs})
         > {
   $$GoalsTableTableManager(_$AppDatabase db, $GoalsTable table)
     : super(
@@ -9124,9 +10226,37 @@ class $$GoalsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$GoalsTableReferences(db, table, e)),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({milestonesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (milestonesRefs) db.milestones],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (milestonesRefs)
+                    await $_getPrefetchedData<
+                      GoalRow,
+                      $GoalsTable,
+                      MilestoneRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$GoalsTableReferences
+                          ._milestonesRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$GoalsTableReferences(db, table, p0).milestonesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.goalId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -9141,9 +10271,9 @@ typedef $$GoalsTableProcessedTableManager =
       $$GoalsTableAnnotationComposer,
       $$GoalsTableCreateCompanionBuilder,
       $$GoalsTableUpdateCompanionBuilder,
-      (GoalRow, BaseReferences<_$AppDatabase, $GoalsTable, GoalRow>),
+      (GoalRow, $$GoalsTableReferences),
       GoalRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool milestonesRefs})
     >;
 typedef $$PreferencesTableTableCreateCompanionBuilder =
     PreferencesTableCompanion Function({
@@ -10036,6 +11166,896 @@ typedef $$ReviewHandledDaysTableProcessedTableManager =
       ReviewHandledDayRow,
       PrefetchHooks Function()
     >;
+typedef $$MilestonesTableCreateCompanionBuilder =
+    MilestonesCompanion Function({
+      required String id,
+      required int createdAt,
+      required int updatedAt,
+      Value<int?> deletedAt,
+      required String goalId,
+      required String title,
+      Value<int?> dueAt,
+      Value<int> sortOrder,
+      Value<MilestoneStatus> status,
+      Value<int?> completedAt,
+      Value<int> rowid,
+    });
+typedef $$MilestonesTableUpdateCompanionBuilder =
+    MilestonesCompanion Function({
+      Value<String> id,
+      Value<int> createdAt,
+      Value<int> updatedAt,
+      Value<int?> deletedAt,
+      Value<String> goalId,
+      Value<String> title,
+      Value<int?> dueAt,
+      Value<int> sortOrder,
+      Value<MilestoneStatus> status,
+      Value<int?> completedAt,
+      Value<int> rowid,
+    });
+
+final class $$MilestonesTableReferences
+    extends BaseReferences<_$AppDatabase, $MilestonesTable, MilestoneRow> {
+  $$MilestonesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $GoalsTable _goalIdTable(_$AppDatabase db) => db.goals.createAlias(
+    $_aliasNameGenerator(db.milestones.goalId, db.goals.id),
+  );
+
+  $$GoalsTableProcessedTableManager get goalId {
+    final $_column = $_itemColumn<String>('goal_id')!;
+
+    final manager = $$GoalsTableTableManager(
+      $_db,
+      $_db.goals,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_goalIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$MilestoneTasksTable, List<MilestoneTaskRow>>
+  _milestoneTasksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.milestoneTasks,
+    aliasName: $_aliasNameGenerator(
+      db.milestones.id,
+      db.milestoneTasks.milestoneId,
+    ),
+  );
+
+  $$MilestoneTasksTableProcessedTableManager get milestoneTasksRefs {
+    final manager = $$MilestoneTasksTableTableManager(
+      $_db,
+      $_db.milestoneTasks,
+    ).filter((f) => f.milestoneId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_milestoneTasksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$MilestonesTableFilterComposer
+    extends Composer<_$AppDatabase, $MilestonesTable> {
+  $$MilestonesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dueAt => $composableBuilder(
+    column: $table.dueAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<MilestoneStatus, MilestoneStatus, String>
+  get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$GoalsTableFilterComposer get goalId {
+    final $$GoalsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableFilterComposer(
+            $db: $db,
+            $table: $db.goals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> milestoneTasksRefs(
+    Expression<bool> Function($$MilestoneTasksTableFilterComposer f) f,
+  ) {
+    final $$MilestoneTasksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestoneTasks,
+      getReferencedColumn: (t) => t.milestoneId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestoneTasksTableFilterComposer(
+            $db: $db,
+            $table: $db.milestoneTasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MilestonesTableOrderingComposer
+    extends Composer<_$AppDatabase, $MilestonesTable> {
+  $$MilestonesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dueAt => $composableBuilder(
+    column: $table.dueAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$GoalsTableOrderingComposer get goalId {
+    final $$GoalsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableOrderingComposer(
+            $db: $db,
+            $table: $db.goals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MilestonesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MilestonesTable> {
+  $$MilestonesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get dueAt =>
+      $composableBuilder(column: $table.dueAt, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MilestoneStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  $$GoalsTableAnnotationComposer get goalId {
+    final $$GoalsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.goalId,
+      referencedTable: $db.goals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GoalsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.goals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> milestoneTasksRefs<T extends Object>(
+    Expression<T> Function($$MilestoneTasksTableAnnotationComposer a) f,
+  ) {
+    final $$MilestoneTasksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.milestoneTasks,
+      getReferencedColumn: (t) => t.milestoneId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestoneTasksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.milestoneTasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$MilestonesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MilestonesTable,
+          MilestoneRow,
+          $$MilestonesTableFilterComposer,
+          $$MilestonesTableOrderingComposer,
+          $$MilestonesTableAnnotationComposer,
+          $$MilestonesTableCreateCompanionBuilder,
+          $$MilestonesTableUpdateCompanionBuilder,
+          (MilestoneRow, $$MilestonesTableReferences),
+          MilestoneRow,
+          PrefetchHooks Function({bool goalId, bool milestoneTasksRefs})
+        > {
+  $$MilestonesTableTableManager(_$AppDatabase db, $MilestonesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MilestonesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MilestonesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MilestonesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> updatedAt = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
+                Value<String> goalId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<int?> dueAt = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<MilestoneStatus> status = const Value.absent(),
+                Value<int?> completedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MilestonesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                goalId: goalId,
+                title: title,
+                dueAt: dueAt,
+                sortOrder: sortOrder,
+                status: status,
+                completedAt: completedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required int createdAt,
+                required int updatedAt,
+                Value<int?> deletedAt = const Value.absent(),
+                required String goalId,
+                required String title,
+                Value<int?> dueAt = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<MilestoneStatus> status = const Value.absent(),
+                Value<int?> completedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MilestonesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                goalId: goalId,
+                title: title,
+                dueAt: dueAt,
+                sortOrder: sortOrder,
+                status: status,
+                completedAt: completedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MilestonesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({goalId = false, milestoneTasksRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (milestoneTasksRefs) db.milestoneTasks,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (goalId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.goalId,
+                                    referencedTable: $$MilestonesTableReferences
+                                        ._goalIdTable(db),
+                                    referencedColumn:
+                                        $$MilestonesTableReferences
+                                            ._goalIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (milestoneTasksRefs)
+                        await $_getPrefetchedData<
+                          MilestoneRow,
+                          $MilestonesTable,
+                          MilestoneTaskRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MilestonesTableReferences
+                              ._milestoneTasksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MilestonesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).milestoneTasksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.milestoneId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$MilestonesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MilestonesTable,
+      MilestoneRow,
+      $$MilestonesTableFilterComposer,
+      $$MilestonesTableOrderingComposer,
+      $$MilestonesTableAnnotationComposer,
+      $$MilestonesTableCreateCompanionBuilder,
+      $$MilestonesTableUpdateCompanionBuilder,
+      (MilestoneRow, $$MilestonesTableReferences),
+      MilestoneRow,
+      PrefetchHooks Function({bool goalId, bool milestoneTasksRefs})
+    >;
+typedef $$MilestoneTasksTableCreateCompanionBuilder =
+    MilestoneTasksCompanion Function({
+      required String taskId,
+      required String milestoneId,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$MilestoneTasksTableUpdateCompanionBuilder =
+    MilestoneTasksCompanion Function({
+      Value<String> taskId,
+      Value<String> milestoneId,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$MilestoneTasksTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $MilestoneTasksTable, MilestoneTaskRow> {
+  $$MilestoneTasksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $TasksTable _taskIdTable(_$AppDatabase db) => db.tasks.createAlias(
+    $_aliasNameGenerator(db.milestoneTasks.taskId, db.tasks.id),
+  );
+
+  $$TasksTableProcessedTableManager get taskId {
+    final $_column = $_itemColumn<String>('task_id')!;
+
+    final manager = $$TasksTableTableManager(
+      $_db,
+      $_db.tasks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_taskIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MilestonesTable _milestoneIdTable(_$AppDatabase db) =>
+      db.milestones.createAlias(
+        $_aliasNameGenerator(db.milestoneTasks.milestoneId, db.milestones.id),
+      );
+
+  $$MilestonesTableProcessedTableManager get milestoneId {
+    final $_column = $_itemColumn<String>('milestone_id')!;
+
+    final manager = $$MilestonesTableTableManager(
+      $_db,
+      $_db.milestones,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_milestoneIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$MilestoneTasksTableFilterComposer
+    extends Composer<_$AppDatabase, $MilestoneTasksTable> {
+  $$MilestoneTasksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$TasksTableFilterComposer get taskId {
+    final $$TasksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.taskId,
+      referencedTable: $db.tasks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TasksTableFilterComposer(
+            $db: $db,
+            $table: $db.tasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MilestonesTableFilterComposer get milestoneId {
+    final $$MilestonesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.milestoneId,
+      referencedTable: $db.milestones,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestonesTableFilterComposer(
+            $db: $db,
+            $table: $db.milestones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MilestoneTasksTableOrderingComposer
+    extends Composer<_$AppDatabase, $MilestoneTasksTable> {
+  $$MilestoneTasksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$TasksTableOrderingComposer get taskId {
+    final $$TasksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.taskId,
+      referencedTable: $db.tasks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TasksTableOrderingComposer(
+            $db: $db,
+            $table: $db.tasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MilestonesTableOrderingComposer get milestoneId {
+    final $$MilestonesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.milestoneId,
+      referencedTable: $db.milestones,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestonesTableOrderingComposer(
+            $db: $db,
+            $table: $db.milestones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MilestoneTasksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MilestoneTasksTable> {
+  $$MilestoneTasksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$TasksTableAnnotationComposer get taskId {
+    final $$TasksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.taskId,
+      referencedTable: $db.tasks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TasksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tasks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MilestonesTableAnnotationComposer get milestoneId {
+    final $$MilestonesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.milestoneId,
+      referencedTable: $db.milestones,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MilestonesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.milestones,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$MilestoneTasksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MilestoneTasksTable,
+          MilestoneTaskRow,
+          $$MilestoneTasksTableFilterComposer,
+          $$MilestoneTasksTableOrderingComposer,
+          $$MilestoneTasksTableAnnotationComposer,
+          $$MilestoneTasksTableCreateCompanionBuilder,
+          $$MilestoneTasksTableUpdateCompanionBuilder,
+          (MilestoneTaskRow, $$MilestoneTasksTableReferences),
+          MilestoneTaskRow,
+          PrefetchHooks Function({bool taskId, bool milestoneId})
+        > {
+  $$MilestoneTasksTableTableManager(
+    _$AppDatabase db,
+    $MilestoneTasksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MilestoneTasksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MilestoneTasksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MilestoneTasksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> taskId = const Value.absent(),
+                Value<String> milestoneId = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MilestoneTasksCompanion(
+                taskId: taskId,
+                milestoneId: milestoneId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String taskId,
+                required String milestoneId,
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => MilestoneTasksCompanion.insert(
+                taskId: taskId,
+                milestoneId: milestoneId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$MilestoneTasksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({taskId = false, milestoneId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (taskId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.taskId,
+                                referencedTable: $$MilestoneTasksTableReferences
+                                    ._taskIdTable(db),
+                                referencedColumn:
+                                    $$MilestoneTasksTableReferences
+                                        ._taskIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (milestoneId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.milestoneId,
+                                referencedTable: $$MilestoneTasksTableReferences
+                                    ._milestoneIdTable(db),
+                                referencedColumn:
+                                    $$MilestoneTasksTableReferences
+                                        ._milestoneIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$MilestoneTasksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MilestoneTasksTable,
+      MilestoneTaskRow,
+      $$MilestoneTasksTableFilterComposer,
+      $$MilestoneTasksTableOrderingComposer,
+      $$MilestoneTasksTableAnnotationComposer,
+      $$MilestoneTasksTableCreateCompanionBuilder,
+      $$MilestoneTasksTableUpdateCompanionBuilder,
+      (MilestoneTaskRow, $$MilestoneTasksTableReferences),
+      MilestoneTaskRow,
+      PrefetchHooks Function({bool taskId, bool milestoneId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10056,4 +12076,8 @@ class $AppDatabaseManager {
       $$ReviewEntriesTableTableManager(_db, _db.reviewEntries);
   $$ReviewHandledDaysTableTableManager get reviewHandledDays =>
       $$ReviewHandledDaysTableTableManager(_db, _db.reviewHandledDays);
+  $$MilestonesTableTableManager get milestones =>
+      $$MilestonesTableTableManager(_db, _db.milestones);
+  $$MilestoneTasksTableTableManager get milestoneTasks =>
+      $$MilestoneTasksTableTableManager(_db, _db.milestoneTasks);
 }

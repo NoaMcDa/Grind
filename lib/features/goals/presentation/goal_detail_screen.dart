@@ -18,8 +18,10 @@ import 'goal_l10n.dart';
 import 'goal_form.dart';
 import 'goal_widgets.dart';
 import 'metric_trend.dart';
+import 'milestone_section.dart';
 
-/// One goal: metric ring with +1 / edit count, details, linked tasks.
+/// One goal: metric ring with +1 / edit count, details, linked tasks, the
+/// next scheduled task and milestones with their weekly tasks (#25).
 /// Routed as `/goals/:id`.
 ///
 /// [onAddTask] creates a new task for the goal (the integrator wires it to
@@ -121,6 +123,16 @@ class GoalDetailScreen extends ConsumerWidget {
   Widget _content(BuildContext context, WidgetRef ref, GoalRecord goal) {
     final progress = ref.watch(goalProgressProvider(goal.id));
     final linked = ref.watch(goalLinkedTasksProvider(goal.id));
+    // Milestone tasks show under their milestone, not twice.
+    final plan = ref.watch(goalMilestonePlanProvider(goal.id));
+    final underMilestones = {
+      for (final v in plan.items)
+        for (final t in v.tasks) t.id,
+    };
+    final shown = [
+      for (final t in linked)
+        if (!underMilestones.contains(t.id)) t,
+    ];
     final actions = ref.read(goalActionsProvider);
     final area = GoalArea.resolve(goal.area);
     final color = area?.color ?? AppColors.violet;
@@ -254,13 +266,13 @@ class GoalDetailScreen extends ConsumerWidget {
         const SizedBox(height: 20),
         SectionLabel(context.l10n.goalsLinkedTasks),
         const SizedBox(height: 8),
-        if (linked.isEmpty)
+        if (shown.isEmpty)
           Text(
             context.l10n.goalsNoLinkedTasks,
             style: AppText.body(color: AppColors.muted),
           )
         else
-          for (final t in linked) ...[
+          for (final t in shown) ...[
             _LinkedTaskRow(
               task: t,
               onToggle: () async {
@@ -294,6 +306,8 @@ class GoalDetailScreen extends ConsumerWidget {
             ],
           ],
         ),
+        const SizedBox(height: 24),
+        GoalMilestoneSection(goal: goal),
         const SizedBox(height: 24),
         PillButton(
           label: goal.status == GoalStatus.done
