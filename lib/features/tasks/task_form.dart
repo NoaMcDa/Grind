@@ -388,8 +388,8 @@ class _Choice extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
+          // No `alignment` here: it would make each chip as wide as the Wrap.
           child: Container(
-            alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: selected ? AppColors.violet : AppColors.card,
@@ -450,7 +450,6 @@ class _EnergyOption extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         child: Container(
           constraints: const BoxConstraints(minHeight: 44),
-          alignment: Alignment.center,
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -459,7 +458,7 @@ class _EnergyOption extends StatelessWidget {
               width: AppStroke.border,
             ),
           ),
-          child: chip,
+          child: Center(widthFactor: 1, child: chip),
         ),
       ),
     );

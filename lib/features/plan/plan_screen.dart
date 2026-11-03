@@ -8,10 +8,15 @@ import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
+import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_date_time_picker.dart';
+import '../calendar/sync/providers.dart';
+import '../calendar/sync/sync_status.dart';
 import '../tasks/task_form.dart';
 import 'plan_layout.dart';
 import 'plan_providers.dart';
+import 'plan_replan_sheet.dart';
+import 'plan_scheduler.dart';
 import 'plan_strings.dart';
 import 'plan_task_sheet.dart';
 import 'plan_timeline.dart';
@@ -100,11 +105,44 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
 
   void _shift(int days) => ref.read(selectedDayProvider.notifier).shift(days);
 
+  bool _replanning = false;
+
+  Future<void> _replan() async {
+    if (_replanning) return;
+    _replanning = true;
+    try {
+      await replanWithPip(context, ref, ref.read(selectedDayProvider));
+    } finally {
+      _replanning = false;
+    }
+  }
+
+  /// The last sync error shown, so each error toasts once.
+  String? _shownSyncError;
+
+  void _onSyncStatus(SyncStatus? status) {
+    if (status == null) return;
+    if (!status.isError) {
+      if (status.phase == SyncPhase.idle) _shownSyncError = null;
+      return;
+    }
+    final message = status.message ?? '';
+    if (message.isEmpty || message == _shownSyncError) return;
+    _shownSyncError = message;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showPipToast(context, message);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(selectedDayProvider, (_, _) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToNow());
     });
+    ref.listen(
+      syncStatusProvider,
+      (_, next) => _onSyncStatus(next.valueOrNull),
+    );
     final day = ref.watch(selectedDayProvider);
     final tasks = ref.watch(planTasksProvider);
     final events =
@@ -195,6 +233,12 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                           height: 1.35,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        ref.watch(planCapacityLineProvider),
+                        key: const Key('plan-capacity'),
+                        style: AppText.bold(size: 13, color: AppColors.ink),
+                      ),
                     ],
                   ),
                 ),
@@ -283,7 +327,8 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
               children: [
                 Expanded(
                   child: PillButton(
-                    label: 'Re-plan with Pip',
+                    key: const Key('plan-replan'),
+                    label: PlanStrings.replan,
                     color: AppColors.violet,
                     textColor: Colors.white,
                     height: 52,
@@ -291,8 +336,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                     fontSize: 17,
                     display: true,
                     icon: const Icon(Icons.auto_awesome),
-                    // Wired to the scheduler in wave 3.
-                    onPressed: () {},
+                    onPressed: _replan,
                   ),
                 ),
                 const SizedBox(width: 10),

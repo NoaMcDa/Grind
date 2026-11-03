@@ -40,6 +40,10 @@ abstract final class TasksStrings {
   static const deleted = 'Task deleted';
   static const markedDone = 'Nicely done';
   static const undo = 'Undo';
+  static const nextOneSet = 'Nicely done. The next one is lined up.';
+  static const repeatsLabel = 'Repeats';
+  static const scheduledLabel = 'On the plan';
+  static const notScheduled = 'Not placed yet';
 
   static const emptyTitle = 'Nothing due today';
   static const emptyBody = 'Add one small thing and Pip will remind you.';
