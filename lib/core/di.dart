@@ -32,6 +32,10 @@ final notificationServiceProvider = Provider<NotificationService>(
   (_) => FakeNotificationService(),
 );
 
+final assistantGatewayProvider = Provider<AssistantGateway>(
+  (_) => FakeAssistantGateway(),
+);
+
 final googleCalendarProvider = Provider<CalendarProvider>(
   (_) => FakeCalendarProvider(CalendarSource.google),
 );
