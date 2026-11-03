@@ -9,6 +9,7 @@ import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../recurrence/occurrence_expander.dart' show RruleText;
 import '../recurrence/recurrence.dart';
 import '../recurrence/recurrence_picker.dart';
 import 'day_bounds.dart';
@@ -167,8 +168,25 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
   /// Writes, replaces or removes the task's rule after a change here.
   Future<void> _saveRule(Task task) async {
-    if (!_recurrenceTouched) return;
     final rules = ref.read(reminderRepositoryProvider);
+    if (!_recurrenceTouched) {
+      // A new reminder time restarts the series there: drop the pinned
+      // start (DTSTART) so occurrences follow the edited time. Completions
+      // (`lastCompletedAt`) stay.
+      final before = _existing?.remindAt;
+      if (before == null || before == task.remindAt) return;
+      final rule = _rule ?? await rules.getForTask(task.id);
+      if (rule == null) return;
+      final text = RruleText.parse(rule.rrule);
+      if (text.dtstart == null) return;
+      await rules.upsert(
+        rule.copyWith(
+          rrule: text.withDtstart(null).toString(),
+          updatedAt: ref.read(clockProvider).now().toUtc(),
+        ),
+      );
+      return;
+    }
     final rule = _rule ?? await rules.getForTask(task.id);
     final value = _recurrence;
     final now = ref.read(clockProvider).now().toUtc();

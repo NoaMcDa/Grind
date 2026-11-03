@@ -285,7 +285,9 @@ void main() {
         after.remindAt!.difference(DateTime(2026, 10, 29, 9).toUtc()),
         const Duration(days: 7),
       );
-      expect(row, findsNothing);
+      // This week's occurrence stays on Today as done and counts.
+      expect(row, findsOneWidget);
+      expect(find.text('2 of 5 today'), findsOneWidget);
 
       await setDay(nextWeek);
       expect(row, findsOneWidget);

@@ -65,14 +65,20 @@ void main() {
     final after = (await repo.getById('w'))!;
     expect(after.isDone, isFalse);
     expect(after.remindAt, DateTime.utc(2026, 11, 10, 5));
-    expect(await c.read(reminderRepositoryProvider).getForTask('w'), isNotNull);
+    final rule = await c.read(reminderRepositoryProvider).getForTask('w');
+    expect(rule!.lastCompletedAt, DateTime.utc(2026, 11, 3, 5));
     expect(find.text('Nicely done. The next one is lined up.'), findsOneWidget);
-    expect(find.text('Weekly review'), findsNothing);
+    // The occurrence stays on Today as a done row and counts.
+    expect(find.text('Weekly review'), findsOneWidget);
+    expect(find.text('1 of 1 today'), findsOneWidget);
 
     await tester.tap(find.text('Undo'));
     await tester.pumpAndSettle();
     expect((await repo.getById('w'))!.remindAt, DateTime.utc(2026, 10, 27, 5));
+    final restored = await c.read(reminderRepositoryProvider).getForTask('w');
+    expect(restored!.lastCompletedAt, isNull);
     expect(find.text('Weekly review'), findsOneWidget);
+    expect(find.text('0 of 1 today'), findsOneWidget);
   });
 
   testWidgets('swipe right on a weekly task completes this occurrence only', (

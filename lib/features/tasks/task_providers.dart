@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rrule/rrule.dart';
 
 import '../../core/core.dart';
+import '../recurrence/occurrence_completion.dart';
 import '../recurrence/occurrence_expander.dart';
 import '../recurrence/providers.dart';
 import 'day_bounds.dart';
@@ -35,7 +36,8 @@ final openTasksProvider = Provider<List<Task>>((ref) {
 /// One row of the Today list: a task, and for a recurring task the
 /// occurrence that falls on the day.
 class TodayItem {
-  const TodayItem(this.task, {this.at, this.occurrence = false});
+  const TodayItem(this.task, {this.at, this.occurrence = false, bool? done})
+    : _done = done;
 
   final Task task;
 
@@ -47,7 +49,11 @@ class TodayItem {
   /// this occurrence only.
   final bool occurrence;
 
-  bool get isDone => task.isDone;
+  final bool? _done;
+
+  /// Done: the task, or for an occurrence, at or before the rule's
+  /// `lastCompletedAt` (the series task itself stays open).
+  bool get isDone => _done ?? task.isDone;
 
   /// Stable per row (a series can occur more than once a day).
   String get key =>
@@ -58,20 +64,22 @@ class TodayItem {
       other is TodayItem &&
       other.task == task &&
       other.at == at &&
-      other.occurrence == occurrence;
+      other.occurrence == occurrence &&
+      other.isDone == isDone;
 
   @override
-  int get hashCode => Object.hash(task, at, occurrence);
+  int get hashCode => Object.hash(task, at, occurrence, isDone);
 }
 
 /// What falls on [day]: one-off tasks whose reminder or due time is on the
 /// day, and each occurrence of a recurring task on the day (expanded from
 /// its rule in the day's zone). A series whose rule cannot be expanded, or
-/// a finished one, is treated as a one-off. Open first by time, done last.
+/// a finished one without completions, is treated as a one-off. Open first
+/// by time, done last.
 ///
-/// A completed occurrence moves the series' anchor on, so it leaves the
-/// list. Once `ReminderRule.lastCompletedAt` exists, an occurrence at or
-/// before it on [day] can stay in the list as done instead.
+/// Occurrences at or before the rule's `lastCompletedAt` are done: when
+/// `lastCompletedAt` falls on [day] they stay as done rows (so "1 of 3
+/// today" counts them), on other days they are not due and are left out.
 List<TodayItem> itemsOnDay({
   required Iterable<Task> tasks,
   required Map<String, ReminderRule> rules,
@@ -82,7 +90,11 @@ List<TodayItem> itemsOnDay({
     if (t.deletedAt != null) continue;
     final rule = rules[t.id];
     final anchor = t.remindAt;
-    if (rule != null && anchor != null && !t.isDone && _expandable(rule)) {
+    final last = rule?.lastCompletedAt;
+    if (rule != null &&
+        anchor != null &&
+        (!t.isDone || last != null) &&
+        _expandable(rule)) {
       final occurrences = expandOccurrences(
         rule: rule.copyWith(leadMinutes: 0),
         anchor: anchor,
@@ -91,7 +103,10 @@ List<TodayItem> itemsOnDay({
         timeZoneName: day.location.name,
       );
       for (final o in occurrences) {
-        out.add(TodayItem(t, at: utcOf(o), occurrence: true));
+        final at = utcOf(o);
+        final done = isOccurrenceDone(rule, at);
+        if (done ? !day.contains(last) : t.isDone) continue;
+        out.add(TodayItem(t, at: at, occurrence: true, done: done));
       }
       continue;
     }
