@@ -1,0 +1,6 @@
+# Placeholders: fill in on the Mac. The bundle id must match the one in Xcode
+# (Runner target > General) and the app record in App Store Connect.
+app_identifier("com.noa.grind") # TODO: confirm; the Xcode project currently says com.noa.grind.grind
+apple_id("YOUR_APPLE_ID@example.com") # TODO
+team_id("YOUR_TEAM_ID") # TODO: developer.apple.com > Membership (10 characters)
+itc_team_id("YOUR_APP_STORE_CONNECT_TEAM_ID") # TODO: only needed if you belong to several teams

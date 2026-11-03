@@ -1,0 +1,50 @@
+# Fastlane lanes for Grind. Run from the ios/ directory on a Mac:
+#   cd ios && bundle exec fastlane beta
+# One-time setup is in docs/release/README.md.
+#
+# Signing: match-less. Xcode "Automatically manage signing" with your team
+# selected in Runner > Signing & Capabilities. See Matchfile for the
+# alternative.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build a release IPA and upload it to TestFlight"
+  lane :beta do
+    # App Store Connect API key from the environment (never commit the .p8):
+    #   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_CONTENT (base64 of the .p8)
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_CONTENT"),
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    # Flutter must produce the release artefacts first (pods, codegen,
+    # build number from pubspec.yaml).
+    sh("flutter", "build", "ios", "--release", "--no-codesign",
+       chdir: File.expand_path("../..", __dir__))
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Placeholder: capture App Store screenshots (see docs/release/app-store-listing.md)"
+  lane :screenshots do
+    UI.important("Not automated yet. Take the screenshots listed in docs/release/app-store-listing.md manually (Simulator: Cmd+S) and upload them in App Store Connect.")
+    # TODO: add a Flutter integration_test driver + `capture_screenshots`
+    # or `snapshot` once the UI is stable.
+  end
+end
