@@ -14,6 +14,7 @@ class CalendarEvent {
     this.isAllDay = false,
     this.isBusy = true,
     this.taskId,
+    this.htmlLink,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -36,6 +37,9 @@ class CalendarEvent {
   /// Set when this event is the write-back of a Grind task.
   final String? taskId;
 
+  /// The provider's web link to the event (Google `htmlLink`), if any.
+  final String? htmlLink;
+
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -50,6 +54,7 @@ class CalendarEvent {
     bool? isBusy,
     Object? calendarId = _unset,
     Object? taskId = _unset,
+    Object? htmlLink = _unset,
     DateTime? updatedAt,
     Object? deletedAt = _unset,
   }) => CalendarEvent(
@@ -63,6 +68,7 @@ class CalendarEvent {
     isAllDay: isAllDay ?? this.isAllDay,
     isBusy: isBusy ?? this.isBusy,
     taskId: taskId == _unset ? this.taskId : taskId as String?,
+    htmlLink: htmlLink == _unset ? this.htmlLink : htmlLink as String?,
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt == _unset ? this.deletedAt : deletedAt as DateTime?,

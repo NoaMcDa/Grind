@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
+
 import '../../domain/domain.dart';
 import '../../services/clock.dart';
 import '../database.dart';
@@ -24,6 +26,7 @@ class BackupSummary {
     required this.focusSessions,
     required this.goals,
     required this.hasPreferences,
+    this.reviewEntries = 0,
   });
 
   final int tasks;
@@ -32,6 +35,7 @@ class BackupSummary {
   final int focusSessions;
   final int goals;
   final bool hasPreferences;
+  final int reviewEntries;
 }
 
 /// Platform side of backups: where the JSON goes and where it comes from.
@@ -50,20 +54,28 @@ abstract interface class BackupFileGateway {
 /// Format (version [format]):
 /// ```json
 /// {
-///   "app": "grind", "format": 1, "schemaVersion": 1,
+///   "app": "grind", "format": 2, "schemaVersion": 3,
 ///   "exportedAt": "2026-11-03T08:00:00.000Z",
 ///   "tasks": [...], "reminderRules": [...], "calendarEvents": [...],
-///   "focusSessions": [...], "goals": [...], "preferences": {...} | null
+///   "focusSessions": [...], "goals": [...], "preferences": {...} | null,
+///   "reviewEntries": [...], "reviewHandledDays": ["2026-11-02", ...]
 /// }
 /// ```
 /// Times are ISO-8601 UTC strings, enums their names. Soft-deleted rows
 /// are included so a restore is an exact copy.
+///
+/// History: format 1 (schema v1-v2) had no review lists and none of the v3
+/// fields; it still imports, with every missing field at its default.
+/// Format 2 (schema v3) adds them. Every row is validated before anything
+/// is written: a wrong type, an unknown enum name, a time range outside one
+/// day, a duplicate id or a reference to a task that is not in the file is
+/// a [BackupFormatException] naming the row and field.
 class BackupService {
   BackupService(this._db, {Clock clock = const SystemClock()}) : _clock = clock;
 
   /// Bump when the JSON shape changes incompatibly; teach [importJson] to
   /// read the older versions.
-  static const format = 1;
+  static const format = 2;
 
   final AppDatabase _db;
   final Clock _clock;
@@ -82,6 +94,12 @@ class BackupService {
     final sessions = await _db.select(_db.focusSessions).get();
     final goals = await _db.select(_db.goals).get();
     final prefs = await _db.select(_db.preferencesTable).getSingleOrNull();
+    final reviews = await (_db.select(
+      _db.reviewEntries,
+    )..orderBy([(r) => OrderingTerm(expression: r.date)])).get();
+    final handled = await (_db.select(
+      _db.reviewHandledDays,
+    )..orderBy([(r) => OrderingTerm(expression: r.date)])).get();
     return {
       'app': 'grind',
       'format': format,
@@ -93,6 +111,8 @@ class BackupService {
       'focusSessions': [for (final r in sessions) r.toDomain().toJson()],
       'goals': [for (final r in goals) r.toDomain().toJson()],
       'preferences': prefs?.toDomain().toJson(),
+      'reviewEntries': [for (final r in reviews) r.toBackupJson()],
+      'reviewHandledDays': [for (final r in handled) r.date],
     };
   });
 
@@ -124,6 +144,11 @@ class BackupService {
           ]);
           b.insertAll(_db.focusSessions, [
             for (final s in parsed.sessions) s.toCompanion(),
+          ]);
+          b.insertAll(_db.reviewEntries, parsed.reviewEntries);
+          b.insertAll(_db.reviewHandledDays, [
+            for (final d in parsed.handledDays)
+              ReviewHandledDaysCompanion.insert(date: d),
           ]);
           final p = parsed.preferences;
           if (p != null) {
@@ -189,18 +214,20 @@ class BackupService {
       throw BackupFormatException('Unknown backup format $version.');
     }
 
-    List<T> list<T>(String key, T Function(Map<String, Object?>) fromJson) {
+    List<Object?> raw(String key) {
       final v = root[key];
       if (v == null) return const [];
       if (v is! List) throw BackupFormatException('"$key" is not a list.');
-      return [
-        for (final (i, item) in v.indexed)
-          _guard('$key[$i]', () => fromJson((item as Map).cast())),
-      ];
+      return v;
     }
 
+    List<T> list<T>(String key, T Function(Map<String, Object?>) fromJson) => [
+      for (final (i, item) in raw(key).indexed)
+        _guard('$key[$i]', () => fromJson(jsonObject(item, 'The row'))),
+    ];
+
     final prefs = root['preferences'];
-    return _ParsedBackup(
+    final parsed = _ParsedBackup(
       tasks: list('tasks', taskFromJson),
       rules: list('reminderRules', reminderRuleFromJson),
       events: list('calendarEvents', calendarEventFromJson),
@@ -210,14 +237,60 @@ class BackupService {
           ? null
           : _guard(
               'preferences',
-              () => preferencesFromJson((prefs as Map).cast()),
+              () => preferencesFromJson(jsonObject(prefs, 'It')),
             ),
+      reviewEntries: list('reviewEntries', reviewEntryFromJson),
+      handledDays: [
+        for (final (i, d) in raw('reviewHandledDays').indexed)
+          _guard('reviewHandledDays[$i]', () => reviewHandledDayFromJson(d)),
+      ],
     );
+    _checkReferences(parsed);
+    return parsed;
+  }
+
+  /// Duplicate ids and rows pointing at a task that is not in the file
+  /// would fail inside the transaction with database text; name them.
+  void _checkReferences(_ParsedBackup p) {
+    void unique(String key, Iterable<String> ids) {
+      final seen = <String>{};
+      for (final (i, id) in ids.indexed) {
+        if (!seen.add(id)) {
+          throw BackupFormatException(
+            'Could not read $key[$i]: "$id" appears twice.',
+          );
+        }
+      }
+    }
+
+    unique('tasks', p.tasks.map((t) => t.id));
+    unique('reminderRules', p.rules.map((r) => r.id));
+    unique('calendarEvents', p.events.map((e) => e.id));
+    unique('focusSessions', p.sessions.map((s) => s.id));
+    unique('goals', p.goals.map((g) => g.id));
+    unique('reviewEntries', p.reviewEntries.map((r) => r.date.value));
+    unique('reviewHandledDays', p.handledDays);
+
+    final taskIds = {for (final t in p.tasks) t.id};
+    void refers(String key, Iterable<String?> ids) {
+      for (final (i, id) in ids.indexed) {
+        if (id != null && !taskIds.contains(id)) {
+          throw BackupFormatException(
+            'Could not read $key[$i]: its task "$id" is not in the backup.',
+          );
+        }
+      }
+    }
+
+    refers('reminderRules', p.rules.map((r) => r.taskId));
+    refers('focusSessions', p.sessions.map((s) => s.taskId));
   }
 
   T _guard<T>(String where, T Function() read) {
     try {
       return read();
+    } on FormatException catch (e) {
+      throw BackupFormatException('Could not read $where: ${e.message}');
     } catch (e) {
       throw BackupFormatException('Could not read $where: $e');
     }
@@ -232,6 +305,8 @@ class _ParsedBackup {
     required this.sessions,
     required this.goals,
     required this.preferences,
+    required this.reviewEntries,
+    required this.handledDays,
   });
 
   final List<Task> tasks;
@@ -240,6 +315,8 @@ class _ParsedBackup {
   final List<FocusSession> sessions;
   final List<Goal> goals;
   final Preferences? preferences;
+  final List<ReviewEntriesCompanion> reviewEntries;
+  final List<String> handledDays;
 
   BackupSummary get summary => BackupSummary(
     tasks: tasks.length,
@@ -248,5 +325,6 @@ class _ParsedBackup {
     focusSessions: sessions.length,
     goals: goals.length,
     hasPreferences: preferences != null,
+    reviewEntries: reviewEntries.length,
   );
 }

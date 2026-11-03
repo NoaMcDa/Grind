@@ -268,6 +268,9 @@ abstract final class NotificationScheduler {
   }
 
   /// Moves [utc] to the end of the quiet hours when it falls inside them.
+  /// Moves [utc] to the end of the quiet hours when it falls inside them.
+  /// A range across midnight (22:00–07:00) ends on the next day when the
+  /// time is in its evening part, on the same day when in its morning part.
   static DateTime _outOfQuietHours(
     DateTime utc,
     Preferences prefs,
@@ -277,12 +280,13 @@ abstract final class NotificationScheduler {
     if (quiet == null) return utc;
     final local = tz.TZDateTime.from(utc, location);
     final minute = local.hour * 60 + local.minute;
-    if (minute < quiet.startMinutes || minute >= quiet.endMinutes) return utc;
+    if (!quiet.contains(minute)) return utc;
+    final nextDay = quiet.wrapsMidnight && minute >= quiet.startMinutes;
     return tz.TZDateTime(
       location,
       local.year,
       local.month,
-      local.day,
+      local.day + (nextDay ? 1 : 0),
       quiet.endMinutes ~/ 60,
       quiet.endMinutes % 60,
     ).toUtc();

@@ -11,6 +11,7 @@ class ReminderRule {
     required this.rrule,
     this.leadMinutes = 0,
     this.until,
+    this.lastCompletedAt,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -26,6 +27,10 @@ class ReminderRule {
   final int leadMinutes;
   final DateTime? until;
 
+  /// When the most recent occurrence was marked done, so completing one
+  /// occurrence does not complete the series (see review H1).
+  final DateTime? lastCompletedAt;
+
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -34,6 +39,7 @@ class ReminderRule {
     String? rrule,
     int? leadMinutes,
     Object? until = _unset,
+    Object? lastCompletedAt = _unset,
     DateTime? updatedAt,
     Object? deletedAt = _unset,
   }) => ReminderRule(
@@ -42,6 +48,9 @@ class ReminderRule {
     rrule: rrule ?? this.rrule,
     leadMinutes: leadMinutes ?? this.leadMinutes,
     until: until == _unset ? this.until : until as DateTime?,
+    lastCompletedAt: lastCompletedAt == _unset
+        ? this.lastCompletedAt
+        : lastCompletedAt as DateTime?,
     createdAt: createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt == _unset ? this.deletedAt : deletedAt as DateTime?,

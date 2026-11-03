@@ -1,6 +1,5 @@
 import '../../core/core.dart';
 import 'domain/goal_progress.dart';
-import 'domain/goal_record.dart';
 
 /// English strings for the goals feature (#24, #26). The integrator moves
 /// these into the ARB files (see docs/plans/ownership.md). Pip's tone:

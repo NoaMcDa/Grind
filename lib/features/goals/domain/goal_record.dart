@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import '../../../core/core.dart';
 import 'goal_metric.dart';
 
-enum GoalStatus { active, paused, done }
+// GoalStatus moved to the core (lib/core/domain/goal.dart, schema v3) so
+// the `goals.status` column can hold it; re-exported for older imports.
+export '../../../core/domain/goal.dart' show GoalStatus;
 
 /// The fields of a goal (#24) that the core [Goal] row does not hold yet:
 /// target date, status, notes and the metric. Serialisable as one JSON

@@ -50,6 +50,15 @@ void main() {
     );
   });
 
+  test('v3: lastCompletedAt round-trips and clears', () async {
+    final done = now.subtract(const Duration(days: 2));
+    await repo.upsert(rule('r1', 't1').copyWith(lastCompletedAt: done));
+    final got = (await repo.getForTask('t1'))!;
+    expect(got.lastCompletedAt, done);
+    await repo.upsert(got.copyWith(lastCompletedAt: null));
+    expect((await repo.getForTask('t1'))!.lastCompletedAt, isNull);
+  });
+
   test('a rule needs its task (foreign key)', () async {
     expect(repo.upsert(rule('r1', 'missing')), throwsA(anything));
   });

@@ -44,10 +44,26 @@ calendar mirror and preferences, on iOS and in the browser. The layer must:
 
 ### Migrations
 
-`AppDatabase.currentSchemaVersion` is 1 and a test pins it. To change the
-schema: bump the version, add an `if (from < N)` step in `onUpgrade`, dump
-the schema (`dart run drift_dev make-migrations`) and add a migration test.
-Never edit an existing step.
+`AppDatabase.currentSchemaVersion` is 3 and a test pins it. To change the
+schema: bump the version, add an `if (from < N)` step in `onUpgrade`
+(`m.addColumn` / `m.createTable`; new non-null columns need a default) and
+add a migration test. Never edit an existing step.
+
+`test/core/data/migration_test.dart` keeps the v2 DDL as a string (copied
+from `sqlite_master`), creates it in `NativeDatabase.memory(setup: ...)`
+with `PRAGMA user_version = 2` and a row per table, opens `AppDatabase`,
+and checks that the migrated `PRAGMA table_info` of every table equals a
+fresh v3 database and that the old rows read back with the new defaults.
+The next version copies the v3 DDL the same way (Drift's
+`make-migrations` schema dumps are the heavier alternative).
+
+### Schema history
+
+| Version | Change |
+|---|---|
+| 1 | `tasks`, `reminder_rules`, `calendar_events`, `focus_sessions`, `goals`, `preferences` (W1-B, #2). |
+| 2 | `tasks.not_before`, `tasks.minutes_done`; `preferences.morning_prompt_minutes`, `evening_prompt_minutes`, `selected_calendar_ids` (default `{}`), `backup_hint_shown` (contracts v2). |
+| 3 | `reminder_rules.last_completed_at`; `calendar_events.html_link`; `focus_sessions.paused_ms` (default 0), `paused_at`, `win`, `kind` (`focus` / `breakTime`, default `focus`); `goals.target_date`, `status` (`active` / `paused` / `done`, default `active`), `notes`, `metric_kind`, `metric_target`, `metric_unit`, `metric_current`, `metric_source`, `metric_period`; `preferences.pip_accessory` (default `scarf`); new tables `review_entries` (PK `date`, `win`, `done_count`, `moved_count`, `created_at`) and `review_handled_days` (PK `date`) (contracts v3). Quiet hours JSON may now have `end <= start` (crosses midnight, `TimeRange.wrapping`); no column change. |
 
 ## Alternatives considered
 
@@ -103,25 +119,34 @@ to IndexedDB, which is fine.
 ```json
 {
   "app": "grind",
-  "format": 1,
-  "schemaVersion": 1,
+  "format": 2,
+  "schemaVersion": 3,
   "exportedAt": "2026-11-03T08:00:00.000Z",
   "tasks": [ { "id": "...", "title": "...", "remindAt": "2026-11-03T09:00:00.000Z", "energy": "deep", "status": "open", "...": "..." } ],
   "reminderRules": [ ... ],
   "calendarEvents": [ ... ],
   "focusSessions": [ ... ],
   "goals": [ ... ],
-  "preferences": { "workingHours": { "1": [ { "start": 540, "end": 1080 } ] }, "...": "..." }
+  "preferences": { "workingHours": { "1": [ { "start": 540, "end": 1080 } ] }, "...": "..." },
+  "reviewEntries": [ { "date": "2026-11-02", "win": "...", "doneCount": 3, "movedCount": 1, "createdAt": "..." } ],
+  "reviewHandledDays": [ "2026-11-02" ]
 }
 ```
 
 - Field names are the domain field names (not column names), times ISO-8601
   UTC, enums by name. Soft-deleted rows are included, so a restore is an
   exact copy. `preferences` is null when the user never saved any.
-- `importJson()` validates (`format` present and `<= 1`, every row parses)
-  before touching the database, then replaces **all** data in one
-  transaction; any failure (bad row, duplicate id, rule pointing at a missing
-  task) rolls back and throws `BackupFormatException`, leaving the old data.
+- `importJson()` validates (`format` present and `<= 2`, every field of
+  every row has the right type and range, no duplicate ids, rules and focus
+  sessions point at tasks in the file, time ranges lie inside one day with
+  only quiet hours allowed to wrap) before touching the database, then
+  replaces **all** data in one transaction. Validation does not rely on
+  `assert`s (off in release builds). Any failure throws
+  `BackupFormatException` naming the row and field (e.g. `tasks[3]: "energy"
+  should be one of deep, light`) and leaves the old data. The UI shows its
+  own calm copy, not this message.
+- Format history: 1 (schema v1-v2); 2 (schema v3: review lists and the v3
+  fields). Format 1 files still import: missing fields take defaults.
 - Missing optional fields take the domain defaults, so a newer app reads
   older files. A file with a higher `format` is refused with a "please
   update" message. Bump `format` only for incompatible changes and keep a
@@ -136,8 +161,6 @@ to IndexedDB, which is fine.
 
 - Sub-millisecond precision of `DateTime`s is dropped; values read back are
   always UTC.
-- `FocusSession` has no `deletedAt` in the domain yet; the column exists and
-  stays null.
 - Not verified on a device: iOS file location, share sheet, file picker.
   Test plan for iOS: create tasks, force-quit, reopen (data present);
   Settings > Export, save to Files; delete all data; import that file

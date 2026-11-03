@@ -6,8 +6,7 @@ import '../focus_session_repository.dart';
 import '../mappers.dart';
 
 /// [FocusSessionRepository] on the local Drift database. Rows with a
-/// `deletedAt` (not written yet; reserved for a future delete path) are
-/// ignored. A session's task is a foreign key, so the task must be stored
+/// `deletedAt` (a soft-deleted session) are ignored. A session's task is a foreign key, so the task must be stored
 /// first; deleting the task nulls `taskId` and keeps the session.
 class DriftFocusSessionRepository implements FocusSessionRepository {
   DriftFocusSessionRepository(this._db);

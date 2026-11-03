@@ -79,10 +79,35 @@ void main() {
     },
   );
 
-  test('companion prefs wear an accessory in memory', () {
-    final c = _container(const []);
+  test('companion prefs wear an accessory and store it', () async {
+    final prefs = InMemoryPreferencesRepository();
+    final c = _container(
+      const [],
+      extra: [preferencesRepositoryProvider.overrideWithValue(prefs)],
+    );
     expect(c.read(companionPrefsProvider).accessory, 'scarf');
     c.read(companionPrefsProvider.notifier).wear('sunglasses');
     expect(c.read(companionPrefsProvider).accessory, 'sunglasses');
+    await pumpEventQueue();
+    expect(c.read(companionPrefsProvider).accessory, 'sunglasses');
+    expect((await prefs.get()).pipAccessory, 'sunglasses');
+  });
+
+  test('companion prefs start from the stored accessory', () async {
+    final prefs = InMemoryPreferencesRepository(
+      const Preferences(pipAccessory: 'beanie'),
+    );
+    final c = _container(
+      const [],
+      extra: [preferencesRepositoryProvider.overrideWithValue(prefs)],
+    );
+    c.read(companionPrefsProvider);
+    await pumpEventQueue();
+    expect(c.read(companionPrefsProvider).accessory, 'beanie');
+
+    // A change made elsewhere (an import, another screen) flows in.
+    await prefs.save((await prefs.get()).copyWith(pipAccessory: 'scarf'));
+    await pumpEventQueue();
+    expect(c.read(companionPrefsProvider).accessory, 'scarf');
   });
 }

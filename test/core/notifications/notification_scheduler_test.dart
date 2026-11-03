@@ -176,6 +176,55 @@ void main() {
     );
   });
 
+  group('quiet hours across midnight (22:00-07:00)', () {
+    final loc = () {
+      ensureTimeZones();
+      return tz.getLocation('Asia/Jerusalem');
+    }();
+    final prefs = const Preferences(timeZoneName: 'Asia/Jerusalem').copyWith(
+      quietHours: const TimeRange.wrapping(
+        startMinutes: 22 * 60,
+        endMinutes: 7 * 60,
+      ),
+    );
+    List<tz.TZDateTime> fire(List<tz.TZDateTime> at) => [
+      for (final n in NotificationScheduler.plan(
+        tasks: [
+          for (final (i, t) in at.indexed) task('t$i', remindAt: t.toUtc()),
+        ],
+        prefs: prefs,
+        clock: clock,
+        prompts: noPrompts,
+      ))
+        tz.TZDateTime.from(n.fireAt, loc),
+    ];
+
+    test('23:30 moves to 07:00 the next day, not midnight', () {
+      expect(fire([tz.TZDateTime(loc, 2026, 11, 4, 23, 30)]), [
+        tz.TZDateTime(loc, 2026, 11, 5, 7),
+      ]);
+    });
+
+    test('02:00 moves to 07:00 the same day', () {
+      expect(fire([tz.TZDateTime(loc, 2026, 11, 5, 2)]), [
+        tz.TZDateTime(loc, 2026, 11, 5, 7),
+      ]);
+    });
+
+    test('times outside the range are kept (21:59, 07:00)', () {
+      expect(
+        fire([
+          tz.TZDateTime(loc, 2026, 11, 4, 21, 59),
+          tz.TZDateTime(loc, 2026, 11, 5, 7),
+        ]),
+        [
+          tz.TZDateTime(loc, 2026, 11, 4, 21, 59),
+          tz.TZDateTime(loc, 2026, 11, 5, 7),
+        ],
+      );
+    });
+  });
+
   group('DST in Asia/Jerusalem keeps 07:00 local', () {
     final loc = () {
       ensureTimeZones();
