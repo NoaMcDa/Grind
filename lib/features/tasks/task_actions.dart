@@ -58,20 +58,20 @@ class TaskActions {
     );
   }
 
-  /// Completes one occurrence of a recurring task: the series moves on to
-  /// its next occurrence (and loses this occurrence's slot), or is done when
-  /// none is left. Null when [t] does not repeat.
+  /// Completes one occurrence of a recurring task: the rule's
+  /// `lastCompletedAt` becomes the occurrence (UTC) and `remindAt` moves on
+  /// to the next one for the notification scheduler, or the task is done
+  /// when none is left (see [completeSeriesOccurrence]). Null when [t] does
+  /// not repeat.
   ///
   /// [occurrenceAt] is the occurrence being completed (a Today row passes
   /// its own). Without it, the current one: the latest occurrence at or
   /// before now, or the anchor when the series has not started yet.
-  ///
-  /// Once `ReminderRule.lastCompletedAt` exists, write [occurrenceAt] there
-  /// too, so COUNT survives and Today can keep the row as done.
   Future<Task?> completeRecurring(Task t, {DateTime? occurrenceAt}) async {
     final anchor = t.remindAt;
     if (anchor == null) return null;
-    final rule = await _ref.read(reminderRepositoryProvider).getForTask(t.id);
+    final rules = _ref.read(reminderRepositoryProvider);
+    final rule = await rules.getForTask(t.id);
     if (rule == null) return null;
     final prefs = await _ref.read(preferencesRepositoryProvider).get();
     final now = _now;
@@ -79,15 +79,14 @@ class TaskActions {
         occurrenceAt ??
         _currentOccurrence(rule, anchor, now, prefs.timeZoneName) ??
         anchor;
-    var next = _plainRemindAt(
-      completeOccurrence(
-        task: t,
-        rule: rule,
-        occurrenceAt: at,
-        timeZoneName: prefs.timeZoneName,
-        now: now,
-      ),
+    final progress = completeSeriesOccurrence(
+      task: t,
+      rule: rule,
+      occurrenceAt: utcOf(at),
+      timeZoneName: prefs.timeZoneName,
+      now: now,
     );
+    var next = _plainRemindAt(progress.task);
     if (!next.isDone) {
       next = next.copyWith(
         scheduledStart: null,
@@ -95,6 +94,31 @@ class TaskActions {
         lockedStart: false,
       );
     }
+    await rules.upsert(progress.rule);
+    await _repo.upsert(next);
+    return next;
+  }
+
+  /// Takes back the completion of [occurrenceAt] (default: the last
+  /// completed one): `lastCompletedAt` returns to the occurrence before it,
+  /// or null (see [uncompleteSeriesOccurrence]). Null when [t] does not
+  /// repeat or nothing was completed.
+  Future<Task?> uncompleteRecurring(Task t, {DateTime? occurrenceAt}) async {
+    final rules = _ref.read(reminderRepositoryProvider);
+    final rule = await rules.getForTask(t.id);
+    if (rule == null) return null;
+    final at = occurrenceAt ?? rule.lastCompletedAt;
+    if (at == null) return null;
+    final prefs = await _ref.read(preferencesRepositoryProvider).get();
+    final progress = uncompleteSeriesOccurrence(
+      task: t,
+      rule: rule,
+      occurrenceAt: utcOf(at),
+      timeZoneName: prefs.timeZoneName,
+      now: _now,
+    );
+    final next = _plainRemindAt(progress.task);
+    await rules.upsert(progress.rule);
     await _repo.upsert(next);
     return next;
   }
@@ -122,26 +146,42 @@ class TaskActions {
 
   /// Toggle done; completing shows an undo toast. On a recurring task,
   /// "done" completes one occurrence only ([occurrenceAt], see
-  /// [completeRecurring]) and the series continues.
+  /// [completeRecurring]) and the series continues; on an occurrence that is
+  /// already done ([isOccurrenceDone]) it takes that completion back
+  /// ([uncompleteRecurring]).
   Future<void> toggle(
     BuildContext context,
     Task t, {
     DateTime? occurrenceAt,
   }) async {
-    final done = !t.isDone;
-    if (done) {
-      final next = await completeRecurring(t, occurrenceAt: occurrenceAt);
-      if (next != null) {
-        if (!context.mounted) return;
-        showPipToast(
-          context,
-          next.isDone ? TasksStrings.markedDone : TasksStrings.nextOneSet,
-          actionLabel: TasksStrings.undo,
-          onAction: () => _repo.upsert(t),
-        );
-        return;
+    final rules = _ref.read(reminderRepositoryProvider);
+    final rule = t.remindAt == null ? null : await rules.getForTask(t.id);
+    if (rule != null) {
+      final rowDone = occurrenceAt == null
+          ? t.isDone
+          : t.isDone || isOccurrenceDone(rule, occurrenceAt);
+      if (rowDone) {
+        if (await uncompleteRecurring(t, occurrenceAt: occurrenceAt) != null) {
+          return;
+        }
+      } else {
+        final next = await completeRecurring(t, occurrenceAt: occurrenceAt);
+        if (next != null) {
+          if (!context.mounted) return;
+          showPipToast(
+            context,
+            next.isDone ? TasksStrings.markedDone : TasksStrings.nextOneSet,
+            actionLabel: TasksStrings.undo,
+            onAction: () async {
+              await rules.upsert(rule);
+              await _repo.upsert(t);
+            },
+          );
+          return;
+        }
       }
     }
+    final done = !t.isDone;
     await setDone(t, done);
     if (done && context.mounted) {
       showPipToast(

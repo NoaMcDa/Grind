@@ -343,7 +343,8 @@ void main() {
         now: now,
       );
       expect(next.status, TaskStatus.open);
-      expect(next.remindAt, at(2026, 3, 24));
+      // Stored as a plain UTC DateTime, not a TZDateTime.
+      expect(next.remindAt!.isAtSameMomentAs(at(2026, 3, 24)), isTrue);
     });
 
     test('completing the last occurrence finishes the task', () {
@@ -403,6 +404,7 @@ void main() {
         task: t,
         rule: rule('FREQ=DAILY'),
         occurrenceAt: at(2026, 3, 25),
+        timeZoneName: zone,
         now: now,
         newRRule: 'FREQ=WEEKLY;BYDAY=WE',
         edit: (f) => f.copyWith(title: 'New plan'),

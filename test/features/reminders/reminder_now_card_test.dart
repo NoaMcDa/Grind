@@ -33,6 +33,7 @@ void main() {
   });
 
   late InMemoryTaskRepository repo;
+  late InMemoryReminderRepository rules;
   late FakeNotificationService notifications;
   final focus = <String>[];
   final picked = <String>[];
@@ -41,11 +42,13 @@ void main() {
     WidgetTester tester,
     List<Task> tasks, {
     Locale locale = const Locale('en'),
+    List<ReminderRule> reminderRules = const [],
   }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     repo = InMemoryTaskRepository(tasks);
+    rules = InMemoryReminderRepository(reminderRules);
     notifications = FakeNotificationService();
     focus.clear();
     picked.clear();
@@ -54,6 +57,7 @@ void main() {
         overrides: [
           clockProvider.overrideWithValue(FixedClock(_now)),
           taskRepositoryProvider.overrideWithValue(repo),
+          reminderRepositoryProvider.overrideWithValue(rules),
           notificationServiceProvider.overrideWithValue(notifications),
           preferencesRepositoryProvider.overrideWithValue(
             InMemoryPreferencesRepository(_prefs),
@@ -101,6 +105,34 @@ void main() {
     expect(t.completedAt, _now);
     expect(notifications.cancelledTaskIds, ['thesis']);
     expect(find.text('Nice start!'), findsOneWidget);
+  });
+
+  testWidgets('Done on a recurring task: this occurrence is done, the card '
+      'says so instead of opening the next one', (tester) async {
+    await pump(
+      tester,
+      [_thesis()],
+      reminderRules: [
+        ReminderRule(
+          id: 'r',
+          taskId: 'thesis',
+          rrule: 'FREQ=DAILY;BYHOUR=7,8;BYMINUTE=0',
+          createdAt: _epoch,
+          updatedAt: _epoch,
+        ),
+      ],
+    );
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    final t = (await repo.getById('thesis'))!;
+    expect(t.isDone, isFalse);
+    expect(t.remindAt, DateTime.utc(2026, 11, 3, 6)); // 08:00, next one
+    expect(
+      (await rules.getForTask('thesis'))!.lastCompletedAt,
+      DateTime.utc(2026, 11, 3, 5),
+    );
+    expect(find.text('Nice start!'), findsOneWidget);
+    expect(find.text('Done'), findsNothing);
   });
 
   testWidgets('Snooze -> "See you at 07:20", Undo goes back', (tester) async {
@@ -231,6 +263,28 @@ void main() {
         _now,
       );
       expect(c!.state, ReminderCardState.open);
+    });
+
+    test('a recurring task completed just now is done, not open again', () {
+      final rule = ReminderRule(
+        id: 'r',
+        taskId: 'daily',
+        rrule: 'FREQ=DAILY',
+        lastCompletedAt: _now.subtract(const Duration(minutes: 5)),
+        createdAt: _epoch,
+        updatedAt: _now.subtract(const Duration(minutes: 1)),
+      );
+      final c = pickCurrentReminder(
+        [
+          // The series moved on to its next occurrence, an hour from now.
+          t('daily', _now.add(const Duration(hours: 1))),
+        ],
+        _prefs,
+        _now,
+        rules: {'daily': rule},
+      );
+      expect(c!.task.id, 'daily');
+      expect(c.state, ReminderCardState.done);
     });
 
     test('outside ±2 h is ignored', () {

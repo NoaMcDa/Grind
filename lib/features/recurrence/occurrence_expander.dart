@@ -9,11 +9,17 @@ void ensureTimeZonesInitialized() => ensureTimeZones();
 /// Parsed form of [ReminderRule.rrule].
 ///
 /// The field holds the RRULE body on its first line (`FREQ=WEEKLY;BYDAY=MO`)
-/// and optionally one more line `EXDATE:<yyyyMMddTHHmmss>,...` listing
-/// skipped occurrences as floating wall-clock times in the task's zone. The
-/// `rrule` package has no EXDATE support in its model, so this layer owns it.
+/// and optionally more lines, as floating wall-clock times in the task's
+/// zone:
+/// - `DTSTART:<yyyyMMddTHHmmss>`: the series' first occurrence. `Task.remindAt`
+///   moves on to the next pending occurrence as occurrences are completed;
+///   DTSTART keeps the start so `COUNT` and `until` are counted from it
+///   (written by [pinSeriesStart] on the first completion or edit).
+/// - `EXDATE:<yyyyMMddTHHmmss>,...`: skipped occurrences.
+///
+/// The `rrule` package models neither, so this layer owns them.
 class RruleText {
-  const RruleText(this.body, [this.exdates = const []]);
+  const RruleText(this.body, [this.exdates = const [], this.dtstart]);
 
   /// RRULE body, no `RRULE:` prefix.
   final String body;
@@ -21,7 +27,12 @@ class RruleText {
   /// Excluded occurrences as wall-clock fields stored in UTC-flagged dates.
   final List<DateTime> exdates;
 
+  /// The series start as wall-clock fields in a UTC-flagged date, or null
+  /// when the series starts at the task's `remindAt`.
+  final DateTime? dtstart;
+
   static const _prefix = 'EXDATE:';
+  static const _startPrefix = 'DTSTART:';
 
   factory RruleText.parse(String text) {
     final lines = text
@@ -33,14 +44,19 @@ class RruleText {
     var body = lines.first;
     if (body.startsWith('RRULE:')) body = body.substring(6);
     final ex = <DateTime>[];
+    DateTime? start;
     for (final l in lines.skip(1)) {
+      if (l.startsWith(_startPrefix)) {
+        start = _parseWall(l.substring(_startPrefix.length).trim()) ?? start;
+        continue;
+      }
       if (!l.startsWith(_prefix)) continue;
       for (final v in l.substring(_prefix.length).split(',')) {
         final d = _parseWall(v.trim());
         if (d != null) ex.add(d);
       }
     }
-    return RruleText(body, ex);
+    return RruleText(body, ex, start);
   }
 
   /// Same text with [occurrence] (a wall-clock moment in the task zone)
@@ -48,16 +64,23 @@ class RruleText {
   RruleText withExdate(DateTime occurrence) {
     final w = wallClock(occurrence);
     if (exdates.contains(w)) return this;
-    return RruleText(body, [...exdates, w]..sort());
+    return RruleText(body, [...exdates, w]..sort(), dtstart);
   }
 
-  /// Same text with the body replaced and the exclusions kept.
-  RruleText withBody(String newBody) => RruleText(newBody, exdates);
+  /// Same text with the body replaced and the exclusions and start kept.
+  RruleText withBody(String newBody) => RruleText(newBody, exdates, dtstart);
+
+  /// Same text starting at [start] (a wall-clock moment in the task zone),
+  /// or at the task's `remindAt` when null.
+  RruleText withDtstart(DateTime? start) =>
+      RruleText(body, exdates, start == null ? null : wallClock(start));
 
   @override
-  String toString() => exdates.isEmpty
-      ? body
-      : '$body\n$_prefix${exdates.map(_formatWall).join(',')}';
+  String toString() => [
+    body,
+    if (dtstart != null) '$_startPrefix${_formatWall(dtstart!)}',
+    if (exdates.isNotEmpty) '$_prefix${exdates.map(_formatWall).join(',')}',
+  ].join('\n');
 
   static String _two(int v) => v.toString().padLeft(2, '0');
 
@@ -82,8 +105,10 @@ DateTime wallClock(DateTime t) =>
 /// [tz.TZDateTime]s in [timeZoneName].
 ///
 /// Occurrences are computed in the task's wall-clock time, so a 07:00 series
-/// stays 07:00 across DST changes. [anchor] is the first occurrence
-/// (`Task.remindAt`). Each occurrence fires `rule.leadMinutes` earlier;
+/// stays 07:00 across DST changes. The series starts at the rule's DTSTART
+/// (see [RruleText]) when it has one, else at [anchor] (`Task.remindAt`), so
+/// `COUNT` and `until` are counted from the start, not from the next pending
+/// occurrence. Each occurrence fires `rule.leadMinutes` earlier;
 /// [from]/[to] bound the fire times. Occurrences after `rule.until`, after an
 /// RRULE `UNTIL` or past `COUNT`, and excluded dates, are skipped. A time that
 /// does not exist on a spring-forward day shifts forward by the DST gap.
@@ -109,7 +134,8 @@ List<tz.TZDateTime> expandOccurrences({
   }
 
   final lead = Duration(minutes: rule.leadMinutes);
-  final anchorWall = wallClock(tz.TZDateTime.from(anchor, location));
+  final anchorWall =
+      text.dtstart ?? wallClock(tz.TZDateTime.from(anchor, location));
   final fromUtc = from.toUtc();
   final toUtc = to.toUtc();
   if (!toUtc.isAfter(fromUtc)) return const [];
@@ -154,4 +180,34 @@ List<tz.TZDateTime> expandOccurrences({
     if (out.length >= maxResults) break;
   }
   return out;
+}
+
+/// The instant the series starts (UTC): the rule's DTSTART in
+/// [timeZoneName], else [anchor].
+DateTime seriesStart(ReminderRule rule, DateTime anchor, String timeZoneName) {
+  final start = RruleText.parse(rule.rrule).dtstart;
+  if (start == null) return anchor.toUtc();
+  return tz.TZDateTime(
+    locationFor(timeZoneName),
+    start.year,
+    start.month,
+    start.day,
+    start.hour,
+    start.minute,
+    start.second,
+  ).toUtc();
+}
+
+/// [rule] with its start written down as DTSTART ([anchor], the task's
+/// current `remindAt`, in [timeZoneName]) unless it already has one. Call it
+/// before `remindAt` moves on, so the series keeps counting from its start.
+ReminderRule pinSeriesStart(
+  ReminderRule rule,
+  DateTime anchor,
+  String timeZoneName,
+) {
+  final text = RruleText.parse(rule.rrule);
+  if (text.dtstart != null || text.body.isEmpty) return rule;
+  final wall = tz.TZDateTime.from(anchor.toUtc(), locationFor(timeZoneName));
+  return rule.copyWith(rrule: text.withDtstart(wall).toString());
 }

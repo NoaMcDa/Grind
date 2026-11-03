@@ -217,7 +217,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   Widget _taskRow(TodayItem item, tz.Location location) {
     final l = context.l10n;
     final t = item.task;
-    final done = t.isDone;
+    final done = item.isDone;
     final at = item.at;
     final tag = taskTagColor(t);
     final onViolet = tag == AppColors.violet;
