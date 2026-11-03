@@ -11,6 +11,8 @@ import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/sticker_card.dart';
+import '../recurrence/providers.dart';
+import '../tasks/task_actions.dart';
 import 'reminder_copy.dart';
 import '../../l10n/l10n.dart';
 
@@ -49,11 +51,16 @@ class CurrentReminder {
 /// with the latest event at or before now — a reminder that fired, a
 /// snooze, a completion — else the soonest upcoming one. Null when there
 /// is none.
+///
+/// A recurring task (its rule in [rules]) whose `lastCompletedAt` is within
+/// [window] counts as completed at the rule's `updatedAt`, so the card says
+/// done even though the series task stays open for its next occurrence.
 CurrentReminder? pickCurrentReminder(
   List<Task> tasks,
   Preferences prefs,
   DateTime now, {
   Duration window = const Duration(hours: 2),
+  Map<String, ReminderRule> rules = const {},
 }) {
   final utcNow = now.toUtc();
   final from = utcNow.subtract(window);
@@ -78,6 +85,17 @@ CurrentReminder? pickCurrentReminder(
 
   for (final t in tasks) {
     if (t.deletedAt != null || t.status == TaskStatus.skipped) continue;
+    final last = rules[t.id]?.lastCompletedAt?.toUtc();
+    if (!t.isDone && last != null && inWindow(last)) {
+      final u = rules[t.id]!.updatedAt.toUtc();
+      final c = u.isAfter(utcNow) ? utcNow : u;
+      if (!c.isBefore(from)) {
+        consider(
+          CurrentReminder(task: t, state: ReminderCardState.done, fireAt: last),
+          c,
+        );
+      }
+    }
     final at = NotificationScheduler.reminderTimeFor(t, prefs);
     if (at == null || !inWindow(at)) continue;
     if (t.isDone) {
@@ -115,7 +133,17 @@ final currentReminderProvider = Provider<CurrentReminder?>((ref) {
   final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
   final prefs = ref.watch(preferencesProvider).valueOrNull;
   if (prefs == null) return null;
-  return pickCurrentReminder(tasks, prefs, ref.watch(clockProvider).now());
+  final rules =
+      ref.watch(reminderRulesProvider).valueOrNull ?? const <ReminderRule>[];
+  return pickCurrentReminder(
+    tasks,
+    prefs,
+    ref.watch(clockProvider).now(),
+    rules: {
+      for (final r in rules)
+        if (r.deletedAt == null) r.taskId: r,
+    },
+  );
 });
 
 /// Applies the card's buttons exactly like the notification actions, so
@@ -188,7 +216,7 @@ class ReminderNowCard extends ConsumerWidget {
               flex: 10,
               label: s.done,
               color: AppColors.sun,
-              onPressed: () => act(NotificationAction.done),
+              onPressed: () => _done(ref, current, act),
             ),
             _Button(
               flex: 10,
@@ -296,6 +324,22 @@ class ReminderNowCard extends ConsumerWidget {
           ),
         );
     }
+  }
+
+  /// Done: a recurring task completes the card's occurrence (recorded as
+  /// the rule's `lastCompletedAt`, so the card turns to done); anything else
+  /// goes through the notification action.
+  Future<void> _done(
+    WidgetRef ref,
+    CurrentReminder current,
+    Future<void> Function(NotificationAction) act,
+  ) async {
+    final actions = ref.read(taskActionsProvider);
+    final next = await actions.completeRecurring(
+      current.task,
+      occurrenceAt: current.fireAt,
+    );
+    if (next == null) await act(NotificationAction.done);
   }
 
   /// Takes the last snooze back: the task as it was before the card's
