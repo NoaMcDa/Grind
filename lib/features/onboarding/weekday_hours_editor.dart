@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/focus_tap.dart';
 import '../../l10n/l10n.dart';
 
 /// "09:00" style label for minutes after midnight (1440 shows as 24:00).
@@ -46,9 +47,8 @@ class TimePill extends StatelessWidget {
       button: true,
       label: '$semanticLabel ${formatMinutes(minutes)}',
       excludeSemantics: true,
-      child: GestureDetector(
+      child: FocusTap(
         onTap: onTap,
-        behavior: HitTestBehavior.opaque,
         child: Container(
           constraints: const BoxConstraints(minHeight: 44, minWidth: 68),
           alignment: Alignment.center,
@@ -120,7 +120,11 @@ class WeekdayHoursEditor extends StatelessWidget {
       if (e <= s) s = (e - 60).clamp(0, e - 1);
     }
     if (s >= 24 * 60 || e <= s) return;
-    _set(day, [TimeRange(startMinutes: s, endMinutes: e)]);
+    // Keep any further ranges of the day (a split shift from a backup).
+    _set(day, [
+      TimeRange(startMinutes: s, endMinutes: e),
+      ...value[day]!.skip(1),
+    ]);
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 
 enum PipAccessory { none, scarf, sunglasses, partyHat, rainBoots, crown }
@@ -12,7 +13,7 @@ class PipAvatar extends StatelessWidget {
     this.size = 58,
     this.cheering = false,
     this.accessory = PipAccessory.none,
-    this.semanticLabel = 'Pip, your companion',
+    this.semanticLabel,
   });
 
   final double size;
@@ -20,13 +21,21 @@ class PipAvatar extends StatelessWidget {
   /// Arms raised (focus screen).
   final bool cheering;
   final PipAccessory accessory;
-  final String semanticLabel;
+
+  /// Announced name; the localized "Pip, your companion" when null.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
-      label: semanticLabel,
+      label:
+          semanticLabel ??
+          Localizations.of<AppLocalizations>(
+            context,
+            AppLocalizations,
+          )?.pipSemanticLabel ??
+          'Pip, your companion',
       child: CustomPaint(
         size: Size.square(size),
         painter: _PipPainter(cheering: cheering, accessory: accessory),

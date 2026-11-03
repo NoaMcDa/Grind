@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/theme/tokens.dart';
 import 'package:grind/widgets/widgets.dart';
@@ -233,5 +234,72 @@ void main() {
     final fill = tester.getRect(find.byType(FractionallySizedBox));
     final meter = tester.getRect(find.byType(MomentumMeter));
     expect(fill.right, closeTo(meter.right - AppStroke.border, 1));
+  });
+
+  testWidgets('PillButton takes keyboard focus, shows a ring, Enter taps', (
+    tester,
+  ) async {
+    var taps = 0;
+    await pumpApp(
+      tester,
+      Center(
+        child: PillButton(label: 'Go', onPressed: () => taps++),
+      ),
+    );
+    final tap = find.descendant(
+      of: find.byType(PillButton),
+      matching: find.byType(GestureDetector),
+    );
+    Focus.of(tester.element(tap)).requestFocus();
+    await tester.pump();
+    // A key press switches Flutter to keyboard (traditional) highlight mode.
+    await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byType(PillButton),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is DecoratedBox &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).border != null &&
+              w.position == DecorationPosition.foreground,
+        ),
+      ),
+      findsOneWidget,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(taps, 2);
+  });
+
+  testWidgets('disabled PillButton is not focusable', (tester) async {
+    await pumpApp(tester, const Center(child: PillButton(label: 'Nope')));
+    final detector = find.descendant(
+      of: find.byType(PillButton),
+      matching: find.byType(FocusableActionDetector),
+    );
+    expect(tester.widget<FocusableActionDetector>(detector).enabled, isFalse);
+  });
+
+  testWidgets('MomentumMeter at zero is an empty track', (tester) async {
+    await pumpApp(tester, const MomentumMeter(value: 0));
+    expect(find.byType(FractionallySizedBox), findsNothing);
+    await pumpApp(tester, const MomentumMeter(value: 0.01));
+    expect(find.byType(FractionallySizedBox), findsOneWidget);
+  });
+
+  testWidgets('Pip and momentum labels follow the app language', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await pumpApp(
+      tester,
+      const Column(children: [PipAvatar(), MomentumMeter(value: 0.5)]),
+      locale: const Locale('he'),
+    );
+    expect(find.bySemanticsLabel('פיפ, המלווה שלך'), findsOneWidget);
+    expect(find.bySemanticsLabel('מומנטום'), findsOneWidget);
+    handle.dispose();
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
@@ -225,5 +226,78 @@ void main() {
       await _tapText(tester, he.commonSkip);
       expect(tester.takeException(), isNull);
     }
+  });
+
+  testWidgets('RTL: progress dots start at the right edge, gap after each', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      prefs: InMemoryPreferencesRepository(),
+      direction: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
+    final dots = find.byType(AnimatedContainer);
+    final first = tester.getRect(dots.at(0));
+    final second = tester.getRect(dots.at(1));
+    // 20 px start padding on the right; the 6 px gap (part of each dot's
+    // box) trails to the left, and the next dot follows it.
+    expect(first.right, closeTo(390 - 20, 0.5));
+    expect(second.right, closeTo(first.left, 0.5));
+  });
+
+  testWidgets('choice pills take keyboard focus and activate on Enter', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs);
+    await _tapText(tester, 'Start');
+    await _tapText(tester, 'Not now');
+    await _tapText(tester, 'Continue');
+    expect(find.text('Monday'), findsOneWidget);
+    // Move focus onto the Monday pill and press Enter.
+    final pill = find.ancestor(
+      of: find.text('Monday'),
+      matching: find.byType(GestureDetector),
+    );
+    Focus.of(tester.element(pill.first)).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).weekStart, DateTime.monday);
+  });
+
+  testWidgets('editing one range keeps the day\'s other ranges', (
+    tester,
+  ) async {
+    Map<int, List<TimeRange>>? saved;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(),
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: WeekdayHoursEditor(
+              value: const {
+                DateTime.monday: [
+                  TimeRange(startMinutes: 540, endMinutes: 720),
+                  TimeRange(startMinutes: 780, endMinutes: 1020),
+                ],
+              },
+              weekStart: DateTime.monday,
+              picker: (_, __) async => 600,
+              onChanged: (v) => saved = v,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('day-start-1')));
+    await tester.pumpAndSettle();
+    expect(saved![DateTime.monday], const [
+      TimeRange(startMinutes: 600, endMinutes: 720),
+      TimeRange(startMinutes: 780, endMinutes: 1020),
+    ]);
   });
 }

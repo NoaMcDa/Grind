@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 
 /// Pill-shaped progress meter with an ink border.
@@ -13,7 +14,7 @@ class MomentumMeter extends StatelessWidget {
     this.height = 18,
     this.segments = const [AppColors.pink],
     this.shadow = 0,
-    this.semanticLabel = 'Momentum',
+    this.semanticLabel,
   });
 
   /// 0..1
@@ -21,13 +22,21 @@ class MomentumMeter extends StatelessWidget {
   final double height;
   final List<Color> segments;
   final double shadow;
-  final String semanticLabel;
+
+  /// Announced name; the localized "Momentum" when null.
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final v = value.clamp(0.0, 1.0);
     return Semantics(
-      label: semanticLabel,
+      label:
+          semanticLabel ??
+          Localizations.of<AppLocalizations>(
+            context,
+            AppLocalizations,
+          )?.momentumSemantic ??
+          'Momentum',
       value: '${(v * 100).round()}%',
       child: Container(
         height: height,
@@ -41,40 +50,43 @@ class MomentumMeter extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadii.pill),
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: FractionallySizedBox(
-              widthFactor: v == 0 ? 0.0001 : v,
-              child: Container(
-                decoration: const BoxDecoration(
-                  border: BorderDirectional(
-                    end: BorderSide(
-                      color: AppColors.ink,
-                      width: AppStroke.border,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < segments.length; i++)
-                      Expanded(
-                        flex: i == 0 ? 5 : 3,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: segments[i],
-                            border: i < segments.length - 1
-                                ? const BorderDirectional(
-                                    end: BorderSide(
-                                      color: AppColors.ink,
-                                      width: AppStroke.border,
-                                    ),
-                                  )
-                                : null,
+            // Zero is an empty track, not a sliver of ink (tone guide, rule 6).
+            child: v == 0
+                ? const SizedBox.shrink()
+                : FractionallySizedBox(
+                    widthFactor: v,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        border: BorderDirectional(
+                          end: BorderSide(
+                            color: AppColors.ink,
+                            width: AppStroke.border,
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-            ),
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < segments.length; i++)
+                            Expanded(
+                              flex: i == 0 ? 5 : 3,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: segments[i],
+                                  border: i < segments.length - 1
+                                      ? const BorderDirectional(
+                                          end: BorderSide(
+                                            color: AppColors.ink,
+                                            width: AppStroke.border,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),

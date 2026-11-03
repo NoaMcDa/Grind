@@ -1,4 +1,5 @@
 export 'empty_state.dart';
+export 'focus_tap.dart';
 export 'icon_chip.dart';
 export 'momentum_meter.dart';
 export 'pill.dart';
