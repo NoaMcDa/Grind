@@ -1525,4 +1525,196 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get goalsCounted => 'נספר. צעד יפה.';
+
+  @override
+  String get capacityTitle => 'השבוע';
+
+  @override
+  String get capacitySubtitle => 'האם זה ריאלי? פיפ הציץ.';
+
+  @override
+  String get capacityTabWeek => 'שבוע';
+
+  @override
+  String get capacityTabPriorities => 'סדרי עדיפויות';
+
+  @override
+  String get capacityBack => 'חזרה';
+
+  @override
+  String capacityHoursShort(String n) {
+    return '$n ש׳';
+  }
+
+  @override
+  String capacityMinutesShort(String n) {
+    return '$n דק׳';
+  }
+
+  @override
+  String capacityTotals(String free, String planned) {
+    return '$free פנויות · $planned מתוכננות';
+  }
+
+  @override
+  String get capacityVerdictFits => 'זה נכנס, ועוד נשאר מקום לנשום.';
+
+  @override
+  String get capacityVerdictTight =>
+      'צפוף, אבל אפשרי. כדאי להסתכל מה יכול לחכות.';
+
+  @override
+  String capacityVerdictOver(String over) {
+    return 'עודף של $over. נזיז כמה דברים, בלי לחץ.';
+  }
+
+  @override
+  String get capacityStateFits => 'נכנס';
+
+  @override
+  String get capacityStateTight => 'צפוף';
+
+  @override
+  String get capacityStateOver => 'עמוס מדי';
+
+  @override
+  String get capacityDayPacked => 'עמוס';
+
+  @override
+  String capacityDaySemantics(String day, String free, String planned) {
+    return '$day: $free פנויות, $planned מתוכננות';
+  }
+
+  @override
+  String get capacityMoveTitle => 'מה אפשר להזיז';
+
+  @override
+  String get capacityMoveIntro =>
+      'קודם מה שהכי זול להזיז. שום דבר כאן לא מגיע השבוע.';
+
+  @override
+  String get capacityMoveOne => 'להעביר לשבוע הבא';
+
+  @override
+  String get capacityMoveAll => 'להעביר את כל המוצעים';
+
+  @override
+  String get capacityMovedOne => 'הועבר לשבוע הבא. דבר אחד פחות.';
+
+  @override
+  String capacityMovedMany(int count) {
+    return '$count הועברו לשבוע הבא. אפשר לנשום.';
+  }
+
+  @override
+  String get capacityReasonNoDeadline => 'אין מועד, אז שבוע הבא מתאים.';
+
+  @override
+  String capacityReasonDue(String day) {
+    return 'מועד היעד רק ב-$day.';
+  }
+
+  @override
+  String capacitySlack(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days ימים של מרווח',
+      one: 'יום אחד של מרווח',
+      zero: 'מגיע מיד אחרי השבוע',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get capacityNothingToMove => 'אין צורך להזיז כלום. יפה.';
+
+  @override
+  String get capacityPrioTitle => 'מה הכי חשוב';
+
+  @override
+  String get capacityPrioIntro =>
+      'פיפ מדרג לפי מועד, מטרה ומאמץ. גוררים משימה למעלה, ופיפ זוכר.';
+
+  @override
+  String get capacityPrioEmpty => 'אין משימות פתוחות. תיהנו מהשקט.';
+
+  @override
+  String capacityRank(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String get capacityReasonPinnedTop => 'נעצתם אותה בראש';
+
+  @override
+  String get capacityReasonOverdue => 'עבר המועד, אז היא ראשונה';
+
+  @override
+  String get capacityReasonDueSoon => 'מגיעה בקרוב';
+
+  @override
+  String get capacityReasonMarkedHigh => 'סימנתם אותה כגבוהה';
+
+  @override
+  String get capacityReasonGoalMatters => 'חשובה למטרה שאכפת לכם ממנה';
+
+  @override
+  String get capacityReasonGoalStalled => 'המטרה שלה לא זזה זמן מה';
+
+  @override
+  String get capacityReasonGoalMoving => 'המטרה שלה בתנופה';
+
+  @override
+  String get capacityReasonQuickWin => 'ניצחון מהיר';
+
+  @override
+  String get capacityReasonSteady => 'יציבה, בלי לחץ';
+
+  @override
+  String get capacityPinTop => 'ראשונה';
+
+  @override
+  String get capacityPinHigh => 'גבוהה';
+
+  @override
+  String get capacityPinNormal => 'רגילה';
+
+  @override
+  String get capacityPinLow => 'נמוכה';
+
+  @override
+  String get capacityPinTitle => 'כמה זה חשוב?';
+
+  @override
+  String capacityPinLabel(String pin) {
+    return 'עדיפות: $pin';
+  }
+
+  @override
+  String get capacityDragHandle => 'גוררים כדי לשנות סדר';
+
+  @override
+  String get capacityRemembered => 'נרשם. פיפ יזכור.';
+
+  @override
+  String get capacityWeightsTitle => 'משקלים';
+
+  @override
+  String get capacityWeightsHint => 'מתקדם. כוונון הדירוג של פיפ בזמן הבטא.';
+
+  @override
+  String get capacityWeightUrgency => 'מועד יעד';
+
+  @override
+  String get capacityWeightImportance => 'חשיבות המטרה';
+
+  @override
+  String get capacityWeightPriority => 'העדיפות שלכם';
+
+  @override
+  String get capacityWeightQuickWin => 'ניצחונות מהירים';
+
+  @override
+  String get capacityWeightsReset => 'איפוס לברירת מחדל';
 }

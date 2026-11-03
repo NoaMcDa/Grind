@@ -1542,4 +1542,197 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsCounted => 'Counted. Nice step.';
+
+  @override
+  String get capacityTitle => 'This week';
+
+  @override
+  String get capacitySubtitle => 'Is it realistic? Pip took a look.';
+
+  @override
+  String get capacityTabWeek => 'Week';
+
+  @override
+  String get capacityTabPriorities => 'Priorities';
+
+  @override
+  String get capacityBack => 'Back';
+
+  @override
+  String capacityHoursShort(String n) {
+    return '$n h';
+  }
+
+  @override
+  String capacityMinutesShort(String n) {
+    return '$n min';
+  }
+
+  @override
+  String capacityTotals(String free, String planned) {
+    return '$free free · $planned planned';
+  }
+
+  @override
+  String get capacityVerdictFits => 'It fits, with room to breathe.';
+
+  @override
+  String get capacityVerdictTight =>
+      'Tight, but doable. Worth a look at what can wait.';
+
+  @override
+  String capacityVerdictOver(String over) {
+    return 'Overbooked by $over. Let\'s move a few things, no stress.';
+  }
+
+  @override
+  String get capacityStateFits => 'Fits';
+
+  @override
+  String get capacityStateTight => 'Tight';
+
+  @override
+  String get capacityStateOver => 'Overbooked';
+
+  @override
+  String get capacityDayPacked => 'Packed';
+
+  @override
+  String capacityDaySemantics(String day, String free, String planned) {
+    return '$day: $free free, $planned planned';
+  }
+
+  @override
+  String get capacityMoveTitle => 'What could move';
+
+  @override
+  String get capacityMoveIntro =>
+      'Lowest cost first. Nothing here is due this week.';
+
+  @override
+  String get capacityMoveOne => 'Move to next week';
+
+  @override
+  String get capacityMoveAll => 'Move all suggested';
+
+  @override
+  String get capacityMovedOne => 'Moved to next week. One less thing now.';
+
+  @override
+  String capacityMovedMany(int count) {
+    return 'Moved $count to next week. Breathe.';
+  }
+
+  @override
+  String get capacityReasonNoDeadline => 'No deadline, so next week works.';
+
+  @override
+  String capacityReasonDue(String day) {
+    return 'Not due until $day.';
+  }
+
+  @override
+  String capacitySlack(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days of slack',
+      one: '1 day of slack',
+      zero: 'Due right after this week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get capacityNothingToMove => 'Nothing needs to move. Nicely done.';
+
+  @override
+  String get capacityPrioTitle => 'What matters most';
+
+  @override
+  String get capacityPrioIntro =>
+      'Pip ranks by deadline, goal and effort. Drag one up and Pip remembers.';
+
+  @override
+  String get capacityPrioEmpty => 'Nothing open. Enjoy the quiet.';
+
+  @override
+  String capacityRank(int rank) {
+    return '#$rank';
+  }
+
+  @override
+  String get capacityReasonPinnedTop => 'You pinned this to the top';
+
+  @override
+  String get capacityReasonOverdue => 'Past its date, so it comes first';
+
+  @override
+  String get capacityReasonDueSoon => 'Due soon';
+
+  @override
+  String get capacityReasonMarkedHigh => 'You marked it high';
+
+  @override
+  String get capacityReasonGoalMatters => 'Matters to a goal you care about';
+
+  @override
+  String get capacityReasonGoalStalled => 'Its goal hasn\'t moved in a while';
+
+  @override
+  String get capacityReasonGoalMoving => 'Its goal is on a roll';
+
+  @override
+  String get capacityReasonQuickWin => 'A quick win';
+
+  @override
+  String get capacityReasonSteady => 'Steady, no rush';
+
+  @override
+  String get capacityPinTop => 'Top';
+
+  @override
+  String get capacityPinHigh => 'High';
+
+  @override
+  String get capacityPinNormal => 'Normal';
+
+  @override
+  String get capacityPinLow => 'Low';
+
+  @override
+  String get capacityPinTitle => 'How much does this matter?';
+
+  @override
+  String capacityPinLabel(String pin) {
+    return 'Priority: $pin';
+  }
+
+  @override
+  String get capacityDragHandle => 'Drag to reorder';
+
+  @override
+  String get capacityRemembered => 'Noted. Pip will remember that.';
+
+  @override
+  String get capacityWeightsTitle => 'Weights';
+
+  @override
+  String get capacityWeightsHint =>
+      'Advanced. Tune how Pip ranks things while we\'re in beta.';
+
+  @override
+  String get capacityWeightUrgency => 'Deadline';
+
+  @override
+  String get capacityWeightImportance => 'Goal importance';
+
+  @override
+  String get capacityWeightPriority => 'Your priority';
+
+  @override
+  String get capacityWeightQuickWin => 'Quick wins';
+
+  @override
+  String get capacityWeightsReset => 'Reset to defaults';
 }
