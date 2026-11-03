@@ -20,14 +20,18 @@ Several agents work on the repo at the same time, each in its own git worktree a
 | W1-G scheduler (#16) | `lib/features/plan/scheduler/**` (new), `test/features/plan/scheduler/**` |
 
 ## Wave 2
+Wave 1 is merged, so `lib/app/**`, `lib/core/data/**`, `lib/core/notifications/**`, `lib/theme/**`, `lib/widgets/**`, `lib/l10n/**` and `lib/features/{onboarding,settings}/**` exist. Read them; edit only what the table gives you.
+
 | Owner | Paths |
 |---|---|
-| W2-A task capture (#8) | `lib/features/tasks/**` (new), `lib/features/today/**`, tests |
-| W2-B reminders (#9, #10, #12) | `lib/features/reminders/**` (new), tests |
-| W2-C recurrence (#11) | `lib/features/recurrence/**` (new), tests |
-| W2-D Google Calendar (#13) | `lib/features/calendar/google/**` (new), tests |
-| W2-E Apple Calendar (#14) | `lib/features/calendar/apple/**`, `ios/Runner/Plugins/**` or a `packages/apple_calendar/` plugin, tests |
-| W2-F calendar views (#15) | `lib/features/plan/**` except `scheduler/`, tests |
+| W2-A task capture (#8) | `lib/features/tasks/**` (new), `lib/features/today/**`, `test/features/tasks/**`, `test/features/today/**` |
+| W2-B reminders (#9, #10, #12) | `lib/features/reminders/**` (new), `lib/core/notifications/**` (inherited from W1-D), `test/features/reminders/**`, `test/core/notifications/**` |
+| W2-C recurrence (#11) | `lib/features/recurrence/**` (new), `test/features/recurrence/**` |
+| W2-D Google Calendar (#13) | `lib/features/calendar/google/**`, `lib/features/calendar/sync/**` (generic pull/write-back engine over `CalendarProvider`), `web/index.html` (GIS script tag only), tests under `test/features/calendar/{google,sync}/**` |
+| W2-E Apple Calendar (#14) | `lib/features/calendar/apple/**`, `ios/Runner/AppleCalendarPlugin.swift` (new), `ios/Runner/AppDelegate.swift` (register the plugin only), `ios/Runner/Info.plist` (usage strings only), `test/features/calendar/apple/**` |
+| W2-F calendar views (#15) | `lib/features/plan/**` except `lib/features/plan/scheduler/**`, `test/features/plan/**` except `scheduler/` |
+
+Strings: do **not** edit `lib/l10n/*.arb` (merge conflicts). Keep new UI strings in a `<feature>_strings.dart` file in your folder; the integrator moves them into the ARB files after the wave. Use `context.l10n` for strings that already exist there.
 
 ## Shared rules
 - New code reads contracts through `package:grind/core/core.dart`.

@@ -1,5 +1,14 @@
 /// Actions a user can take on a reminder notification without opening the app.
-enum NotificationAction { done, snooze, startFocus }
+///
+/// [moveToTonight] / [moveToTomorrow] appear only on the smart-snooze
+/// variant (after two snoozes, #12) instead of nagging again.
+enum NotificationAction {
+  done,
+  snooze,
+  startFocus,
+  moveToTonight,
+  moveToTomorrow,
+}
 
 /// A request to show one notification at one moment.
 class ScheduledNotification {
