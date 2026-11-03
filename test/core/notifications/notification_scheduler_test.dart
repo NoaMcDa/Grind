@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/notifications.dart';
+import 'package:grind/features/reminders/prompt_copy.dart';
 import 'package:grind/features/reminders/reminder_copy.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -132,13 +133,165 @@ void main() {
     );
     final morning = plan.firstWhere((n) => n.id.startsWith('prompt:morning:'));
     final evening = plan.firstWhere((n) => n.id.startsWith('prompt:evening:'));
-    expect(morning.title, PromptSettings.hebrewMorningTitle);
-    expect(evening.body, PromptSettings.hebrewEveningBody);
+    expect(morning.title, 'בוקר טוב');
+    expect(morning.body, 'מתאים לתכנן את היום ביחד?');
+    expect(evening.body, 'דקה אחת להציץ אחורה על היום?');
     // English stays English.
+    final en = NotificationScheduler.plan(
+      tasks: const [],
+      prefs: const Preferences(),
+      clock: clock,
+    );
     expect(
-      const PromptSettings().withPreferences(const Preferences()).morningTitle,
+      en.firstWhere((n) => n.id.startsWith('prompt:morning:')).title,
       'Good morning',
     );
+  });
+
+  group('prompt copy (#37)', () {
+    // 3 Nov 2026, 06:00 UTC; UTC zone so local = UTC.
+    final at6 = FixedClock(DateTime.utc(2026, 11, 3, 6));
+    ScheduledNotification prompt(
+      List<ScheduledNotification> plan,
+      String prefix,
+      String day,
+    ) => plan.firstWhere((n) => n.id == '$prefix$day');
+
+    test('morning names the first task of the day', () {
+      final plan = NotificationScheduler.plan(
+        tasks: [
+          task('late', title: 'Gym', remindAt: DateTime.utc(2026, 11, 3, 18)),
+          task(
+            'early',
+            title: 'Thesis',
+            remindAt: DateTime.utc(2026, 11, 3, 9),
+          ),
+          task('before', title: 'Wake', remindAt: DateTime.utc(2026, 11, 3, 7)),
+          task(
+            'done',
+            title: 'Old',
+            remindAt: DateTime.utc(2026, 11, 3, 8, 30),
+            status: TaskStatus.done,
+          ),
+        ],
+        prefs: utcPrefs,
+        clock: at6,
+      );
+      expect(
+        prompt(plan, 'prompt:morning:', '2026-11-03').body,
+        'Want to plan the day together? First up: Thesis',
+      );
+      // A day with nothing planned: the plain invitation.
+      expect(
+        prompt(plan, 'prompt:morning:', '2026-11-05').body,
+        'Want to plan the day together?',
+      );
+    });
+
+    test('evening leads with what got done that day', () {
+      final one = task(
+        'a',
+        title: 'Thesis',
+        status: TaskStatus.done,
+      ).copyWith(completedAt: DateTime.utc(2026, 11, 3, 5));
+      final plan = NotificationScheduler.plan(
+        tasks: [one],
+        prefs: utcPrefs,
+        clock: at6,
+      );
+      final today = prompt(plan, 'prompt:evening:', '2026-11-03');
+      expect(today.title, 'Good evening');
+      expect(
+        today.body,
+        'You finished "Thesis" today. One minute to look back?',
+      );
+      expect(
+        prompt(plan, 'prompt:evening:', '2026-11-04').body,
+        'One minute to look back on today?',
+      );
+
+      final two = NotificationScheduler.plan(
+        tasks: [
+          one,
+          task(
+            'b',
+            title: 'Run',
+            status: TaskStatus.done,
+          ).copyWith(completedAt: DateTime.utc(2026, 11, 3, 5, 30)),
+        ],
+        prefs: utcPrefs,
+        clock: at6,
+      );
+      expect(
+        prompt(two, 'prompt:evening:', '2026-11-03').body,
+        '2 things done today, "Run" among them. One minute to look back?',
+      );
+    });
+
+    test("evening leads with the review's win when one was saved", () {
+      final plan = NotificationScheduler.plan(
+        tasks: const [],
+        prefs: utcPrefs.copyWith(localeCode: 'he'),
+        clock: at6,
+        winsByDay: const {'2026-11-03': 'הגשתי את הטיוטה.'},
+      );
+      expect(
+        prompt(plan, 'prompt:evening:', '2026-11-03').body,
+        'הרגע הטוב של היום: הגשתי את הטיוטה. דקה להציץ אחורה?',
+      );
+    });
+
+    test('prompts follow quiet hours, and the first task after the shift', () {
+      final prefs = utcPrefs.copyWith(
+        quietHours: const TimeRange.wrapping(
+          startMinutes: 22 * 60,
+          endMinutes: 9 * 60,
+        ),
+      );
+      final plan = NotificationScheduler.plan(
+        tasks: [
+          task('a', title: 'Early', remindAt: DateTime.utc(2026, 11, 3, 8)),
+          task('b', title: 'Later', remindAt: DateTime.utc(2026, 11, 3, 10)),
+        ],
+        prefs: prefs,
+        clock: at6,
+      );
+      final m = prompt(plan, 'prompt:morning:', '2026-11-03');
+      expect(m.fireAt, DateTime.utc(2026, 11, 3, 9));
+      expect(m.body, endsWith('First up: Later'));
+    });
+
+    test('fixed copy still wins', () {
+      final plan = NotificationScheduler.plan(
+        tasks: const [],
+        prefs: utcPrefs,
+        clock: at6,
+        prompts: const PromptSettings(morningBody: 'Custom'),
+      );
+      expect(prompt(plan, 'prompt:morning:', '2026-11-04').body, 'Custom');
+    });
+
+    test('prompt copy has no banned words', () {
+      final all = [
+        for (final lang in ['en', 'he']) ...[
+          PromptCopy.morning(languageCode: lang),
+          PromptCopy.morning(languageCode: lang, firstTask: 'X'),
+          PromptCopy.evening(languageCode: lang),
+          PromptCopy.evening(languageCode: lang, win: 'X'),
+          PromptCopy.evening(languageCode: lang, doneTitles: ['X']),
+          PromptCopy.evening(languageCode: lang, doneTitles: ['X', 'Y']),
+        ],
+      ];
+      for (final p in all) {
+        final text = '${p.title} ${p.body}'.toLowerCase();
+        for (final w in ReminderCopy.bannedWords['en']!) {
+          expect(RegExp('\\b$w\\b').hasMatch(text), isFalse, reason: text);
+        }
+        for (final w in ReminderCopy.bannedWords['he']!) {
+          expect(text.contains(w), isFalse, reason: text);
+        }
+      }
+    });
   });
 
   test('quiet hours shift a reminder to their end', () {

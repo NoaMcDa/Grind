@@ -14,6 +14,8 @@ import 'package:grind/core/data/data.dart'
         DriftTaskRepository,
         openConnection;
 
+import 'package:grind/l10n/app_localizations.dart';
+
 import 'background_response.dart';
 import 'file_notification_store.dart';
 import 'local_notification_service.dart';
@@ -119,43 +121,55 @@ class FlutterLocalNotificationsBackend implements LocalNotificationsBackend {
   final bool _background;
   ReceivePort? _port;
 
-  static final _darwin = fln.DarwinInitializationSettings(
-    // Permission is asked later by requestPermission(), after Pip's
-    // rationale screen, never at launch.
-    requestAlertPermission: false,
-    requestBadgePermission: false,
-    requestSoundPermission: false,
-    notificationCategories: [
-      fln.DarwinNotificationCategory(
-        grindReminderCategory,
-        actions: [
-          fln.DarwinNotificationAction.plain(actionIdDone, 'Done'),
-          fln.DarwinNotificationAction.plain(actionIdSnooze, 'Snooze 15'),
-          fln.DarwinNotificationAction.plain(
-            actionIdStartFocus,
-            'Start focus',
-            options: {fln.DarwinNotificationActionOption.foreground},
+  /// Action labels in the device language (iOS registers the categories
+  /// once, at launch; Hebrew or English).
+  static fln.DarwinInitializationSettings _darwinFor(AppLocalizations l) =>
+      fln.DarwinInitializationSettings(
+        // Permission is asked later by requestPermission(), after Pip's
+        // rationale screen, never at launch.
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+        notificationCategories: [
+          fln.DarwinNotificationCategory(
+            grindReminderCategory,
+            actions: [
+              fln.DarwinNotificationAction.plain(actionIdDone, l.done),
+              fln.DarwinNotificationAction.plain(actionIdSnooze, l.snooze15),
+              fln.DarwinNotificationAction.plain(
+                actionIdStartFocus,
+                l.startFocus,
+                options: {fln.DarwinNotificationActionOption.foreground},
+              ),
+            ],
+          ),
+          // Smart snooze (#12): after two snoozes, offer to move instead.
+          fln.DarwinNotificationCategory(
+            grindRescheduleCategory,
+            actions: [
+              fln.DarwinNotificationAction.plain(
+                actionIdMoveToTonight,
+                l.remindersTonight,
+              ),
+              fln.DarwinNotificationAction.plain(
+                actionIdMoveToTomorrow,
+                l.commonTomorrow,
+              ),
+              fln.DarwinNotificationAction.plain(
+                actionIdPickTime,
+                l.remindersPickATime,
+                options: {fln.DarwinNotificationActionOption.foreground},
+              ),
+            ],
           ),
         ],
-      ),
-      // Smart snooze (#12): after two snoozes, offer to move instead.
-      fln.DarwinNotificationCategory(
-        grindRescheduleCategory,
-        actions: [
-          fln.DarwinNotificationAction.plain(actionIdMoveToTonight, 'Tonight'),
-          fln.DarwinNotificationAction.plain(
-            actionIdMoveToTomorrow,
-            'Tomorrow',
-          ),
-          fln.DarwinNotificationAction.plain(
-            actionIdPickTime,
-            'Pick a time',
-            options: {fln.DarwinNotificationActionOption.foreground},
-          ),
-        ],
-      ),
-    ],
-  );
+      );
+
+  static AppLocalizations _deviceStrings() {
+    final code = PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+    final he = code == 'he' || code == 'iw';
+    return lookupAppLocalizations(Locale(he ? 'he' : 'en'));
+  }
 
   fln.IOSFlutterLocalNotificationsPlugin? get _ios => _plugin
       .resolvePlatformSpecificImplementation<
@@ -182,8 +196,9 @@ class FlutterLocalNotificationsBackend implements LocalNotificationsBackend {
     });
     _port = port;
 
+    final darwin = _darwinFor(_deviceStrings());
     await _plugin.initialize(
-      settings: fln.InitializationSettings(iOS: _darwin, macOS: _darwin),
+      settings: fln.InitializationSettings(iOS: darwin, macOS: darwin),
       onDidReceiveNotificationResponse: (r) => onResponse(rawFrom(r)),
       onDidReceiveBackgroundNotificationResponse:
           grindNotificationBackgroundHandler,

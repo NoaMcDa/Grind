@@ -13,8 +13,9 @@ import 'time_zones.dart';
 /// - `done`: status done, `completedAt` now, and the task's other pending
 ///   notifications are cancelled at once (the re-plan would drop them too,
 ///   but a background isolate has no re-plan). A recurring task (one with a
-///   [ReminderRule]) is not completed: its `remindAt` anchor advances to the
-///   next occurrence and its other pending reminders stay.
+///   [ReminderRule]) is not completed: the occurrence is (the rule's
+///   `lastCompletedAt` is stored), `remindAt` advances to the next
+///   occurrence and its other pending reminders stay.
 /// - `snooze`, `moveToTonight`, `moveToTomorrow` on a recurring task: ignored.
 ///   `remindAt` is the series anchor there, and moving it would shift every
 ///   later occurrence. (Proposed: a one-off snooze on `ReminderRule`.)
@@ -68,11 +69,14 @@ class NotificationRouter {
       '/focus?taskId=${Uri.encodeQueryComponent(taskId)}';
 
   /// Route location for a body tap: the task (where "Pick a time" lives),
-  /// the evening review for the evening prompt, or null for the morning
-  /// prompt (stay on / open Today).
+  /// the evening review for the evening prompt, the highlights for the
+  /// weekly recap, or null for the morning prompt (stay on / open Today).
   static String? openLocation(NotificationResponse response) {
     if (response.taskId.isNotEmpty) {
       return '/task/${Uri.encodeComponent(response.taskId)}';
+    }
+    if (response.notificationId.startsWith(NotificationScheduler.recapPrefix)) {
+      return '/highlights';
     }
     if (response.notificationId.startsWith(
       NotificationScheduler.eveningPrefix,
@@ -105,7 +109,7 @@ class NotificationRouter {
     final now = _clock.now().toUtc();
     final rule = await _reminders?.getForTask(task.id);
     if (rule != null) {
-      await _handleRecurring(task, rule, action, now);
+      await _handleRecurring(task, rule, response, now);
       return;
     }
     switch (action) {
@@ -159,24 +163,41 @@ class NotificationRouter {
     }
   }
 
-  /// Done completes one occurrence (the series goes on); every move would
-  /// shift the series anchor, so those are left alone.
+  /// Done completes one occurrence (the series goes on) through
+  /// [storeSeriesCompletion], exactly like `TaskActions.completeRecurring`:
+  /// the rule's `lastCompletedAt` advances and is stored with the task, so
+  /// the re-plan drops that occurrence and schedules the next one. Every
+  /// move would shift the series anchor, so those are left alone.
   Future<void> _handleRecurring(
     Task task,
     ReminderRule rule,
-    NotificationAction action,
+    NotificationResponse response,
     DateTime now,
   ) async {
-    if (action != NotificationAction.done) return;
+    if (response.action != NotificationAction.done) return;
+    final reminders = _reminders;
+    if (reminders == null) return;
+    // The occurrence this reminder was for (its id carries the fire time),
+    // never before the pending one; without a readable id, `remindAt`.
+    final fromId = occurrenceOfNotification(
+      response.notificationId,
+      task.id,
+      rule,
+    );
+    if (fromId != null && isOccurrenceDone(rule, fromId)) return;
+    final pending = task.remindAt?.toUtc();
+    final occurrenceAt = fromId == null
+        ? (pending ?? now)
+        : (pending != null && fromId.isBefore(pending) ? pending : fromId);
     final prefs = await _prefs?.get();
-    await _tasks.upsert(
-      completeOccurrence(
-        task: task,
-        rule: rule,
-        occurrenceAt: now,
-        timeZoneName: prefs?.timeZoneName ?? 'UTC',
-        now: now,
-      ),
+    await storeSeriesCompletion(
+      tasks: _tasks,
+      rules: reminders,
+      task: task,
+      rule: rule,
+      occurrenceAt: occurrenceAt,
+      timeZoneName: prefs?.timeZoneName ?? 'UTC',
+      now: now,
     );
   }
 

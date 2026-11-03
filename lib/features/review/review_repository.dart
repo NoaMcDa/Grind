@@ -43,3 +43,11 @@ class InMemoryReviewRepository implements ReviewRepository {
   @override
   Future<bool> isHandled(String day) async => _handled.contains(day);
 }
+
+/// The non-empty win of each saved review by local day (`yyyy-MM-dd`), for
+/// the evening prompt (#37): pass to `NotificationSync(wins: ...)`.
+Future<Map<String, String>> Function() reviewDayWins(ReviewRepository repo) =>
+    () async => {
+      for (final e in await repo.all())
+        if (e.win.trim().isNotEmpty) e.date: e.win.trim(),
+    };

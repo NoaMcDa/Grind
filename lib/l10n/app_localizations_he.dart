@@ -550,7 +550,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get remindersLine10 => 'לאט לאט זה מצטבר.';
 
   @override
-  String get remindersLine11 => 'פשוט לפתוח ולראות איך זה מרגיש.';
+  String get remindersLine11 => 'גם רק לפתוח את זה נחשב.';
 
   @override
   String get remindersLine12 => 'התחלה מהירה עדיפה על תוכנית מושלמת.';
@@ -562,7 +562,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get remindersLine14 => 'עשר דקות של ריכוז עושות הרבה.';
 
   @override
-  String get remindersLine15 => 'להתחיל בקטן ובקלילות.';
+  String get remindersLine15 => 'קטן וקליל זה מספיק.';
 
   @override
   String get remindersLine16 => 'הרגע הזה שלך.';
@@ -2392,4 +2392,39 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get planOpenInCalendarFailed =>
       'היומן לא נפתח כרגע. אפשר לנסות עוד רגע.';
+
+  @override
+  String get promptMorningTitle => 'בוקר טוב';
+
+  @override
+  String get promptMorningBody => 'מתאים לתכנן את היום ביחד?';
+
+  @override
+  String promptMorningBodyFirst(String task) {
+    return 'מתאים לתכנן את היום ביחד? ראשון בתור: $task';
+  }
+
+  @override
+  String get promptEveningTitle => 'ערב טוב';
+
+  @override
+  String get promptEveningBody => 'דקה אחת להציץ אחורה על היום?';
+
+  @override
+  String promptEveningBodyWin(String win) {
+    return 'הרגע הטוב של היום: $win. דקה להציץ אחורה?';
+  }
+
+  @override
+  String promptEveningBodyDone(String task) {
+    return 'היום סיימת את \"$task\". דקה להציץ אחורה?';
+  }
+
+  @override
+  String promptEveningBodyDoneMany(int count, String task) {
+    return '$count דברים הושלמו היום, ביניהם \"$task\". דקה להציץ אחורה?';
+  }
+
+  @override
+  String get recapNotificationTitle => 'השבוע שלך עם פיפ';
 }

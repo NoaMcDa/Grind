@@ -140,24 +140,28 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
 
   Future<void> _confirmDone() async {
     final repo = ref.read(taskRepositoryProvider);
+    final rules = ref.read(reminderRepositoryProvider);
     final prefs = await ref.read(preferencesRepositoryProvider).get();
-    final now = _now;
+    final now = _now.toUtc();
     for (final t in _today.where((t) => _checked.contains(t.id))) {
       final rule = _rules[t.id];
-      final next = rule == null
-          ? t.copyWith(
-              status: TaskStatus.done,
-              completedAt: now.toUtc(),
-              updatedAt: now.toUtc(),
-            )
-          : completeOccurrence(
-              task: t,
-              rule: rule,
-              occurrenceAt: t.remindAt ?? t.dueAt ?? now,
-              timeZoneName: prefs.timeZoneName,
-              now: now,
-            );
-      await repo.upsert(next);
+      if (rule == null) {
+        await repo.upsert(
+          t.copyWith(status: TaskStatus.done, completedAt: now, updatedAt: now),
+        );
+      } else {
+        // One occurrence, stored with its rule like
+        // `TaskActions.completeRecurring` (the series goes on).
+        await storeSeriesCompletion(
+          tasks: repo,
+          rules: rules,
+          task: t,
+          rule: rule,
+          occurrenceAt: t.remindAt ?? now,
+          timeZoneName: prefs.timeZoneName,
+          now: now,
+        );
+      }
       _doneIds.add(t.id);
       _doneCount++;
     }

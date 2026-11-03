@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/features/review/review_providers.dart';
+import 'package:grind/features/review/review_repository.dart';
 
 import 'notification_router.dart';
 import 'notification_service_factory.dart';
@@ -23,9 +25,10 @@ final notificationRouterProvider = Provider<NotificationRouter>((ref) {
   return router;
 });
 
-/// Feature-supplied reminders for the plan. Null by default; the integrator
-/// overrides it with the recurrence hook (#11), e.g.
-/// `notificationExtraProvider.overrideWith((ref) => ref.watch(recurrenceExtraProvider))`.
+/// Feature-supplied reminders for the plan. Null by default; `main.dart`
+/// overrides it with the recurrence hook (#11) and the weekly recap (#28):
+/// `notificationExtraProvider.overrideWith((ref) => combineExtras([
+/// ref.watch(recurrenceExtraProvider), ref.watch(recapExtraProvider)]))`.
 final notificationExtraProvider = Provider<ExtraNotifications?>((_) => null);
 
 /// Keeps pending notifications in step with tasks and preferences. Reading
@@ -39,6 +42,7 @@ final notificationSyncProvider = Provider<NotificationSync>((ref) {
     service: ref.watch(notificationServiceProvider),
     clock: ref.watch(clockProvider),
     extra: ref.watch(notificationExtraProvider),
+    wins: reviewDayWins(ref.watch(reviewRepositoryProvider)),
   )..start();
   ref.onDispose(sync.dispose);
   return sync;

@@ -550,7 +550,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remindersLine10 => 'Little by little adds up.';
 
   @override
-  String get remindersLine11 => 'Open it and see how it feels.';
+  String get remindersLine11 => 'Just opening it counts.';
 
   @override
   String get remindersLine12 => 'A quick start beats a perfect plan.';
@@ -562,7 +562,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remindersLine14 => 'Ten focused minutes go a long way.';
 
   @override
-  String get remindersLine15 => 'Begin small, keep it light.';
+  String get remindersLine15 => 'Small and light is plenty.';
 
   @override
   String get remindersLine16 => 'This moment is yours.';
@@ -2411,4 +2411,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get planOpenInCalendarFailed =>
       'The calendar didn\'t open just now. Worth a try in a moment.';
+
+  @override
+  String get promptMorningTitle => 'Good morning';
+
+  @override
+  String get promptMorningBody => 'Want to plan the day together?';
+
+  @override
+  String promptMorningBodyFirst(String task) {
+    return 'Want to plan the day together? First up: $task';
+  }
+
+  @override
+  String get promptEveningTitle => 'Good evening';
+
+  @override
+  String get promptEveningBody => 'One minute to look back on today?';
+
+  @override
+  String promptEveningBodyWin(String win) {
+    return 'Today\'s win: $win. One minute to look back?';
+  }
+
+  @override
+  String promptEveningBodyDone(String task) {
+    return 'You finished \"$task\" today. One minute to look back?';
+  }
+
+  @override
+  String promptEveningBodyDoneMany(int count, String task) {
+    return '$count things done today, \"$task\" among them. One minute to look back?';
+  }
+
+  @override
+  String get recapNotificationTitle => 'Your week with Pip';
 }
