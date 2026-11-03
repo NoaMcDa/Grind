@@ -8,7 +8,9 @@ import '../core/core.dart';
 import '../core/notifications/notifications.dart';
 import '../features/calendar/apple/providers.dart';
 import '../features/calendar/sync/providers.dart';
+import '../features/companion/celebration_bus.dart';
 import '../features/onboarding/onboarding_providers.dart';
+import '../features/settings/time_zone/device_time_zone.dart';
 import '../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import '../theme/text_scale.dart';
@@ -89,6 +91,8 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
       unawaited(sync.refresh());
       // Pull external calendars on start, on foreground and every 15 min.
       startCalendarSync(ref);
+      // First run, or the device moved zones: follow the device time zone.
+      unawaited(syncDeviceTimeZone(ref));
     }
   }
 
@@ -130,7 +134,10 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
       localizationsDelegates: localizationsDelegates,
       supportedLocales: supportedLocales,
       locale: localeCode == null ? null : Locale(localeCode),
-      builder: (context, child) => TextScaleClamp(child: child!),
+      // CelebrationHost needs the ScaffoldMessenger above it, so it lives in
+      // the builder, not around MaterialApp.
+      builder: (context, child) =>
+          CelebrationHost(child: TextScaleClamp(child: child!)),
       routerConfig: _router,
     );
   }

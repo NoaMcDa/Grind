@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app/app.dart';
 import 'app/backup_actions_adapter.dart';
+import 'app/recent_sessions.dart';
 import 'core/core.dart';
 import 'core/data/data.dart';
 import 'core/notifications/notifications.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
       overrides: [
         ...dataProvidersOverrides(db),
         focusRepositoryOverride(db),
+        recentFocusSessionsOverride(),
         reviewRepositoryOverride(db),
         goalRepositoryProvider.overrideWith(
           (ref) => DriftGoalRepository(db, clock: ref.watch(clockProvider)),

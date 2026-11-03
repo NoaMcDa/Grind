@@ -128,7 +128,9 @@ void main() {
     tester,
   ) async {
     final c = await _pump(tester);
-    emit(c, const CelebrationEvent.taskCompleted());
+    // A goal event: task completion keeps its own Undo toast, so the host
+    // shows confetti only for that one (see _handle).
+    emit(c, const CelebrationEvent.goalCompleted());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(ConfettiOverlay), findsOneWidget);
@@ -138,6 +140,18 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     expect(find.byType(ConfettiOverlay), findsNothing);
     await _dismiss(tester);
+  });
+
+  testWidgets('task completion celebrates without a second toast', (
+    tester,
+  ) async {
+    final c = await _pump(tester);
+    emit(c, const CelebrationEvent.taskCompleted());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(ConfettiOverlay), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.pump(const Duration(milliseconds: 1000));
   });
 
   testWidgets('finished focus session adds the Pip bounce', (tester) async {
@@ -168,7 +182,7 @@ void main() {
     final c = await _pump(tester, reduce: true);
     String? last;
     for (var i = 0; i < 6; i++) {
-      emit(c, const CelebrationEvent.taskCompleted());
+      emit(c, const CelebrationEvent.showedUp());
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       final text = tester

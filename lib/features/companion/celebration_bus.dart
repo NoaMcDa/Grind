@@ -237,7 +237,9 @@ class _CelebrationHostState extends ConsumerState<CelebrationHost> {
       setState(() => _bursts.add(burst));
     }
 
-    if (ScaffoldMessenger.maybeOf(context) != null) {
+    // A completed task already shows its own toast with Undo (TaskActions);
+    // a second snackbar would queue behind it. Confetti and haptic still run.
+    if (e is! TaskCompleted && ScaffoldMessenger.maybeOf(context) != null) {
       showPipToast(context, line, duration: const Duration(seconds: 3));
     }
   }

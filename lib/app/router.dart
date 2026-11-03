@@ -7,6 +7,7 @@ import '../features/onboarding/onboarding_flow.dart';
 import '../features/pip/pip_screen.dart';
 import '../features/plan/plan_screen.dart';
 import '../features/analytics/analytics_screen.dart';
+import '../features/capacity/week_capacity_screen.dart';
 import '../features/goals/goals.dart';
 import '../features/review/review.dart';
 import '../features/settings/settings_screen.dart';
@@ -76,6 +77,10 @@ GoRouter createRouter({
       GoRoute(
         path: '/analytics',
         builder: (context, state) => const AnalyticsScreen(),
+      ),
+      GoRoute(
+        path: '/week',
+        builder: (context, state) => const WeekCapacityScreen(),
       ),
       GoRoute(
         path: '/task/:id',

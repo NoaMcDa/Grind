@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/core.dart';
+import '../companion/celebration_bus.dart';
 import 'providers.dart';
 
 /// Interval lengths. Defaults are the classic 25/5 with a longer break after
@@ -442,6 +443,12 @@ class FocusController extends AsyncNotifier<FocusState> {
     _lastEnded = ended;
     await _repo.update(ended);
     await _addActualMinutes(session.taskId, minutes);
+    if (minutes > 0) {
+      celebrateFrom(
+        ref,
+        CelebrationEvent.focusSessionFinished(full: completed),
+      );
+    }
 
     final outcome = FocusOutcome(
       sessionId: session.id,

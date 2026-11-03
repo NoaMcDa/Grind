@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/core.dart';
 import '../../widgets/pip_toast.dart';
+import '../companion/celebration_bus.dart';
 import '../recurrence/occurrence_completion.dart';
 import '../recurrence/occurrence_expander.dart';
 import 'day_bounds.dart';
@@ -167,6 +168,7 @@ class TaskActions {
       } else {
         final next = await completeRecurring(t, occurrenceAt: occurrenceAt);
         if (next != null) {
+          celebrateFrom(_ref, const CelebrationEvent.taskCompleted());
           if (!context.mounted) return;
           showPipToast(
             context,
@@ -183,6 +185,12 @@ class TaskActions {
     }
     final done = !t.isDone;
     await setDone(t, done);
+    if (done) {
+      celebrateFrom(
+        _ref,
+        CelebrationEvent.taskCompleted(big: t.estimatedMinutes >= 90),
+      );
+    }
     if (done && context.mounted) {
       showPipToast(
         context,

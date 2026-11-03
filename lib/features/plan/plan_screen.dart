@@ -231,14 +231,22 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        planCapacityLine(
-                          l,
-                          freeMinutes: capacity.free,
-                          plannedMinutes: capacity.planned,
+                      GestureDetector(
+                        key: const Key('plan-capacity-link'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/week'),
+                        child: Text(
+                          planCapacityLine(
+                            l,
+                            freeMinutes: capacity.free,
+                            plannedMinutes: capacity.planned,
+                          ),
+                          key: const Key('plan-capacity'),
+                          style: AppText.bold(
+                            size: 13,
+                            color: AppColors.violet,
+                          ).copyWith(decoration: TextDecoration.underline),
                         ),
-                        key: const Key('plan-capacity'),
-                        style: AppText.bold(size: 13, color: AppColors.ink),
                       ),
                     ],
                   ),
