@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/core.dart';
+import 'today_providers.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -9,67 +14,44 @@ import '../../widgets/sticker_card.dart';
 
 enum _ReminderState { open, done, snoozed }
 
-class _Task {
-  const _Task(this.id, this.time, this.title, this.ifThen, this.tag);
-  final String id, time, title, ifThen;
-  final Color tag;
-}
-
-const _tasks = [
-  _Task(
-    'lab',
-    '12:30',
-    'Deep learning lab 4',
-    'If lunch is over, then open the notebook',
-    AppColors.violet,
-  ),
-  _Task(
-    'papers',
-    '16:00',
-    'Read 2 papers',
-    'If you get to the library, then start with the shorter one',
-    AppColors.sky,
-  ),
-  _Task(
-    'gym',
-    '17:15',
-    'Gym',
-    'If it is 17:00, then pack your bag',
-    AppColors.mint,
-  ),
-  _Task(
-    'mom',
-    '19:30',
-    'Call mom',
-    'If dinner is done, then call',
-    AppColors.pink,
-  ),
-];
-
 /// Reminders layer: the if-then reminder of the moment, momentum, up next.
-class TodayScreen extends StatefulWidget {
-  const TodayScreen({
-    super.key,
-    required this.onStartFocus,
-    required this.onAdd,
-  });
+///
+/// [onStartFocus] and [onAdd] default to navigating with go_router.
+class TodayScreen extends ConsumerStatefulWidget {
+  const TodayScreen({super.key, this.onStartFocus, this.onAdd});
 
-  final VoidCallback onStartFocus;
-  final VoidCallback onAdd;
+  final VoidCallback? onStartFocus;
+  final VoidCallback? onAdd;
 
   @override
-  State<TodayScreen> createState() => _TodayScreenState();
+  ConsumerState<TodayScreen> createState() => _TodayScreenState();
 }
 
-class _TodayScreenState extends State<TodayScreen> {
+class _TodayScreenState extends ConsumerState<TodayScreen> {
   _ReminderState _reminder = _ReminderState.open;
-  final Set<String> _done = {'mom'};
 
-  int get _doneCount =>
-      _done.length + (_reminder == _ReminderState.done ? 1 : 0);
+  void _startFocus() => (widget.onStartFocus ?? () => context.go('/focus'))();
+  void _add() => (widget.onAdd ?? () => context.go('/ask'))();
+
+  Future<void> _toggle(Task t) {
+    final now = ref.read(clockProvider).now().toUtc();
+    return ref
+        .read(taskRepositoryProvider)
+        .upsert(
+          t.copyWith(
+            status: t.isDone ? TaskStatus.open : TaskStatus.done,
+            completedAt: t.isDone ? null : now,
+            updatedAt: now,
+          ),
+        );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tasks = ref.watch(todayTasksProvider);
+    final doneCount =
+        tasks.where((t) => t.isDone).length +
+        (_reminder == _ReminderState.done ? 1 : 0);
     final top = MediaQuery.paddingOf(context).top;
     return Stack(
       children: [
@@ -83,7 +65,7 @@ class _TodayScreenState extends State<TodayScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SectionLabel('Thursday, Oct 29'),
+                      SectionLabel(ref.watch(todayLabelProvider)),
                       const SizedBox(height: 4),
                       Text(
                         'Good morning!',
@@ -109,23 +91,20 @@ class _TodayScreenState extends State<TodayScreen> {
                     children: [
                       const SectionLabel('Momentum'),
                       Text(
-                        '$_doneCount of 5 today',
+                        '$doneCount of 5 today',
                         style: AppText.display(size: 16),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  MomentumMeter(value: _doneCount / 5),
+                  MomentumMeter(value: doneCount / 5),
                 ],
               ),
             ),
             const SizedBox(height: 18),
             const SectionLabel('Up next'),
             const SizedBox(height: 10),
-            for (final t in _tasks) ...[
-              _taskRow(t),
-              const SizedBox(height: 10),
-            ],
+            for (final t in tasks) ...[_taskRow(t), const SizedBox(height: 10)],
           ],
         ),
         Positioned(
@@ -135,7 +114,7 @@ class _TodayScreenState extends State<TodayScreen> {
             button: true,
             label: 'Add a task',
             child: GestureDetector(
-              onTap: widget.onAdd,
+              onTap: _add,
               child: Container(
                 width: 60,
                 height: 60,
@@ -224,7 +203,7 @@ class _TodayScreenState extends State<TodayScreen> {
                       color: AppColors.mint,
                       icon: const Icon(Icons.play_arrow),
                       horizontalPadding: 8,
-                      onPressed: widget.onStartFocus,
+                      onPressed: _startFocus,
                     ),
                   ),
                 ],
@@ -288,16 +267,16 @@ class _TodayScreenState extends State<TodayScreen> {
     }
   }
 
-  Widget _taskRow(_Task t) {
-    final done = _done.contains(t.id);
-    final onViolet = t.tag == AppColors.violet;
+  Widget _taskRow(Task t) {
+    final done = t.isDone;
+    final tag = taskTagColor(t);
+    final onViolet = tag == AppColors.violet;
     return Semantics(
       button: true,
       checked: done,
       label: t.title,
       child: GestureDetector(
-        onTap: () =>
-            setState(() => done ? _done.remove(t.id) : _done.add(t.id)),
+        onTap: () => _toggle(t),
         child: Container(
           constraints: const BoxConstraints(minHeight: 62),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -313,7 +292,7 @@ class _TodayScreenState extends State<TodayScreen> {
                 width: 26,
                 height: 26,
                 decoration: BoxDecoration(
-                  color: done ? t.tag : AppColors.card,
+                  color: done ? tag : AppColors.card,
                   borderRadius: BorderRadius.circular(9),
                   border: Border.all(
                     color: AppColors.ink,
@@ -343,7 +322,7 @@ class _TodayScreenState extends State<TodayScreen> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      t.ifThen,
+                      t.firstAction ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppText.body(size: 13, color: AppColors.muted),
@@ -353,8 +332,8 @@ class _TodayScreenState extends State<TodayScreen> {
               ),
               const SizedBox(width: 8),
               Pill(
-                label: t.time,
-                color: t.tag,
+                label: formatClock(t.remindAt!),
+                color: tag,
                 textColor: onViolet ? Colors.white : AppColors.ink,
                 fontSize: 13,
               ),
