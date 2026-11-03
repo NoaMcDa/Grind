@@ -321,7 +321,7 @@
       }
     }
   },
-  "snoozeAgainHint": "Snooze again and Pip will offer to move it instead.",
+  "snoozeAgainHint": "Need a bit more time? Pip can offer to move it instead.",
   "@snoozeAgainHint": {
     "description": "Snooze toast body"
   },
@@ -356,5 +356,997 @@
   "emptyDefaultBody": "Whenever you're ready, Pip is here.",
   "@emptyDefaultBody": {
     "description": "Empty state body"
+  },
+  "commonBack": "Back",
+  "@commonBack": {
+    "description": "Back button / semantics"
+  },
+  "commonSkip": "Skip",
+  "@commonSkip": {
+    "description": "Skip button"
+  },
+  "commonCancel": "Cancel",
+  "@commonCancel": {
+    "description": "Cancel button"
+  },
+  "commonSave": "Save",
+  "@commonSave": {
+    "description": "Save button"
+  },
+  "commonClear": "Clear",
+  "@commonClear": {
+    "description": "Clear button"
+  },
+  "commonDelete": "Delete",
+  "@commonDelete": {
+    "description": "Delete button"
+  },
+  "commonConnect": "Connect",
+  "@commonConnect": {
+    "description": "Connect button"
+  },
+  "commonConnected": "Connected",
+  "@commonConnected": {
+    "description": "Connected status"
+  },
+  "commonSunday": "Sunday",
+  "@commonSunday": {
+    "description": "Week start option"
+  },
+  "commonMonday": "Monday",
+  "@commonMonday": {
+    "description": "Week start option"
+  },
+  "commonToday": "Today",
+  "@commonToday": {
+    "description": "Relative day name"
+  },
+  "commonTomorrow": "Tomorrow",
+  "@commonTomorrow": {
+    "description": "Relative day name"
+  },
+  "commonGoogleCalendar": "Google Calendar",
+  "@commonGoogleCalendar": {
+    "description": "Calendar provider name"
+  },
+  "commonAppleCalendar": "Apple Calendar",
+  "@commonAppleCalendar": {
+    "description": "Calendar provider name"
+  },
+  "commonLanguageEnglish": "English",
+  "@commonLanguageEnglish": {
+    "description": "Language name in its own language"
+  },
+  "commonLanguageHebrew": "עברית",
+  "@commonLanguageHebrew": {
+    "description": "Language name in its own language"
+  },
+  "commonMinutes": "{minutes} min",
+  "@commonMinutes": {
+    "description": "Duration in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "commonWeekdayShortMon": "Mon",
+  "@commonWeekdayShortMon": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortTue": "Tue",
+  "@commonWeekdayShortTue": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortWed": "Wed",
+  "@commonWeekdayShortWed": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortThu": "Thu",
+  "@commonWeekdayShortThu": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortFri": "Fri",
+  "@commonWeekdayShortFri": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortSat": "Sat",
+  "@commonWeekdayShortSat": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayShortSun": "Sun",
+  "@commonWeekdayShortSun": {
+    "description": "Short weekday name (list use)"
+  },
+  "commonWeekdayFullMon": "Monday",
+  "@commonWeekdayFullMon": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullTue": "Tuesday",
+  "@commonWeekdayFullTue": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullWed": "Wednesday",
+  "@commonWeekdayFullWed": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullThu": "Thursday",
+  "@commonWeekdayFullThu": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullFri": "Friday",
+  "@commonWeekdayFullFri": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullSat": "Saturday",
+  "@commonWeekdayFullSat": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayFullSun": "Sunday",
+  "@commonWeekdayFullSun": {
+    "description": "Full weekday name"
+  },
+  "commonWeekdayLetterMon": "M",
+  "@commonWeekdayLetterMon": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterTue": "T",
+  "@commonWeekdayLetterTue": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterWed": "W",
+  "@commonWeekdayLetterWed": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterThu": "T",
+  "@commonWeekdayLetterThu": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterFri": "F",
+  "@commonWeekdayLetterFri": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterSat": "S",
+  "@commonWeekdayLetterSat": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonWeekdayLetterSun": "S",
+  "@commonWeekdayLetterSun": {
+    "description": "One-letter weekday toggle"
+  },
+  "commonMonthShortJan": "Jan",
+  "@commonMonthShortJan": {
+    "description": "Short month name"
+  },
+  "commonMonthShortFeb": "Feb",
+  "@commonMonthShortFeb": {
+    "description": "Short month name"
+  },
+  "commonMonthShortMar": "Mar",
+  "@commonMonthShortMar": {
+    "description": "Short month name"
+  },
+  "commonMonthShortApr": "Apr",
+  "@commonMonthShortApr": {
+    "description": "Short month name"
+  },
+  "commonMonthShortMay": "May",
+  "@commonMonthShortMay": {
+    "description": "Short month name"
+  },
+  "commonMonthShortJun": "Jun",
+  "@commonMonthShortJun": {
+    "description": "Short month name"
+  },
+  "commonMonthShortJul": "Jul",
+  "@commonMonthShortJul": {
+    "description": "Short month name"
+  },
+  "commonMonthShortAug": "Aug",
+  "@commonMonthShortAug": {
+    "description": "Short month name"
+  },
+  "commonMonthShortSep": "Sep",
+  "@commonMonthShortSep": {
+    "description": "Short month name"
+  },
+  "commonMonthShortOct": "Oct",
+  "@commonMonthShortOct": {
+    "description": "Short month name"
+  },
+  "commonMonthShortNov": "Nov",
+  "@commonMonthShortNov": {
+    "description": "Short month name"
+  },
+  "commonMonthShortDec": "Dec",
+  "@commonMonthShortDec": {
+    "description": "Short month name"
+  },
+  "commonDateShort": "{weekday}, {month} {day}",
+  "@commonDateShort": {
+    "description": "Short date such as \"Thu, Oct 29\"; weekday and month are already localised",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "tasksNewTask": "New task",
+  "@tasksNewTask": {
+    "description": "Task form title (create)"
+  },
+  "tasksEditTask": "Edit task",
+  "@tasksEditTask": {
+    "description": "Task form title (edit)"
+  },
+  "tasksTitleLabel": "What needs doing?",
+  "@tasksTitleLabel": {
+    "description": "Task title field label"
+  },
+  "tasksTitleRequired": "Give it a short name and you are set.",
+  "@tasksTitleRequired": {
+    "description": "Validation hint when the title is empty"
+  },
+  "tasksDueLabel": "Due",
+  "@tasksDueLabel": {
+    "description": "Due date field label"
+  },
+  "tasksPickDate": "Pick a date",
+  "@tasksPickDate": {
+    "description": "Date picker button"
+  },
+  "tasksNoDate": "No date",
+  "@tasksNoDate": {
+    "description": "Chip for no due date"
+  },
+  "tasksDueTime": "Due time",
+  "@tasksDueTime": {
+    "description": "Due time label"
+  },
+  "tasksReminderTime": "Reminder",
+  "@tasksReminderTime": {
+    "description": "Reminder time label"
+  },
+  "tasksAddTime": "Add a time",
+  "@tasksAddTime": {
+    "description": "Button to add a time"
+  },
+  "tasksEstimateLabel": "How long?",
+  "@tasksEstimateLabel": {
+    "description": "Estimate field label"
+  },
+  "tasksCustom": "Custom",
+  "@tasksCustom": {
+    "description": "Custom estimate chip"
+  },
+  "tasksCustomMinutes": "Minutes",
+  "@tasksCustomMinutes": {
+    "description": "Custom estimate field label"
+  },
+  "tasksFirstActionLabel": "First action",
+  "@tasksFirstActionLabel": {
+    "description": "First action field label"
+  },
+  "tasksFirstActionHint": "If it's 7:00, then open the thesis file",
+  "@tasksFirstActionHint": {
+    "description": "If-then example hint"
+  },
+  "tasksNotesLabel": "Notes",
+  "@tasksNotesLabel": {
+    "description": "Notes field label"
+  },
+  "tasksDetailTitle": "Task",
+  "@tasksDetailTitle": {
+    "description": "Task detail screen title"
+  },
+  "tasksNotFound": "This task is not here anymore.",
+  "@tasksNotFound": {
+    "description": "Shown when a task id no longer exists"
+  },
+  "tasksBackToToday": "Back to Today",
+  "@tasksBackToToday": {
+    "description": "Button on the not-found screen"
+  },
+  "tasksComplete": "Complete",
+  "@tasksComplete": {
+    "description": "Button"
+  },
+  "tasksReopen": "Mark as open",
+  "@tasksReopen": {
+    "description": "Button"
+  },
+  "tasksDeleteTitle": "Delete this task?",
+  "@tasksDeleteTitle": {
+    "description": "Dialog title"
+  },
+  "tasksDeleteBody": "You can undo it right after.",
+  "@tasksDeleteBody": {
+    "description": "Dialog body"
+  },
+  "tasksKeep": "Keep it",
+  "@tasksKeep": {
+    "description": "Dialog button that cancels deletion"
+  },
+  "tasksDeleted": "Task deleted",
+  "@tasksDeleted": {
+    "description": "Toast"
+  },
+  "tasksMarkedDone": "Nicely done",
+  "@tasksMarkedDone": {
+    "description": "Toast after completing a task"
+  },
+  "tasksEmptyTitle": "Nothing due today",
+  "@tasksEmptyTitle": {
+    "description": "Empty state title"
+  },
+  "tasksEmptyBody": "Add one small thing and Pip will remind you.",
+  "@tasksEmptyBody": {
+    "description": "Empty state body"
+  },
+  "tasksDoneOfToday": "{done} of {total} today",
+  "@tasksDoneOfToday": {
+    "description": "Today header pill",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "remindersTonight": "Tonight",
+  "@remindersTonight": {
+    "description": "Smart-snooze button"
+  },
+  "remindersPickATime": "Pick a time",
+  "@remindersPickATime": {
+    "description": "Smart-snooze button"
+  },
+  "remindersMoveOffer": "Want to move this instead?",
+  "@remindersMoveOffer": {
+    "description": "Notification headline offering to move a task"
+  },
+  "remindersMoveLine": "\"{title}\" can have a calmer moment.",
+  "@remindersMoveLine": {
+    "description": "Notification line under the move offer",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "remindersLine01": "25 minutes is enough to start.",
+  "@remindersLine01": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine02": "Small steps count.",
+  "@remindersLine02": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine03": "Just the first step. Pip has the rest.",
+  "@remindersLine03": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine04": "Starting is the hard part, and you are here.",
+  "@remindersLine04": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine05": "Five minutes in, it gets easier.",
+  "@remindersLine05": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine06": "One page is a fine start.",
+  "@remindersLine06": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine07": "Pip has the timer ready.",
+  "@remindersLine07": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine08": "No need to finish, just begin.",
+  "@remindersLine08": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine09": "You picked this step for a reason.",
+  "@remindersLine09": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine10": "Little by little adds up.",
+  "@remindersLine10": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine11": "Open it and see how it feels.",
+  "@remindersLine11": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine12": "A quick start beats a perfect plan.",
+  "@remindersLine12": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine13": "Pip is cheering for you.",
+  "@remindersLine13": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine14": "Ten focused minutes go a long way.",
+  "@remindersLine14": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine15": "Begin small, keep it light.",
+  "@remindersLine15": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine16": "This moment is yours.",
+  "@remindersLine16": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine17": "Momentum starts with one move.",
+  "@remindersLine17": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine18": "Easy does it. Start where you are.",
+  "@remindersLine18": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine19": "Future you will be glad.",
+  "@remindersLine19": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "remindersLine20": "Ready when you are.",
+  "@remindersLine20": {
+    "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
+  },
+  "recurrenceDoesNotRepeat": "Does not repeat",
+  "@recurrenceDoesNotRepeat": {
+    "description": "Repeat option"
+  },
+  "recurrenceDaily": "Daily",
+  "@recurrenceDaily": {
+    "description": "Repeat option"
+  },
+  "recurrenceWeekdays": "Weekdays",
+  "@recurrenceWeekdays": {
+    "description": "Repeat option"
+  },
+  "recurrenceWeekly": "Weekly",
+  "@recurrenceWeekly": {
+    "description": "Repeat option"
+  },
+  "recurrenceMonthly": "Monthly",
+  "@recurrenceMonthly": {
+    "description": "Repeat option"
+  },
+  "recurrenceRepeatLabel": "Repeat",
+  "@recurrenceRepeatLabel": {
+    "description": "Field label"
+  },
+  "recurrenceOnDays": "On days",
+  "@recurrenceOnDays": {
+    "description": "Field label"
+  },
+  "recurrenceEveryLabel": "Every",
+  "@recurrenceEveryLabel": {
+    "description": "Field label before the interval stepper"
+  },
+  "recurrenceEndsLabel": "Ends",
+  "@recurrenceEndsLabel": {
+    "description": "Field label"
+  },
+  "recurrenceNever": "Never",
+  "@recurrenceNever": {
+    "description": "End option"
+  },
+  "recurrenceOnDate": "On a date",
+  "@recurrenceOnDate": {
+    "description": "End option"
+  },
+  "recurrenceDone": "Done",
+  "@recurrenceDone": {
+    "description": "Button closing the recurrence sheet"
+  },
+  "recurrenceIncrease": "Increase",
+  "@recurrenceIncrease": {
+    "description": "Stepper semantics"
+  },
+  "recurrenceDecrease": "Decrease",
+  "@recurrenceDecrease": {
+    "description": "Stepper semantics"
+  },
+  "recurrenceUnitDay": "{n, plural, =1{day} other{days}}",
+  "@recurrenceUnitDay": {
+    "description": "Interval unit",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceUnitWeek": "{n, plural, =1{week} other{weeks}}",
+  "@recurrenceUnitWeek": {
+    "description": "Interval unit",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceUnitMonth": "{n, plural, =1{month} other{months}}",
+  "@recurrenceUnitMonth": {
+    "description": "Interval unit",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEditThisOne": "This one",
+  "@recurrenceEditThisOne": {
+    "description": "Edit scope option"
+  },
+  "recurrenceEditAllFuture": "All future",
+  "@recurrenceEditAllFuture": {
+    "description": "Edit scope option"
+  },
+  "recurrenceEditTitle": "Change just this one?",
+  "@recurrenceEditTitle": {
+    "description": "Edit scope sheet title"
+  },
+  "recurrenceEditHint": "Change this one time, or the series from here on.",
+  "@recurrenceEditHint": {
+    "description": "Edit scope sheet body"
+  },
+  "recurrenceEveryDay": "{n, plural, =1{Every day} other{Every {n} days}}",
+  "@recurrenceEveryDay": {
+    "description": "Description",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryWeekday": "Every weekday",
+  "@recurrenceEveryWeekday": {
+    "description": "Description"
+  },
+  "recurrenceEveryWeek": "{n, plural, =1{Every {days}} other{Every {n} weeks on {days}}}",
+  "@recurrenceEveryWeek": {
+    "description": "Description with chosen weekdays, already joined into one string",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceEveryWeekPlain": "{n, plural, =1{Every week} other{Every {n} weeks}}",
+  "@recurrenceEveryWeekPlain": {
+    "description": "Description without weekdays",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryMonth": "{n, plural, =1{Every month} other{Every {n} months}}",
+  "@recurrenceEveryMonth": {
+    "description": "Description without a day of month",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryMonthOn": "{n, plural, =1{Every month} other{Every {n} months}} on the {day}",
+  "@recurrenceEveryMonthOn": {
+    "description": "Description with day of month; day is a pre-formatted ordinal in English (3rd)",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceListJoinLast": "{head} and {last}",
+  "@recurrenceListJoinLast": {
+    "description": "Joins the last item of a day list",
+    "placeholders": {
+      "head": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceUntil": "until {date}",
+  "@recurrenceUntil": {
+    "description": "Suffix of a description, appended after a space",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurrenceTimesCount": "{count, plural, =1{1 time} other{{count} times}}",
+  "@recurrenceTimesCount": {
+    "description": "Suffix of a description, appended after a comma",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceDateLabel": "{day} {month} {year}",
+  "@recurrenceDateLabel": {
+    "description": "Date shown for the end date",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "planYourDay": "Your day",
+  "@planYourDay": {
+    "description": "Plan title for days other than today"
+  },
+  "planSubtitle": "Pip arranged {tasks, plural, =1{1 task} other{{tasks} tasks}} around {events, plural, =1{1 event} other{{events} events}}. Long-press a task to move it.",
+  "@planSubtitle": {
+    "description": "Plan card body",
+    "placeholders": {
+      "tasks": {
+        "type": "int"
+      },
+      "events": {
+        "type": "int"
+      }
+    }
+  },
+  "planEmptyTitle": "Nothing planned yet",
+  "@planEmptyTitle": {
+    "description": "Empty state title"
+  },
+  "planEmptyBody": "A quiet day. Add a task and Pip will find it a good spot.",
+  "@planEmptyBody": {
+    "description": "Empty state body"
+  },
+  "planPreviousDay": "Previous day",
+  "@planPreviousDay": {
+    "description": "Button semantics"
+  },
+  "planNextDay": "Next day",
+  "@planNextDay": {
+    "description": "Button semantics"
+  },
+  "planPickDay": "Pick a day",
+  "@planPickDay": {
+    "description": "Button semantics"
+  },
+  "planWeekStripLabel": "Week",
+  "@planWeekStripLabel": {
+    "description": "Week strip semantics"
+  },
+  "planNowLabel": "Now",
+  "@planNowLabel": {
+    "description": "Marker on the timeline"
+  },
+  "planDayLoad": "{day}, {percent}% booked",
+  "@planDayLoad": {
+    "description": "Day chip semantics",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "planAllDay": "All day",
+  "@planAllDay": {
+    "description": "Label for all-day events"
+  },
+  "planCalendarLocal": "Grind",
+  "@planCalendarLocal": {
+    "description": "Source name for events created in the app"
+  },
+  "planCalendarLabel": "Calendar",
+  "@planCalendarLabel": {
+    "description": "Label"
+  },
+  "planOpenInCalendar": "Open in calendar",
+  "@planOpenInCalendar": {
+    "description": "Button"
+  },
+  "planOpenInCalendarSoon": "Opening the calendar app is coming soon.",
+  "@planOpenInCalendarSoon": {
+    "description": "Toast"
+  },
+  "planMarkDone": "Mark done",
+  "@planMarkDone": {
+    "description": "Button"
+  },
+  "planMarkOpen": "Mark as not done",
+  "@planMarkOpen": {
+    "description": "Button"
+  },
+  "planUnschedule": "Unschedule",
+  "@planUnschedule": {
+    "description": "Button"
+  },
+  "planCantDropHere": "That slot is taken by an event.",
+  "@planCantDropHere": {
+    "description": "Toast when dropping a task onto an event"
+  },
+  "onboardingWelcomeTitle": "Hi, I'm Pip",
+  "@onboardingWelcomeTitle": {
+    "description": "Welcome title"
+  },
+  "onboardingWelcomeBody": "Grind keeps your plans on this phone. Nothing leaves it.",
+  "@onboardingWelcomeBody": {
+    "description": "Welcome body"
+  },
+  "onboardingWelcomeStart": "Start",
+  "@onboardingWelcomeStart": {
+    "description": "Welcome button"
+  },
+  "onboardingNotifTitle": "Gentle nudges, only when you want them",
+  "@onboardingNotifTitle": {
+    "description": "Notifications step title"
+  },
+  "onboardingNotifRationaleTitle": "Why notifications?",
+  "@onboardingNotifRationaleTitle": {
+    "description": "Rationale heading"
+  },
+  "onboardingNotifRationale": "Reminders can only reach you if Grind may show them. I will only nudge you about things you asked me to remind you of.",
+  "@onboardingNotifRationale": {
+    "description": "Rationale body"
+  },
+  "onboardingNotifAllow": "Allow",
+  "@onboardingNotifAllow": {
+    "description": "Button"
+  },
+  "onboardingNotifNotNow": "Not now",
+  "@onboardingNotifNotNow": {
+    "description": "Button"
+  },
+  "onboardingNotifGranted": "Notifications are on. Thank you!",
+  "@onboardingNotifGranted": {
+    "description": "Confirmation"
+  },
+  "onboardingNotifDenied": "No problem. Grind works fine without notifications. You can switch them on later in Settings.",
+  "@onboardingNotifDenied": {
+    "description": "Message after permission was declined"
+  },
+  "onboardingContinue": "Continue",
+  "@onboardingContinue": {
+    "description": "Button"
+  },
+  "onboardingCalTitle": "Bring your calendar along",
+  "@onboardingCalTitle": {
+    "description": "Calendar step title"
+  },
+  "onboardingCalRationale": "Connecting a calendar lets me plan around meetings you already have. Events are read on this device and stay here.",
+  "@onboardingCalRationale": {
+    "description": "Rationale"
+  },
+  "onboardingCalFailed": "That did not work this time. You can retry, or skip it for now.",
+  "@onboardingCalFailed": {
+    "description": "Connection error message, rewritten without \"again\""
+  },
+  "onboardingCalLater": "You can always connect one later in Settings.",
+  "@onboardingCalLater": {
+    "description": "Reassurance"
+  },
+  "onboardingHoursTitle": "When do you like to work?",
+  "@onboardingHoursTitle": {
+    "description": "Hours step title"
+  },
+  "onboardingHoursBody": "I will plan around these hours. Switch a day off to keep it free.",
+  "@onboardingHoursBody": {
+    "description": "Hours step body"
+  },
+  "onboardingWeekStartLabel": "Week starts on",
+  "@onboardingWeekStartLabel": {
+    "description": "Field label"
+  },
+  "onboardingLanguageLabel": "Language",
+  "@onboardingLanguageLabel": {
+    "description": "Field label"
+  },
+  "onboardingDoneTitle": "You're set.",
+  "@onboardingDoneTitle": {
+    "description": "Done title"
+  },
+  "onboardingDoneBody": "Everything stays on this device. You can change any of this in Settings, whenever you like.",
+  "@onboardingDoneBody": {
+    "description": "Done body"
+  },
+  "onboardingDoneButton": "Take me to Today",
+  "@onboardingDoneButton": {
+    "description": "Final button"
+  },
+  "onboardingDayOff": "Day off",
+  "@onboardingDayOff": {
+    "description": "Toggle label"
+  },
+  "onboardingStartTime": "Start time",
+  "@onboardingStartTime": {
+    "description": "Field label"
+  },
+  "onboardingEndTime": "End time",
+  "@onboardingEndTime": {
+    "description": "Field label"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Screen title"
+  },
+  "settingsCalendars": "Calendars",
+  "@settingsCalendars": {
+    "description": "Section label"
+  },
+  "settingsDisconnect": "Disconnect",
+  "@settingsDisconnect": {
+    "description": "Button"
+  },
+  "settingsNotConnected": "Not connected",
+  "@settingsNotConnected": {
+    "description": "Status"
+  },
+  "settingsCalendarsToUse": "Calendars to use",
+  "@settingsCalendarsToUse": {
+    "description": "Sub-list label"
+  },
+  "settingsConnectFailed": "That did not work this time. Whenever you like, give it another go.",
+  "@settingsConnectFailed": {
+    "description": "Connection error, rewritten without \"again\""
+  },
+  "settingsNotifications": "Notifications",
+  "@settingsNotifications": {
+    "description": "Section label"
+  },
+  "settingsNotifPermission": "Allow notifications",
+  "@settingsNotifPermission": {
+    "description": "Row label"
+  },
+  "settingsNotifPermissionOn": "On",
+  "@settingsNotifPermissionOn": {
+    "description": "Status"
+  },
+  "settingsNotifPermissionOff": "Off. Grind keeps working; turn them on if you want reminders.",
+  "@settingsNotifPermissionOff": {
+    "description": "Status"
+  },
+  "settingsLeadTime": "Remind me before",
+  "@settingsLeadTime": {
+    "description": "Row label"
+  },
+  "settingsLeadAtTime": "At the time",
+  "@settingsLeadAtTime": {
+    "description": "Lead time option 0"
+  },
+  "settingsQuietHours": "Quiet hours",
+  "@settingsQuietHours": {
+    "description": "Row label"
+  },
+  "settingsQuietHoursHint": "No notifications in this window.",
+  "@settingsQuietHoursHint": {
+    "description": "Row hint"
+  },
+  "settingsQuietFrom": "From",
+  "@settingsQuietFrom": {
+    "description": "Field label"
+  },
+  "settingsQuietTo": "To",
+  "@settingsQuietTo": {
+    "description": "Field label"
+  },
+  "settingsMorningPrompt": "Morning prompt",
+  "@settingsMorningPrompt": {
+    "description": "Row label"
+  },
+  "settingsEveningPrompt": "Evening prompt",
+  "@settingsEveningPrompt": {
+    "description": "Row label"
+  },
+  "settingsPromptsHint": "A short hello from Pip to plan or wrap up.",
+  "@settingsPromptsHint": {
+    "description": "Row hint"
+  },
+  "settingsPlanning": "Planning",
+  "@settingsPlanning": {
+    "description": "Section label"
+  },
+  "settingsWorkingHours": "Working hours",
+  "@settingsWorkingHours": {
+    "description": "Row label"
+  },
+  "settingsWeekStart": "Week starts on",
+  "@settingsWeekStart": {
+    "description": "Row label"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Section label"
+  },
+  "settingsData": "Data",
+  "@settingsData": {
+    "description": "Section label"
+  },
+  "settingsExportBackup": "Export backup",
+  "@settingsExportBackup": {
+    "description": "Button"
+  },
+  "settingsImportBackup": "Import backup",
+  "@settingsImportBackup": {
+    "description": "Button"
+  },
+  "settingsDeleteAll": "Delete all data",
+  "@settingsDeleteAll": {
+    "description": "Button"
+  },
+  "settingsExportDone": "Backup saved.",
+  "@settingsExportDone": {
+    "description": "Toast"
+  },
+  "settingsImportDone": "Backup restored.",
+  "@settingsImportDone": {
+    "description": "Toast"
+  },
+  "settingsActionFailed": "That did not work this time. Nothing was lost.",
+  "@settingsActionFailed": {
+    "description": "Toast"
+  },
+  "settingsDeleteConfirmTitle": "Delete everything?",
+  "@settingsDeleteConfirmTitle": {
+    "description": "Dialog title"
+  },
+  "settingsDeleteConfirmBody": "This removes all tasks, plans and settings from this device. It cannot be undone.",
+  "@settingsDeleteConfirmBody": {
+    "description": "Dialog body"
+  },
+  "settingsDeleteConfirm": "Delete",
+  "@settingsDeleteConfirm": {
+    "description": "Dialog confirm button"
+  },
+  "settingsDeleted": "All data deleted.",
+  "@settingsDeleted": {
+    "description": "Toast"
+  },
+  "settingsAbout": "About",
+  "@settingsAbout": {
+    "description": "Section label"
+  },
+  "settingsVersion": "Version",
+  "@settingsVersion": {
+    "description": "Row label"
+  },
+  "settingsLicences": "Licences",
+  "@settingsLicences": {
+    "description": "Row label"
+  },
+  "settingsPrivacy": "Privacy",
+  "@settingsPrivacy": {
+    "description": "Row label"
+  },
+  "settingsPrivacyCopy": "Everything stays on this device. No account, no sign-in.",
+  "@settingsPrivacyCopy": {
+    "description": "Privacy statement"
   }
 }

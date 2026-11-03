@@ -19,17 +19,78 @@ double contrast(Color a, Color b) {
 }
 
 void main() {
+  Map<String, dynamic> load(String l) =>
+      json.decode(File('lib/l10n/app_$l.arb').readAsStringSync())
+          as Map<String, dynamic>;
+  Set<String> keys(Map<String, dynamic> m) =>
+      m.keys.where((k) => !k.startsWith('@')).toSet();
+  // Brace tokens such as `{count}` or `{count, plural, ...}`. Plural branch
+  // words in braces (`other{days}`) also match, so compare against declared
+  // placeholders rather than expecting an exact set.
+  Set<String> tokens(String v) => RegExp(
+    r'\{([A-Za-z_]\w*)\s*[,}]',
+  ).allMatches(v).map((m) => m.group(1)!).toSet();
+  Set<String> declared(Map<String, dynamic> en, String k) =>
+      (((en['@$k'] as Map<String, dynamic>?)?['placeholders']
+                  as Map<String, dynamic>?) ??
+              {})
+          .keys
+          .toSet();
+
   test('ARB files have identical key sets and no empty values', () {
-    Map<String, dynamic> load(String l) =>
-        json.decode(File('lib/l10n/app_$l.arb').readAsStringSync())
-            as Map<String, dynamic>;
-    Set<String> keys(Map<String, dynamic> m) =>
-        m.keys.where((k) => !k.startsWith('@')).toSet();
     final en = load('en'), he = load('he');
     expect(keys(he), keys(en));
     for (final k in keys(en)) {
       expect((en[k] as String).trim(), isNotEmpty, reason: k);
       expect((he[k] as String).trim(), isNotEmpty, reason: k);
+    }
+  });
+
+  test('every EN key has a description and uses its declared placeholders', () {
+    final en = load('en');
+    for (final k in keys(en)) {
+      final meta = en['@$k'] as Map<String, dynamic>?;
+      expect(meta?['description'], isNotNull, reason: '@$k description');
+      expect(
+        tokens(en[k] as String).containsAll(declared(en, k)),
+        isTrue,
+        reason: k,
+      );
+    }
+  });
+
+  test('every placeholder in EN exists in HE, and HE adds none', () {
+    final en = load('en'), he = load('he');
+    for (final k in keys(en)) {
+      final used = tokens(he[k] as String);
+      final d = declared(en, k);
+      expect(used.containsAll(d), isTrue, reason: '$k missing in HE');
+      expect(d.containsAll(used), isTrue, reason: '$k has extra in HE');
+    }
+  });
+
+  test('copy never uses guilt words (EN and HE)', () {
+    final enBanned = RegExp(
+      r'\b(should|failed|fail|again|missed|miss|behind|overdue|lazy|late|'
+      r'must|forgot|you broke)\b',
+      caseSensitive: false,
+    );
+    // Whole Hebrew words only (no adjacent Hebrew letters).
+    final heWords = RegExp(
+      r'(?<![א-ת])(שוב|צריך|צריכה|חייב|חייבת|נכשלת|פספסת)(?![א-ת])',
+    );
+    final heStems = RegExp('נכשל|פספס|כישלון|איחור');
+    for (final l in ['en', 'he']) {
+      final m = load(l);
+      for (final k in keys(m)) {
+        final v = m[k] as String;
+        if (l == 'en') {
+          expect(enBanned.hasMatch(v), isFalse, reason: '$l/$k: $v');
+        } else {
+          expect(heWords.hasMatch(v), isFalse, reason: '$l/$k: $v');
+          expect(heStems.hasMatch(v), isFalse, reason: '$l/$k: $v');
+        }
+      }
     }
   });
 
