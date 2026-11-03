@@ -5,6 +5,7 @@ import 'package:grind/widgets/widgets.dart';
 
 import 'recurrence.dart';
 import 'recurrence_strings.dart';
+import 'package:grind/l10n/l10n.dart';
 
 /// Repeat presets as pills, custom weekday toggles, an interval stepper and
 /// an optional end date. Controlled: pass [value] (null = does not repeat)
@@ -25,36 +26,40 @@ class RecurrencePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = RecurrenceStrings.of(Localizations.localeOf(context));
+    final s = context.l10n;
     final v = value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SectionLabel(s.repeatLabel),
+        SectionLabel(s.recurrenceRepeatLabel),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            _choice(s.doesNotRepeat, v == null, () => onChanged(null)),
             _choice(
-              s.daily,
+              s.recurrenceDoesNotRepeat,
+              v == null,
+              () => onChanged(null),
+            ),
+            _choice(
+              s.recurrenceDaily,
               v?.preset == RecurrencePreset.daily,
               () => onChanged(_with(v, RecurrencePreset.daily)),
             ),
             _choice(
-              s.weekdays,
+              s.recurrenceWeekdays,
               v?.preset == RecurrencePreset.weekdays,
               () => onChanged(_with(v, RecurrencePreset.weekdays)),
             ),
             _choice(
-              s.weekly,
+              s.recurrenceWeekly,
               v?.preset == RecurrencePreset.weekly,
               () => onChanged(_with(v, RecurrencePreset.weekly)),
             ),
             _choice(
-              s.monthly,
+              s.recurrenceMonthly,
               v?.preset == RecurrencePreset.monthly,
               () => onChanged(_with(v, RecurrencePreset.monthly)),
             ),
@@ -62,7 +67,7 @@ class RecurrencePicker extends StatelessWidget {
         ),
         if (v != null && v.preset == RecurrencePreset.weekly) ...[
           const SizedBox(height: 16),
-          SectionLabel(s.onDays),
+          SectionLabel(s.recurrenceOnDays),
           const SizedBox(height: 8),
           _weekdayToggles(s, v),
         ],
@@ -72,19 +77,23 @@ class RecurrencePicker extends StatelessWidget {
         ],
         if (v != null) ...[
           const SizedBox(height: 16),
-          SectionLabel(s.endsLabel),
+          SectionLabel(s.recurrenceEndsLabel),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               _choice(
-                s.never,
+                s.recurrenceNever,
                 v.until == null,
                 () => onChanged(v.copyWith(until: null, count: null)),
               ),
               _choice(
-                v.until == null ? s.onDate : s.dateLabel(v.until!),
+                v.until == null
+                    ? s.recurrenceOnDate
+                    : RecurrenceStrings.of(
+                        Localizations.localeOf(context),
+                      ).dateLabel(v.until!),
                 v.until != null,
                 () => _pickUntil(context, v),
               ),
@@ -131,15 +140,15 @@ class RecurrencePicker extends StatelessWidget {
     );
   }
 
-  Widget _weekdayToggles(RecurrenceStrings s, Recurrence v) {
+  Widget _weekdayToggles(AppLocalizations s, Recurrence v) {
     return Wrap(
       spacing: 6,
       runSpacing: 6,
       children: [
         for (final d in const [7, 1, 2, 3, 4, 5, 6])
           _DayToggle(
-            label: s.weekdayLetter(d),
-            semanticLabel: s.weekdayFull(d),
+            label: _weekdayLetter(s, d),
+            semanticLabel: _weekdayFull(s, d),
             selected: v.weekdays.contains(d),
             onTap: () {
               final next = {...v.weekdays};
@@ -155,19 +164,19 @@ class RecurrencePicker extends StatelessWidget {
     );
   }
 
-  Widget _intervalRow(BuildContext context, RecurrenceStrings s, Recurrence v) {
-    final unit = switch (v.preset) {
-      RecurrencePreset.weekly => RecurrenceUnit.week,
-      RecurrencePreset.monthly => RecurrenceUnit.month,
-      _ => RecurrenceUnit.day,
+  Widget _intervalRow(BuildContext context, AppLocalizations s, Recurrence v) {
+    final String Function(int) unit = switch (v.preset) {
+      RecurrencePreset.weekly => s.recurrenceUnitWeek,
+      RecurrencePreset.monthly => s.recurrenceUnitMonth,
+      _ => s.recurrenceUnitDay,
     };
     return Row(
       children: [
-        Text(s.everyLabel, style: AppText.bold()),
+        Text(s.recurrenceEveryLabel, style: AppText.bold()),
         const SizedBox(width: 10),
         _StepButton(
           icon: Icons.remove_rounded,
-          label: s.decrease,
+          label: s.recurrenceDecrease,
           onTap: v.interval > 1
               ? () => onChanged(v.copyWith(interval: v.interval - 1))
               : null,
@@ -182,7 +191,7 @@ class RecurrencePicker extends StatelessWidget {
         ),
         _StepButton(
           icon: Icons.add_rounded,
-          label: s.increase,
+          label: s.recurrenceIncrease,
           onTap: v.interval < 99
               ? () => onChanged(v.copyWith(interval: v.interval + 1))
               : null,
@@ -190,7 +199,7 @@ class RecurrencePicker extends StatelessWidget {
         const SizedBox(width: 10),
         Flexible(
           child: Text(
-            s.intervalUnit(unit, v.interval),
+            unit(v.interval),
             style: AppText.bold(),
             overflow: TextOverflow.ellipsis,
           ),
@@ -344,7 +353,7 @@ class _PickerSheetState extends State<_PickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final s = RecurrenceStrings.of(Localizations.localeOf(context));
+    final s = context.l10n;
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -358,7 +367,7 @@ class _PickerSheetState extends State<_PickerSheet> {
           ),
           const SizedBox(height: 20),
           PillButton(
-            label: s.done,
+            label: s.recurrenceDone,
             color: AppColors.violet,
             textColor: Colors.white,
             onPressed: () => Navigator.pop(context, RecurrencePick(_value)),
@@ -378,9 +387,9 @@ class RecurrenceSummaryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    final s = RecurrenceStrings.of(locale);
-    final label = recurrence?.describe(locale) ?? s.doesNotRepeat;
+    final label =
+        recurrence?.describe(Localizations.localeOf(context)) ??
+        context.l10n.recurrenceDoesNotRepeat;
     return Semantics(
       button: true,
       label: label,
@@ -407,3 +416,23 @@ class RecurrenceSummaryChip extends StatelessWidget {
     );
   }
 }
+
+String _weekdayLetter(AppLocalizations l, int weekday) => [
+  l.commonWeekdayLetterMon,
+  l.commonWeekdayLetterTue,
+  l.commonWeekdayLetterWed,
+  l.commonWeekdayLetterThu,
+  l.commonWeekdayLetterFri,
+  l.commonWeekdayLetterSat,
+  l.commonWeekdayLetterSun,
+][weekday - 1];
+
+String _weekdayFull(AppLocalizations l, int weekday) => [
+  l.commonWeekdayFullMon,
+  l.commonWeekdayFullTue,
+  l.commonWeekdayFullWed,
+  l.commonWeekdayFullThu,
+  l.commonWeekdayFullFri,
+  l.commonWeekdayFullSat,
+  l.commonWeekdayFullSun,
+][weekday - 1];

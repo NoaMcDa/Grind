@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/l10n/app_localizations.dart';
 
 import '../../test_fonts.dart';
 import 'zone_test_support.dart';
@@ -146,7 +147,10 @@ void main() {
     await pumpGrindApp(tester, overrides: _hebrew);
     await tester.tap(find.bySemanticsLabel('הוספת משימה'));
     await tester.pumpAndSettle();
-    expect(find.text('New task'), findsOneWidget);
+    expect(
+      find.text(lookupAppLocalizations(const Locale('he')).tasksNewTask),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

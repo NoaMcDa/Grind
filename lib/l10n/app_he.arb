@@ -641,5 +641,16 @@
   "analyticsAccuracyOnTarget": "משימות {category} לרוב מסתיימות בדיוק לפי ההערכה",
   "analyticsSamples": "{n, plural, =1{משימה אחת} other{{n} משימות}}",
   "analyticsSemanticsFocus": "דקות פוקוס, 14 הימים האחרונים: {minutes} בסך הכול, {restDays} ימי מנוחה",
-  "analyticsSemanticsCompletion": "אחוז השלמה, 8 השבועות האחרונים: {done} מתוך {planned} משימות הושלמו"
+  "analyticsSemanticsCompletion": "אחוז השלמה, 8 השבועות האחרונים: {done} מתוך {planned} משימות הושלמו",
+  "tasksGoalLabel": "מטרה",
+  "tasksNoGoal": "בלי מטרה",
+  "tasksRepeatsLabel": "חוזרת",
+  "tasksScheduledLabel": "בתוכנית",
+  "tasksNotScheduled": "עוד לא שובצה",
+  "tasksNextOneSet": "כל הכבוד. הבאה כבר מחכה.",
+  "planScheduleForMe": "לשבץ בשבילי",
+  "planDetails": "פרטים",
+  "planOpenInCalendarApple": "אפשר לפתוח את אפליקציית היומן כדי לראות את זה. קישור ישיר בדרך.",
+  "planOpenInCalendarLocal": "זה חי רק בתוך Grind.",
+  "planOpenInCalendarFailed": "היומן לא נפתח כרגע. אפשר לנסות עוד רגע."
 }

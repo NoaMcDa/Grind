@@ -14,7 +14,8 @@ import '../recurrence/recurrence.dart';
 import '../recurrence/recurrence_picker.dart';
 import 'day_bounds.dart';
 import 'task_actions.dart';
-import 'tasks_strings.dart';
+import '../../l10n/l10n.dart';
+import '../plan/plan_l10n.dart' show formatPlanDay;
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
 /// [initialGoalId] presets the goal of a new task. Resolves to the saved
@@ -273,7 +274,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     if (options.isEmpty) return const [];
     return [
       const SizedBox(height: 16),
-      const SectionLabel(TasksStrings.goalLabel),
+      SectionLabel(context.l10n.tasksGoalLabel),
       const SizedBox(height: 8),
       Wrap(
         key: const Key('task-form-goal'),
@@ -281,7 +282,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         runSpacing: 8,
         children: [
           _Choice(
-            label: TasksStrings.noGoal,
+            label: context.l10n.tasksNoGoal,
             selected: _goalId == null,
             onTap: () => setState(() => _goalId = null),
           ),
@@ -336,16 +337,18 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    editing ? TasksStrings.editTask : TasksStrings.newTask,
+                    editing
+                        ? context.l10n.tasksEditTask
+                        : context.l10n.tasksNewTask,
                     style: AppText.display(size: 22),
                   ),
                   const SizedBox(height: 12),
                   StickerTextField(
                     controller: _title,
                     autofocus: true,
-                    label: TasksStrings.titleLabel,
+                    label: context.l10n.tasksTitleLabel,
                     errorText: _showError && _title.text.trim().isEmpty
-                        ? TasksStrings.titleRequired
+                        ? context.l10n.tasksTitleRequired
                         : null,
                     textInputAction: TextInputAction.done,
                     onChanged: (_) {
@@ -354,19 +357,19 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     onSubmitted: (_) => _save(),
                   ),
                   const SizedBox(height: 16),
-                  const SectionLabel(TasksStrings.dueLabel),
+                  SectionLabel(context.l10n.tasksDueLabel),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       _Choice(
-                        label: TasksStrings.today,
+                        label: context.l10n.commonToday,
                         selected: isToday,
                         onTap: () => setState(() => _date = today),
                       ),
                       _Choice(
-                        label: TasksStrings.tomorrow,
+                        label: context.l10n.commonTomorrow,
                         selected: isTomorrow,
                         onTap: () => setState(
                           () => _date = DateTime(
@@ -378,8 +381,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       ),
                       _Choice(
                         label: customDate
-                            ? TasksStrings.date(_date!)
-                            : TasksStrings.pickDate,
+                            ? formatPlanDay(context.l10n, _date!)
+                            : context.l10n.tasksPickDate,
                         selected: customDate,
                         icon: Icons.calendar_today_outlined,
                         onTap: _pickDate,
@@ -388,7 +391,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                   ),
                   const SizedBox(height: 14),
                   _TimeRow(
-                    label: TasksStrings.dueTime,
+                    label: context.l10n.tasksDueTime,
                     value: _dueTime,
                     onPick: () async {
                       final t = await _pickTime(_dueTime);
@@ -398,7 +401,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                   ),
                   const SizedBox(height: 10),
                   _TimeRow(
-                    label: TasksStrings.reminderTime,
+                    label: context.l10n.tasksReminderTime,
                     value: _effectiveRemind,
                     onPick: () async {
                       final t = await _pickTime(_effectiveRemind);
@@ -415,7 +418,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     }),
                   ),
                   const SizedBox(height: 12),
-                  const SectionLabel(TasksStrings.repeatsLabel),
+                  SectionLabel(context.l10n.tasksRepeatsLabel),
                   const SizedBox(height: 2),
                   RecurrenceSummaryChip(
                     key: const Key('task-form-recurrence'),
@@ -423,7 +426,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     onTap: _pickRecurrence,
                   ),
                   const SizedBox(height: 16),
-                  const SectionLabel(TasksStrings.estimateLabel),
+                  SectionLabel(context.l10n.tasksEstimateLabel),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -431,7 +434,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     children: [
                       for (final m in _presets)
                         _Choice(
-                          label: TasksStrings.minutes(m),
+                          label: context.l10n.commonMinutes(m),
                           selected: !_customMode && _minutes == m,
                           onTap: () => setState(() {
                             _customMode = false;
@@ -439,7 +442,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                           }),
                         ),
                       _Choice(
-                        label: TasksStrings.custom,
+                        label: context.l10n.tasksCustom,
                         selected: _customMode,
                         onTap: () => setState(() => _customMode = true),
                       ),
@@ -449,14 +452,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     const SizedBox(height: 8),
                     StickerTextField(
                       controller: _custom,
-                      label: TasksStrings.customMinutes,
+                      label: context.l10n.tasksCustomMinutes,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted: (_) => _save(),
                     ),
                   ],
                   const SizedBox(height: 16),
-                  const SectionLabel(TasksStrings.energyLabel),
+                  SectionLabel(context.l10n.sectionEnergy),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -464,7 +467,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     children: [
                       _EnergyOption(
                         chip: IconChip.deep(
-                          label: TasksStrings.deep,
+                          label: context.l10n.energyDeep,
                           height: 36,
                         ),
                         selected: _energy == Energy.deep,
@@ -472,7 +475,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       ),
                       _EnergyOption(
                         chip: IconChip.light(
-                          label: TasksStrings.light,
+                          label: context.l10n.energyLight,
                           height: 36,
                         ),
                         selected: _energy == Energy.light,
@@ -484,13 +487,13 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                   const SizedBox(height: 16),
                   StickerTextField(
                     controller: _firstAction,
-                    label: TasksStrings.firstActionLabel,
-                    hint: TasksStrings.firstActionHint,
+                    label: context.l10n.tasksFirstActionLabel,
+                    hint: context.l10n.tasksFirstActionHint,
                   ),
                   const SizedBox(height: 12),
                   StickerTextField(
                     controller: _notes,
-                    label: TasksStrings.notesLabel,
+                    label: context.l10n.tasksNotesLabel,
                     maxLines: 3,
                     keyboardType: TextInputType.multiline,
                   ),
@@ -503,14 +506,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
             children: [
               Expanded(
                 child: PillButton(
-                  label: TasksStrings.cancel,
+                  label: context.l10n.commonCancel,
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: PillButton(
-                  label: TasksStrings.save,
+                  label: context.l10n.commonSave,
                   color: AppColors.violet,
                   textColor: Colors.white,
                   onPressed: _save,
@@ -643,7 +646,7 @@ class _TimeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = value == null
-        ? TasksStrings.addTime
+        ? context.l10n.tasksAddTime
         : MaterialLocalizations.of(
             context,
           ).formatTimeOfDay(value!, alwaysUse24HourFormat: true);
@@ -659,7 +662,7 @@ class _TimeRow extends StatelessWidget {
         if (value != null)
           Semantics(
             button: true,
-            label: '${TasksStrings.clear} $label',
+            label: '${context.l10n.commonClear} $label',
             excludeSemantics: true,
             onTap: onClear,
             child: GestureDetector(

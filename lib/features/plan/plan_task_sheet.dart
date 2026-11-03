@@ -15,7 +15,7 @@ import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../today/today_providers.dart' show formatClock;
 import 'plan_replan_sheet.dart';
-import 'plan_strings.dart';
+import '../../l10n/l10n.dart';
 
 String _range(DateTime s, DateTime e, tz.Location location) =>
     '${formatClock(s, location)}–${formatClock(e, location)}';
@@ -54,14 +54,14 @@ class PlanTaskDetailPage extends ConsumerWidget {
               Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: PillButton(
-                  label: PlanStrings.back,
+                  label: context.l10n.commonBack,
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
               const SizedBox(height: 20),
               if (task == null)
-                Text(PlanStrings.taskDetailTitle, style: AppText.display())
+                Text(context.l10n.tasksDetailTitle, style: AppText.display())
               else
                 StickerCard(
                   child: Column(
@@ -85,8 +85,8 @@ class PlanTaskDetailPage extends ConsumerWidget {
                         children: [
                           PillButton(
                             label: task.isDone
-                                ? PlanStrings.markOpen
-                                : PlanStrings.markDone,
+                                ? context.l10n.planMarkOpen
+                                : context.l10n.planMarkDone,
                             color: AppColors.mint,
                             icon: const Icon(Icons.check),
                             // Series-aware, as on Today.
@@ -97,7 +97,7 @@ class PlanTaskDetailPage extends ConsumerWidget {
                           if (!task.isDone)
                             PillButton(
                               key: const Key('plan-sheet-schedule'),
-                              label: PlanStrings.scheduleForMe,
+                              label: context.l10n.planScheduleForMe,
                               color: AppColors.lilac,
                               icon: const Icon(Icons.auto_awesome),
                               onPressed: () =>
@@ -105,7 +105,7 @@ class PlanTaskDetailPage extends ConsumerWidget {
                             ),
                           PillButton(
                             key: const Key('plan-sheet-details'),
-                            label: PlanStrings.details,
+                            label: context.l10n.planDetails,
                             icon: const Icon(Icons.notes),
                             onPressed: () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
@@ -116,7 +116,7 @@ class PlanTaskDetailPage extends ConsumerWidget {
                           ),
                           if (task.isScheduled)
                             PillButton(
-                              label: PlanStrings.unschedule,
+                              label: context.l10n.planUnschedule,
                               icon: const Icon(Icons.event_busy_outlined),
                               onPressed: () async {
                                 final nav = Navigator.of(context);
@@ -144,10 +144,10 @@ class PlanTaskDetailPage extends ConsumerWidget {
   }
 }
 
-String _sourceName(CalendarSource s) => switch (s) {
-  CalendarSource.google => PlanStrings.calendarGoogle,
-  CalendarSource.apple => PlanStrings.calendarApple,
-  CalendarSource.local => PlanStrings.calendarLocal,
+String _sourceName(BuildContext context, CalendarSource s) => switch (s) {
+  CalendarSource.google => context.l10n.commonGoogleCalendar,
+  CalendarSource.apple => context.l10n.commonAppleCalendar,
+  CalendarSource.local => context.l10n.planCalendarLocal,
 };
 
 /// Opens a URL outside the app. Overridden in tests.
@@ -193,31 +193,37 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(PlanStrings.fromCalendar, style: AppText.label(size: 11)),
+          Text(
+            ctx.l10n.fromCalendar.toUpperCase(),
+            style: AppText.label(size: 11),
+          ),
           const SizedBox(height: 4),
           Text(e.title, style: AppText.display(size: 24)),
           const SizedBox(height: 6),
           Text(
-            e.isAllDay ? PlanStrings.allDay : _range(e.start, e.end, location),
+            e.isAllDay ? ctx.l10n.planAllDay : _range(e.start, e.end, location),
             style: AppText.body(color: AppColors.muted),
           ),
           const SizedBox(height: 4),
           Text(
-            '${PlanStrings.calendarLabel}: ${_sourceName(e.source)}',
+            '${ctx.l10n.planCalendarLabel}: ${_sourceName(ctx, e.source)}',
             style: AppText.body(color: AppColors.muted),
           ),
           const SizedBox(height: 16),
           Consumer(
             builder: (context, ref, _) => PillButton(
               key: const Key('plan-open-in-calendar'),
-              label: PlanStrings.openInCalendar,
+              label: context.l10n.planOpenInCalendar,
               icon: const Icon(Icons.open_in_new),
               onPressed: url == null
                   ? null
                   : () async {
                       final ok = await ref.read(planUrlLauncherProvider)(url);
                       if (!ok && context.mounted) {
-                        showPipToast(context, PlanStrings.openInCalendarFailed);
+                        showPipToast(
+                          context,
+                          context.l10n.planOpenInCalendarFailed,
+                        );
                       }
                     },
             ),
@@ -226,8 +232,8 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
             const SizedBox(height: 8),
             Text(
               e.source == CalendarSource.apple
-                  ? PlanStrings.openInCalendarApple
-                  : PlanStrings.openInCalendarLocal,
+                  ? ctx.l10n.planOpenInCalendarApple
+                  : ctx.l10n.planOpenInCalendarLocal,
               style: AppText.body(size: 12, color: AppColors.muted),
             ),
           ],

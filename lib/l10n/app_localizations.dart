@@ -3949,6 +3949,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Completion rate, last 8 weeks: {done} of {planned} tasks finished'**
   String analyticsSemanticsCompletion(int done, int planned);
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get tasksGoalLabel;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'No goal'**
+  String get tasksNoGoal;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get tasksRepeatsLabel;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'On the plan'**
+  String get tasksScheduledLabel;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Not placed yet'**
+  String get tasksNotScheduled;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Nicely done. The next one is lined up.'**
+  String get tasksNextOneSet;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule it for me'**
+  String get planScheduleForMe;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get planDetails;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'Open the Calendar app to see this one. A direct link is coming.'**
+  String get planOpenInCalendarApple;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'This one lives in Grind only.'**
+  String get planOpenInCalendarLocal;
+
+  /// Tasks and plan sheet copy
+  ///
+  /// In en, this message translates to:
+  /// **'The calendar didn\'t open just now. Worth a try in a moment.'**
+  String get planOpenInCalendarFailed;
 }
 
 class _AppLocalizationsDelegate

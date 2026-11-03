@@ -8,7 +8,7 @@ import '../companion/celebration_bus.dart';
 import '../recurrence/occurrence_completion.dart';
 import '../recurrence/occurrence_expander.dart';
 import 'day_bounds.dart';
-import 'tasks_strings.dart';
+import '../../l10n/l10n.dart';
 
 /// Create, complete and delete, shared by Today and the detail screen.
 class TaskActions {
@@ -172,8 +172,10 @@ class TaskActions {
           if (!context.mounted) return;
           showPipToast(
             context,
-            next.isDone ? TasksStrings.markedDone : TasksStrings.nextOneSet,
-            actionLabel: TasksStrings.undo,
+            next.isDone
+                ? context.l10n.tasksMarkedDone
+                : context.l10n.tasksNextOneSet,
+            actionLabel: context.l10n.undo,
             onAction: () async {
               await rules.upsert(rule);
               await _repo.upsert(t);
@@ -194,8 +196,8 @@ class TaskActions {
     if (done && context.mounted) {
       showPipToast(
         context,
-        TasksStrings.markedDone,
-        actionLabel: TasksStrings.undo,
+        context.l10n.tasksMarkedDone,
+        actionLabel: context.l10n.undo,
         onAction: () => setDone(t, false),
       );
     }
@@ -215,8 +217,8 @@ class TaskActions {
     if (!context.mounted) return;
     showPipToast(
       context,
-      TasksStrings.deleted,
-      actionLabel: TasksStrings.undo,
+      context.l10n.tasksDeleted,
+      actionLabel: context.l10n.undo,
       onAction: () {
         _repo.upsert(t);
         if (rule != null) rules.upsert(rule);

@@ -3266,5 +3266,49 @@
         "type": "int"
       }
     }
+  },
+  "tasksGoalLabel": "Goal",
+  "@tasksGoalLabel": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "tasksNoGoal": "No goal",
+  "@tasksNoGoal": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "tasksRepeatsLabel": "Repeats",
+  "@tasksRepeatsLabel": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "tasksScheduledLabel": "On the plan",
+  "@tasksScheduledLabel": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "tasksNotScheduled": "Not placed yet",
+  "@tasksNotScheduled": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "tasksNextOneSet": "Nicely done. The next one is lined up.",
+  "@tasksNextOneSet": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "planScheduleForMe": "Schedule it for me",
+  "@planScheduleForMe": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "planDetails": "Details",
+  "@planDetails": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "planOpenInCalendarApple": "Open the Calendar app to see this one. A direct link is coming.",
+  "@planOpenInCalendarApple": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "planOpenInCalendarLocal": "This one lives in Grind only.",
+  "@planOpenInCalendarLocal": {
+    "description": "Tasks and plan sheet copy"
+  },
+  "planOpenInCalendarFailed": "The calendar didn't open just now. Worth a try in a moment.",
+  "@planOpenInCalendarFailed": {
+    "description": "Tasks and plan sheet copy"
   }
 }
