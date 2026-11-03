@@ -6,6 +6,11 @@ import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../plan/plan_replan_sheet.dart' show scheduleTaskForMe;
+import '../plan/plan_strings.dart';
+import '../recurrence/providers.dart';
+import '../recurrence/recurrence.dart';
+import '../recurrence/recurrence_picker.dart';
 import 'task_actions.dart';
 import 'task_form.dart';
 import 'task_providers.dart';
@@ -70,6 +75,53 @@ class TaskDetailScreen extends ConsumerWidget {
     // Toast first (the messenger outlives this route), then leave.
     await actions.deleteWithUndo(context, task);
     if (context.mounted) _leave(context);
+  }
+
+  /// Picks a repeat rule and writes it, or deletes it for "does not
+  /// repeat". A series is anchored at `remindAt`, so a task without one
+  /// gets its due time (or 09:00 on its day) as the anchor.
+  Future<void> _editRecurrence(
+    BuildContext context,
+    WidgetRef ref,
+    Task task,
+    ReminderRule? rule,
+    Recurrence? current,
+  ) async {
+    final now = ref.read(clockProvider).now();
+    final anchor = (task.remindAt ?? _defaultAnchor(task, now)).toLocal();
+    final pick = await showRecurrencePicker(context, current, anchor: anchor);
+    if (pick == null) return;
+    final rules = ref.read(reminderRepositoryProvider);
+    final utc = now.toUtc();
+    final value = pick.value;
+    if (value == null) {
+      if (rule != null) await rules.delete(rule.id);
+      return;
+    }
+    final rrule = value.toRRule();
+    await rules.upsert(
+      rule == null
+          ? ReminderRule(
+              id: 'rule-${task.id}',
+              taskId: task.id,
+              rrule: rrule,
+              createdAt: utc,
+              updatedAt: utc,
+            )
+          : rule.copyWith(rrule: rrule, updatedAt: utc),
+    );
+    if (task.remindAt == null) {
+      await ref
+          .read(taskActionsProvider)
+          .save(task.copyWith(remindAt: anchor.toUtc()));
+    }
+  }
+
+  static DateTime _defaultAnchor(Task task, DateTime now) {
+    final due = task.dueAt?.toLocal();
+    if (due != null && !(due.hour == 23 && due.minute == 59)) return due;
+    final d = due ?? now.toLocal();
+    return DateTime(d.year, d.month, d.day, 9);
   }
 
   @override
@@ -145,6 +197,15 @@ class TaskDetailScreen extends ConsumerWidget {
     final dueHasTime = due != null && !(due.hour == 23 && due.minute == 59);
     final remind = task.remindAt?.toLocal();
     final done = task.isDone;
+    final rule = ref.watch(ruleForTaskProvider(task.id)).valueOrNull;
+    Recurrence? recurrence;
+    if (rule != null) {
+      try {
+        recurrence = Recurrence.parse(rule.rrule);
+      } on FormatException {
+        recurrence = null;
+      }
+    }
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
       children: [
@@ -189,6 +250,25 @@ class TaskDetailScreen extends ConsumerWidget {
                     ? '—'
                     : '${TasksStrings.date(remind)} · ${formatTime(remind)}',
               ),
+              const SizedBox(height: 12),
+              _field(
+                TasksStrings.scheduledLabel,
+                task.isScheduled
+                    ? PlanStrings.slot(
+                        task.scheduledStart!.toLocal(),
+                        task.scheduledEnd!.toLocal(),
+                      )
+                    : TasksStrings.notScheduled,
+              ),
+              const SizedBox(height: 12),
+              const SectionLabel(TasksStrings.repeatsLabel),
+              const SizedBox(height: 2),
+              RecurrenceSummaryChip(
+                key: const Key('task-recurrence'),
+                recurrence: recurrence,
+                onTap: () =>
+                    _editRecurrence(context, ref, task, rule, recurrence),
+              ),
               if (task.firstAction != null) ...[
                 const SizedBox(height: 12),
                 _field(TasksStrings.firstActionLabel, task.firstAction!),
@@ -208,6 +288,16 @@ class TaskDetailScreen extends ConsumerWidget {
           fontSize: 16,
           onPressed: () => actions.toggle(context, task),
         ),
+        if (!done) ...[
+          const SizedBox(height: 10),
+          PillButton(
+            key: const Key('task-schedule-for-me'),
+            label: PlanStrings.scheduleForMe,
+            color: AppColors.lilac,
+            icon: const Icon(Icons.auto_awesome),
+            onPressed: () => scheduleTaskForMe(context, ref, task.id),
+          ),
+        ],
         const SizedBox(height: 10),
         Row(
           children: [

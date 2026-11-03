@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/core.dart';
 import '../reminders/reminder_now_card.dart';
@@ -43,6 +44,8 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
 
   void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
 
+  void _openSettings() => GoRouter.maybeOf(context)?.push('/settings');
+
   void _open(Task t) {
     Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(taskId: t.id)),
@@ -78,7 +81,28 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 6),
+                Semantics(
+                  button: true,
+                  label: 'Settings',
+                  excludeSemantics: true,
+                  onTap: _openSettings,
+                  child: GestureDetector(
+                    key: const Key('today-settings'),
+                    onTap: _openSettings,
+                    behavior: HitTestBehavior.opaque,
+                    child: const SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Icon(
+                        Icons.settings_outlined,
+                        color: AppColors.ink,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
                 const PipAvatar(size: 58),
               ],
             ),

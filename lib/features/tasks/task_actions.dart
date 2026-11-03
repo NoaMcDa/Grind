@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../core/core.dart';
 import '../../widgets/pip_toast.dart';
+import '../recurrence/occurrence_completion.dart';
 import 'tasks_strings.dart';
 
 /// Create, complete and delete, shared by Today and the detail screen.
@@ -53,9 +54,50 @@ class TaskActions {
     );
   }
 
-  /// Toggle done; completing shows an undo toast.
+  /// Completes the current occurrence of a recurring task: the series moves
+  /// on to its next occurrence (and loses this occurrence's slot), or is
+  /// done when none is left. Null when [t] does not repeat.
+  Future<Task?> completeRecurring(Task t) async {
+    final anchor = t.remindAt;
+    if (anchor == null) return null;
+    final rule = await _ref.read(reminderRepositoryProvider).getForTask(t.id);
+    if (rule == null) return null;
+    final prefs = await _ref.read(preferencesRepositoryProvider).get();
+    var next = completeOccurrence(
+      task: t,
+      rule: rule,
+      occurrenceAt: anchor,
+      timeZoneName: prefs.timeZoneName,
+      now: _now,
+    );
+    if (!next.isDone) {
+      next = next.copyWith(
+        scheduledStart: null,
+        scheduledEnd: null,
+        lockedStart: false,
+      );
+    }
+    await _repo.upsert(next);
+    return next;
+  }
+
+  /// Toggle done; completing shows an undo toast. On a recurring task,
+  /// "done" completes this occurrence only.
   Future<void> toggle(BuildContext context, Task t) async {
     final done = !t.isDone;
+    if (done) {
+      final next = await completeRecurring(t);
+      if (next != null) {
+        if (!context.mounted) return;
+        showPipToast(
+          context,
+          next.isDone ? TasksStrings.markedDone : TasksStrings.nextOneSet,
+          actionLabel: TasksStrings.undo,
+          onAction: () => _repo.upsert(t),
+        );
+        return;
+      }
+    }
     await setDone(t, done);
     if (done && context.mounted) {
       showPipToast(
