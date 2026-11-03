@@ -33,6 +33,15 @@ Wave 1 is merged, so `lib/app/**`, `lib/core/data/**`, `lib/core/notifications/*
 
 Strings: do **not** edit `lib/l10n/*.arb` (merge conflicts). Keep new UI strings in a `<feature>_strings.dart` file in your folder; the integrator moves them into the ARB files after the wave. Use `context.l10n` for strings that already exist there.
 
+## Wave 3
+Wave 2 is merged. Everything from waves 1–2 exists on `main`; read before editing.
+
+| Owner | Paths |
+|---|---|
+| W3-A integration (#16 UI, polish) | `lib/features/plan/**` (incl. wiring the scheduler, not its core logic), `lib/app/**`, `lib/features/today/**`, `lib/features/tasks/**`, `test/app/**`, `test/features/{plan,today,tasks}/**`, `docs/plans/mvp-gate.md` (new) |
+| W3-B review (code + security + copy) | `docs/reviews/**` (new); targeted bug fixes anywhere **except** the W3-A paths above, each fix small and covered by a test |
+| W3-C localization (after A and B merge) | `lib/l10n/**`, every `*_strings.dart`, and the call sites that use them |
+
 ## Shared rules
 - New code reads contracts through `package:grind/core/core.dart`.
 - Riverpod providers for a feature live in that feature's folder; `lib/core/di.dart` only holds the interface providers.
