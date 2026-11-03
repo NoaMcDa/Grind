@@ -1,0 +1,8 @@
+# Not used: the beta lane relies on Xcode automatic signing.
+# Enable `match` only if you later add CI signing or more than one developer.
+#
+# git_url("https://github.com/YOUR_ORG/grind-certificates") # private repo
+# storage_mode("git")
+# type("appstore")
+# app_identifier(["com.noa.grind"])
+# username("YOUR_APPLE_ID@example.com")

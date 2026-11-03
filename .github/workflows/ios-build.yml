@@ -1,0 +1,29 @@
+name: iOS build check
+
+# OPTIONAL. Compile check only: builds the iOS app without code signing and
+# uploads nothing. It needs macOS runners, which bill at a higher rate than
+# Linux (10x minutes on private repos), so it runs on demand and on release
+# tags rather than on every PR. No signing secrets are used or needed.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
