@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,8 @@ import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/sticker_card.dart';
+import '../calendar/sync/providers.dart';
+import '../calendar/sync/sync_status.dart';
 import '../onboarding/choice_pills.dart';
 import '../onboarding/weekday_hours_editor.dart';
 import 'backup_actions.dart';
@@ -71,11 +75,13 @@ class SettingsScreen extends ConsumerWidget {
               _CalendarProviderTile(
                 label: SettingsStrings.google,
                 providerOf: googleCalendarProvider,
+                statusOf: syncStatusProvider,
               ),
               if (_isIos)
                 _CalendarProviderTile(
                   label: SettingsStrings.apple,
                   providerOf: appleCalendarProvider,
+                  statusOf: appleSyncStatusProvider,
                 ),
             ]),
             _section(SettingsStrings.notifications, [
@@ -488,10 +494,15 @@ class _SmallButton extends StatelessWidget {
 }
 
 class _CalendarProviderTile extends ConsumerStatefulWidget {
-  const _CalendarProviderTile({required this.label, required this.providerOf});
+  const _CalendarProviderTile({
+    required this.label,
+    required this.providerOf,
+    required this.statusOf,
+  });
 
   final String label;
   final Provider<CalendarProvider> providerOf;
+  final StreamProvider<SyncStatus> statusOf;
 
   @override
   ConsumerState<_CalendarProviderTile> createState() =>
@@ -543,14 +554,26 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
       if (!mounted) return;
       setState(() => _failed = !ok);
       await _refresh();
+      // Events should appear now, not at the next 15 minute tick.
+      if (ok) unawaited(_syncNow());
     } catch (_) {
       if (mounted) setState(() => _failed = true);
+    }
+  }
+
+  Future<void> _syncNow() async {
+    try {
+      await ref.read(calendarSyncSchedulerProvider).runNow();
+    } catch (_) {
+      // Failures are shown through the sync status pill.
     }
   }
 
   Future<void> _disconnect() async {
     await _provider.disconnect();
     await _refresh();
+    // Clears the mirrored events of this calendar.
+    unawaited(_syncNow());
   }
 
   Future<void> _toggle(String id) async {
@@ -559,6 +582,7 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
         .read(settingsStoreProvider)
         .setSelectedCalendarIds(next.source, next.ids);
     if (mounted) setState(() => _selection = next);
+    unawaited(_syncNow());
   }
 
   @override
@@ -579,6 +603,7 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
             onPressed: _connected ? _disconnect : _connect,
           ),
         ),
+        if (_connected) _SyncStatusPill(status: ref.watch(widget.statusOf)),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
@@ -615,6 +640,47 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
   }
 }
 
+/// Idle / syncing / last synced hh:mm / error, for one calendar provider.
+class _SyncStatusPill extends StatelessWidget {
+  const _SyncStatusPill({required this.status});
+
+  final AsyncValue<SyncStatus> status;
+
+  static String two(int v) => v.toString().padLeft(2, '0');
+
+  static String label(SyncStatus s) {
+    switch (s.phase) {
+      case SyncPhase.syncing:
+        return SettingsStrings.syncing;
+      case SyncPhase.error:
+        return s.message ?? SettingsStrings.syncError;
+      case SyncPhase.idle:
+        final t = s.lastSyncedAt?.toLocal();
+        return t == null
+            ? SettingsStrings.syncIdle
+            : SettingsStrings.lastSynced('${two(t.hour)}:${two(t.minute)}');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = status.value;
+    if (s == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Pill(
+          key: const ValueKey('sync-status'),
+          height: 28,
+          label: label(s),
+          color: s.isError ? AppColors.card : AppColors.lilac,
+        ),
+      ),
+    );
+  }
+}
+
 class _DataActions extends ConsumerWidget {
   const _DataActions();
 
@@ -641,6 +707,7 @@ class _DataActions extends ConsumerWidget {
       children: [
         SettingsRow(
           label: SettingsStrings.exportBackup,
+          subtitle: SettingsStrings.exportHint,
           trailing: const Icon(
             Icons.file_upload_outlined,
             color: AppColors.ink,

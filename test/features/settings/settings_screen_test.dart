@@ -15,6 +15,8 @@ Future<void> _pump(
   FakeBackupActions? backup,
   FakeCalendarProvider? google,
   InMemorySettingsStore? store,
+  InMemoryCalendarRepository? calendars,
+  Clock? clock,
   TextDirection direction = TextDirection.ltr,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
@@ -27,6 +29,9 @@ Future<void> _pump(
         if (backup != null) backupActionsProvider.overrideWithValue(backup),
         if (google != null) googleCalendarProvider.overrideWithValue(google),
         if (store != null) settingsStoreProvider.overrideWithValue(store),
+        if (calendars != null)
+          calendarRepositoryProvider.overrideWithValue(calendars),
+        if (clock != null) clockProvider.overrideWithValue(clock),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
@@ -156,7 +161,7 @@ void main() {
     await _pump(tester, prefs: InMemoryPreferencesRepository());
     await _scrollTo(tester, find.text('Licences'));
     expect(
-      find.textContaining('Everything stays on this device'),
+      find.textContaining('Your plans stay on this device'),
       findsOneWidget,
     );
   });
@@ -174,4 +179,94 @@ void main() {
       expect(tester.takeException(), isNull);
     }
   });
+
+  testWidgets('connecting pulls events right away and shows the status', (
+    tester,
+  ) async {
+    final now = DateTime.utc(2026, 11, 3, 8, 5);
+    final event = CalendarEvent(
+      id: 'g1',
+      source: CalendarSource.google,
+      externalId: 'g1',
+      title: 'Standup',
+      start: DateTime.utc(2026, 11, 4, 9),
+      end: DateTime.utc(2026, 11, 4, 10),
+      createdAt: now,
+      updatedAt: now,
+    );
+    final google = FakeCalendarProvider(CalendarSource.google, events: [event]);
+    final calendars = InMemoryCalendarRepository();
+    await _pump(
+      tester,
+      prefs: InMemoryPreferencesRepository(),
+      google: google,
+      calendars: calendars,
+      clock: FixedClock(now),
+    );
+    expect(find.byKey(const ValueKey('sync-status')), findsNothing);
+
+    await tester.tap(find.text('Connect'));
+    await tester.pumpAndSettle();
+
+    final stored = await calendars.getBetween(
+      DateTime.utc(2026, 11),
+      DateTime.utc(2026, 12),
+    );
+    expect(stored.map((e) => e.title), ['Standup']);
+    final pill = find.byKey(const ValueKey('sync-status'));
+    final t = now.toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    expect(
+      find.descendant(
+        of: pill,
+        matching: find.text('Last synced ${two(t.hour)}:${two(t.minute)}'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the sync pill shows the engine error message', (tester) async {
+    final google = _BrokenFetch();
+    await _pump(
+      tester,
+      prefs: InMemoryPreferencesRepository(),
+      google: google,
+      clock: FixedClock(DateTime.utc(2026, 11, 3, 8)),
+    );
+    await tester.tap(find.text('Connect'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('sync-status')),
+        matching: find.textContaining("Pip couldn't reach your calendar"),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('settings chips hug their label instead of stretching', (
+    tester,
+  ) async {
+    await _pump(tester, prefs: InMemoryPreferencesRepository());
+    await _scrollTo(tester, find.text('15 min'));
+    final label = tester.getSize(find.text('15 min'));
+    final chip = tester.getSize(
+      find
+          .ancestor(of: find.text('15 min'), matching: find.byType(Container))
+          .first,
+    );
+    expect(chip.width, lessThan(label.width + 40));
+    expect(chip.height, greaterThanOrEqualTo(44));
+  });
+}
+
+class _BrokenFetch extends FakeCalendarProvider {
+  _BrokenFetch() : super(CalendarSource.google);
+
+  @override
+  Future<List<CalendarEvent>> fetchEvents({
+    required List<String> calendarIds,
+    required DateTime from,
+    required DateTime to,
+  }) async => throw StateError('network');
 }
