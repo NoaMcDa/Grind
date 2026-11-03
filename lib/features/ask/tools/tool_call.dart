@@ -27,10 +27,7 @@ sealed class ToolCall {
   Map<String, Object?> argumentsJson();
 
   /// Envelope: `{"name": ..., "arguments": {...}}`.
-  Map<String, Object?> toJson() => {
-    'name': name,
-    'arguments': argumentsJson(),
-  };
+  Map<String, Object?> toJson() => {'name': name, 'arguments': argumentsJson()};
 
   /// Parse a tool call envelope. Throws [ToolCallFormatException] on any
   /// unknown name or malformed arguments.
@@ -55,8 +52,9 @@ sealed class ToolCall {
       MoveTaskCall.toolName => MoveTaskCall.fromArguments(args),
       SplitTaskCall.toolName => SplitTaskCall.fromArguments(args),
       StartFocusCall.toolName => StartFocusCall.fromArguments(args),
-      CreateCalendarEventCall.toolName =>
-        CreateCalendarEventCall.fromArguments(args),
+      CreateCalendarEventCall.toolName => CreateCalendarEventCall.fromArguments(
+        args,
+      ),
       ReplanCall.toolName => ReplanCall.fromArguments(args),
       _ => throw ToolCallFormatException('unknown tool "$name"'),
     };
@@ -368,11 +366,7 @@ class MoveTaskCall extends ToolCall {
 /// honoured against the task's estimated minutes.
 @immutable
 class SplitTaskCall extends ToolCall {
-  SplitTaskCall({
-    required this.taskId,
-    this.chunkMinutes,
-    this.chunkCount,
-  }) {
+  SplitTaskCall({required this.taskId, this.chunkMinutes, this.chunkCount}) {
     if (taskId.isEmpty) {
       throw const ToolCallFormatException('"taskId" must be non-empty');
     }
@@ -438,10 +432,7 @@ class SplitTaskCall extends ToolCall {
 /// session with just a duration is fine.
 @immutable
 class StartFocusCall extends ToolCall {
-  StartFocusCall({
-    required this.plannedMinutes,
-    this.taskId,
-  }) {
+  StartFocusCall({required this.plannedMinutes, this.taskId}) {
     if (plannedMinutes < 1 || plannedMinutes > 240) {
       throw const ToolCallFormatException(
         '"plannedMinutes" must be between 1 and 240',
@@ -581,10 +572,7 @@ class CreateCalendarEventCall extends ToolCall {
 /// cutoff for the plan (used by "re-plan from 14:00").
 @immutable
 class ReplanCall extends ToolCall {
-  ReplanCall({
-    required this.date,
-    this.from,
-  }) {
+  ReplanCall({required this.date, this.from}) {
     if (!_isDateOnly(date)) {
       throw const ToolCallFormatException(
         '"date" must be YYYY-MM-DD with no time component',

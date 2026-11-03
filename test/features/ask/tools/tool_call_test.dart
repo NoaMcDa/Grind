@@ -141,19 +141,12 @@ void main() {
 
     test('rejects an end before/equal to start', () {
       expect(
-        () => AddTaskCall(
-          title: 'x',
-          scheduledStart: end,
-          scheduledEnd: start,
-        ),
+        () => AddTaskCall(title: 'x', scheduledStart: end, scheduledEnd: start),
         throwsA(isA<ToolCallFormatException>()),
       );
       expect(
-        () => AddTaskCall(
-          title: 'x',
-          scheduledStart: start,
-          scheduledEnd: start,
-        ),
+        () =>
+            AddTaskCall(title: 'x', scheduledStart: start, scheduledEnd: start),
         throwsA(isA<ToolCallFormatException>()),
       );
     });
@@ -198,14 +191,16 @@ void main() {
     });
 
     test('accepts a non-UTC ISO timestamp and normalises to UTC', () {
-      final decoded = ToolCall.fromJson({
-        'name': 'addTask',
-        'arguments': {
-          'title': 'Gym',
-          'scheduledStart': '2026-11-03T11:00:00+02:00',
-          'scheduledEnd': '2026-11-03T11:45:00+02:00',
-        },
-      }) as AddTaskCall;
+      final decoded =
+          ToolCall.fromJson({
+                'name': 'addTask',
+                'arguments': {
+                  'title': 'Gym',
+                  'scheduledStart': '2026-11-03T11:00:00+02:00',
+                  'scheduledEnd': '2026-11-03T11:45:00+02:00',
+                },
+              })
+              as AddTaskCall;
       expect(decoded.scheduledStart, DateTime.utc(2026, 11, 3, 9));
       expect(decoded.scheduledEnd, DateTime.utc(2026, 11, 3, 9, 45));
     });
@@ -230,11 +225,8 @@ void main() {
 
     test('rejects empty taskId', () {
       expect(
-        () => MoveTaskCall(
-          taskId: '',
-          scheduledStart: start,
-          scheduledEnd: end,
-        ),
+        () =>
+            MoveTaskCall(taskId: '', scheduledStart: start, scheduledEnd: end),
         throwsA(isA<ToolCallFormatException>()),
       );
     });
