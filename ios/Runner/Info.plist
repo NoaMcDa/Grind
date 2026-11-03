@@ -51,6 +51,23 @@
 	<string>Grind adds the tasks you schedule to your calendar, so your plan shows up next to everything else.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Grind reads your calendar so Pip plans tasks around the time you already have booked, and adds the tasks you schedule back to it. Your events stay on this phone.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>FlutterDeepLinkingEnabled</key>
+	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>grind</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
