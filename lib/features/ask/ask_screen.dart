@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -7,14 +8,14 @@ import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 
 /// Assistant layer: natural-language capture and gentle re-planning.
-class AskScreen extends StatefulWidget {
+class AskScreen extends ConsumerStatefulWidget {
   const AskScreen({super.key});
 
   @override
-  State<AskScreen> createState() => _AskScreenState();
+  ConsumerState<AskScreen> createState() => _AskScreenState();
 }
 
-class _AskScreenState extends State<AskScreen> {
+class _AskScreenState extends ConsumerState<AskScreen> {
   bool _added = false;
   bool _planned = false;
   final _controller = TextEditingController();

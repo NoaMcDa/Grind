@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -9,14 +10,17 @@ import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 
 /// Productive layer: a full-screen focus session with Pip cheering.
-class FocusScreen extends StatefulWidget {
-  const FocusScreen({super.key});
+class FocusScreen extends ConsumerStatefulWidget {
+  const FocusScreen({super.key, this.taskId});
+
+  /// Task to focus on, from the `/focus?taskId=` deep link.
+  final String? taskId;
 
   @override
-  State<FocusScreen> createState() => _FocusScreenState();
+  ConsumerState<FocusScreen> createState() => _FocusScreenState();
 }
 
-class _FocusScreenState extends State<FocusScreen> {
+class _FocusScreenState extends ConsumerState<FocusScreen> {
   bool _paused = false;
 
   static const _remaining = '18:42';

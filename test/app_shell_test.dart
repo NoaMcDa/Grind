@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grind/app/demo_seed.dart';
 import 'package:grind/main.dart';
 
 import 'test_fonts.dart';
@@ -14,7 +16,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const GrindApp());
+    await tester.pumpWidget(
+      ProviderScope(overrides: demoOverrides(), child: const GrindApp()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Good morning!'), findsOneWidget);
@@ -38,7 +42,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(const GrindApp());
+    await tester.pumpWidget(
+      ProviderScope(overrides: demoOverrides(), child: const GrindApp()),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('1 of 5 today'), findsOneWidget);

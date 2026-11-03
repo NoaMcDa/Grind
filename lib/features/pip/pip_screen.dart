@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -8,14 +9,14 @@ import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 
 /// Cheering layer: Pip's mood, momentum, the week, wins and cosmetic unlocks.
-class PipScreen extends StatefulWidget {
+class PipScreen extends ConsumerStatefulWidget {
   const PipScreen({super.key});
 
   @override
-  State<PipScreen> createState() => _PipScreenState();
+  ConsumerState<PipScreen> createState() => _PipScreenState();
 }
 
-class _PipScreenState extends State<PipScreen> {
+class _PipScreenState extends ConsumerState<PipScreen> {
   PipAccessory _equipped = PipAccessory.scarf;
 
   static const _week = <double>[62, 48, 14, 72, 54, 36, 44];

@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/core.dart';
+import '../today/today_providers.dart' show formatClock;
+import 'plan_providers.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -21,60 +27,97 @@ class _Block {
     this.end,
     this.kind, {
     this.focus = false,
+    this.done = false,
   });
+
+  factory _Block.fromTask(Task t) {
+    final kind = switch (t.category) {
+      'break' => _Kind.lunch,
+      'light' => _Kind.light,
+      'move' => _Kind.mint,
+      _ => _Kind.deep,
+    };
+    final s = t.scheduledStart!.toLocal();
+    final e = t.scheduledEnd!.toLocal();
+    return _Block(
+      t.id,
+      t.title,
+      kind == _Kind.lunch
+          ? formatClock(s)
+          : '${formatClock(s)}\u2013${formatClock(e)}',
+      s.hour + s.minute / 60,
+      e.hour + e.minute / 60,
+      kind,
+      focus: t.priority == 1,
+      done: t.isDone,
+    );
+  }
+
   final String id, title, time;
   final double start, end;
   final _Kind kind;
-  final bool focus;
+  final bool focus, done;
 }
 
 class _Event {
   const _Event(this.title, this.time, this.start, this.end);
+
+  factory _Event.fromCalendar(CalendarEvent e) {
+    final s = e.start.toLocal();
+    final end = e.end.toLocal();
+    return _Event(
+      e.title,
+      '${formatClock(s)}\u2013${formatClock(end)}',
+      s.hour + s.minute / 60,
+      end.hour + end.minute / 60,
+    );
+  }
+
   final String title, time;
   final double start, end;
 }
 
-const _events = [
-  _Event('Lecture: Computer Vision', '10:00–11:30', 10, 11.5),
-  _Event('Seminar with supervisor', '14:00–15:30', 14, 15.5),
-];
-
-const _blocks = [
-  _Block(
-    'thesis',
-    'Thesis: write related-work section',
-    '08:00–09:30',
-    8,
-    9.5,
-    _Kind.deep,
-    focus: true,
-  ),
-  _Block('lunch', 'Lunch break', '12:00', 12, 12.5, _Kind.lunch),
-  _Block('lab', 'Deep learning lab 4', '12:30–13:15', 12.5, 13.25, _Kind.deep),
-  _Block('read', 'Read 2 papers', '16:00–16:45', 16, 16.75, _Kind.light),
-  _Block('gym', 'Gym', '17:15–18:00', 17.25, 18, _Kind.mint),
-];
-
 /// Productive layer: the day drafted by Pip around calendar events.
-class PlanScreen extends StatefulWidget {
-  const PlanScreen({
-    super.key,
-    required this.onStartFocus,
-    required this.onAdd,
-  });
+///
+/// [onStartFocus] and [onAdd] default to navigating with go_router.
+class PlanScreen extends ConsumerWidget {
+  const PlanScreen({super.key, this.onStartFocus, this.onAdd});
 
-  final VoidCallback onStartFocus;
-  final VoidCallback onAdd;
+  final VoidCallback? onStartFocus;
+  final VoidCallback? onAdd;
+
+  void _startFocus(BuildContext context) =>
+      (onStartFocus ?? () => context.go('/focus'))();
+  void _add(BuildContext context) => (onAdd ?? () => context.go('/ask'))();
+
+  Future<void> _toggle(WidgetRef ref, String id) async {
+    final repo = ref.read(taskRepositoryProvider);
+    final t = await repo.getById(id);
+    if (t == null) return;
+    final now = ref.read(clockProvider).now().toUtc();
+    await repo.upsert(
+      t.copyWith(
+        status: t.isDone ? TaskStatus.open : TaskStatus.done,
+        completedAt: t.isDone ? null : now,
+        updatedAt: now,
+      ),
+    );
+  }
 
   @override
-  State<PlanScreen> createState() => _PlanScreenState();
-}
-
-class _PlanScreenState extends State<PlanScreen> {
-  final Set<String> _done = {'thesis', 'lunch'};
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final blocks = [
+      for (final t
+          in ref.watch(planTasksProvider).valueOrNull ?? const <Task>[])
+        _Block.fromTask(t),
+    ];
+    final events = [
+      for (final e
+          in ref.watch(planEventsProvider).valueOrNull ??
+              const <CalendarEvent>[])
+        _Event.fromCalendar(e),
+    ];
+    final doneCount = blocks.where((b) => b.done).length;
     final top = MediaQuery.paddingOf(context).top;
     return Stack(
       children: [
@@ -84,9 +127,9 @@ class _PlanScreenState extends State<PlanScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Flexible(
+                Flexible(
                   child: Pill(
-                    label: 'Thu, Oct 29',
+                    label: ref.watch(planDayLabelProvider),
                     height: 30,
                     fontSize: 13,
                     border: AppStroke.border,
@@ -96,7 +139,7 @@ class _PlanScreenState extends State<PlanScreen> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Pill(
-                    label: '${_done.length} of 5 done',
+                    label: '$doneCount of ${blocks.length} done',
                     color: AppColors.mint,
                     height: 30,
                     fontSize: 13,
@@ -121,7 +164,7 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Pip arranged 5 tasks around 2 classes. Drag to tweak.',
+                        'Pip arranged ${blocks.length} tasks around ${events.length} classes. Drag to tweak.',
                         style: AppText.body(
                           size: 13,
                           color: AppColors.muted,
@@ -187,8 +230,8 @@ class _PlanScreenState extends State<PlanScreen> {
                       ),
                     ),
                   ],
-                  for (final e in _events) _eventCard(e),
-                  for (final b in _blocks) _blockCard(b),
+                  for (final e in events) _eventCard(e),
+                  for (final b in blocks) _blockCard(context, ref, b),
                 ],
               ),
             ),
@@ -231,7 +274,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   shadow: 4,
                   fontSize: 15,
                   icon: const Icon(Icons.add),
-                  onPressed: widget.onAdd,
+                  onPressed: () => _add(context),
                 ),
               ],
             ),
@@ -299,8 +342,8 @@ class _PlanScreenState extends State<PlanScreen> {
     );
   }
 
-  Widget _blockCard(_Block b) {
-    final done = _done.contains(b.id);
+  Widget _blockCard(BuildContext context, WidgetRef ref, _Block b) {
+    final done = b.done;
     final top = (b.start - _startHour) * _hourHeight;
     final height = (b.end - b.start) * _hourHeight;
     final bg = switch (b.kind) {
@@ -312,8 +355,7 @@ class _PlanScreenState extends State<PlanScreen> {
     final fg = b.kind == _Kind.deep ? Colors.white : AppColors.ink;
     final deco = done ? TextDecoration.lineThrough : null;
 
-    void toggle() =>
-        setState(() => done ? _done.remove(b.id) : _done.add(b.id));
+    void toggle() => _toggle(ref, b.id);
 
     if (b.kind == _Kind.lunch) {
       return Positioned(
@@ -483,7 +525,7 @@ class _PlanScreenState extends State<PlanScreen> {
                   fontSize: 13,
                   horizontalPadding: 12,
                   icon: const Icon(Icons.play_arrow),
-                  onPressed: widget.onStartFocus,
+                  onPressed: () => _startFocus(context),
                 ),
               ),
           ],
