@@ -2287,7 +2287,7 @@
   "@recapWins": {
     "description": "Recap wins label"
   },
-  "recapRolledOverLine": "{count, plural, =0{Nothing needed moving.} =1{One task moved to another day. That's planning, not falling behind.} other{{count} tasks moved to another day. That's planning, not falling behind.}}",
+  "recapRolledOverLine": "{count, plural, =0{Everything stayed on its day.} =1{One task moved to another day. That's planning, and it counts.} other{{count} tasks moved to another day. That's planning, and it counts.}}",
   "@recapRolledOverLine": {
     "description": "Recap rolled-over line, never guilt",
     "placeholders": {

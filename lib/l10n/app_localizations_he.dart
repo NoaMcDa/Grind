@@ -1698,9 +1698,9 @@ class AppLocalizationsHe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count משימות עברו ליום אחר. זה תכנון, לא פיגור.',
-      one: 'משימה אחת עברה ליום אחר. זה תכנון, לא פיגור.',
-      zero: 'שום דבר לא היה צריך לזוז.',
+      other: '$count משימות עברו ליום אחר. זה תכנון, וגם זה נחשב.',
+      one: 'משימה אחת עברה ליום אחר. זה תכנון, וגם זה נחשב.',
+      zero: 'הכול נשאר ביום שלו.',
     );
     return '$_temp0';
   }

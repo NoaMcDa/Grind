@@ -3011,7 +3011,7 @@ abstract class AppLocalizations {
   /// Recap rolled-over line, never guilt
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{Nothing needed moving.} =1{One task moved to another day. That\'s planning, not falling behind.} other{{count} tasks moved to another day. That\'s planning, not falling behind.}}'**
+  /// **'{count, plural, =0{Everything stayed on its day.} =1{One task moved to another day. That\'s planning, and it counts.} other{{count} tasks moved to another day. That\'s planning, and it counts.}}'**
   String recapRolledOverLine(int count);
 
   /// Recap share button

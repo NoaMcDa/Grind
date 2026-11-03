@@ -485,7 +485,7 @@
   "recapStatHit": "מכסות שהושגו",
   "recapStatRolled": "עברו הלאה",
   "recapWins": "ניצחונות שרשמת",
-  "recapRolledOverLine": "{count, plural, =0{שום דבר לא היה צריך לזוז.} =1{משימה אחת עברה ליום אחר. זה תכנון, לא פיגור.} other{{count} משימות עברו ליום אחר. זה תכנון, לא פיגור.}}",
+  "recapRolledOverLine": "{count, plural, =0{הכול נשאר ביום שלו.} =1{משימה אחת עברה ליום אחר. זה תכנון, וגם זה נחשב.} other{{count} משימות עברו ליום אחר. זה תכנון, וגם זה נחשב.}}",
   "recapShare": "לשתף",
   "recapShareHeader": "השבוע שלי עם פיפ ({range})",
   "recapShareWins": "ניצחונות: {list}",

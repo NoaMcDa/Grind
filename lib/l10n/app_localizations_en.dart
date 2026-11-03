@@ -1717,10 +1717,9 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count tasks moved to another day. That\'s planning, not falling behind.',
-      one:
-          'One task moved to another day. That\'s planning, not falling behind.',
-      zero: 'Nothing needed moving.',
+          '$count tasks moved to another day. That\'s planning, and it counts.',
+      one: 'One task moved to another day. That\'s planning, and it counts.',
+      zero: 'Everything stayed on its day.',
     );
     return '$_temp0';
   }
