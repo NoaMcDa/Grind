@@ -44,6 +44,10 @@ String localizePlanReason(AppLocalizations l, String reason) {
       return l.planNothingToSchedule;
     case 'no free gap before the end of the week':
       return l.planNoRoomThisWeek;
+    case 'keeps your focus window clear':
+      return l.planReasonFocusClear;
+    case 'in the order you chose':
+      return l.planReasonYourOrder;
   }
   var r = m(r'due (.+)');
   if (r != null) return l.planReasonDue(_dayWord(l, r[1]!));
@@ -68,6 +72,8 @@ String localizePlanReason(AppLocalizations l, String reason) {
       _deadlineWord(l, r[2]!),
     );
   }
+  r = m(r'fills a (\d+)-minute gap');
+  if (r != null) return l.planReasonFillsGap(int.parse(r[1]!));
   r = m(r'focus blocks are full (.+)');
   if (r != null) return l.planReasonFocusFull(_by(l, r[1]!));
   r = m(r'only (\d+) of (\d+) min fit (.+)');
@@ -111,6 +117,7 @@ String _deadlineWord(AppLocalizations l, String w) {
 /// "this week" or "before" plus a deadline or a day.
 String _by(AppLocalizations l, String by) {
   if (by == 'this week') return l.planByThisWeek;
+  if (by == 'today') return l.planByToday;
   if (by.startsWith('before ')) {
     final rest = by.substring(7);
     final isDeadline = rest.endsWith('deadline');

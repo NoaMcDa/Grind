@@ -3044,5 +3044,114 @@
   "recapShareFooter": "Sent from Grind",
   "@recapShareFooter": {
     "description": "Shared recap: last line"
+  },
+  "planReasonFillsGap": "fills a {minutes}-minute gap",
+  "@planReasonFillsGap": {
+    "description": "Scheduler reason: a short task fills a gap",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planReasonFocusClear": "keeps your focus window clear",
+  "@planReasonFocusClear": {
+    "description": "Scheduler reason: a light task placed outside the focus window"
+  },
+  "planReasonYourOrder": "in the order you chose",
+  "@planReasonYourOrder": {
+    "description": "Day draft reason after the user reorders"
+  },
+  "planByToday": "today",
+  "@planByToday": {
+    "description": "Scheduler: 'no free slot today'"
+  },
+  "todayPlanDayTitle": "Plan my day with Pip",
+  "@todayPlanDayTitle": {
+    "description": "Today card title (morning invitation)"
+  },
+  "todayPlanDayBody": "Pip can sketch today around your calendar. Ready when you are.",
+  "@todayPlanDayBody": {
+    "description": "Today card body"
+  },
+  "todayPlanDayAction": "Draft my day",
+  "@todayPlanDayAction": {
+    "description": "Today card button"
+  },
+  "todayPlanDayHide": "Hide for today",
+  "@todayPlanDayHide": {
+    "description": "Today card close button label"
+  },
+  "draftTitle": "Your day, drafted",
+  "@draftTitle": {
+    "description": "Day draft sheet title"
+  },
+  "draftSummary": "Pip found {free} free today and drafted {planned}.",
+  "@draftSummary": {
+    "description": "Day draft summary; free and planned are durations",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "draftNothing": "Nothing to draft right now. The day is yours.",
+  "@draftNothing": {
+    "description": "Day draft: no open tasks"
+  },
+  "draftNoTime": "No free time left today. Tomorrow is a fresh page.",
+  "@draftNoTime": {
+    "description": "Day draft: no free time"
+  },
+  "draftOrderLabel": "Today, in order",
+  "@draftOrderLabel": {
+    "description": "Day draft section label"
+  },
+  "draftLater": "{n, plural, =1{One more thing can wait for another day.} other{{n} more things can wait for another day.}}",
+  "@draftLater": {
+    "description": "Day draft: tasks left for later",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "draftAcceptAll": "Accept all",
+  "@draftAcceptAll": {
+    "description": "Day draft: apply every block"
+  },
+  "draftRemove": "Remove {title} from the draft",
+  "@draftRemove": {
+    "description": "Day draft row action label",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "draftMoveEarlier": "Move {title} earlier",
+  "@draftMoveEarlier": {
+    "description": "Day draft row action label",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "draftMoveLater": "Move {title} later",
+  "@draftMoveLater": {
+    "description": "Day draft row action label",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "draftNoRoom": "That one does not fit there",
+  "@draftNoRoom": {
+    "description": "Day draft toast when a move does not fit"
   }
 }

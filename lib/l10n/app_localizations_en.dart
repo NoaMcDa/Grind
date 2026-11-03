@@ -2227,4 +2227,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'Sent from Grind';
+
+  @override
+  String planReasonFillsGap(int minutes) {
+    return 'fills a $minutes-minute gap';
+  }
+
+  @override
+  String get planReasonFocusClear => 'keeps your focus window clear';
+
+  @override
+  String get planReasonYourOrder => 'in the order you chose';
+
+  @override
+  String get planByToday => 'today';
+
+  @override
+  String get todayPlanDayTitle => 'Plan my day with Pip';
+
+  @override
+  String get todayPlanDayBody =>
+      'Pip can sketch today around your calendar. Ready when you are.';
+
+  @override
+  String get todayPlanDayAction => 'Draft my day';
+
+  @override
+  String get todayPlanDayHide => 'Hide for today';
+
+  @override
+  String get draftTitle => 'Your day, drafted';
+
+  @override
+  String draftSummary(String free, String planned) {
+    return 'Pip found $free free today and drafted $planned.';
+  }
+
+  @override
+  String get draftNothing => 'Nothing to draft right now. The day is yours.';
+
+  @override
+  String get draftNoTime =>
+      'No free time left today. Tomorrow is a fresh page.';
+
+  @override
+  String get draftOrderLabel => 'Today, in order';
+
+  @override
+  String draftLater(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n more things can wait for another day.',
+      one: 'One more thing can wait for another day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get draftAcceptAll => 'Accept all';
+
+  @override
+  String draftRemove(String title) {
+    return 'Remove $title from the draft';
+  }
+
+  @override
+  String draftMoveEarlier(String title) {
+    return 'Move $title earlier';
+  }
+
+  @override
+  String draftMoveLater(String title) {
+    return 'Move $title later';
+  }
+
+  @override
+  String get draftNoRoom => 'That one does not fit there';
 }

@@ -3721,6 +3721,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent from Grind'**
   String get recapShareFooter;
+
+  /// Scheduler reason: a short task fills a gap
+  ///
+  /// In en, this message translates to:
+  /// **'fills a {minutes}-minute gap'**
+  String planReasonFillsGap(int minutes);
+
+  /// Scheduler reason: a light task placed outside the focus window
+  ///
+  /// In en, this message translates to:
+  /// **'keeps your focus window clear'**
+  String get planReasonFocusClear;
+
+  /// Day draft reason after the user reorders
+  ///
+  /// In en, this message translates to:
+  /// **'in the order you chose'**
+  String get planReasonYourOrder;
+
+  /// Scheduler: 'no free slot today'
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get planByToday;
+
+  /// Today card title (morning invitation)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan my day with Pip'**
+  String get todayPlanDayTitle;
+
+  /// Today card body
+  ///
+  /// In en, this message translates to:
+  /// **'Pip can sketch today around your calendar. Ready when you are.'**
+  String get todayPlanDayBody;
+
+  /// Today card button
+  ///
+  /// In en, this message translates to:
+  /// **'Draft my day'**
+  String get todayPlanDayAction;
+
+  /// Today card close button label
+  ///
+  /// In en, this message translates to:
+  /// **'Hide for today'**
+  String get todayPlanDayHide;
+
+  /// Day draft sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Your day, drafted'**
+  String get draftTitle;
+
+  /// Day draft summary; free and planned are durations
+  ///
+  /// In en, this message translates to:
+  /// **'Pip found {free} free today and drafted {planned}.'**
+  String draftSummary(String free, String planned);
+
+  /// Day draft: no open tasks
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to draft right now. The day is yours.'**
+  String get draftNothing;
+
+  /// Day draft: no free time
+  ///
+  /// In en, this message translates to:
+  /// **'No free time left today. Tomorrow is a fresh page.'**
+  String get draftNoTime;
+
+  /// Day draft section label
+  ///
+  /// In en, this message translates to:
+  /// **'Today, in order'**
+  String get draftOrderLabel;
+
+  /// Day draft: tasks left for later
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One more thing can wait for another day.} other{{n} more things can wait for another day.}}'**
+  String draftLater(int n);
+
+  /// Day draft: apply every block
+  ///
+  /// In en, this message translates to:
+  /// **'Accept all'**
+  String get draftAcceptAll;
+
+  /// Day draft row action label
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {title} from the draft'**
+  String draftRemove(String title);
+
+  /// Day draft row action label
+  ///
+  /// In en, this message translates to:
+  /// **'Move {title} earlier'**
+  String draftMoveEarlier(String title);
+
+  /// Day draft row action label
+  ///
+  /// In en, this message translates to:
+  /// **'Move {title} later'**
+  String draftMoveLater(String title);
+
+  /// Day draft toast when a move does not fit
+  ///
+  /// In en, this message translates to:
+  /// **'That one does not fit there'**
+  String get draftNoRoom;
 }
 
 class _AppLocalizationsDelegate

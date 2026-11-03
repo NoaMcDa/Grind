@@ -2207,4 +2207,80 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'נשלח מ-Grind';
+
+  @override
+  String planReasonFillsGap(int minutes) {
+    return 'ממלא חלון של $minutes דקות';
+  }
+
+  @override
+  String get planReasonFocusClear => 'שומר את חלון הפוקוס פנוי';
+
+  @override
+  String get planReasonYourOrder => 'לפי הסדר שבחרת';
+
+  @override
+  String get planByToday => 'היום';
+
+  @override
+  String get todayPlanDayTitle => 'לתכנן את היום עם פיפ';
+
+  @override
+  String get todayPlanDayBody =>
+      'פיפ יכול לשרטט את היום סביב היומן. מתי שנוח לך.';
+
+  @override
+  String get todayPlanDayAction => 'טיוטה ליום שלי';
+
+  @override
+  String get todayPlanDayHide => 'להסתיר להיום';
+
+  @override
+  String get draftTitle => 'היום שלך, בטיוטה';
+
+  @override
+  String draftSummary(String free, String planned) {
+    return 'זמן פנוי היום: $free. בטיוטה: $planned.';
+  }
+
+  @override
+  String get draftNothing => 'אין מה לשבץ כרגע. היום שלך.';
+
+  @override
+  String get draftNoTime => 'לא נשאר זמן פנוי היום. מחר דף חדש.';
+
+  @override
+  String get draftOrderLabel => 'היום, לפי הסדר';
+
+  @override
+  String draftLater(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n דברים נוספים יכולים לחכות ליום אחר.',
+      one: 'דבר אחד נוסף יכול לחכות ליום אחר.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get draftAcceptAll => 'לאשר הכול';
+
+  @override
+  String draftRemove(String title) {
+    return 'להסיר את $title מהטיוטה';
+  }
+
+  @override
+  String draftMoveEarlier(String title) {
+    return 'להקדים את $title';
+  }
+
+  @override
+  String draftMoveLater(String title) {
+    return 'לדחות את $title';
+  }
+
+  @override
+  String get draftNoRoom => 'זה לא נכנס שם';
 }
