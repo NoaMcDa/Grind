@@ -37,6 +37,10 @@ abstract final class SettingsStrings {
   static const planning = 'Planning';
   static const workingHours = 'Working hours';
   static const weekStart = 'Week starts on';
+  static const timeZone = 'Time zone';
+  static const timeZoneSearch = 'Search, e.g. London';
+  static const timeZoneNoMatch = 'No zone by that name. Try a city.';
+  static String useDeviceZone(String zone) => 'Use this device: $zone';
   static const sunday = 'Sunday';
   static const monday = 'Monday';
 

@@ -19,6 +19,8 @@ import 'quiet_hours.dart';
 import 'settings_row.dart';
 import 'settings_store.dart';
 import 'settings_strings.dart';
+import 'time_zone/device_time_zone.dart';
+import 'time_zone/time_zone_picker.dart';
 
 bool get _isIos => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -115,8 +117,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   onChanged: (v) => _update(
                     ref,
-                    (p) =>
-                        p.copyWith(quietHours: v ? defaultQuietHours : null),
+                    (p) => p.copyWith(quietHours: v ? defaultQuietHours : null),
                   ),
                 ),
               ),
@@ -130,6 +131,7 @@ class SettingsScreen extends ConsumerWidget {
               _PromptTimes(picker: picker),
             ]),
             _section(SettingsStrings.planning, [
+              _TimeZoneRow(timeZoneName: prefs.timeZoneName),
               const SettingsRow(label: SettingsStrings.workingHours),
               WeekdayHoursEditor(
                 value: prefs.workingHours,
@@ -274,6 +276,36 @@ class _TimeRangeRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The zone every day boundary and reminder uses; opens the picker.
+class _TimeZoneRow extends ConsumerWidget {
+  const _TimeZoneRow({required this.timeZoneName});
+
+  final String timeZoneName;
+
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final device = await ref.read(deviceTimeZoneProvider).current();
+    if (!context.mounted) return;
+    final picked = await showTimeZonePicker(
+      context,
+      current: timeZoneName,
+      deviceZone: device,
+    );
+    if (picked == null) return;
+    await saveTimeZone(ref.read(preferencesRepositoryProvider), picked);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsRow(
+      key: const ValueKey('time-zone-row'),
+      label: SettingsStrings.timeZone,
+      subtitle: timeZoneLabel(timeZoneName),
+      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.ink),
+      onTap: () => _edit(context, ref),
     );
   }
 }

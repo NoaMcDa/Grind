@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/onboarding/onboarding_flow.dart';
 import 'package:grind/features/onboarding/weekday_hours_editor.dart';
+import 'package:grind/features/calendar/google/key_value_store.dart';
+import 'package:grind/features/settings/time_zone/device_time_zone.dart';
 import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
@@ -18,6 +20,7 @@ Future<void> _pump(
   TextDirection direction = TextDirection.ltr,
   Locale locale = const Locale('en'),
   MinutesPicker? picker,
+  DeviceTimeZone? device,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -29,6 +32,8 @@ Future<void> _pump(
         if (notifications != null)
           notificationServiceProvider.overrideWithValue(notifications),
         if (google != null) googleCalendarProvider.overrideWithValue(google),
+        if (device != null) deviceTimeZoneProvider.overrideWithValue(device),
+        deviceTimeZoneMemoryProvider.overrideWithValue(InMemoryKeyValueStore()),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
@@ -109,6 +114,16 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('onboarding-quiet-switch')));
     await tester.pumpAndSettle();
     expect((await prefs.get()).quietHours, isNotNull);
+  });
+
+  testWidgets('first run takes the device time zone', (tester) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(
+      tester,
+      prefs: prefs,
+      device: FakeDeviceTimeZone('America/Los_Angeles'),
+    );
+    expect((await prefs.get()).timeZoneName, 'America/Los_Angeles');
   });
 
   testWidgets('skipping every step still finishes', (tester) async {

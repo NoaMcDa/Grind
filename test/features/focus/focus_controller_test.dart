@@ -188,7 +188,10 @@ void main() {
     clock.advance(const Duration(minutes: 25));
     await ctrl.tick();
     expect(stateOf(c).phase, FocusPhase.onBreak);
-    final all = await sessions.getBetween(t0, clock.now().add(const Duration(hours: 1)));
+    final all = await sessions.getBetween(
+      t0,
+      clock.now().add(const Duration(hours: 1)),
+    );
     expect(all, hasLength(1));
     expect(all.single.kind, FocusSessionKind.focus);
   });

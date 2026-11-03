@@ -5,6 +5,7 @@ import 'package:grind/core/core.dart';
 import 'package:grind/features/settings/backup_actions.dart';
 import 'package:grind/features/settings/settings_screen.dart';
 import 'package:grind/features/settings/settings_store.dart';
+import 'package:grind/features/settings/time_zone/device_time_zone.dart';
 import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
@@ -20,6 +21,7 @@ Future<void> _pump(
   Clock? clock,
   TextDirection direction = TextDirection.ltr,
   int Function()? pick,
+  DeviceTimeZone? device,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -34,6 +36,7 @@ Future<void> _pump(
         if (calendars != null)
           calendarRepositoryProvider.overrideWithValue(calendars),
         if (clock != null) clockProvider.overrideWithValue(clock),
+        if (device != null) deviceTimeZoneProvider.overrideWithValue(device),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
@@ -136,6 +139,49 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('quiet-start')));
     await tester.pumpAndSettle();
     expect((await prefs.get()).quietHours!.startMinutes, 23 * 60 + 30);
+  });
+
+  testWidgets('time zone row: device zone in one tap, or search', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(
+      tester,
+      prefs: prefs,
+      device: FakeDeviceTimeZone('Europe/London'),
+    );
+    final row = find.byKey(const ValueKey('time-zone-row'));
+    await _scrollTo(tester, row);
+    expect(find.text('Asia/Jerusalem'), findsOneWidget);
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tz-use-device')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).timeZoneName, 'Europe/London');
+    expect(find.text('Europe/London'), findsOneWidget);
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('tz-search')), 'new york');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tz-America/New_York')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).timeZoneName, 'America/New_York');
+    expect(find.text('America/New York'), findsOneWidget);
+  });
+
+  testWidgets('time zone picker hides an unknown device zone', (tester) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs, device: FakeDeviceTimeZone('Nope/Zone'));
+    final row = find.byKey(const ValueKey('time-zone-row'));
+    await _scrollTo(tester, row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tz-use-device')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('tz-search')), 'zzzz');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No zone by that name'), findsOneWidget);
   });
 
   testWidgets('calendar connect, pick calendars and disconnect', (

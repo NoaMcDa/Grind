@@ -139,9 +139,7 @@ void main() {
     expect(stored.win, 'Drafted the intro');
   });
 
-  testWidgets('a session paused before a restart opens paused', (
-    tester,
-  ) async {
+  testWidgets('a session paused before a restart opens paused', (tester) async {
     final clock = FixedClock(testNow);
     final start = clock.now().toUtc().subtract(const Duration(minutes: 30));
     await pumpGrindApp(

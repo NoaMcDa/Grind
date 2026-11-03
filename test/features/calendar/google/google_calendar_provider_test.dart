@@ -236,8 +236,11 @@ void main() {
       final e = timed('a', at(4, 10), at(4, 11))
         ..htmlLink = 'https://www.google.com/calendar/event?eid=YQ';
       expect(
-        GoogleEventMapper.toDomain(e, calendarId: 'primary', now: now)!
-            .htmlLink,
+        GoogleEventMapper.toDomain(
+          e,
+          calendarId: 'primary',
+          now: now,
+        )!.htmlLink,
         'https://www.google.com/calendar/event?eid=YQ',
       );
       e.htmlLink = 'javascript:alert(1)';

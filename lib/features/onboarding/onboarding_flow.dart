@@ -12,6 +12,7 @@ import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 import '../calendar/sync/providers.dart';
 import '../settings/quiet_hours.dart';
+import '../settings/time_zone/device_time_zone.dart';
 import 'choice_pills.dart';
 import 'onboarding_providers.dart';
 import '../../l10n/l10n.dart';
@@ -38,6 +39,13 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   final _controller = PageController();
   int _step = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // First run: plan days in the zone the device is set to.
+    unawaited(syncDeviceTimeZone(ref, force: true));
+  }
 
   @override
   void dispose() {
@@ -243,9 +251,7 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
   Future<void> _setQuiet(bool on) async {
     final repo = ref.read(preferencesRepositoryProvider);
     final prefs = await repo.get();
-    await repo.save(
-      prefs.copyWith(quietHours: on ? defaultQuietHours : null),
-    );
+    await repo.save(prefs.copyWith(quietHours: on ? defaultQuietHours : null));
   }
 
   @override
