@@ -15,9 +15,12 @@ import '../onboarding/choice_pills.dart';
 import '../onboarding/weekday_hours_editor.dart';
 import 'backup_actions.dart';
 import 'calendar_selection.dart';
+import 'quiet_hours.dart';
 import 'settings_row.dart';
 import 'settings_store.dart';
 import 'settings_strings.dart';
+import 'time_zone/device_time_zone.dart';
+import 'time_zone/time_zone_picker.dart';
 
 bool get _isIos => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -114,14 +117,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   onChanged: (v) => _update(
                     ref,
-                    (p) => p.copyWith(
-                      quietHours: v
-                          ? const TimeRange(
-                              startMinutes: 22 * 60,
-                              endMinutes: 24 * 60,
-                            )
-                          : null,
-                    ),
+                    (p) => p.copyWith(quietHours: v ? defaultQuietHours : null),
                   ),
                 ),
               ),
@@ -135,6 +131,7 @@ class SettingsScreen extends ConsumerWidget {
               _PromptTimes(picker: picker),
             ]),
             _section(SettingsStrings.planning, [
+              _TimeZoneRow(timeZoneName: prefs.timeZoneName),
               const SettingsRow(label: SettingsStrings.workingHours),
               WeekdayHoursEditor(
                 value: prefs.workingHours,
@@ -237,16 +234,11 @@ class _TimeRangeRow extends StatelessWidget {
         start ? range.startMinutes : range.endMinutes,
       );
       if (v == null) return;
-      var s = range.startMinutes, e = range.endMinutes;
-      if (start) {
-        s = v;
-        if (e <= s) e = 24 * 60;
-      } else {
-        e = v;
-        if (e <= s) s = 0;
-      }
-      if (s >= 24 * 60 || e <= s) return;
-      onChanged(TimeRange(startMinutes: s, endMinutes: e));
+      // An end before the start crosses midnight (22:00 – 07:00).
+      final next = start
+          ? changeQuietHours(range, start: v)
+          : changeQuietHours(range, end: v);
+      if (next != null) onChanged(next);
     }
 
     return Padding(
@@ -256,6 +248,18 @@ class _TimeRangeRow extends StatelessWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              formatQuietHours(range),
+              key: const ValueKey('quiet-summary'),
+              style: AppText.body(
+                size: 13,
+                weight: FontWeight.w500,
+                color: AppColors.muted,
+              ),
+            ),
+          ),
           Text(SettingsStrings.quietFrom, style: AppText.bold(size: 14)),
           TimePill(
             key: const ValueKey('quiet-start'),
@@ -272,6 +276,36 @@ class _TimeRangeRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The zone every day boundary and reminder uses; opens the picker.
+class _TimeZoneRow extends ConsumerWidget {
+  const _TimeZoneRow({required this.timeZoneName});
+
+  final String timeZoneName;
+
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final device = await ref.read(deviceTimeZoneProvider).current();
+    if (!context.mounted) return;
+    final picked = await showTimeZonePicker(
+      context,
+      current: timeZoneName,
+      deviceZone: device,
+    );
+    if (picked == null) return;
+    await saveTimeZone(ref.read(preferencesRepositoryProvider), picked);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SettingsRow(
+      key: const ValueKey('time-zone-row'),
+      label: SettingsStrings.timeZone,
+      subtitle: timeZoneLabel(timeZoneName),
+      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.ink),
+      onTap: () => _edit(context, ref),
     );
   }
 }
@@ -603,7 +637,11 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
             onPressed: _connected ? _disconnect : _connect,
           ),
         ),
-        if (_connected) _SyncStatusPill(status: ref.watch(widget.statusOf)),
+        if (_connected)
+          _SyncStatusPill(
+            source: _provider.source,
+            status: ref.watch(widget.statusOf),
+          ),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
@@ -642,7 +680,9 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
 
 /// Idle / syncing / last synced hh:mm / error, for one calendar provider.
 class _SyncStatusPill extends StatelessWidget {
-  const _SyncStatusPill({required this.status});
+  const _SyncStatusPill({required this.source, required this.status});
+
+  final CalendarSource source;
 
   final AsyncValue<SyncStatus> status;
 
@@ -671,7 +711,7 @@ class _SyncStatusPill extends StatelessWidget {
       child: Align(
         alignment: AlignmentDirectional.centerStart,
         child: Pill(
-          key: const ValueKey('sync-status'),
+          key: ValueKey('sync-status-${source.name}'),
           height: 28,
           label: label(s),
           color: s.isError ? AppColors.card : AppColors.lilac,

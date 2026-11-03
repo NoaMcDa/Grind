@@ -1490,6 +1490,18 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get onboardingWelcomeStart;
 
+  /// Onboarding switch for quiet hours
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet overnight'**
+  String get onboardingQuietLabel;
+
+  /// Onboarding quiet hours hint; range is like 22:00 – 07:00
+  ///
+  /// In en, this message translates to:
+  /// **'No nudges {range}. You can change this in Settings.'**
+  String onboardingQuietBody(String range);
+
   /// Notifications step title
   ///
   /// In en, this message translates to:
@@ -2059,6 +2071,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Win logged. Pip saw that.'**
   String get focusWinLogged;
+
+  /// Title of the sheet that saves a one-line win for a focus session
+  ///
+  /// In en, this message translates to:
+  /// **'What got done?'**
+  String get focusWinTitle;
+
+  /// Example text in the win field
+  ///
+  /// In en, this message translates to:
+  /// **'Drafted section 2'**
+  String get focusWinHint;
 
   /// Toast
   ///

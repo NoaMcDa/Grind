@@ -835,6 +835,14 @@ class AppLocalizationsHe extends AppLocalizations {
   String get onboardingWelcomeStart => 'מתחילים';
 
   @override
+  String get onboardingQuietLabel => 'שקט בלילה';
+
+  @override
+  String onboardingQuietBody(String range) {
+    return 'בלי תזכורות $range. אפשר לשנות בהגדרות.';
+  }
+
+  @override
   String get onboardingNotifTitle => 'תזכורות עדינות, רק כשבא לך';
 
   @override
@@ -1159,6 +1167,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get focusWinLogged => 'הניצחון נרשם. פיפ ראה.';
+
+  @override
+  String get focusWinTitle => 'מה הספקת?';
+
+  @override
+  String get focusWinHint => 'טיוטה של פרק 2';
 
   @override
   String get focusTaskDone => 'המשימה בוצעה. פיפ גאה בך.';

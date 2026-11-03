@@ -1105,6 +1105,19 @@
   "@onboardingWelcomeStart": {
     "description": "Welcome button"
   },
+  "onboardingQuietLabel": "Quiet overnight",
+  "@onboardingQuietLabel": {
+    "description": "Onboarding switch for quiet hours"
+  },
+  "onboardingQuietBody": "No nudges {range}. You can change this in Settings.",
+  "@onboardingQuietBody": {
+    "description": "Onboarding quiet hours hint; range is like 22:00 – 07:00",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingNotifTitle": "Gentle nudges, only when you want them",
   "@onboardingNotifTitle": {
     "description": "Notifications step title"
@@ -1517,6 +1530,14 @@
   "focusWinLogged": "Win logged. Pip saw that.",
   "@focusWinLogged": {
     "description": "Toast"
+  },
+  "focusWinTitle": "What got done?",
+  "@focusWinTitle": {
+    "description": "Title of the sheet that saves a one-line win for a focus session"
+  },
+  "focusWinHint": "Drafted section 2",
+  "@focusWinHint": {
+    "description": "Example text in the win field"
   },
   "focusTaskDone": "Task done. Pip is proud of you.",
   "@focusTaskDone": {

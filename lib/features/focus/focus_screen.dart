@@ -14,6 +14,7 @@ import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_bottom_sheet.dart';
+import '../../widgets/sticker_text_field.dart';
 import '../../widgets/sticker_card.dart';
 import '../tasks/task_actions.dart';
 import 'providers.dart';
@@ -111,8 +112,13 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
         // fresh session on the same task.
         if (!outcome.completed) await _ctrl.start(taskId: outcome.taskId);
       case _EndChoice.logWin:
-        // No field to store it yet; see the PR's proposed `win` field.
-        showPipToast(context, context.l10n.focusWinLogged);
+        final win = await showStickerSheet<String>(
+          context,
+          (ctx) => const _WinSheet(),
+        );
+        if (!mounted || win == null || win.trim().isEmpty) return;
+        await _ctrl.saveWin(outcome.sessionId, win);
+        if (mounted) showPipToast(context, context.l10n.focusWinLogged);
       case null:
         break;
     }
@@ -650,6 +656,62 @@ class _EndSheet extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(_EndChoice.logWin),
         ),
       ],
+    );
+  }
+}
+
+/// One line on what got done; pops the text (or null when dismissed).
+class _WinSheet extends StatefulWidget {
+  const _WinSheet();
+
+  @override
+  State<_WinSheet> createState() => _WinSheetState();
+}
+
+class _WinSheetState extends State<_WinSheet> {
+  final _text = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _save() => Navigator.of(context).pop(_text.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 12),
+          Text(l.focusWinTitle, style: AppText.display(size: 20, height: 1.2)),
+          const SizedBox(height: 12),
+          StickerTextField(
+            key: const ValueKey('focus-win-field'),
+            controller: _text,
+            hint: l.focusWinHint,
+            pill: true,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: 12),
+          PillButton(
+            key: const ValueKey('focus-win-save'),
+            label: l.commonSave,
+            color: AppColors.sun,
+            height: 48,
+            shadow: 3,
+            fontSize: 15,
+            onPressed: _save,
+          ),
+        ],
+      ),
     );
   }
 }

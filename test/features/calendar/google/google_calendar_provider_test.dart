@@ -231,6 +231,51 @@ void main() {
     });
   });
 
+  group('htmlLink', () {
+    test('the mapping keeps an https htmlLink and drops others', () {
+      final e = timed('a', at(4, 10), at(4, 11))
+        ..htmlLink = 'https://www.google.com/calendar/event?eid=YQ';
+      expect(
+        GoogleEventMapper.toDomain(
+          e,
+          calendarId: 'primary',
+          now: now,
+        )!.htmlLink,
+        'https://www.google.com/calendar/event?eid=YQ',
+      );
+      e.htmlLink = 'javascript:alert(1)';
+      expect(
+        GoogleEventMapper.toDomain(
+          e,
+          calendarId: 'primary',
+          now: now,
+        )!.htmlLink,
+        isNull,
+      );
+    });
+
+    test('reaches fetchEvents and survives the persisted mirror', () async {
+      gw.put(
+        'primary',
+        timed('a', at(4, 10), at(4, 11))
+          ..htmlLink = 'https://www.google.com/calendar/event?eid=YQ',
+      );
+      final first = await build().fetchEvents(
+        calendarIds: ['primary'],
+        from: from,
+        to: to,
+      );
+      expect(first.single.htmlLink, contains('eid=YQ'));
+      final mapped = GoogleEventMapper.toDomain(
+        timed('b', at(4, 10), at(4, 11))..htmlLink = 'https://x.test/b',
+        calendarId: 'primary',
+        now: now,
+      )!;
+      final back = GoogleEventMapper.fromJson(GoogleEventMapper.toJson(mapped));
+      expect(back.htmlLink, 'https://x.test/b');
+    });
+  });
+
   group('write-back', () {
     final task = Task(
       id: 'task-42',

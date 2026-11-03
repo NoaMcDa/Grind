@@ -58,6 +58,7 @@ abstract final class GoogleEventMapper {
       isAllDay: allDay,
       isBusy: e.transparency != 'transparent' && !selfDeclined,
       taskId: e.extendedProperties?.private?[taskIdKey],
+      htmlLink: _link(e.htmlLink),
       createdAt: (e.created ?? now).toUtc(),
       updatedAt: (e.updated ?? now).toUtc(),
     );
@@ -84,6 +85,13 @@ abstract final class GoogleEventMapper {
     );
   }
 
+  /// Google's `htmlLink`, kept only when it is an https URL.
+  static String? _link(String? raw) {
+    final uri = raw == null ? null : Uri.tryParse(raw.trim());
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+    return uri.toString();
+  }
+
   static DateTime _localMidnight(DateTime date) =>
       DateTime(date.year, date.month, date.day).toUtc();
 
@@ -98,6 +106,7 @@ abstract final class GoogleEventMapper {
     'allDay': e.isAllDay,
     'busy': e.isBusy,
     'task': e.taskId,
+    'link': e.htmlLink,
     'created': e.createdAt.toUtc().toIso8601String(),
     'updated': e.updatedAt.toUtc().toIso8601String(),
   };
@@ -113,6 +122,7 @@ abstract final class GoogleEventMapper {
     isAllDay: j['allDay'] as bool? ?? false,
     isBusy: j['busy'] as bool? ?? true,
     taskId: j['task'] as String?,
+    htmlLink: j['link'] as String?,
     createdAt: DateTime.parse(j['created']! as String),
     updatedAt: DateTime.parse(j['updated']! as String),
   );

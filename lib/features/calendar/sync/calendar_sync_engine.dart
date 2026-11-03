@@ -230,6 +230,7 @@ class CalendarSyncEngine {
         isAllDay: e.isAllDay,
         isBusy: e.isBusy,
         taskId: e.taskId ?? prior?.taskId,
+        htmlLink: e.htmlLink,
         createdAt: prior?.createdAt ?? e.createdAt,
         updatedAt: prior == null ? e.updatedAt : now,
       );
@@ -440,7 +441,8 @@ class CalendarSyncEngine {
       a.isAllDay == b.isAllDay &&
       a.isBusy == b.isBusy &&
       a.taskId == b.taskId &&
-      a.calendarId == b.calendarId;
+      a.calendarId == b.calendarId &&
+      a.htmlLink == b.htmlLink;
 
   Future<void> dispose() => _statusController.close();
 }

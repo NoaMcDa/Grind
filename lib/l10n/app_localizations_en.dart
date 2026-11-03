@@ -837,6 +837,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingWelcomeStart => 'Start';
 
   @override
+  String get onboardingQuietLabel => 'Quiet overnight';
+
+  @override
+  String onboardingQuietBody(String range) {
+    return 'No nudges $range. You can change this in Settings.';
+  }
+
+  @override
   String get onboardingNotifTitle => 'Gentle nudges, only when you want them';
 
   @override
@@ -1166,6 +1174,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get focusWinLogged => 'Win logged. Pip saw that.';
+
+  @override
+  String get focusWinTitle => 'What got done?';
+
+  @override
+  String get focusWinHint => 'Drafted section 2';
 
   @override
   String get focusTaskDone => 'Task done. Pip is proud of you.';

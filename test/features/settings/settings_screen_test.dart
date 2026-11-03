@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:grind/core/core.dart';
 import 'package:grind/features/settings/backup_actions.dart';
 import 'package:grind/features/settings/settings_screen.dart';
 import 'package:grind/features/settings/settings_store.dart';
+import 'package:grind/features/settings/time_zone/device_time_zone.dart';
 import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
@@ -19,6 +21,9 @@ Future<void> _pump(
   InMemoryCalendarRepository? calendars,
   Clock? clock,
   TextDirection direction = TextDirection.ltr,
+  int Function()? pick,
+  DeviceTimeZone? device,
+  FakeCalendarProvider? apple,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -33,6 +38,8 @@ Future<void> _pump(
         if (calendars != null)
           calendarRepositoryProvider.overrideWithValue(calendars),
         if (clock != null) clockProvider.overrideWithValue(clock),
+        if (device != null) deviceTimeZoneProvider.overrideWithValue(device),
+        if (apple != null) appleCalendarProvider.overrideWithValue(apple),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
@@ -40,7 +47,9 @@ Future<void> _pump(
         supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: direction,
-          child: SettingsScreen(picker: (_, _) async => 7 * 60),
+          child: SettingsScreen(
+            picker: (_, _) async => pick == null ? 7 * 60 : pick(),
+          ),
         ),
       ),
     ),
@@ -69,9 +78,9 @@ void main() {
     await tester.pumpAndSettle();
     expect((await prefs.get()).quietHours, isNotNull);
 
-    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.tap(find.byKey(const ValueKey('quiet-end')));
     await tester.pumpAndSettle();
-    expect((await prefs.get()).quietHours!.startMinutes, 7 * 60);
+    expect((await prefs.get()).quietHours!.endMinutes, 7 * 60);
 
     await tester.tap(find.byKey(const ValueKey('quiet-switch')));
     await tester.pumpAndSettle();
@@ -98,6 +107,86 @@ void main() {
     expect((await prefs.get()).localeCode, 'he');
   });
 
+  testWidgets('quiet hours default to 22:00 – 07:00 and may cross midnight', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    var next = 6 * 60;
+    await _pump(tester, prefs: prefs, pick: () => next);
+
+    await _scrollTo(tester, find.byKey(const ValueKey('quiet-switch')));
+    await tester.tap(find.byKey(const ValueKey('quiet-switch')));
+    await tester.pumpAndSettle();
+    var quiet = (await prefs.get()).quietHours!;
+    expect(quiet.startMinutes, 22 * 60);
+    expect(quiet.endMinutes, 7 * 60);
+    expect(quiet.wrapsMidnight, isTrue);
+    expect(find.text('22:00 – 07:00'), findsOneWidget);
+
+    // An earlier end keeps the start: the range still crosses midnight.
+    await tester.tap(find.byKey(const ValueKey('quiet-end')));
+    await tester.pumpAndSettle();
+    quiet = (await prefs.get()).quietHours!;
+    expect((quiet.startMinutes, quiet.endMinutes), (22 * 60, 6 * 60));
+    expect(find.text('22:00 – 06:00'), findsOneWidget);
+
+    // A start after the end is fine too, and nothing is pushed to 24:00.
+    next = 23 * 60 + 30;
+    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.pumpAndSettle();
+    quiet = (await prefs.get()).quietHours!;
+    expect((quiet.startMinutes, quiet.endMinutes), (23 * 60 + 30, 6 * 60));
+
+    // Same start and end would be empty: the old range stays.
+    next = 6 * 60;
+    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).quietHours!.startMinutes, 23 * 60 + 30);
+  });
+
+  testWidgets('time zone row: device zone in one tap, or search', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(
+      tester,
+      prefs: prefs,
+      device: FakeDeviceTimeZone('Europe/London'),
+    );
+    final row = find.byKey(const ValueKey('time-zone-row'));
+    await _scrollTo(tester, row);
+    expect(find.text('Asia/Jerusalem'), findsOneWidget);
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tz-use-device')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).timeZoneName, 'Europe/London');
+    expect(find.text('Europe/London'), findsOneWidget);
+
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('tz-search')), 'new york');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('tz-America/New_York')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).timeZoneName, 'America/New_York');
+    expect(find.text('America/New York'), findsOneWidget);
+  });
+
+  testWidgets('time zone picker hides an unknown device zone', (tester) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs, device: FakeDeviceTimeZone('Nope/Zone'));
+    final row = find.byKey(const ValueKey('time-zone-row'));
+    await _scrollTo(tester, row);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tz-use-device')), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('tz-search')), 'zzzz');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No zone by that name'), findsOneWidget);
+  });
+
   testWidgets('calendar connect, pick calendars and disconnect', (
     tester,
   ) async {
@@ -119,6 +208,69 @@ void main() {
     await tester.tap(find.text('Disconnect'));
     await tester.pumpAndSettle();
     expect(google.connected, isFalse);
+  });
+
+  testWidgets('calendar checkboxes read and write Preferences', (tester) async {
+    final prefs = InMemoryPreferencesRepository(
+      const Preferences(
+        selectedCalendarIds: {
+          CalendarSource.google: ['work'],
+        },
+      ),
+    );
+    final google = _TwoCalendars()..connected = true;
+    // No store override: the app's PreferencesSettingsStore is used.
+    await _pump(tester, prefs: prefs, google: google);
+
+    final primary = find.byKey(const ValueKey('cal-Google Calendar-primary'));
+    final work = find.byKey(const ValueKey('cal-Google Calendar-work'));
+    expect(tester.widget<CheckboxListTile>(primary).value, isFalse);
+    expect(tester.widget<CheckboxListTile>(work).value, isTrue);
+
+    await tester.tap(primary);
+    await tester.pumpAndSettle();
+    expect(
+      (await prefs.get()).selectedCalendarIds[CalendarSource.google]!.toSet(),
+      {'work', 'primary'},
+    );
+    await tester.tap(work);
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).selectedCalendarIds[CalendarSource.google], [
+      'primary',
+    ]);
+  });
+
+  testWidgets('on iOS the Apple sync pill shows next to the Google one', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      final google = FakeCalendarProvider(CalendarSource.google)
+        ..connected = true;
+      final apple = FakeCalendarProvider(CalendarSource.apple)
+        ..connected = true;
+      final prefs = InMemoryPreferencesRepository();
+      await _pump(
+        tester,
+        prefs: prefs,
+        google: google,
+        apple: apple,
+        clock: FixedClock(DateTime.utc(2026, 11, 3, 8)),
+      );
+      expect(find.text('Apple Calendar'), findsOneWidget);
+      expect(find.byKey(const ValueKey('sync-status-google')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sync-status-apple')), findsOneWidget);
+      final apples = find.byKey(const ValueKey('cal-Apple Calendar-primary'));
+      expect(apples, findsOneWidget);
+      await tester.tap(apples);
+      await tester.pumpAndSettle();
+      expect(
+        (await prefs.get()).selectedCalendarIds[CalendarSource.apple],
+        isEmpty,
+      );
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets('prompt times persist in the settings store', (tester) async {
@@ -206,7 +358,7 @@ void main() {
       calendars: calendars,
       clock: FixedClock(now),
     );
-    expect(find.byKey(const ValueKey('sync-status')), findsNothing);
+    expect(find.byKey(const ValueKey('sync-status-google')), findsNothing);
 
     await tester.tap(find.text('Connect'));
     await tester.pumpAndSettle();
@@ -216,7 +368,7 @@ void main() {
       DateTime.utc(2026, 12),
     );
     expect(stored.map((e) => e.title), ['Standup']);
-    final pill = find.byKey(const ValueKey('sync-status'));
+    final pill = find.byKey(const ValueKey('sync-status-google'));
     final t = now.toLocal();
     String two(int v) => v.toString().padLeft(2, '0');
     expect(
@@ -240,7 +392,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('sync-status')),
+        of: find.byKey(const ValueKey('sync-status-google')),
         matching: find.textContaining("Pip couldn't reach your calendar"),
       ),
       findsOneWidget,
@@ -272,4 +424,14 @@ class _BrokenFetch extends FakeCalendarProvider {
     required DateTime from,
     required DateTime to,
   }) async => throw StateError('network');
+}
+
+class _TwoCalendars extends FakeCalendarProvider {
+  _TwoCalendars() : super(CalendarSource.google);
+
+  @override
+  Future<List<ExternalCalendar>> listCalendars() async => const [
+    ExternalCalendar(id: 'primary', name: 'Me', isPrimary: true),
+    ExternalCalendar(id: 'work', name: 'Work'),
+  ];
 }

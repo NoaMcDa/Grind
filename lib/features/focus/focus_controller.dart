@@ -186,8 +186,14 @@ const _unset = Object();
 /// and [clockProvider]. On build it restores the active session from
 /// [FocusSessionRepository.getActive], so a restart keeps the timer.
 ///
-/// Known gap: [FocusSession] has no `pauses` field, so pauses live in memory
-/// only. A session restored after a restart counts paused time as focused.
+/// Pauses are persisted on the session: [pause] writes
+/// [FocusSession.pausedAt], [resume] folds the pause into
+/// [FocusSession.pausedMs]. A restart while paused comes back paused, and
+/// paused time never counts as focused.
+///
+/// Breaks are not stored: only focus sessions (kind
+/// [FocusSessionKind.focus]) are written. A break lives in memory, so a
+/// restart during a break lands on the idle screen, which is harmless.
 class FocusController extends AsyncNotifier<FocusState> {
   FocusSessionRepository get _repo => ref.read(focusSessionRepositoryProvider);
   TaskRepository get _tasks => ref.read(taskRepositoryProvider);
@@ -203,14 +209,21 @@ class FocusController extends AsyncNotifier<FocusState> {
       midnight,
       midnight.add(const Duration(days: 1)),
     );
-    final done = today.where((s) => s.completed).length;
+    final done = today
+        .where((s) => s.kind == FocusSessionKind.focus && s.completed)
+        .length;
     var s = FocusState(
       settings: settings,
       completedInCycle: done % settings.sessionsPerCycle,
     );
     final active = await _repo.getActive();
-    if (active != null) {
-      s = s.copyWith(phase: FocusPhase.focusing, session: active);
+    if (active != null && active.kind == FocusSessionKind.focus) {
+      s = s.copyWith(
+        phase: active.isPaused ? FocusPhase.paused : FocusPhase.focusing,
+        session: active,
+        pausedTotal: active.paused,
+        pausedAt: active.pausedAt,
+      );
       s = (await _advance(s, now)).$1;
     }
     return s;
@@ -273,22 +286,37 @@ class FocusController extends AsyncNotifier<FocusState> {
     );
   }
 
-  void pause() {
+  /// Freeze the timer. The pause start is stored on the session, so a
+  /// restart while paused restores the paused state.
+  Future<void> pause() async {
     final s = _s;
     if (s == null || s.phase != FocusPhase.focusing) return;
-    _set(s.copyWith(phase: FocusPhase.paused, pausedAt: _now()));
+    final now = _now();
+    final session = s.session!.copyWith(pausedAt: now, updatedAt: now);
+    _set(s.copyWith(phase: FocusPhase.paused, session: session, pausedAt: now));
+    await _repo.update(session);
   }
 
-  void resume() {
+  /// Continue; the finished pause is added to [FocusSession.pausedMs].
+  Future<void> resume() async {
     final s = _s;
     if (s == null || s.phase != FocusPhase.paused) return;
+    final now = _now();
+    final total = s.pausedTotal + now.difference(s.pausedAt!);
+    final session = s.session!.copyWith(
+      pausedMs: total.inMilliseconds,
+      pausedAt: null,
+      updatedAt: now,
+    );
     _set(
       s.copyWith(
         phase: FocusPhase.focusing,
-        pausedTotal: s.pausedTotal + _now().difference(s.pausedAt!),
+        session: session,
+        pausedTotal: total,
         pausedAt: null,
       ),
     );
+    await _repo.update(session);
   }
 
   /// +5 min on the running session or break.
@@ -307,7 +335,7 @@ class FocusController extends AsyncNotifier<FocusState> {
     }
     final session = s.session;
     if (session == null) return;
-    final updated = session._copy(
+    final updated = session.copyWith(
       plannedMinutes: session.plannedMinutes + minutes,
       updatedAt: _now(),
     );
@@ -340,6 +368,20 @@ class FocusController extends AsyncNotifier<FocusState> {
     _set(_toIdle(s));
   }
 
+  /// Store the user's one-line note on what got done in the session the
+  /// end-of-session sheet is about. Blank text clears it.
+  Future<void> saveWin(String sessionId, String win) async {
+    final ended = _lastEnded;
+    if (ended == null || ended.id != sessionId) return;
+    final text = win.trim();
+    final updated = ended.copyWith(
+      win: text.isEmpty ? null : text,
+      updatedAt: _now(),
+    );
+    _lastEnded = updated;
+    await _repo.update(updated);
+  }
+
   /// The end-of-session sheet was handled.
   void dismissOutcome() {
     final s = _s;
@@ -348,6 +390,9 @@ class FocusController extends AsyncNotifier<FocusState> {
   }
 
   // ------------------------------------------------------------ internals
+
+  /// The session the current outcome is about, for [saveWin].
+  FocusSession? _lastEnded;
 
   FocusState _toIdle(FocusState s) => s.copyWith(
     phase: FocusPhase.idle,
@@ -382,9 +427,20 @@ class FocusController extends AsyncNotifier<FocusState> {
     final session = s.session!;
     final focused = s.focused(at);
     final minutes = (focused.inSeconds / 60).round();
-    await _repo.update(
-      session._copy(endedAt: at, completed: completed, updatedAt: _now()),
+    // Ending while paused: the open pause counts as paused, up to [at].
+    final open = s.pausedAt;
+    final pausedTotal = open == null || !at.isAfter(open)
+        ? s.pausedTotal
+        : s.pausedTotal + at.difference(open);
+    final ended = session.copyWith(
+      endedAt: at,
+      completed: completed,
+      pausedMs: pausedTotal.inMilliseconds,
+      pausedAt: null,
+      updatedAt: _now(),
     );
+    _lastEnded = ended;
+    await _repo.update(ended);
     await _addActualMinutes(session.taskId, minutes);
 
     final outcome = FocusOutcome(
@@ -423,22 +479,4 @@ class FocusController extends AsyncNotifier<FocusState> {
       ),
     );
   }
-}
-
-extension on FocusSession {
-  FocusSession _copy({
-    int? plannedMinutes,
-    DateTime? endedAt,
-    bool? completed,
-    DateTime? updatedAt,
-  }) => FocusSession(
-    id: id,
-    taskId: taskId,
-    plannedMinutes: plannedMinutes ?? this.plannedMinutes,
-    startedAt: startedAt,
-    endedAt: endedAt ?? this.endedAt,
-    completed: completed ?? this.completed,
-    createdAt: createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
 }
