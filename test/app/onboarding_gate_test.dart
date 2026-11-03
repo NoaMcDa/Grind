@@ -27,6 +27,20 @@ void main() {
     expect(find.text('Good morning!'), findsOneWidget);
   });
 
+  testWidgets('/goals and /review routes open their screens', (tester) async {
+    await pumpGrindApp(tester, initialLocation: '/goals');
+    expect(find.text('Good morning!'), findsNothing);
+    expect(find.byType(Scaffold), findsWidgets);
+    await pumpGrindApp(tester, initialLocation: '/review');
+    expect(find.text('Good morning!'), findsNothing);
+  });
+
+  testWidgets('Today has Goals and Settings entry points', (tester) async {
+    await pumpGrindApp(tester);
+    expect(find.byKey(const Key('today-goals')), findsOneWidget);
+    expect(find.byKey(const Key('today-settings')), findsOneWidget);
+  });
+
   testWidgets('/settings opens the settings screen', (tester) async {
     await pumpGrindApp(tester, initialLocation: '/settings');
     expect(find.text('Good morning!'), findsNothing);

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/core.dart';
 import '../reminders/reminder_now_card.dart';
+import '../review/review.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
@@ -45,6 +46,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
 
   void _openSettings() => GoRouter.maybeOf(context)?.push('/settings');
+  void _openGoals() => GoRouter.maybeOf(context)?.push('/goals');
 
   void _open(Task t) {
     Navigator.of(context, rootNavigator: true).push(
@@ -84,6 +86,26 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 const SizedBox(width: 6),
                 Semantics(
                   button: true,
+                  label: 'Goals',
+                  excludeSemantics: true,
+                  onTap: _openGoals,
+                  child: GestureDetector(
+                    key: const Key('today-goals'),
+                    onTap: _openGoals,
+                    behavior: HitTestBehavior.opaque,
+                    child: const SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Icon(
+                        Icons.flag_outlined,
+                        color: AppColors.ink,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+                Semantics(
+                  button: true,
                   label: 'Settings',
                   excludeSemantics: true,
                   onTap: _openSettings,
@@ -108,6 +130,10 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
             ),
             const SizedBox(height: 18),
             ReminderNowCard(onStartFocus: _startFocus),
+            // Shows only after the evening prompt time, once per day.
+            EveningReviewBanner(
+              onTap: () => GoRouter.maybeOf(context)?.push('/review'),
+            ),
             const SizedBox(height: 18),
             StickerCard(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),

@@ -6,6 +6,8 @@ import '../features/focus/focus_screen.dart';
 import '../features/onboarding/onboarding_flow.dart';
 import '../features/pip/pip_screen.dart';
 import '../features/plan/plan_screen.dart';
+import '../features/goals/goals.dart';
+import '../features/review/review.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/tasks/task_detail_screen.dart';
 import '../features/today/today_screen.dart';
@@ -51,6 +53,21 @@ GoRouter createRouter({
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/review',
+        builder: (context, state) => const EveningReviewEntry(),
+      ),
+      GoRoute(
+        path: '/goals',
+        builder: (context, state) => const GoalsScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                GoalDetailScreen(goalId: state.pathParameters['id']!),
+          ),
+        ],
       ),
       GoRoute(
         path: '/task/:id',

@@ -166,11 +166,20 @@ void main() {
     });
   });
 
-  test('openLocation is null for prompts', () {
+  test('openLocation: evening prompt opens the review, morning stays', () {
     expect(
       NotificationRouter.openLocation(
         const NotificationResponse(
           notificationId: 'prompt:evening:2026-11-03',
+          taskId: '',
+        ),
+      ),
+      '/review',
+    );
+    expect(
+      NotificationRouter.openLocation(
+        const NotificationResponse(
+          notificationId: 'prompt:morning:2026-11-03',
           taskId: '',
         ),
       ),

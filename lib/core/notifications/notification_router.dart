@@ -68,11 +68,19 @@ class NotificationRouter {
       '/focus?taskId=${Uri.encodeQueryComponent(taskId)}';
 
   /// Route location for a body tap: the task (where "Pick a time" lives),
-  /// or null for the daily prompts (stay on / open Today).
-  static String? openLocation(NotificationResponse response) =>
-      response.taskId.isEmpty
-      ? null
-      : '/task/${Uri.encodeComponent(response.taskId)}';
+  /// the evening review for the evening prompt, or null for the morning
+  /// prompt (stay on / open Today).
+  static String? openLocation(NotificationResponse response) {
+    if (response.taskId.isNotEmpty) {
+      return '/task/${Uri.encodeComponent(response.taskId)}';
+    }
+    if (response.notificationId.startsWith(
+      NotificationScheduler.eveningPrefix,
+    )) {
+      return '/review';
+    }
+    return null;
+  }
 
   StreamSubscription<NotificationResponse> attach(
     Stream<NotificationResponse> responses,
