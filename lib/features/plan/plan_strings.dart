@@ -87,6 +87,9 @@ abstract final class PlanStrings {
       return 'A full week: over by ${_hours(plannedMinutes - freeMinutes)}. '
           'Pip can help trim it.';
     }
+    if (plannedMinutes == 0) {
+      return '${_hours(freeMinutes)} free · nothing planned yet';
+    }
     return '${_hours(freeMinutes)} free · ${_hours(plannedMinutes)} planned';
   }
 

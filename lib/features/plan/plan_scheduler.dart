@@ -234,7 +234,9 @@ final planSchedulerProvider = Provider<PlanScheduler>(PlanScheduler.new);
 /// Free vs planned time for the shown week, for the Plan header.
 ///
 /// Free: working hours minus busy events, buffers, lunch and the daily
-/// cushion across the whole week. Planned: open tasks scheduled in it.
+/// cushion, from now (in the current week) or the week's start to its end,
+/// the same window "Re-plan with Pip" fills. A past week counts whole.
+/// Planned: open tasks scheduled in that window.
 final planWeekCapacityProvider = Provider.autoDispose<scheduler.WeekCapacity>((
   ref,
 ) {
@@ -243,8 +245,9 @@ final planWeekCapacityProvider = Provider.autoDispose<scheduler.WeekCapacity>((
   final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
   final events =
       ref.watch(planWeekEventsProvider).valueOrNull ?? const <CalendarEvent>[];
-  final start = week.first;
   final end = nextDay(week.last);
+  final now = ref.watch(clockProvider).now().toLocal();
+  final start = now.isAfter(week.first) && now.isBefore(end) ? now : week.first;
   final planned = [
     for (final t in tasks)
       if (_isOpen(t) &&

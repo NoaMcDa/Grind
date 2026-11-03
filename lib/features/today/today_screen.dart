@@ -75,7 +75,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       SectionLabel(ref.watch(todayLabelProvider)),
                       const SizedBox(height: 4),
                       Text(
-                        'Good morning!',
+                        greetingFor(ref.watch(clockProvider).now()),
                         style: AppText.display(height: 1.05),
                       ),
                     ],
@@ -317,4 +317,12 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
       child: Icon(icon, color: AppColors.ink),
     );
   }
+}
+
+/// "Good morning!" before noon, then afternoon, then evening.
+String greetingFor(DateTime now) {
+  final h = now.toLocal().hour;
+  if (h >= 5 && h < 12) return 'Good morning!';
+  if (h >= 12 && h < 18) return 'Good afternoon!';
+  return 'Good evening!';
 }

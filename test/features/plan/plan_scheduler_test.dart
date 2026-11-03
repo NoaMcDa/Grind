@@ -248,7 +248,10 @@ void main() {
     await c.read(preferencesProvider.future);
     final cap = c.read(planWeekCapacityProvider);
     expect(cap.demandMinutes, 60); // only the pinned hour is scheduled
-    expect(cap.freeMinutes, greaterThan(20 * 60));
+    // Same free time as the draft "Re-plan with Pip" shows: now → week end.
+    final draft = await c.read(planSchedulerProvider).proposeWeek(_now);
+    expect(cap.freeMinutes, draft.plan.capacity.freeMinutes);
+    expect(cap.freeMinutes, greaterThan(5 * 60));
     expect(
       c.read(planCapacityLineProvider),
       PlanStrings.capacityLine(
@@ -270,6 +273,10 @@ void main() {
     expect(
       PlanStrings.capacityLine(freeMinutes: 10 * 60, plannedMinutes: 12 * 60),
       'A full week: over by 2 h. Pip can help trim it.',
+    );
+    expect(
+      PlanStrings.capacityLine(freeMinutes: 21 * 60, plannedMinutes: 0),
+      '21 h free · nothing planned yet',
     );
   });
 }
