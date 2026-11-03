@@ -13,6 +13,7 @@ final notificationRouterProvider = Provider<NotificationRouter>((ref) {
     clock: ref.watch(clockProvider),
     notifications: ref.watch(notificationServiceProvider),
     preferences: ref.watch(preferencesRepositoryProvider),
+    reminders: ref.watch(reminderRepositoryProvider),
   );
   final sub = router.attach(ref.watch(notificationServiceProvider).responses);
   ref.onDispose(() {

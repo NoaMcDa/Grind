@@ -32,6 +32,7 @@ Future<void> applyResponseInBackground({
     clock: clock,
     notifications: service,
     preferences: preferences,
+    reminders: reminders,
   );
   try {
     await router.handle(response);

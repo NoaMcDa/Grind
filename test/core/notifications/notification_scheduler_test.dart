@@ -122,6 +122,25 @@ void main() {
     }
   });
 
+  test('prompts speak Hebrew when the app language is Hebrew', () {
+    const he = Preferences(localeCode: 'he');
+    final plan = NotificationScheduler.plan(
+      tasks: const [],
+      prefs: he,
+      clock: clock,
+      prompts: const PromptSettings().withPreferences(he),
+    );
+    final morning = plan.firstWhere((n) => n.id.startsWith('prompt:morning:'));
+    final evening = plan.firstWhere((n) => n.id.startsWith('prompt:evening:'));
+    expect(morning.title, PromptSettings.hebrewMorningTitle);
+    expect(evening.body, PromptSettings.hebrewEveningBody);
+    // English stays English.
+    expect(
+      const PromptSettings().withPreferences(const Preferences()).morningTitle,
+      'Good morning',
+    );
+  });
+
   test('quiet hours shift a reminder to their end', () {
     final prefs = utcPrefs.copyWith(quietHours: TimeRange.hm(0, 0, 7, 30));
     final plan = NotificationScheduler.plan(

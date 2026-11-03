@@ -32,18 +32,39 @@ class PromptSettings {
   final String eveningTitle;
   final String eveningBody;
 
-  /// Times and on/off from [Preferences] (null minutes = prompt off),
-  /// keeping this instance's copy.
-  PromptSettings withPreferences(Preferences prefs) => PromptSettings(
-    morningEnabled: prefs.morningPromptMinutes != null,
-    morningMinutes: prefs.morningPromptMinutes ?? morningMinutes,
-    eveningEnabled: prefs.eveningPromptMinutes != null,
-    eveningMinutes: prefs.eveningPromptMinutes ?? eveningMinutes,
-    morningTitle: morningTitle,
-    morningBody: morningBody,
-    eveningTitle: eveningTitle,
-    eveningBody: eveningBody,
-  );
+  /// Hebrew copy for the same prompts, gender-neutral (infinitive and
+  /// plural-free forms), used when the app language is Hebrew.
+  static const hebrewMorningTitle = 'בוקר טוב';
+  static const hebrewMorningBody = 'מתאים לתכנן את היום ביחד?';
+  static const hebrewEveningTitle = 'רגע של ערב';
+  static const hebrewEveningBody = 'דקה אחת להציץ אחורה על היום?';
+
+  /// Times and on/off from [Preferences] (null minutes = prompt off). The
+  /// copy is this instance's, except that the English defaults become the
+  /// Hebrew copy when `prefs.localeCode` is Hebrew.
+  PromptSettings withPreferences(Preferences prefs) {
+    final he = prefs.localeCode.toLowerCase().startsWith('he');
+    const defaults = PromptSettings();
+    bool isDefault(String own, String fallback) => own == fallback;
+    return PromptSettings(
+      morningEnabled: prefs.morningPromptMinutes != null,
+      morningMinutes: prefs.morningPromptMinutes ?? morningMinutes,
+      eveningEnabled: prefs.eveningPromptMinutes != null,
+      eveningMinutes: prefs.eveningPromptMinutes ?? eveningMinutes,
+      morningTitle: he && isDefault(morningTitle, defaults.morningTitle)
+          ? hebrewMorningTitle
+          : morningTitle,
+      morningBody: he && isDefault(morningBody, defaults.morningBody)
+          ? hebrewMorningBody
+          : morningBody,
+      eveningTitle: he && isDefault(eveningTitle, defaults.eveningTitle)
+          ? hebrewEveningTitle
+          : eveningTitle,
+      eveningBody: he && isDefault(eveningBody, defaults.eveningBody)
+          ? hebrewEveningBody
+          : eveningBody,
+    );
+  }
 }
 
 /// Pure planning of the pending notification set. No plugin, no I/O: given

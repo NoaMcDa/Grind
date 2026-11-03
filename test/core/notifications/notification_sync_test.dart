@@ -15,6 +15,18 @@ class CountingService extends FakeNotificationService {
   }
 }
 
+/// Refuses the first replaceAll, like an OS that rejects one request.
+class FlakyService extends CountingService {
+  @override
+  Future<void> replaceAll(List<ScheduledNotification> notifications) async {
+    calls++;
+    if (calls == 1) throw StateError('os said no');
+    pending
+      ..clear()
+      ..addAll(notifications);
+  }
+}
+
 void main() {
   setUpAll(ensureTimeZones);
 
@@ -160,5 +172,21 @@ void main() {
     await settle();
     expect(service.calls, before + 1);
     expect(service.pending.where((n) => n.taskId == 'r'), isEmpty);
+  });
+
+  test('an identical plan is retried after replaceAll failed', () async {
+    final flaky = FlakyService();
+    final retry = NotificationSync(
+      tasks: tasks,
+      preferences: prefs,
+      service: flaky,
+      clock: FixedClock(now),
+      debounce: debounce,
+    );
+    addTearDown(retry.dispose);
+    await expectLater(retry.refresh(), throwsStateError);
+    await retry.refresh();
+    expect(flaky.calls, 2);
+    expect(flaky.pending, isNotEmpty);
   });
 }
