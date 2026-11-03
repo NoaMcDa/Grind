@@ -55,7 +55,14 @@ Lower-level pieces: `freeSlots(...)`, `weekCapacity(...)`,
   slot; at most `maxDeepBlocksPerDay` deep blocks a day (each chunk counts).
 - While deep tasks are still waiting, light tasks keep out of the deep windows
   when the same day has room elsewhere (protects the focus window). This is
-  the one rule beyond the research pseudocode.
+  the one rule beyond the research pseudocode. Such a placement says
+  "keeps your focus window clear".
+- Duration fit (#17): on the same day, a light task that is not urgent
+  (urgency ≤ 0.6) prefers a gap it fills (less than 15 minutes left over)
+  to one it would fragment, so longer gaps stay whole for longer tasks
+  ("fills a 30-minute gap"). Urgent tasks keep the earliest fit.
+- A one-day horizon (`horizonEnd` = next midnight) words misses as "today"
+  ("no free 45-minute slot today", "focus blocks are full today").
 - Splittable tasks are chunked; no chunk shorter than `minChunkMinutes` except
   a final remainder.
 - `days_left` in the score is fractional (minutes / 1440) instead of whole
@@ -63,6 +70,12 @@ Lower-level pieces: `freeSlots(...)`, `weekCapacity(...)`,
 - Capacity: locked tasks count as demand, not as lost free time. Demand is the
   sum of adjusted estimates of every open task passed in, so pass the tasks
   that are meant for this horizon.
+
+## Day drafts
+
+`../draft/day_draft.dart` runs `plan()` with `horizonEnd` = end of today
+for "Your day, drafted" (#17); the review sheet reorders by re-fitting the
+blocks in the chosen order into the same free slots.
 
 ## Time zone assumption
 
