@@ -1,4 +1,5 @@
 import 'package:grind/core/core.dart';
+import 'package:grind/features/reminders/reminder_copy.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'time_zones.dart';
@@ -60,11 +61,68 @@ abstract final class NotificationScheduler {
   static String taskNotificationId(String taskId, DateTime fireAt) =>
       '$taskPrefix$taskId:${fireAt.millisecondsSinceEpoch ~/ 60000}';
 
+  /// From this many snoozes on, a task's next reminder offers to move it
+  /// instead of nagging (smart snooze, #12).
+  static const smartSnoozeAfter = 2;
+
+  /// Actions of a normal task reminder (category `GRIND_REMINDER`).
+  static const reminderActions = [
+    NotificationAction.done,
+    NotificationAction.snooze,
+    NotificationAction.startFocus,
+  ];
+
+  /// Actions of the smart-snooze variant (category `GRIND_RESCHEDULE`;
+  /// "Pick a time" is a foreground action that opens `/task/<id>`).
+  static const rescheduleActions = [
+    NotificationAction.moveToTonight,
+    NotificationAction.moveToTomorrow,
+  ];
+
+  /// When [task]'s reminder fires: `remindAt` when set. Otherwise, for a
+  /// task with a due *time*, `dueAt - Preferences.defaultReminderLeadMinutes`.
+  /// A date-only due (stored as local midnight or end of day, 23:59) gets
+  /// no reminder of its own.
+  static DateTime? reminderTimeFor(Task task, Preferences prefs) {
+    final remindAt = task.remindAt;
+    if (remindAt != null) return remindAt.toUtc();
+    final due = task.dueAt;
+    if (due == null) return null;
+    final local = tz.TZDateTime.from(
+      due.toUtc(),
+      locationFor(prefs.timeZoneName),
+    );
+    final minute = local.hour * 60 + local.minute;
+    if (minute == 0 || minute >= 23 * 60 + 59) return null;
+    return due.toUtc().subtract(
+      Duration(minutes: prefs.defaultReminderLeadMinutes),
+    );
+  }
+
+  /// Title, body and actions of [task]'s reminder firing at [fireAt]: the
+  /// if-then copy (#9), or the smart-snooze offer once the task was snoozed
+  /// [smartSnoozeAfter] times (#12). Public so feature-supplied reminders
+  /// (recurrence occurrences, #11) read exactly like plain ones.
+  static ({String title, String body, List<NotificationAction> actions})
+  copyFor(Task task, Preferences prefs, DateTime fireAt) {
+    final smart = task.snoozeCount >= smartSnoozeAfter;
+    final copy = smart
+        ? ReminderCopy.reschedule(task, prefs)
+        : ReminderCopy.build(task, prefs, at: fireAt);
+    return (
+      title: copy.title,
+      body: copy.body,
+      actions: smart ? rescheduleActions : reminderActions,
+    );
+  }
+
   /// True for the daily planning / evening review prompts (no task).
   static bool isPrompt(String notificationId) =>
       notificationId.startsWith(morningPrefix) ||
       notificationId.startsWith(eveningPrefix);
 
+  /// [taskIdsWithRules]: tasks with a [ReminderRule]; their `remindAt` is
+  /// skipped because the rule's occurrences arrive in [extra].
   static List<ScheduledNotification> plan({
     required List<Task> tasks,
     required Preferences prefs,
@@ -73,6 +131,7 @@ abstract final class NotificationScheduler {
     int cap = 50,
     List<ScheduledNotification> extra = const [],
     PromptSettings prompts = const PromptSettings(),
+    Set<String> taskIdsWithRules = const {},
   }) {
     final location = locationFor(prefs.timeZoneName);
     final now = clock.now().toUtc();
@@ -86,17 +145,22 @@ abstract final class NotificationScheduler {
     }
 
     for (final task in tasks) {
-      final remindAt = task.remindAt?.toUtc();
       if (task.status != TaskStatus.open || task.deletedAt != null) continue;
+      // A recurring task's reminders come from its rule through [extra];
+      // planning remindAt too would fire the first occurrence twice.
+      if (taskIdsWithRules.contains(task.id)) continue;
+      final remindAt = reminderTimeFor(task, prefs);
       if (remindAt == null || !inWindow(remindAt)) continue;
       final fireAt = _outOfQuietHours(remindAt, prefs, location);
+      final copy = copyFor(task, prefs, fireAt);
       add(
         ScheduledNotification(
           id: taskNotificationId(task.id, fireAt),
           taskId: task.id,
           fireAt: fireAt,
-          title: _titleFor(task),
-          body: _bodyFor(task, tz.TZDateTime.from(fireAt, location)),
+          title: copy.title,
+          body: copy.body,
+          actions: copy.actions,
         ),
       );
     }
@@ -201,24 +265,6 @@ abstract final class NotificationScheduler {
       quiet.endMinutes ~/ 60,
       quiet.endMinutes % 60,
     ).toUtc();
-  }
-
-  static String _titleFor(Task task) =>
-      _step(task) == null ? 'Grind' : task.title;
-
-  /// If-then form when there is a first action ("07:00 — open the thesis
-  /// file."), otherwise the task title.
-  static String _bodyFor(Task task, tz.TZDateTime local) {
-    final step = _step(task);
-    if (step == null) return task.title;
-    final hm = '${_two(local.hour)}:${_two(local.minute)}';
-    final stop = RegExp(r'[.!?]$').hasMatch(step) ? '' : '.';
-    return '$hm — $step$stop';
-  }
-
-  static String? _step(Task task) {
-    final s = task.firstAction?.trim();
-    return s == null || s.isEmpty ? null : s;
   }
 
   static String _date(tz.TZDateTime d) =>

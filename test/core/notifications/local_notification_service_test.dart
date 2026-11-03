@@ -3,59 +3,9 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
 
+import 'fake_backend.dart';
 import 'helpers.dart';
-
-/// Records what the service asks of the plugin.
-class FakeBackend implements LocalNotificationsBackend {
-  final Map<int, ({tz.TZDateTime at, String payload, bool withActions})>
-  pending = {};
-  void Function(RawNotificationResponse)? onResponse;
-  RawNotificationResponse? launch;
-  bool granted = false;
-  int initCount = 0;
-
-  @override
-  Future<void> initialize({
-    required void Function(RawNotificationResponse) onResponse,
-  }) async {
-    initCount++;
-    this.onResponse = onResponse;
-  }
-
-  @override
-  Future<RawNotificationResponse?> launchResponse() async => launch;
-
-  @override
-  Future<bool> requestPermission() async => granted = true;
-
-  @override
-  Future<bool> hasPermission() async => granted;
-
-  @override
-  Future<void> schedule({
-    required int platformId,
-    required tz.TZDateTime at,
-    required String title,
-    required String body,
-    required String payload,
-    required bool withActions,
-  }) async {
-    pending[platformId] = (at: at, payload: payload, withActions: withActions);
-  }
-
-  @override
-  Future<void> cancel(int platformId) async => pending.remove(platformId);
-
-  @override
-  Future<void> cancelAllPending() async => pending.clear();
-
-  List<String> get notificationIds => [
-    for (final p in pending.values)
-      (jsonDecode(p.payload) as Map)['notificationId'] as String,
-  ];
-}
 
 void main() {
   setUpAll(ensureTimeZones);
@@ -99,7 +49,9 @@ void main() {
         isTrue,
       );
       // Task reminders carry the action category; prompts do not.
-      final withActions = backend.pending.values.where((p) => p.withActions);
+      final withActions = backend.pending.values.where(
+        (p) => p.category != null,
+      );
       expect(withActions.length, dueThisWeek.length);
     },
   );
@@ -221,5 +173,75 @@ void main() {
     expect(platformIdFor('task:a:1'), platformIdFor('task:a:1'));
     expect(platformIdFor('task:a:1'), isNot(platformIdFor('task:a:2')));
     expect(platformIdFor('x'), inInclusiveRange(0, 0x7fffffff));
+  });
+
+  test(
+    'category follows the actions; replaceTaskReminders is scoped',
+    () async {
+      final backend = FakeBackend();
+      final service = LocalNotificationService(
+        backend: backend,
+        store: MemoryNotificationStore(),
+        clock: FixedClock(now),
+      );
+      ScheduledNotification n(
+        String id,
+        String taskId,
+        int hours, [
+        List<NotificationAction> actions =
+            NotificationScheduler.reminderActions,
+      ]) => ScheduledNotification(
+        id: id,
+        taskId: taskId,
+        fireAt: now.add(Duration(hours: hours)),
+        title: 't',
+        body: 'b',
+        actions: actions,
+      );
+      await service.replaceAll([
+        n('task:a:1', 'a', 1),
+        n('rec:a:1', 'a', 2),
+        n('task:b:1', 'b', 3, NotificationScheduler.rescheduleActions),
+        n('prompt:morning:2026-11-04', '', 4, const []),
+      ]);
+      String? categoryOf(String id) => backend.pending.values
+          .firstWhere(
+            (p) => (jsonDecode(p.payload) as Map)['notificationId'] == id,
+          )
+          .category;
+      expect(categoryOf('task:a:1'), grindReminderCategory);
+      expect(categoryOf('task:b:1'), grindRescheduleCategory);
+      expect(categoryOf('prompt:morning:2026-11-04'), isNull);
+
+      await service.replaceTaskReminders('a', [n('task:a:2', 'a', 5)]);
+      expect(backend.notificationIds.toSet(), {
+        'rec:a:1',
+        'task:b:1',
+        'prompt:morning:2026-11-04',
+        'task:a:2',
+      });
+      expect(service.scheduledIds, contains('task:a:2'));
+
+      // A past reminder is not scheduled.
+      await service.replaceTaskReminders('a', [n('task:a:0', 'a', -1)]);
+      expect(backend.notificationIds, isNot(contains('task:a:0')));
+      expect(backend.notificationIds, isNot(contains('task:a:2')));
+    },
+  );
+
+  test('replayJournal: false leaves the journal for the next launch', () async {
+    final store = MemoryNotificationStore();
+    await appendPendingResponse(
+      store,
+      const RawNotificationResponse(actionId: 'done', payload: '{}'),
+    );
+    final service = LocalNotificationService(
+      backend: FakeBackend(),
+      store: store,
+      clock: FixedClock(now),
+      replayJournal: false,
+    );
+    await service.ready;
+    expect(store.docs.containsKey(pendingResponsesDocument), isTrue);
   });
 }

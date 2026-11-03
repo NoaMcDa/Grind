@@ -96,4 +96,109 @@ void main() {
     expect((await repo.getById('a'))!.isDone, isTrue);
     await sub.cancel();
   });
+
+  group('all five actions with notifications and preferences', () {
+    // 09:00Z = 11:00 in Asia/Jerusalem (UTC+2 in November).
+    late FakeNotificationService notifications;
+    late NotificationRouter full;
+
+    setUp(() {
+      ensureTimeZones();
+      notifications = FakeNotificationService();
+      full = NotificationRouter(
+        tasks: repo,
+        clock: FixedClock(now),
+        notifications: notifications,
+        preferences: InMemoryPreferencesRepository(
+          const Preferences(timeZoneName: 'Asia/Jerusalem'),
+        ),
+      );
+    });
+
+    tearDown(() => full.dispose());
+
+    test('done cancels the task\'s other pending notifications', () async {
+      await full.handle(r('a', NotificationAction.done));
+      expect((await repo.getById('a'))!.isDone, isTrue);
+      expect(notifications.cancelledTaskIds, ['a']);
+    });
+
+    test('move to tonight: 20:00 local, snooze count reset', () async {
+      await repo.upsert((await repo.getById('a'))!.copyWith(snoozeCount: 2));
+      await full.handle(r('a', NotificationAction.moveToTonight));
+      final a = (await repo.getById('a'))!;
+      expect(a.remindAt, DateTime.utc(2026, 11, 3, 18));
+      expect(a.snoozeCount, 0);
+      expect(a.status, TaskStatus.open);
+    });
+
+    test('move to tomorrow: same local time next day, reset', () async {
+      await repo.upsert((await repo.getById('b'))!.copyWith(snoozeCount: 3));
+      await full.handle(r('b', NotificationAction.moveToTomorrow));
+      final b = (await repo.getById('b'))!;
+      // b reminded at 07:00Z (09:00 local) -> 09:00 local on the 4th.
+      expect(b.remindAt, DateTime.utc(2026, 11, 4, 7));
+      expect(b.snoozeCount, 0);
+    });
+
+    test('snooze, start focus and body tap still behave', () async {
+      final focus = <String>[];
+      final opened = <NotificationResponse>[];
+      full.focusRequests.listen(focus.add);
+      full.opened.listen(opened.add);
+      await full.handle(r('a', NotificationAction.snooze));
+      await full.handle(r('a', NotificationAction.startFocus));
+      await full.handle(r('a', null));
+      await pumpEventQueue();
+      expect((await repo.getById('a'))!.snoozeCount, 1);
+      expect(focus, ['a']);
+      expect(NotificationRouter.openLocation(opened.single), '/task/a');
+      expect(notifications.cancelledTaskIds, isEmpty);
+    });
+
+    test('a move on a done task is ignored', () async {
+      await full.handle(r('a', NotificationAction.done));
+      final before = (await repo.getById('a'))!.remindAt;
+      await full.handle(r('a', NotificationAction.moveToTomorrow));
+      expect((await repo.getById('a'))!.remindAt, before);
+    });
+  });
+
+  test('openLocation is null for prompts', () {
+    expect(
+      NotificationRouter.openLocation(
+        const NotificationResponse(
+          notificationId: 'prompt:evening:2026-11-03',
+          taskId: '',
+        ),
+      ),
+      isNull,
+    );
+  });
+
+  test('"Pick a time" decodes to a body tap', () {
+    final raw = RawNotificationResponse(
+      actionId: actionIdPickTime,
+      payload: encodePayload(
+        ScheduledNotification(
+          id: 'task:a:1',
+          taskId: 'a',
+          fireAt: now,
+          title: 't',
+          body: 'b',
+        ),
+      ),
+    );
+    final decoded = raw.decode()!;
+    expect(decoded.action, isNull);
+    expect(decoded.taskId, 'a');
+    expect(
+      actionFromId(actionIdMoveToTonight),
+      NotificationAction.moveToTonight,
+    );
+    expect(
+      actionFromId(actionIdFor(NotificationAction.moveToTomorrow)),
+      NotificationAction.moveToTomorrow,
+    );
+  });
 }

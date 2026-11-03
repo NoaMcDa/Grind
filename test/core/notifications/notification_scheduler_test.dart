@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/notifications.dart';
+import 'package:grind/features/reminders/reminder_copy.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'helpers.dart';
@@ -215,7 +216,8 @@ void main() {
           eveningEnabled: false,
         ),
       );
-      expect(plan.single.body, '07:00 — lace up.');
+      // The if-then part; an encouraging line follows (#9).
+      expect(plan.single.body, startsWith('07:00 — lace up. '));
     });
   });
 
@@ -234,9 +236,15 @@ void main() {
       clock: clock,
       prompts: noPrompts,
     );
+    // Since #9 every body ends with a line from ReminderCopy's pool.
     expect(plan[0].title, 'Thesis');
-    expect(plan[0].body, '07:00 — open the thesis file.');
-    expect(plan[1].body, 'Call mum');
+    expect(plan[0].body, startsWith('07:00 — open the thesis file. '));
+    expect(plan[1].title, 'Grind');
+    expect(plan[1].body, startsWith('Call mum. '));
+    expect(
+      plan.every((n) => ReminderCopy.pool('en').any(n.body.endsWith)),
+      isTrue,
+    );
     final words = RegExp(
       r'\b(missed|failed|behind|overdue|again|lazy)\b',
       caseSensitive: false,
@@ -283,5 +291,98 @@ void main() {
       extra: extra,
     );
     expect(plan.map((n) => n.title), ['Gym']);
+  });
+
+  group('smart snooze (#12)', () {
+    List<ScheduledNotification> planFor(int snoozes) =>
+        NotificationScheduler.plan(
+          tasks: [
+            task(
+              's',
+              title: 'Thesis',
+              firstAction: 'open the thesis file',
+              remindAt: now.add(const Duration(minutes: 15)),
+            ).copyWith(snoozeCount: snoozes),
+          ],
+          prefs: utcPrefs,
+          clock: clock,
+          prompts: noPrompts,
+        );
+
+    test('0 and 1 snoozes: the normal reminder category', () {
+      for (final n in [...planFor(0), ...planFor(1)]) {
+        expect(n.actions, NotificationScheduler.reminderActions);
+        expect(categoryFor(n.actions), grindReminderCategory);
+        expect(n.body, startsWith('06:15 — open the thesis file. '));
+      }
+    });
+
+    test('from the 2nd snooze: reschedule category and the move offer', () {
+      for (final n in [...planFor(2), ...planFor(5)]) {
+        expect(n.actions, NotificationScheduler.rescheduleActions);
+        expect(categoryFor(n.actions), grindRescheduleCategory);
+        expect(n.body, startsWith('Want to move this instead?'));
+        expect(n.body, contains('Thesis'));
+        expect(
+          RegExp(
+            r'\b(again|snoozed?)\b',
+            caseSensitive: false,
+          ).hasMatch('${n.title} ${n.body}'),
+          isFalse,
+        );
+      }
+      // Same id as before: a re-plan replaces the request in place.
+      expect(planFor(2).single.id, planFor(0).single.id);
+    });
+
+    test('prompts keep no category', () {
+      expect(categoryFor(const []), isNull);
+    });
+  });
+
+  group('reminder time and lead time', () {
+    final due = now.add(const Duration(hours: 5));
+    Task dueTask({DateTime? remindAt, DateTime? dueAt}) => Task(
+      id: 'd',
+      title: 'Essay',
+      remindAt: remindAt,
+      dueAt: dueAt,
+      createdAt: epoch,
+      updatedAt: epoch,
+    );
+
+    test('remindAt wins over the due time', () {
+      final at = now.add(const Duration(hours: 1));
+      expect(
+        NotificationScheduler.reminderTimeFor(
+          dueTask(remindAt: at, dueAt: due),
+          utcPrefs.copyWith(defaultReminderLeadMinutes: 30),
+        ),
+        at,
+      );
+    });
+
+    test('a due time without remindAt fires lead minutes before', () {
+      final prefs = utcPrefs.copyWith(defaultReminderLeadMinutes: 30);
+      final plan = NotificationScheduler.plan(
+        tasks: [dueTask(dueAt: due)],
+        prefs: prefs,
+        clock: clock,
+        prompts: noPrompts,
+      );
+      expect(plan.single.fireAt, due.subtract(const Duration(minutes: 30)));
+    });
+
+    test('a date-only due (end of day or midnight) gets no reminder', () {
+      for (final d in [
+        DateTime.utc(2026, 11, 4, 23, 59, 59),
+        DateTime.utc(2026, 11, 4),
+      ]) {
+        expect(
+          NotificationScheduler.reminderTimeFor(dueTask(dueAt: d), utcPrefs),
+          isNull,
+        );
+      }
+    });
   });
 }

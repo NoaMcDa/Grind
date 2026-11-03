@@ -1,7 +1,7 @@
 # ADR 0003: Notifications
 
 - Status: accepted
-- Issue: #5
+- Issues: #5; updated for #9, #10, #12 (wave 2)
 - Code: `lib/core/notifications/`, tests in `test/core/notifications/`
 
 ## Context
@@ -66,47 +66,90 @@ Asia/Jerusalem in March and October 2026). A notification inside
 day. `quietHours` is a single in-day `TimeRange`, so a range across midnight is
 not expressible yet (would need a list in `Preferences`).
 
-### 4. Copy
+### 4. Copy (#9)
 
-If the task has a `firstAction`, the title is the task and the body is the
-if-then form `"07:00 — open the thesis file."`. Otherwise the title is "Grind"
-and the body is the task title. Prompts are invitations. No guilt words; a test
-checks a small blocklist.
+`ReminderCopy` (`lib/features/reminders/reminder_copy.dart`) builds every task
+reminder, for the notification and the Today card alike:
 
-### 5. Actions and the background response design
+- With a `firstAction`: title = task title, body
+  `"<HH:mm> — <firstAction>. <encouraging line>"` (time in
+  `Preferences.timeZoneName`).
+- Without: title "Grind", body `"<task title>. <encouraging line>"`.
+- The line comes from a pool of 20 per language (English, Hebrew written in
+  gender-neutral forms). Rotation is deterministic:
+  `(fnv(taskId) + localDay * 7) mod 20`; 7 is coprime with 20, so a task sees
+  every line before any repeats (never the same line within 5 days).
+- `ReminderCopy.bannedWords` ("should", "failed", "again", "missed", ... and
+  Hebrew equivalents) is enforced over the whole pool by a test.
 
-Category `GRIND_REMINDER` with actions `done` ("Done"), `snooze`
-("Snooze 15") and `start_focus` ("Start focus", `foreground` option so it
-opens the app). Prompts have no category.
+`NotificationScheduler.copyFor(task, prefs, fireAt)` is the public entry point
+(also for recurrence occurrences, #11). Ids and ordering are unchanged.
 
-When Done or Snooze is tapped, iOS runs the app in the background and the
-plugin calls the top-level `@pragma('vm:entry-point')`
-`grindNotificationBackgroundHandler` in a separate isolate:
+**Fire time.** `Task.remindAt` is the fire time. Only a task with a due *time*
+and no `remindAt` gets a reminder at `dueAt - defaultReminderLeadMinutes`; a
+date-only due (local midnight or 23:59) gets none
+(`NotificationScheduler.reminderTimeFor`). Tasks with a `ReminderRule` skip
+`remindAt` (their occurrences come through `extra`), and `NotificationSync`
+watches `ReminderRepository` so rule-only edits re-plan.
 
-1. If the main isolate is alive (process running), it looks up a `SendPort`
-   registered in `IsolateNameServer` and hands the response over; the main
-   isolate's `NotificationRouter` applies it immediately.
-2. Otherwise it appends the response to a journal file
-   (`pending_notification_responses.json`). On the next launch
-   `LocalNotificationService` drains the journal and replays it on
-   `responses` before live ones (plus the launch-tap response, if any).
+### 5. Actions and the background response design (#10, #12)
 
-Exactly one path is taken per response, so a snooze is never applied twice.
+Two categories, both registered at launch:
 
-Why a journal instead of writing the task in the background isolate: the
-database (#2) has not merged, and two isolates writing one SQLite file needs
-care. Consequence today: after Done on the Lock Screen of a **killed** app, the
-notification disappears at once but the task flips to done on the next launch.
-Follow-up once #2 lands: open the database in the background handler and run
-`NotificationRouter.handle` there (drift supports this with a shared
-`DriftIsolate` or by opening the same file with WAL), keeping the journal as
-the fallback.
+- `GRIND_REMINDER`: `done` ("Done"), `snooze` ("Snooze 15"), `start_focus`
+  ("Start focus", `foreground`).
+- `GRIND_RESCHEDULE` (smart snooze, #12): `move_tonight` ("Tonight"),
+  `move_tomorrow` ("Tomorrow"), `pick_time` ("Pick a time", `foreground`;
+  decodes to no action, so it behaves as a body tap and opens `/task/<id>`).
 
-`NotificationRouter`: `done` sets status done and `completedAt`; `snooze`
-sets `remindAt` to 15 minutes after the later of the old reminder and now
-(a late tap never snoozes into the past) and increments `snoozeCount`;
-`startFocus` emits the task id on `focusRequests` for the app router to open
-`/focus?taskId=`; body taps emit on `opened`.
+The scheduler picks `GRIND_RESCHEDULE` once `snoozeCount >= 2`
+(`smartSnoozeAfter`): snooze twice and the third notification reads "Want to
+move this instead? «task» can have a calmer moment." It never mentions the
+snoozes. Prompts have no category. `categoryFor(actions)` maps actions to the
+category.
+
+`NotificationRouter`:
+
+- `done`: status done, `completedAt` now, then
+  `NotificationService.cancelForTask` (best effort) so the task's other
+  pending requests go at once.
+- `snooze`: `remindAt` = 15 minutes after the later of the old reminder and
+  now (a late tap never snoozes into the past), `snoozeCount + 1`.
+- `moveToTonight`: today 20:00 local, or tomorrow 20:00 when that has passed
+  (after midnight "today" is the new day); `snoozeCount = 0`.
+- `moveToTomorrow`: the reminder's local clock time on the day after now's
+  local date; `snoozeCount = 0`. Both DST-safe (`RescheduleTimes`).
+- `startFocus`: emits on `focusRequests` (`/focus?taskId=`).
+- body tap / Pick a time: emits on `opened`; `openLocation` gives
+  `/task/<id>` (null for prompts).
+
+The Today card (`ReminderNowCard`) applies its buttons through the same
+router, so iOS, web and the card behave identically.
+
+When an action without the `foreground` option is tapped, iOS runs
+`grindNotificationBackgroundHandler` in a background isolate:
+
+1. Main isolate alive: hand the response over the `IsolateNameServer` port;
+   the main router applies it.
+2. Otherwise: open the Drift database (`AppDatabase(openConnection())`) and
+   run `applyResponseInBackground` (same router, Drift repositories). After a
+   snooze or move it re-plans only that task's own reminders
+   (`LocalNotificationService.replaceTaskReminders`, ids `task:<id>:…`) with a
+   service that skips `initialize` and the journal, so the next reminder
+   (or the reschedule offer) is pending without opening the app. Prompts and
+   recurrence occurrences wait for the app's next full re-plan.
+3. If opening or writing the database throws, append to the journal
+   (`pending_notification_responses.json`), replayed on the next launch as
+   before. Notification errors after a successful write are swallowed, so a
+   response is never applied twice.
+
+Two connections to one SQLite file (background isolate plus a main isolate
+that started at the same time) are safe for these single-row writes; a
+locked database falls back to the journal. A running main isolate's drift
+streams do not see a write from the other connection until its next own
+write; `NotificationSync` re-reads the repositories on resume
+(`refresh(reload: true)`). The UI stream can be nudged on resume with
+`db.markTablesUpdated({db.tasks})` (integrator, `main.dart`).
 
 ### 6. Web
 
@@ -139,14 +182,27 @@ Setup: build with the integrator's `main.dart` wiring, a real iPhone, iOS 17+.
    reminders of the next 7 days are among them.
 3. **Delivery while killed.** Swipe the app away. The first reminder arrives on
    the Lock Screen with the task title / if-then body.
-4. **Done on the Lock Screen.** Long-press the notification, tap **Done**. The
-   app must not open. Relaunch: the task shows as done, its reminder is gone
-   from pending, and the pending set was topped up.
+4. **Done on the Lock Screen (killed app).** Long-press the notification,
+   tap **Done**. The app must not open. Without relaunching, check pending
+   requests (Xcode console): none left for that task. Relaunch: the task
+   shows as done at once and the journal file
+   (`pending_notification_responses.json`) does not exist.
 5. **Done while backgrounded.** Repeat 4 with the app in the background (not
    killed). Reopen: task already done.
-6. **Snooze 15.** On another reminder, tap **Snooze 15**. Relaunch: the task's
-   reminder moved 15 minutes later and a new notification arrives then.
-   Repeat once: `snoozeCount` is 2.
+6. **Snooze 15 (killed app).** On another reminder, tap **Snooze 15** and do
+   not open the app. A new notification arrives 15 minutes later with the
+   normal actions. Snooze it again: the third notification reads "Want to
+   move this instead?" with **Tonight / Tomorrow / Pick a time**.
+6a. **Tonight.** Tap **Tonight** (before 20:00): the next reminder arrives at
+   20:00 with Done / Snooze 15 / Start focus again. After 20:00 it moves to
+   20:00 the next day.
+6b. **Tomorrow.** Tap **Tomorrow**: the reminder arrives at the same clock
+   time the next day.
+6c. **Pick a time.** Tap it: the app opens on the task (`/task/<id>`).
+6d. **Copy.** A task with a first action reads
+   "07:00 — open the thesis file. <line>"; switch the language to Hebrew,
+   relaunch, and the next reminder reads in Hebrew (action button titles stay
+   English until the categories are localised).
 7. **Start focus.** Tap **Start focus**: the app opens on the focus screen for
    that task.
 8. **Body tap** opens the app (task / today).
@@ -161,6 +217,9 @@ Setup: build with the integrator's `main.dart` wiring, a real iPhone, iOS 17+.
 
 - Reminders beyond 7 days depend on the app being opened (or, later, a
   background fetch) within the week.
-- Lock Screen Done on a killed app is applied on next launch until #2 lands.
+- Lock Screen actions on a killed app are written to the database directly;
+  only a database failure leaves them to the journal and the next launch.
+- iOS action button titles are registered once, in English; localising them
+  needs the locale at launch (follow-up).
 - The `NotificationService` interface did not need to change; the time zone is
   passed through the optional `TimeZoneAware` interface in this folder.
