@@ -11,6 +11,7 @@ import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 import '../calendar/sync/providers.dart';
+import '../settings/quiet_hours.dart';
 import 'choice_pills.dart';
 import 'onboarding_providers.dart';
 import '../../l10n/l10n.dart';
@@ -229,6 +230,22 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
     }
     if (!mounted) return;
     setState(() => _perm = ok ? _Perm.granted : _Perm.denied);
+    // Reminders are on now: start with a quiet night unless already set.
+    if (ok) {
+      final repo = ref.read(preferencesRepositoryProvider);
+      final prefs = await repo.get();
+      if (prefs.quietHours == null) {
+        await repo.save(prefs.copyWith(quietHours: defaultQuietHours));
+      }
+    }
+  }
+
+  Future<void> _setQuiet(bool on) async {
+    final repo = ref.read(preferencesRepositoryProvider);
+    final prefs = await repo.get();
+    await repo.save(
+      prefs.copyWith(quietHours: on ? defaultQuietHours : null),
+    );
   }
 
   @override
@@ -243,7 +260,7 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
           body: context.l10n.onboardingNotifRationale,
         ),
         const SizedBox(height: 16),
-        if (_perm == _Perm.granted)
+        if (_perm == _Perm.granted) ...[
           StickerCard(
             color: AppColors.mint.withValues(alpha: 0.25),
             child: Text(
@@ -251,6 +268,9 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
               style: AppText.bold(size: 14),
             ),
           ),
+          const SizedBox(height: 12),
+          _QuietHoursCard(onChanged: _setQuiet),
+        ],
         if (_perm == _Perm.denied)
           StickerCard(
             key: const ValueKey('notif-denied'),
@@ -293,6 +313,58 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _QuietHoursCard extends ConsumerWidget {
+  const _QuietHoursCard({required this.onChanged});
+
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final quiet = ref.watch(
+      preferencesProvider.select((p) => p.valueOrNull?.quietHours),
+    );
+    return StickerCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.onboardingQuietLabel,
+                  style: AppText.bold(size: 15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.onboardingQuietBody(
+                    formatQuietHours(quiet ?? defaultQuietHours),
+                  ),
+                  key: const ValueKey('onboarding-quiet-range'),
+                  style: AppText.body(
+                    size: 13,
+                    weight: FontWeight.w500,
+                    color: AppColors.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            key: const ValueKey('onboarding-quiet-switch'),
+            value: quiet != null,
+            activeThumbColor: AppColors.card,
+            activeTrackColor: AppColors.violet,
+            inactiveThumbColor: AppColors.ink,
+            inactiveTrackColor: AppColors.lilac,
+            trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }

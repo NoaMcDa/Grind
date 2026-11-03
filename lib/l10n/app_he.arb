@@ -232,6 +232,8 @@
   "onboardingWelcomeTitle": "היי, אני פיפ",
   "onboardingWelcomeBody": "Grind שומר את התוכניות שלך בטלפון הזה. שום דבר לא יוצא ממנו.",
   "onboardingWelcomeStart": "מתחילים",
+  "onboardingQuietLabel": "שקט בלילה",
+  "onboardingQuietBody": "בלי תזכורות {range}. אפשר לשנות בהגדרות.",
   "onboardingNotifTitle": "תזכורות עדינות, רק כשבא לך",
   "onboardingNotifRationaleTitle": "למה התראות?",
   "onboardingNotifRationale": "תזכורות יכולות להגיע אליך רק אם Grind רשאי להציג אותן. אזכיר לך רק דברים שביקשת שאזכיר.",

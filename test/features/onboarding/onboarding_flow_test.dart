@@ -90,6 +90,27 @@ void main() {
     expect(finished, isTrue);
   });
 
+  testWidgets('allowing notifications starts quiet hours 22:00 – 07:00', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs);
+    await _tapText(tester, 'Start');
+    await _tapText(tester, 'Allow');
+
+    final quiet = (await prefs.get()).quietHours!;
+    expect((quiet.startMinutes, quiet.endMinutes), (22 * 60, 7 * 60));
+    expect(quiet.wrapsMidnight, isTrue);
+    expect(find.textContaining('22:00 – 07:00'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('onboarding-quiet-switch')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).quietHours, isNull);
+    await tester.tap(find.byKey(const ValueKey('onboarding-quiet-switch')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).quietHours, isNotNull);
+  });
+
   testWidgets('skipping every step still finishes', (tester) async {
     final prefs = InMemoryPreferencesRepository();
     var finished = false;

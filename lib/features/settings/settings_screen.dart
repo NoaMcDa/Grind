@@ -15,6 +15,7 @@ import '../onboarding/choice_pills.dart';
 import '../onboarding/weekday_hours_editor.dart';
 import 'backup_actions.dart';
 import 'calendar_selection.dart';
+import 'quiet_hours.dart';
 import 'settings_row.dart';
 import 'settings_store.dart';
 import 'settings_strings.dart';
@@ -114,14 +115,8 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   onChanged: (v) => _update(
                     ref,
-                    (p) => p.copyWith(
-                      quietHours: v
-                          ? const TimeRange(
-                              startMinutes: 22 * 60,
-                              endMinutes: 24 * 60,
-                            )
-                          : null,
-                    ),
+                    (p) =>
+                        p.copyWith(quietHours: v ? defaultQuietHours : null),
                   ),
                 ),
               ),
@@ -237,16 +232,11 @@ class _TimeRangeRow extends StatelessWidget {
         start ? range.startMinutes : range.endMinutes,
       );
       if (v == null) return;
-      var s = range.startMinutes, e = range.endMinutes;
-      if (start) {
-        s = v;
-        if (e <= s) e = 24 * 60;
-      } else {
-        e = v;
-        if (e <= s) s = 0;
-      }
-      if (s >= 24 * 60 || e <= s) return;
-      onChanged(TimeRange(startMinutes: s, endMinutes: e));
+      // An end before the start crosses midnight (22:00 – 07:00).
+      final next = start
+          ? changeQuietHours(range, start: v)
+          : changeQuietHours(range, end: v);
+      if (next != null) onChanged(next);
     }
 
     return Padding(
@@ -256,6 +246,18 @@ class _TimeRangeRow extends StatelessWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          SizedBox(
+            width: double.infinity,
+            child: Text(
+              formatQuietHours(range),
+              key: const ValueKey('quiet-summary'),
+              style: AppText.body(
+                size: 13,
+                weight: FontWeight.w500,
+                color: AppColors.muted,
+              ),
+            ),
+          ),
           Text(SettingsStrings.quietFrom, style: AppText.bold(size: 14)),
           TimePill(
             key: const ValueKey('quiet-start'),

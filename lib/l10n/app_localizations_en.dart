@@ -837,6 +837,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingWelcomeStart => 'Start';
 
   @override
+  String get onboardingQuietLabel => 'Quiet overnight';
+
+  @override
+  String onboardingQuietBody(String range) {
+    return 'No nudges $range. You can change this in Settings.';
+  }
+
+  @override
   String get onboardingNotifTitle => 'Gentle nudges, only when you want them';
 
   @override

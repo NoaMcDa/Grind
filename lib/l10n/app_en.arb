@@ -1105,6 +1105,19 @@
   "@onboardingWelcomeStart": {
     "description": "Welcome button"
   },
+  "onboardingQuietLabel": "Quiet overnight",
+  "@onboardingQuietLabel": {
+    "description": "Onboarding switch for quiet hours"
+  },
+  "onboardingQuietBody": "No nudges {range}. You can change this in Settings.",
+  "@onboardingQuietBody": {
+    "description": "Onboarding quiet hours hint; range is like 22:00 – 07:00",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingNotifTitle": "Gentle nudges, only when you want them",
   "@onboardingNotifTitle": {
     "description": "Notifications step title"

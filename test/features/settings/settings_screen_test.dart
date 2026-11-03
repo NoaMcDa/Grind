@@ -19,6 +19,7 @@ Future<void> _pump(
   InMemoryCalendarRepository? calendars,
   Clock? clock,
   TextDirection direction = TextDirection.ltr,
+  int Function()? pick,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -40,7 +41,9 @@ Future<void> _pump(
         supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: direction,
-          child: SettingsScreen(picker: (_, _) async => 7 * 60),
+          child: SettingsScreen(
+            picker: (_, _) async => pick == null ? 7 * 60 : pick(),
+          ),
         ),
       ),
     ),
@@ -69,9 +72,9 @@ void main() {
     await tester.pumpAndSettle();
     expect((await prefs.get()).quietHours, isNotNull);
 
-    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.tap(find.byKey(const ValueKey('quiet-end')));
     await tester.pumpAndSettle();
-    expect((await prefs.get()).quietHours!.startMinutes, 7 * 60);
+    expect((await prefs.get()).quietHours!.endMinutes, 7 * 60);
 
     await tester.tap(find.byKey(const ValueKey('quiet-switch')));
     await tester.pumpAndSettle();
@@ -96,6 +99,43 @@ void main() {
     await tester.tap(find.text('עברית'));
     await tester.pumpAndSettle();
     expect((await prefs.get()).localeCode, 'he');
+  });
+
+  testWidgets('quiet hours default to 22:00 – 07:00 and may cross midnight', (
+    tester,
+  ) async {
+    final prefs = InMemoryPreferencesRepository();
+    var next = 6 * 60;
+    await _pump(tester, prefs: prefs, pick: () => next);
+
+    await _scrollTo(tester, find.byKey(const ValueKey('quiet-switch')));
+    await tester.tap(find.byKey(const ValueKey('quiet-switch')));
+    await tester.pumpAndSettle();
+    var quiet = (await prefs.get()).quietHours!;
+    expect(quiet.startMinutes, 22 * 60);
+    expect(quiet.endMinutes, 7 * 60);
+    expect(quiet.wrapsMidnight, isTrue);
+    expect(find.text('22:00 – 07:00'), findsOneWidget);
+
+    // An earlier end keeps the start: the range still crosses midnight.
+    await tester.tap(find.byKey(const ValueKey('quiet-end')));
+    await tester.pumpAndSettle();
+    quiet = (await prefs.get()).quietHours!;
+    expect((quiet.startMinutes, quiet.endMinutes), (22 * 60, 6 * 60));
+    expect(find.text('22:00 – 06:00'), findsOneWidget);
+
+    // A start after the end is fine too, and nothing is pushed to 24:00.
+    next = 23 * 60 + 30;
+    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.pumpAndSettle();
+    quiet = (await prefs.get()).quietHours!;
+    expect((quiet.startMinutes, quiet.endMinutes), (23 * 60 + 30, 6 * 60));
+
+    // Same start and end would be empty: the old range stays.
+    next = 6 * 60;
+    await tester.tap(find.byKey(const ValueKey('quiet-start')));
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).quietHours!.startMinutes, 23 * 60 + 30);
   });
 
   testWidgets('calendar connect, pick calendars and disconnect', (
