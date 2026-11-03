@@ -1706,6 +1706,32 @@
   "@reviewRepeatsNote": {
     "description": "Note on a recurring task"
   },
+  "reviewCheckInTitle": "Check in on your goals",
+  "@reviewCheckInTitle": {
+    "description": "Review step title for the daily check-in on recurring-metric goals"
+  },
+  "reviewCheckInHint": "Tick any you hit today. Pip logs a +1 on each.",
+  "@reviewCheckInHint": {
+    "description": "Review check-in step hint"
+  },
+  "reviewCheckInEmpty": "No recurring goals yet. You can add one from the Goals tab.",
+  "@reviewCheckInEmpty": {
+    "description": "Review check-in step empty state"
+  },
+  "reviewCheckInUnitWeek": "{unit} this week",
+  "@reviewCheckInUnitWeek": {
+    "description": "Subtitle on a weekly check-in row: unit label with the current period",
+    "placeholders": {
+      "unit": {"type": "String", "example": "workouts"}
+    }
+  },
+  "reviewCheckInUnitMonth": "{unit} this month",
+  "@reviewCheckInUnitMonth": {
+    "description": "Subtitle on a monthly check-in row: unit label with the current period",
+    "placeholders": {
+      "unit": {"type": "String", "example": "runs"}
+    }
+  },
   "reviewWinTitle": "One win",
   "@reviewWinTitle": {
     "description": "Review step title"

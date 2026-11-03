@@ -1326,6 +1326,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewRepeatsNote => 'Repeats on its own, so it stays put.';
 
   @override
+  String get reviewCheckInTitle => 'Check in on your goals';
+
+  @override
+  String get reviewCheckInHint =>
+      'Tick any you hit today. Pip logs a +1 on each.';
+
+  @override
+  String get reviewCheckInEmpty =>
+      'No recurring goals yet. You can add one from the Goals tab.';
+
+  @override
+  String reviewCheckInUnitWeek(String unit) {
+    return '$unit this week';
+  }
+
+  @override
+  String reviewCheckInUnitMonth(String unit) {
+    return '$unit this month';
+  }
+
+  @override
   String get reviewWinTitle => 'One win';
 
   @override
