@@ -93,6 +93,51 @@ void main() {
         expect(got.map((s) => s.id), ['a', 'b']);
       });
 
+      test('v3 fields round-trip: pauses, win, kind', () async {
+        final repo = make();
+        final paused = now.add(const Duration(minutes: 10));
+        await repo.start(
+          session('a', now).copyWith(pausedMs: 60000, pausedAt: paused),
+        );
+        final active = (await repo.getActive())!;
+        expect(active.pausedMs, 60000);
+        expect(active.pausedAt, paused);
+        expect(active.isPaused, isTrue);
+        expect(active.kind, FocusSessionKind.focus);
+
+        await repo.update(
+          active.copyWith(
+            pausedMs: 120000,
+            pausedAt: null,
+            endedAt: now.add(const Duration(minutes: 27)),
+            completed: true,
+            win: 'Outlined chapter 2',
+          ),
+        );
+        final done = (await repo.getBetween(now, now.add(_day))).single;
+        expect(done.pausedMs, 120000);
+        expect(done.paused, const Duration(minutes: 2));
+        expect(done.pausedAt, isNull);
+        expect(done.win, 'Outlined chapter 2');
+
+        await repo.start(
+          session(
+            'break',
+            now.add(const Duration(minutes: 30)),
+            taskId: null,
+          ).copyWith(kind: FocusSessionKind.breakTime),
+        );
+        expect((await repo.getActive())!.kind, FocusSessionKind.breakTime);
+      });
+
+      test('soft-deleted sessions are hidden', () async {
+        final repo = make();
+        await repo.start(session('a', now));
+        await repo.update(session('a', now).copyWith(deletedAt: now));
+        expect(await repo.getActive(), isNull);
+        expect(await repo.getBetween(now, now.add(_day)), isEmpty);
+      });
+
       test('free sessions have no task', () async {
         final repo = make();
         await repo.start(session('free', now, taskId: null));

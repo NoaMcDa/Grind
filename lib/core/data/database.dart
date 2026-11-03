@@ -1,7 +1,13 @@
 import 'package:drift/drift.dart';
 
 import '../domain/domain.dart'
-    show CalendarSource, Energy, GoalHorizon, TaskStatus;
+    show
+        CalendarSource,
+        Energy,
+        FocusSessionKind,
+        GoalHorizon,
+        GoalStatus,
+        TaskStatus;
 
 part 'database.g.dart';
 
@@ -56,6 +62,7 @@ class ReminderRules extends Table with _Row {
   TextColumn get rrule => text()();
   IntColumn get leadMinutes => integer().withDefault(const Constant(0))();
   IntColumn get until => integer().nullable()();
+  IntColumn get lastCompletedAt => integer().nullable()();
 }
 
 @DataClassName('CalendarEventRow')
@@ -73,6 +80,7 @@ class CalendarEvents extends Table with _Row {
 
   /// No foreign key: sync may mirror an event before its task exists.
   TextColumn get taskId => text().nullable()();
+  TextColumn get htmlLink => text().nullable()();
 }
 
 @DataClassName('FocusSessionRow')
@@ -83,6 +91,12 @@ class FocusSessions extends Table with _Row {
   IntColumn get startedAt => integer()();
   IntColumn get endedAt => integer().nullable()();
   BoolColumn get completed => boolean().withDefault(const Constant(false))();
+  IntColumn get pausedMs => integer().withDefault(const Constant(0))();
+  IntColumn get pausedAt => integer().nullable()();
+  TextColumn get win => text().nullable()();
+  TextColumn get kind => textEnum<FocusSessionKind>().withDefault(
+    Constant(FocusSessionKind.focus.name),
+  )();
 }
 
 @DataClassName('GoalRow')
@@ -94,6 +108,38 @@ class Goals extends Table with _Row {
   RealColumn get importance => real().withDefault(const Constant(0.5))();
   RealColumn get progress => real().withDefault(const Constant(0.0))();
   IntColumn get lastProgressAt => integer().nullable()();
+  IntColumn get targetDate => integer().nullable()();
+  TextColumn get status =>
+      textEnum<GoalStatus>().withDefault(Constant(GoalStatus.active.name))();
+  TextColumn get notes => text().nullable()();
+  TextColumn get metricKind => text().nullable()();
+  IntColumn get metricTarget => integer().nullable()();
+  TextColumn get metricUnit => text().nullable()();
+  IntColumn get metricCurrent => integer().nullable()();
+  TextColumn get metricSource => text().nullable()();
+  TextColumn get metricPeriod => text().nullable()();
+}
+
+/// One finished evening review per local day (`yyyy-MM-dd`).
+@DataClassName('ReviewEntryRow')
+class ReviewEntries extends Table {
+  TextColumn get date => text()();
+  TextColumn get win => text()();
+  IntColumn get doneCount => integer()();
+  IntColumn get movedCount => integer()();
+  IntColumn get createdAt => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {date};
+}
+
+/// Days whose evening review was shown (finished or skipped).
+@DataClassName('ReviewHandledDayRow')
+class ReviewHandledDays extends Table {
+  TextColumn get date => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {date};
 }
 
 /// The single preferences row (id [PreferencesRows.singletonId]). Maps and
@@ -129,6 +175,7 @@ class PreferencesTable extends Table with _Row {
       text().withDefault(const Constant('{}'))();
   BoolColumn get backupHintShown =>
       boolean().withDefault(const Constant(false))();
+  TextColumn get pipAccessory => text().withDefault(const Constant('scarf'))();
 }
 
 abstract final class PreferencesRows {
@@ -147,13 +194,15 @@ abstract final class PreferencesRows {
     FocusSessions,
     Goals,
     PreferencesTable,
+    ReviewEntries,
+    ReviewHandledDays,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// Bump on every schema change and add a step in [migration].
-  static const currentSchemaVersion = 2;
+  static const currentSchemaVersion = 3;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -180,6 +229,26 @@ class AppDatabase extends _$AppDatabase {
         );
         await m.addColumn(preferencesTable, preferencesTable.backupHintShown);
       }
+      if (from < 3) {
+        await m.addColumn(reminderRules, reminderRules.lastCompletedAt);
+        await m.addColumn(calendarEvents, calendarEvents.htmlLink);
+        await m.addColumn(focusSessions, focusSessions.pausedMs);
+        await m.addColumn(focusSessions, focusSessions.pausedAt);
+        await m.addColumn(focusSessions, focusSessions.win);
+        await m.addColumn(focusSessions, focusSessions.kind);
+        await m.addColumn(goals, goals.targetDate);
+        await m.addColumn(goals, goals.status);
+        await m.addColumn(goals, goals.notes);
+        await m.addColumn(goals, goals.metricKind);
+        await m.addColumn(goals, goals.metricTarget);
+        await m.addColumn(goals, goals.metricUnit);
+        await m.addColumn(goals, goals.metricCurrent);
+        await m.addColumn(goals, goals.metricSource);
+        await m.addColumn(goals, goals.metricPeriod);
+        await m.addColumn(preferencesTable, preferencesTable.pipAccessory);
+        await m.createTable(reviewEntries);
+        await m.createTable(reviewHandledDays);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -189,6 +258,8 @@ class AppDatabase extends _$AppDatabase {
   /// Every table, children first: the order for hard deletes. Reverse it
   /// for inserts.
   List<TableInfo<Table, Object?>> get tablesChildrenFirst => [
+    reviewEntries,
+    reviewHandledDays,
     reminderRules,
     focusSessions,
     calendarEvents,

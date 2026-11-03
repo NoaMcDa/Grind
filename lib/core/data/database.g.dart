@@ -1537,6 +1537,17 @@ class $ReminderRulesTable extends ReminderRules
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lastCompletedAtMeta = const VerificationMeta(
+    'lastCompletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> lastCompletedAt = GeneratedColumn<int>(
+    'last_completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1547,6 +1558,7 @@ class $ReminderRulesTable extends ReminderRules
     rrule,
     leadMinutes,
     until,
+    lastCompletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1618,6 +1630,15 @@ class $ReminderRulesTable extends ReminderRules
         until.isAcceptableOrUnknown(data['until']!, _untilMeta),
       );
     }
+    if (data.containsKey('last_completed_at')) {
+      context.handle(
+        _lastCompletedAtMeta,
+        lastCompletedAt.isAcceptableOrUnknown(
+          data['last_completed_at']!,
+          _lastCompletedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1659,6 +1680,10 @@ class $ReminderRulesTable extends ReminderRules
         DriftSqlType.int,
         data['${effectivePrefix}until'],
       ),
+      lastCompletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_completed_at'],
+      ),
     );
   }
 
@@ -1677,6 +1702,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
   final String rrule;
   final int leadMinutes;
   final int? until;
+  final int? lastCompletedAt;
   const ReminderRuleRow({
     required this.id,
     required this.createdAt,
@@ -1686,6 +1712,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
     required this.rrule,
     required this.leadMinutes,
     this.until,
+    this.lastCompletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1701,6 +1728,9 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
     map['lead_minutes'] = Variable<int>(leadMinutes);
     if (!nullToAbsent || until != null) {
       map['until'] = Variable<int>(until);
+    }
+    if (!nullToAbsent || lastCompletedAt != null) {
+      map['last_completed_at'] = Variable<int>(lastCompletedAt);
     }
     return map;
   }
@@ -1719,6 +1749,9 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
       until: until == null && nullToAbsent
           ? const Value.absent()
           : Value(until),
+      lastCompletedAt: lastCompletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastCompletedAt),
     );
   }
 
@@ -1736,6 +1769,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
       rrule: serializer.fromJson<String>(json['rrule']),
       leadMinutes: serializer.fromJson<int>(json['leadMinutes']),
       until: serializer.fromJson<int?>(json['until']),
+      lastCompletedAt: serializer.fromJson<int?>(json['lastCompletedAt']),
     );
   }
   @override
@@ -1750,6 +1784,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
       'rrule': serializer.toJson<String>(rrule),
       'leadMinutes': serializer.toJson<int>(leadMinutes),
       'until': serializer.toJson<int?>(until),
+      'lastCompletedAt': serializer.toJson<int?>(lastCompletedAt),
     };
   }
 
@@ -1762,6 +1797,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
     String? rrule,
     int? leadMinutes,
     Value<int?> until = const Value.absent(),
+    Value<int?> lastCompletedAt = const Value.absent(),
   }) => ReminderRuleRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -1771,6 +1807,9 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
     rrule: rrule ?? this.rrule,
     leadMinutes: leadMinutes ?? this.leadMinutes,
     until: until.present ? until.value : this.until,
+    lastCompletedAt: lastCompletedAt.present
+        ? lastCompletedAt.value
+        : this.lastCompletedAt,
   );
   ReminderRuleRow copyWithCompanion(ReminderRulesCompanion data) {
     return ReminderRuleRow(
@@ -1784,6 +1823,9 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
           ? data.leadMinutes.value
           : this.leadMinutes,
       until: data.until.present ? data.until.value : this.until,
+      lastCompletedAt: data.lastCompletedAt.present
+          ? data.lastCompletedAt.value
+          : this.lastCompletedAt,
     );
   }
 
@@ -1797,7 +1839,8 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
           ..write('taskId: $taskId, ')
           ..write('rrule: $rrule, ')
           ..write('leadMinutes: $leadMinutes, ')
-          ..write('until: $until')
+          ..write('until: $until, ')
+          ..write('lastCompletedAt: $lastCompletedAt')
           ..write(')'))
         .toString();
   }
@@ -1812,6 +1855,7 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
     rrule,
     leadMinutes,
     until,
+    lastCompletedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1824,7 +1868,8 @@ class ReminderRuleRow extends DataClass implements Insertable<ReminderRuleRow> {
           other.taskId == this.taskId &&
           other.rrule == this.rrule &&
           other.leadMinutes == this.leadMinutes &&
-          other.until == this.until);
+          other.until == this.until &&
+          other.lastCompletedAt == this.lastCompletedAt);
 }
 
 class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
@@ -1836,6 +1881,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
   final Value<String> rrule;
   final Value<int> leadMinutes;
   final Value<int?> until;
+  final Value<int?> lastCompletedAt;
   final Value<int> rowid;
   const ReminderRulesCompanion({
     this.id = const Value.absent(),
@@ -1846,6 +1892,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
     this.rrule = const Value.absent(),
     this.leadMinutes = const Value.absent(),
     this.until = const Value.absent(),
+    this.lastCompletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReminderRulesCompanion.insert({
@@ -1857,6 +1904,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
     required String rrule,
     this.leadMinutes = const Value.absent(),
     this.until = const Value.absent(),
+    this.lastCompletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -1872,6 +1920,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
     Expression<String>? rrule,
     Expression<int>? leadMinutes,
     Expression<int>? until,
+    Expression<int>? lastCompletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1883,6 +1932,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
       if (rrule != null) 'rrule': rrule,
       if (leadMinutes != null) 'lead_minutes': leadMinutes,
       if (until != null) 'until': until,
+      if (lastCompletedAt != null) 'last_completed_at': lastCompletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1896,6 +1946,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
     Value<String>? rrule,
     Value<int>? leadMinutes,
     Value<int?>? until,
+    Value<int?>? lastCompletedAt,
     Value<int>? rowid,
   }) {
     return ReminderRulesCompanion(
@@ -1907,6 +1958,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
       rrule: rrule ?? this.rrule,
       leadMinutes: leadMinutes ?? this.leadMinutes,
       until: until ?? this.until,
+      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1938,6 +1990,9 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
     if (until.present) {
       map['until'] = Variable<int>(until.value);
     }
+    if (lastCompletedAt.present) {
+      map['last_completed_at'] = Variable<int>(lastCompletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1955,6 +2010,7 @@ class ReminderRulesCompanion extends UpdateCompanion<ReminderRuleRow> {
           ..write('rrule: $rrule, ')
           ..write('leadMinutes: $leadMinutes, ')
           ..write('until: $until, ')
+          ..write('lastCompletedAt: $lastCompletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2106,6 +2162,17 @@ class $CalendarEventsTable extends CalendarEvents
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _htmlLinkMeta = const VerificationMeta(
+    'htmlLink',
+  );
+  @override
+  late final GeneratedColumn<String> htmlLink = GeneratedColumn<String>(
+    'html_link',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2121,6 +2188,7 @@ class $CalendarEventsTable extends CalendarEvents
     isAllDay,
     isBusy,
     taskId,
+    htmlLink,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2217,6 +2285,12 @@ class $CalendarEventsTable extends CalendarEvents
         taskId.isAcceptableOrUnknown(data['task_id']!, _taskIdMeta),
       );
     }
+    if (data.containsKey('html_link')) {
+      context.handle(
+        _htmlLinkMeta,
+        htmlLink.isAcceptableOrUnknown(data['html_link']!, _htmlLinkMeta),
+      );
+    }
     return context;
   }
 
@@ -2280,6 +2354,10 @@ class $CalendarEventsTable extends CalendarEvents
         DriftSqlType.string,
         data['${effectivePrefix}task_id'],
       ),
+      htmlLink: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}html_link'],
+      ),
     );
   }
 
@@ -2309,6 +2387,7 @@ class CalendarEventRow extends DataClass
 
   /// No foreign key: sync may mirror an event before its task exists.
   final String? taskId;
+  final String? htmlLink;
   const CalendarEventRow({
     required this.id,
     required this.createdAt,
@@ -2323,6 +2402,7 @@ class CalendarEventRow extends DataClass
     required this.isAllDay,
     required this.isBusy,
     this.taskId,
+    this.htmlLink,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2350,6 +2430,9 @@ class CalendarEventRow extends DataClass
     if (!nullToAbsent || taskId != null) {
       map['task_id'] = Variable<String>(taskId);
     }
+    if (!nullToAbsent || htmlLink != null) {
+      map['html_link'] = Variable<String>(htmlLink);
+    }
     return map;
   }
 
@@ -2374,6 +2457,9 @@ class CalendarEventRow extends DataClass
       taskId: taskId == null && nullToAbsent
           ? const Value.absent()
           : Value(taskId),
+      htmlLink: htmlLink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(htmlLink),
     );
   }
 
@@ -2398,6 +2484,7 @@ class CalendarEventRow extends DataClass
       isAllDay: serializer.fromJson<bool>(json['isAllDay']),
       isBusy: serializer.fromJson<bool>(json['isBusy']),
       taskId: serializer.fromJson<String?>(json['taskId']),
+      htmlLink: serializer.fromJson<String?>(json['htmlLink']),
     );
   }
   @override
@@ -2419,6 +2506,7 @@ class CalendarEventRow extends DataClass
       'isAllDay': serializer.toJson<bool>(isAllDay),
       'isBusy': serializer.toJson<bool>(isBusy),
       'taskId': serializer.toJson<String?>(taskId),
+      'htmlLink': serializer.toJson<String?>(htmlLink),
     };
   }
 
@@ -2436,6 +2524,7 @@ class CalendarEventRow extends DataClass
     bool? isAllDay,
     bool? isBusy,
     Value<String?> taskId = const Value.absent(),
+    Value<String?> htmlLink = const Value.absent(),
   }) => CalendarEventRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -2450,6 +2539,7 @@ class CalendarEventRow extends DataClass
     isAllDay: isAllDay ?? this.isAllDay,
     isBusy: isBusy ?? this.isBusy,
     taskId: taskId.present ? taskId.value : this.taskId,
+    htmlLink: htmlLink.present ? htmlLink.value : this.htmlLink,
   );
   CalendarEventRow copyWithCompanion(CalendarEventsCompanion data) {
     return CalendarEventRow(
@@ -2470,6 +2560,7 @@ class CalendarEventRow extends DataClass
       isAllDay: data.isAllDay.present ? data.isAllDay.value : this.isAllDay,
       isBusy: data.isBusy.present ? data.isBusy.value : this.isBusy,
       taskId: data.taskId.present ? data.taskId.value : this.taskId,
+      htmlLink: data.htmlLink.present ? data.htmlLink.value : this.htmlLink,
     );
   }
 
@@ -2488,7 +2579,8 @@ class CalendarEventRow extends DataClass
           ..write('endAt: $endAt, ')
           ..write('isAllDay: $isAllDay, ')
           ..write('isBusy: $isBusy, ')
-          ..write('taskId: $taskId')
+          ..write('taskId: $taskId, ')
+          ..write('htmlLink: $htmlLink')
           ..write(')'))
         .toString();
   }
@@ -2508,6 +2600,7 @@ class CalendarEventRow extends DataClass
     isAllDay,
     isBusy,
     taskId,
+    htmlLink,
   );
   @override
   bool operator ==(Object other) =>
@@ -2525,7 +2618,8 @@ class CalendarEventRow extends DataClass
           other.endAt == this.endAt &&
           other.isAllDay == this.isAllDay &&
           other.isBusy == this.isBusy &&
-          other.taskId == this.taskId);
+          other.taskId == this.taskId &&
+          other.htmlLink == this.htmlLink);
 }
 
 class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
@@ -2542,6 +2636,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
   final Value<bool> isAllDay;
   final Value<bool> isBusy;
   final Value<String?> taskId;
+  final Value<String?> htmlLink;
   final Value<int> rowid;
   const CalendarEventsCompanion({
     this.id = const Value.absent(),
@@ -2557,6 +2652,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
     this.isAllDay = const Value.absent(),
     this.isBusy = const Value.absent(),
     this.taskId = const Value.absent(),
+    this.htmlLink = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CalendarEventsCompanion.insert({
@@ -2573,6 +2669,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
     this.isAllDay = const Value.absent(),
     this.isBusy = const Value.absent(),
     this.taskId = const Value.absent(),
+    this.htmlLink = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -2596,6 +2693,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
     Expression<bool>? isAllDay,
     Expression<bool>? isBusy,
     Expression<String>? taskId,
+    Expression<String>? htmlLink,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2612,6 +2710,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
       if (isAllDay != null) 'is_all_day': isAllDay,
       if (isBusy != null) 'is_busy': isBusy,
       if (taskId != null) 'task_id': taskId,
+      if (htmlLink != null) 'html_link': htmlLink,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2630,6 +2729,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
     Value<bool>? isAllDay,
     Value<bool>? isBusy,
     Value<String?>? taskId,
+    Value<String?>? htmlLink,
     Value<int>? rowid,
   }) {
     return CalendarEventsCompanion(
@@ -2646,6 +2746,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
       isAllDay: isAllDay ?? this.isAllDay,
       isBusy: isBusy ?? this.isBusy,
       taskId: taskId ?? this.taskId,
+      htmlLink: htmlLink ?? this.htmlLink,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2694,6 +2795,9 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
     if (taskId.present) {
       map['task_id'] = Variable<String>(taskId.value);
     }
+    if (htmlLink.present) {
+      map['html_link'] = Variable<String>(htmlLink.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2716,6 +2820,7 @@ class CalendarEventsCompanion extends UpdateCompanion<CalendarEventRow> {
           ..write('isAllDay: $isAllDay, ')
           ..write('isBusy: $isBusy, ')
           ..write('taskId: $taskId, ')
+          ..write('htmlLink: $htmlLink, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2830,6 +2935,48 @@ class $FocusSessionsTable extends FocusSessions
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _pausedMsMeta = const VerificationMeta(
+    'pausedMs',
+  );
+  @override
+  late final GeneratedColumn<int> pausedMs = GeneratedColumn<int>(
+    'paused_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _pausedAtMeta = const VerificationMeta(
+    'pausedAt',
+  );
+  @override
+  late final GeneratedColumn<int> pausedAt = GeneratedColumn<int>(
+    'paused_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _winMeta = const VerificationMeta('win');
+  @override
+  late final GeneratedColumn<String> win = GeneratedColumn<String>(
+    'win',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<FocusSessionKind, String> kind =
+      GeneratedColumn<String>(
+        'kind',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(FocusSessionKind.focus.name),
+      ).withConverter<FocusSessionKind>($FocusSessionsTable.$converterkind);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2841,6 +2988,10 @@ class $FocusSessionsTable extends FocusSessions
     startedAt,
     endedAt,
     completed,
+    pausedMs,
+    pausedAt,
+    win,
+    kind,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2918,6 +3069,24 @@ class $FocusSessionsTable extends FocusSessions
         completed.isAcceptableOrUnknown(data['completed']!, _completedMeta),
       );
     }
+    if (data.containsKey('paused_ms')) {
+      context.handle(
+        _pausedMsMeta,
+        pausedMs.isAcceptableOrUnknown(data['paused_ms']!, _pausedMsMeta),
+      );
+    }
+    if (data.containsKey('paused_at')) {
+      context.handle(
+        _pausedAtMeta,
+        pausedAt.isAcceptableOrUnknown(data['paused_at']!, _pausedAtMeta),
+      );
+    }
+    if (data.containsKey('win')) {
+      context.handle(
+        _winMeta,
+        win.isAcceptableOrUnknown(data['win']!, _winMeta),
+      );
+    }
     return context;
   }
 
@@ -2963,6 +3132,24 @@ class $FocusSessionsTable extends FocusSessions
         DriftSqlType.bool,
         data['${effectivePrefix}completed'],
       )!,
+      pausedMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paused_ms'],
+      )!,
+      pausedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paused_at'],
+      ),
+      win: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}win'],
+      ),
+      kind: $FocusSessionsTable.$converterkind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}kind'],
+        )!,
+      ),
     );
   }
 
@@ -2970,6 +3157,9 @@ class $FocusSessionsTable extends FocusSessions
   $FocusSessionsTable createAlias(String alias) {
     return $FocusSessionsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<FocusSessionKind, String, String> $converterkind =
+      const EnumNameConverter<FocusSessionKind>(FocusSessionKind.values);
 }
 
 class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
@@ -2982,6 +3172,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
   final int startedAt;
   final int? endedAt;
   final bool completed;
+  final int pausedMs;
+  final int? pausedAt;
+  final String? win;
+  final FocusSessionKind kind;
   const FocusSessionRow({
     required this.id,
     required this.createdAt,
@@ -2992,6 +3186,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
     required this.startedAt,
     this.endedAt,
     required this.completed,
+    required this.pausedMs,
+    this.pausedAt,
+    this.win,
+    required this.kind,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3011,6 +3209,18 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
       map['ended_at'] = Variable<int>(endedAt);
     }
     map['completed'] = Variable<bool>(completed);
+    map['paused_ms'] = Variable<int>(pausedMs);
+    if (!nullToAbsent || pausedAt != null) {
+      map['paused_at'] = Variable<int>(pausedAt);
+    }
+    if (!nullToAbsent || win != null) {
+      map['win'] = Variable<String>(win);
+    }
+    {
+      map['kind'] = Variable<String>(
+        $FocusSessionsTable.$converterkind.toSql(kind),
+      );
+    }
     return map;
   }
 
@@ -3031,6 +3241,12 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
           ? const Value.absent()
           : Value(endedAt),
       completed: Value(completed),
+      pausedMs: Value(pausedMs),
+      pausedAt: pausedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pausedAt),
+      win: win == null && nullToAbsent ? const Value.absent() : Value(win),
+      kind: Value(kind),
     );
   }
 
@@ -3049,6 +3265,12 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
       startedAt: serializer.fromJson<int>(json['startedAt']),
       endedAt: serializer.fromJson<int?>(json['endedAt']),
       completed: serializer.fromJson<bool>(json['completed']),
+      pausedMs: serializer.fromJson<int>(json['pausedMs']),
+      pausedAt: serializer.fromJson<int?>(json['pausedAt']),
+      win: serializer.fromJson<String?>(json['win']),
+      kind: $FocusSessionsTable.$converterkind.fromJson(
+        serializer.fromJson<String>(json['kind']),
+      ),
     );
   }
   @override
@@ -3064,6 +3286,12 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
       'startedAt': serializer.toJson<int>(startedAt),
       'endedAt': serializer.toJson<int?>(endedAt),
       'completed': serializer.toJson<bool>(completed),
+      'pausedMs': serializer.toJson<int>(pausedMs),
+      'pausedAt': serializer.toJson<int?>(pausedAt),
+      'win': serializer.toJson<String?>(win),
+      'kind': serializer.toJson<String>(
+        $FocusSessionsTable.$converterkind.toJson(kind),
+      ),
     };
   }
 
@@ -3077,6 +3305,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
     int? startedAt,
     Value<int?> endedAt = const Value.absent(),
     bool? completed,
+    int? pausedMs,
+    Value<int?> pausedAt = const Value.absent(),
+    Value<String?> win = const Value.absent(),
+    FocusSessionKind? kind,
   }) => FocusSessionRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -3087,6 +3319,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
     startedAt: startedAt ?? this.startedAt,
     endedAt: endedAt.present ? endedAt.value : this.endedAt,
     completed: completed ?? this.completed,
+    pausedMs: pausedMs ?? this.pausedMs,
+    pausedAt: pausedAt.present ? pausedAt.value : this.pausedAt,
+    win: win.present ? win.value : this.win,
+    kind: kind ?? this.kind,
   );
   FocusSessionRow copyWithCompanion(FocusSessionsCompanion data) {
     return FocusSessionRow(
@@ -3101,6 +3337,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
       startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
       endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
       completed: data.completed.present ? data.completed.value : this.completed,
+      pausedMs: data.pausedMs.present ? data.pausedMs.value : this.pausedMs,
+      pausedAt: data.pausedAt.present ? data.pausedAt.value : this.pausedAt,
+      win: data.win.present ? data.win.value : this.win,
+      kind: data.kind.present ? data.kind.value : this.kind,
     );
   }
 
@@ -3115,7 +3355,11 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
           ..write('plannedMinutes: $plannedMinutes, ')
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
-          ..write('completed: $completed')
+          ..write('completed: $completed, ')
+          ..write('pausedMs: $pausedMs, ')
+          ..write('pausedAt: $pausedAt, ')
+          ..write('win: $win, ')
+          ..write('kind: $kind')
           ..write(')'))
         .toString();
   }
@@ -3131,6 +3375,10 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
     startedAt,
     endedAt,
     completed,
+    pausedMs,
+    pausedAt,
+    win,
+    kind,
   );
   @override
   bool operator ==(Object other) =>
@@ -3144,7 +3392,11 @@ class FocusSessionRow extends DataClass implements Insertable<FocusSessionRow> {
           other.plannedMinutes == this.plannedMinutes &&
           other.startedAt == this.startedAt &&
           other.endedAt == this.endedAt &&
-          other.completed == this.completed);
+          other.completed == this.completed &&
+          other.pausedMs == this.pausedMs &&
+          other.pausedAt == this.pausedAt &&
+          other.win == this.win &&
+          other.kind == this.kind);
 }
 
 class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
@@ -3157,6 +3409,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
   final Value<int> startedAt;
   final Value<int?> endedAt;
   final Value<bool> completed;
+  final Value<int> pausedMs;
+  final Value<int?> pausedAt;
+  final Value<String?> win;
+  final Value<FocusSessionKind> kind;
   final Value<int> rowid;
   const FocusSessionsCompanion({
     this.id = const Value.absent(),
@@ -3168,6 +3424,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
     this.startedAt = const Value.absent(),
     this.endedAt = const Value.absent(),
     this.completed = const Value.absent(),
+    this.pausedMs = const Value.absent(),
+    this.pausedAt = const Value.absent(),
+    this.win = const Value.absent(),
+    this.kind = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FocusSessionsCompanion.insert({
@@ -3180,6 +3440,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
     required int startedAt,
     this.endedAt = const Value.absent(),
     this.completed = const Value.absent(),
+    this.pausedMs = const Value.absent(),
+    this.pausedAt = const Value.absent(),
+    this.win = const Value.absent(),
+    this.kind = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -3196,6 +3460,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
     Expression<int>? startedAt,
     Expression<int>? endedAt,
     Expression<bool>? completed,
+    Expression<int>? pausedMs,
+    Expression<int>? pausedAt,
+    Expression<String>? win,
+    Expression<String>? kind,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3208,6 +3476,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
       if (startedAt != null) 'started_at': startedAt,
       if (endedAt != null) 'ended_at': endedAt,
       if (completed != null) 'completed': completed,
+      if (pausedMs != null) 'paused_ms': pausedMs,
+      if (pausedAt != null) 'paused_at': pausedAt,
+      if (win != null) 'win': win,
+      if (kind != null) 'kind': kind,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3222,6 +3494,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
     Value<int>? startedAt,
     Value<int?>? endedAt,
     Value<bool>? completed,
+    Value<int>? pausedMs,
+    Value<int?>? pausedAt,
+    Value<String?>? win,
+    Value<FocusSessionKind>? kind,
     Value<int>? rowid,
   }) {
     return FocusSessionsCompanion(
@@ -3234,6 +3510,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
       startedAt: startedAt ?? this.startedAt,
       endedAt: endedAt ?? this.endedAt,
       completed: completed ?? this.completed,
+      pausedMs: pausedMs ?? this.pausedMs,
+      pausedAt: pausedAt ?? this.pausedAt,
+      win: win ?? this.win,
+      kind: kind ?? this.kind,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3268,6 +3548,20 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
     if (completed.present) {
       map['completed'] = Variable<bool>(completed.value);
     }
+    if (pausedMs.present) {
+      map['paused_ms'] = Variable<int>(pausedMs.value);
+    }
+    if (pausedAt.present) {
+      map['paused_at'] = Variable<int>(pausedAt.value);
+    }
+    if (win.present) {
+      map['win'] = Variable<String>(win.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(
+        $FocusSessionsTable.$converterkind.toSql(kind.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3286,6 +3580,10 @@ class FocusSessionsCompanion extends UpdateCompanion<FocusSessionRow> {
           ..write('startedAt: $startedAt, ')
           ..write('endedAt: $endedAt, ')
           ..write('completed: $completed, ')
+          ..write('pausedMs: $pausedMs, ')
+          ..write('pausedAt: $pausedAt, ')
+          ..write('win: $win, ')
+          ..write('kind: $kind, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3402,6 +3700,102 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _targetDateMeta = const VerificationMeta(
+    'targetDate',
+  );
+  @override
+  late final GeneratedColumn<int> targetDate = GeneratedColumn<int>(
+    'target_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<GoalStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: Constant(GoalStatus.active.name),
+      ).withConverter<GoalStatus>($GoalsTable.$converterstatus);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricKindMeta = const VerificationMeta(
+    'metricKind',
+  );
+  @override
+  late final GeneratedColumn<String> metricKind = GeneratedColumn<String>(
+    'metric_kind',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricTargetMeta = const VerificationMeta(
+    'metricTarget',
+  );
+  @override
+  late final GeneratedColumn<int> metricTarget = GeneratedColumn<int>(
+    'metric_target',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricUnitMeta = const VerificationMeta(
+    'metricUnit',
+  );
+  @override
+  late final GeneratedColumn<String> metricUnit = GeneratedColumn<String>(
+    'metric_unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricCurrentMeta = const VerificationMeta(
+    'metricCurrent',
+  );
+  @override
+  late final GeneratedColumn<int> metricCurrent = GeneratedColumn<int>(
+    'metric_current',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricSourceMeta = const VerificationMeta(
+    'metricSource',
+  );
+  @override
+  late final GeneratedColumn<String> metricSource = GeneratedColumn<String>(
+    'metric_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metricPeriodMeta = const VerificationMeta(
+    'metricPeriod',
+  );
+  @override
+  late final GeneratedColumn<String> metricPeriod = GeneratedColumn<String>(
+    'metric_period',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3414,6 +3808,15 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalRow> {
     importance,
     progress,
     lastProgressAt,
+    targetDate,
+    status,
+    notes,
+    metricKind,
+    metricTarget,
+    metricUnit,
+    metricCurrent,
+    metricSource,
+    metricPeriod,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3489,6 +3892,66 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalRow> {
         ),
       );
     }
+    if (data.containsKey('target_date')) {
+      context.handle(
+        _targetDateMeta,
+        targetDate.isAcceptableOrUnknown(data['target_date']!, _targetDateMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('metric_kind')) {
+      context.handle(
+        _metricKindMeta,
+        metricKind.isAcceptableOrUnknown(data['metric_kind']!, _metricKindMeta),
+      );
+    }
+    if (data.containsKey('metric_target')) {
+      context.handle(
+        _metricTargetMeta,
+        metricTarget.isAcceptableOrUnknown(
+          data['metric_target']!,
+          _metricTargetMeta,
+        ),
+      );
+    }
+    if (data.containsKey('metric_unit')) {
+      context.handle(
+        _metricUnitMeta,
+        metricUnit.isAcceptableOrUnknown(data['metric_unit']!, _metricUnitMeta),
+      );
+    }
+    if (data.containsKey('metric_current')) {
+      context.handle(
+        _metricCurrentMeta,
+        metricCurrent.isAcceptableOrUnknown(
+          data['metric_current']!,
+          _metricCurrentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('metric_source')) {
+      context.handle(
+        _metricSourceMeta,
+        metricSource.isAcceptableOrUnknown(
+          data['metric_source']!,
+          _metricSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('metric_period')) {
+      context.handle(
+        _metricPeriodMeta,
+        metricPeriod.isAcceptableOrUnknown(
+          data['metric_period']!,
+          _metricPeriodMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3540,6 +4003,44 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalRow> {
         DriftSqlType.int,
         data['${effectivePrefix}last_progress_at'],
       ),
+      targetDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_date'],
+      ),
+      status: $GoalsTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      metricKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric_kind'],
+      ),
+      metricTarget: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}metric_target'],
+      ),
+      metricUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric_unit'],
+      ),
+      metricCurrent: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}metric_current'],
+      ),
+      metricSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric_source'],
+      ),
+      metricPeriod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric_period'],
+      ),
     );
   }
 
@@ -3550,6 +4051,8 @@ class $GoalsTable extends Goals with TableInfo<$GoalsTable, GoalRow> {
 
   static JsonTypeConverter2<GoalHorizon, String, String> $converterhorizon =
       const EnumNameConverter<GoalHorizon>(GoalHorizon.values);
+  static JsonTypeConverter2<GoalStatus, String, String> $converterstatus =
+      const EnumNameConverter<GoalStatus>(GoalStatus.values);
 }
 
 class GoalRow extends DataClass implements Insertable<GoalRow> {
@@ -3563,6 +4066,15 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
   final double importance;
   final double progress;
   final int? lastProgressAt;
+  final int? targetDate;
+  final GoalStatus status;
+  final String? notes;
+  final String? metricKind;
+  final int? metricTarget;
+  final String? metricUnit;
+  final int? metricCurrent;
+  final String? metricSource;
+  final String? metricPeriod;
   const GoalRow({
     required this.id,
     required this.createdAt,
@@ -3574,6 +4086,15 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
     required this.importance,
     required this.progress,
     this.lastProgressAt,
+    this.targetDate,
+    required this.status,
+    this.notes,
+    this.metricKind,
+    this.metricTarget,
+    this.metricUnit,
+    this.metricCurrent,
+    this.metricSource,
+    this.metricPeriod,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3598,6 +4119,35 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
     if (!nullToAbsent || lastProgressAt != null) {
       map['last_progress_at'] = Variable<int>(lastProgressAt);
     }
+    if (!nullToAbsent || targetDate != null) {
+      map['target_date'] = Variable<int>(targetDate);
+    }
+    {
+      map['status'] = Variable<String>(
+        $GoalsTable.$converterstatus.toSql(status),
+      );
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || metricKind != null) {
+      map['metric_kind'] = Variable<String>(metricKind);
+    }
+    if (!nullToAbsent || metricTarget != null) {
+      map['metric_target'] = Variable<int>(metricTarget);
+    }
+    if (!nullToAbsent || metricUnit != null) {
+      map['metric_unit'] = Variable<String>(metricUnit);
+    }
+    if (!nullToAbsent || metricCurrent != null) {
+      map['metric_current'] = Variable<int>(metricCurrent);
+    }
+    if (!nullToAbsent || metricSource != null) {
+      map['metric_source'] = Variable<String>(metricSource);
+    }
+    if (!nullToAbsent || metricPeriod != null) {
+      map['metric_period'] = Variable<String>(metricPeriod);
+    }
     return map;
   }
 
@@ -3617,6 +4167,31 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
       lastProgressAt: lastProgressAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastProgressAt),
+      targetDate: targetDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetDate),
+      status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      metricKind: metricKind == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricKind),
+      metricTarget: metricTarget == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricTarget),
+      metricUnit: metricUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricUnit),
+      metricCurrent: metricCurrent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricCurrent),
+      metricSource: metricSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricSource),
+      metricPeriod: metricPeriod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metricPeriod),
     );
   }
 
@@ -3638,6 +4213,17 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
       importance: serializer.fromJson<double>(json['importance']),
       progress: serializer.fromJson<double>(json['progress']),
       lastProgressAt: serializer.fromJson<int?>(json['lastProgressAt']),
+      targetDate: serializer.fromJson<int?>(json['targetDate']),
+      status: $GoalsTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+      notes: serializer.fromJson<String?>(json['notes']),
+      metricKind: serializer.fromJson<String?>(json['metricKind']),
+      metricTarget: serializer.fromJson<int?>(json['metricTarget']),
+      metricUnit: serializer.fromJson<String?>(json['metricUnit']),
+      metricCurrent: serializer.fromJson<int?>(json['metricCurrent']),
+      metricSource: serializer.fromJson<String?>(json['metricSource']),
+      metricPeriod: serializer.fromJson<String?>(json['metricPeriod']),
     );
   }
   @override
@@ -3656,6 +4242,17 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
       'importance': serializer.toJson<double>(importance),
       'progress': serializer.toJson<double>(progress),
       'lastProgressAt': serializer.toJson<int?>(lastProgressAt),
+      'targetDate': serializer.toJson<int?>(targetDate),
+      'status': serializer.toJson<String>(
+        $GoalsTable.$converterstatus.toJson(status),
+      ),
+      'notes': serializer.toJson<String?>(notes),
+      'metricKind': serializer.toJson<String?>(metricKind),
+      'metricTarget': serializer.toJson<int?>(metricTarget),
+      'metricUnit': serializer.toJson<String?>(metricUnit),
+      'metricCurrent': serializer.toJson<int?>(metricCurrent),
+      'metricSource': serializer.toJson<String?>(metricSource),
+      'metricPeriod': serializer.toJson<String?>(metricPeriod),
     };
   }
 
@@ -3670,6 +4267,15 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
     double? importance,
     double? progress,
     Value<int?> lastProgressAt = const Value.absent(),
+    Value<int?> targetDate = const Value.absent(),
+    GoalStatus? status,
+    Value<String?> notes = const Value.absent(),
+    Value<String?> metricKind = const Value.absent(),
+    Value<int?> metricTarget = const Value.absent(),
+    Value<String?> metricUnit = const Value.absent(),
+    Value<int?> metricCurrent = const Value.absent(),
+    Value<String?> metricSource = const Value.absent(),
+    Value<String?> metricPeriod = const Value.absent(),
   }) => GoalRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -3683,6 +4289,17 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
     lastProgressAt: lastProgressAt.present
         ? lastProgressAt.value
         : this.lastProgressAt,
+    targetDate: targetDate.present ? targetDate.value : this.targetDate,
+    status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
+    metricKind: metricKind.present ? metricKind.value : this.metricKind,
+    metricTarget: metricTarget.present ? metricTarget.value : this.metricTarget,
+    metricUnit: metricUnit.present ? metricUnit.value : this.metricUnit,
+    metricCurrent: metricCurrent.present
+        ? metricCurrent.value
+        : this.metricCurrent,
+    metricSource: metricSource.present ? metricSource.value : this.metricSource,
+    metricPeriod: metricPeriod.present ? metricPeriod.value : this.metricPeriod,
   );
   GoalRow copyWithCompanion(GoalsCompanion data) {
     return GoalRow(
@@ -3700,6 +4317,29 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
       lastProgressAt: data.lastProgressAt.present
           ? data.lastProgressAt.value
           : this.lastProgressAt,
+      targetDate: data.targetDate.present
+          ? data.targetDate.value
+          : this.targetDate,
+      status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      metricKind: data.metricKind.present
+          ? data.metricKind.value
+          : this.metricKind,
+      metricTarget: data.metricTarget.present
+          ? data.metricTarget.value
+          : this.metricTarget,
+      metricUnit: data.metricUnit.present
+          ? data.metricUnit.value
+          : this.metricUnit,
+      metricCurrent: data.metricCurrent.present
+          ? data.metricCurrent.value
+          : this.metricCurrent,
+      metricSource: data.metricSource.present
+          ? data.metricSource.value
+          : this.metricSource,
+      metricPeriod: data.metricPeriod.present
+          ? data.metricPeriod.value
+          : this.metricPeriod,
     );
   }
 
@@ -3715,7 +4355,16 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
           ..write('horizon: $horizon, ')
           ..write('importance: $importance, ')
           ..write('progress: $progress, ')
-          ..write('lastProgressAt: $lastProgressAt')
+          ..write('lastProgressAt: $lastProgressAt, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('metricKind: $metricKind, ')
+          ..write('metricTarget: $metricTarget, ')
+          ..write('metricUnit: $metricUnit, ')
+          ..write('metricCurrent: $metricCurrent, ')
+          ..write('metricSource: $metricSource, ')
+          ..write('metricPeriod: $metricPeriod')
           ..write(')'))
         .toString();
   }
@@ -3732,6 +4381,15 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
     importance,
     progress,
     lastProgressAt,
+    targetDate,
+    status,
+    notes,
+    metricKind,
+    metricTarget,
+    metricUnit,
+    metricCurrent,
+    metricSource,
+    metricPeriod,
   );
   @override
   bool operator ==(Object other) =>
@@ -3746,7 +4404,16 @@ class GoalRow extends DataClass implements Insertable<GoalRow> {
           other.horizon == this.horizon &&
           other.importance == this.importance &&
           other.progress == this.progress &&
-          other.lastProgressAt == this.lastProgressAt);
+          other.lastProgressAt == this.lastProgressAt &&
+          other.targetDate == this.targetDate &&
+          other.status == this.status &&
+          other.notes == this.notes &&
+          other.metricKind == this.metricKind &&
+          other.metricTarget == this.metricTarget &&
+          other.metricUnit == this.metricUnit &&
+          other.metricCurrent == this.metricCurrent &&
+          other.metricSource == this.metricSource &&
+          other.metricPeriod == this.metricPeriod);
 }
 
 class GoalsCompanion extends UpdateCompanion<GoalRow> {
@@ -3760,6 +4427,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
   final Value<double> importance;
   final Value<double> progress;
   final Value<int?> lastProgressAt;
+  final Value<int?> targetDate;
+  final Value<GoalStatus> status;
+  final Value<String?> notes;
+  final Value<String?> metricKind;
+  final Value<int?> metricTarget;
+  final Value<String?> metricUnit;
+  final Value<int?> metricCurrent;
+  final Value<String?> metricSource;
+  final Value<String?> metricPeriod;
   final Value<int> rowid;
   const GoalsCompanion({
     this.id = const Value.absent(),
@@ -3772,6 +4448,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
     this.importance = const Value.absent(),
     this.progress = const Value.absent(),
     this.lastProgressAt = const Value.absent(),
+    this.targetDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.metricKind = const Value.absent(),
+    this.metricTarget = const Value.absent(),
+    this.metricUnit = const Value.absent(),
+    this.metricCurrent = const Value.absent(),
+    this.metricSource = const Value.absent(),
+    this.metricPeriod = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GoalsCompanion.insert({
@@ -3785,6 +4470,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
     this.importance = const Value.absent(),
     this.progress = const Value.absent(),
     this.lastProgressAt = const Value.absent(),
+    this.targetDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.metricKind = const Value.absent(),
+    this.metricTarget = const Value.absent(),
+    this.metricUnit = const Value.absent(),
+    this.metricCurrent = const Value.absent(),
+    this.metricSource = const Value.absent(),
+    this.metricPeriod = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -3801,6 +4495,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
     Expression<double>? importance,
     Expression<double>? progress,
     Expression<int>? lastProgressAt,
+    Expression<int>? targetDate,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<String>? metricKind,
+    Expression<int>? metricTarget,
+    Expression<String>? metricUnit,
+    Expression<int>? metricCurrent,
+    Expression<String>? metricSource,
+    Expression<String>? metricPeriod,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3814,6 +4517,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
       if (importance != null) 'importance': importance,
       if (progress != null) 'progress': progress,
       if (lastProgressAt != null) 'last_progress_at': lastProgressAt,
+      if (targetDate != null) 'target_date': targetDate,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (metricKind != null) 'metric_kind': metricKind,
+      if (metricTarget != null) 'metric_target': metricTarget,
+      if (metricUnit != null) 'metric_unit': metricUnit,
+      if (metricCurrent != null) 'metric_current': metricCurrent,
+      if (metricSource != null) 'metric_source': metricSource,
+      if (metricPeriod != null) 'metric_period': metricPeriod,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3829,6 +4541,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
     Value<double>? importance,
     Value<double>? progress,
     Value<int?>? lastProgressAt,
+    Value<int?>? targetDate,
+    Value<GoalStatus>? status,
+    Value<String?>? notes,
+    Value<String?>? metricKind,
+    Value<int?>? metricTarget,
+    Value<String?>? metricUnit,
+    Value<int?>? metricCurrent,
+    Value<String?>? metricSource,
+    Value<String?>? metricPeriod,
     Value<int>? rowid,
   }) {
     return GoalsCompanion(
@@ -3842,6 +4563,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
       importance: importance ?? this.importance,
       progress: progress ?? this.progress,
       lastProgressAt: lastProgressAt ?? this.lastProgressAt,
+      targetDate: targetDate ?? this.targetDate,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      metricKind: metricKind ?? this.metricKind,
+      metricTarget: metricTarget ?? this.metricTarget,
+      metricUnit: metricUnit ?? this.metricUnit,
+      metricCurrent: metricCurrent ?? this.metricCurrent,
+      metricSource: metricSource ?? this.metricSource,
+      metricPeriod: metricPeriod ?? this.metricPeriod,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3881,6 +4611,35 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
     if (lastProgressAt.present) {
       map['last_progress_at'] = Variable<int>(lastProgressAt.value);
     }
+    if (targetDate.present) {
+      map['target_date'] = Variable<int>(targetDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $GoalsTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (metricKind.present) {
+      map['metric_kind'] = Variable<String>(metricKind.value);
+    }
+    if (metricTarget.present) {
+      map['metric_target'] = Variable<int>(metricTarget.value);
+    }
+    if (metricUnit.present) {
+      map['metric_unit'] = Variable<String>(metricUnit.value);
+    }
+    if (metricCurrent.present) {
+      map['metric_current'] = Variable<int>(metricCurrent.value);
+    }
+    if (metricSource.present) {
+      map['metric_source'] = Variable<String>(metricSource.value);
+    }
+    if (metricPeriod.present) {
+      map['metric_period'] = Variable<String>(metricPeriod.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3900,6 +4659,15 @@ class GoalsCompanion extends UpdateCompanion<GoalRow> {
           ..write('importance: $importance, ')
           ..write('progress: $progress, ')
           ..write('lastProgressAt: $lastProgressAt, ')
+          ..write('targetDate: $targetDate, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('metricKind: $metricKind, ')
+          ..write('metricTarget: $metricTarget, ')
+          ..write('metricUnit: $metricUnit, ')
+          ..write('metricCurrent: $metricCurrent, ')
+          ..write('metricSource: $metricSource, ')
+          ..write('metricPeriod: $metricPeriod, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4143,6 +4911,18 @@ class $PreferencesTableTable extends PreferencesTable
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _pipAccessoryMeta = const VerificationMeta(
+    'pipAccessory',
+  );
+  @override
+  late final GeneratedColumn<String> pipAccessory = GeneratedColumn<String>(
+    'pip_accessory',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('scarf'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4166,6 +4946,7 @@ class $PreferencesTableTable extends PreferencesTable
     eveningPromptMinutes,
     selectedCalendarIds,
     backupHintShown,
+    pipAccessory,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4371,6 +5152,15 @@ class $PreferencesTableTable extends PreferencesTable
         ),
       );
     }
+    if (data.containsKey('pip_accessory')) {
+      context.handle(
+        _pipAccessoryMeta,
+        pipAccessory.isAcceptableOrUnknown(
+          data['pip_accessory']!,
+          _pipAccessoryMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4464,6 +5254,10 @@ class $PreferencesTableTable extends PreferencesTable
         DriftSqlType.bool,
         data['${effectivePrefix}backup_hint_shown'],
       )!,
+      pipAccessory: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pip_accessory'],
+      )!,
     );
   }
 
@@ -4503,6 +5297,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
   /// JSON: `{"google": ["id", ...], "apple": [...]}`.
   final String selectedCalendarIds;
   final bool backupHintShown;
+  final String pipAccessory;
   const PreferencesRow({
     required this.id,
     required this.createdAt,
@@ -4525,6 +5320,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     this.eveningPromptMinutes,
     required this.selectedCalendarIds,
     required this.backupHintShown,
+    required this.pipAccessory,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4562,6 +5358,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     }
     map['selected_calendar_ids'] = Variable<String>(selectedCalendarIds);
     map['backup_hint_shown'] = Variable<bool>(backupHintShown);
+    map['pip_accessory'] = Variable<String>(pipAccessory);
     return map;
   }
 
@@ -4596,6 +5393,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
           : Value(eveningPromptMinutes),
       selectedCalendarIds: Value(selectedCalendarIds),
       backupHintShown: Value(backupHintShown),
+      pipAccessory: Value(pipAccessory),
     );
   }
 
@@ -4640,6 +5438,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
         json['selectedCalendarIds'],
       ),
       backupHintShown: serializer.fromJson<bool>(json['backupHintShown']),
+      pipAccessory: serializer.fromJson<String>(json['pipAccessory']),
     );
   }
   @override
@@ -4671,6 +5470,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       'eveningPromptMinutes': serializer.toJson<int?>(eveningPromptMinutes),
       'selectedCalendarIds': serializer.toJson<String>(selectedCalendarIds),
       'backupHintShown': serializer.toJson<bool>(backupHintShown),
+      'pipAccessory': serializer.toJson<String>(pipAccessory),
     };
   }
 
@@ -4696,6 +5496,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     Value<int?> eveningPromptMinutes = const Value.absent(),
     String? selectedCalendarIds,
     bool? backupHintShown,
+    String? pipAccessory,
   }) => PreferencesRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -4724,6 +5525,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
         : this.eveningPromptMinutes,
     selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
     backupHintShown: backupHintShown ?? this.backupHintShown,
+    pipAccessory: pipAccessory ?? this.pipAccessory,
   );
   PreferencesRow copyWithCompanion(PreferencesTableCompanion data) {
     return PreferencesRow(
@@ -4778,6 +5580,9 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       backupHintShown: data.backupHintShown.present
           ? data.backupHintShown.value
           : this.backupHintShown,
+      pipAccessory: data.pipAccessory.present
+          ? data.pipAccessory.value
+          : this.pipAccessory,
     );
   }
 
@@ -4804,7 +5609,8 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
           ..write('morningPromptMinutes: $morningPromptMinutes, ')
           ..write('eveningPromptMinutes: $eveningPromptMinutes, ')
           ..write('selectedCalendarIds: $selectedCalendarIds, ')
-          ..write('backupHintShown: $backupHintShown')
+          ..write('backupHintShown: $backupHintShown, ')
+          ..write('pipAccessory: $pipAccessory')
           ..write(')'))
         .toString();
   }
@@ -4832,6 +5638,7 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     eveningPromptMinutes,
     selectedCalendarIds,
     backupHintShown,
+    pipAccessory,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -4857,7 +5664,8 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
           other.morningPromptMinutes == this.morningPromptMinutes &&
           other.eveningPromptMinutes == this.eveningPromptMinutes &&
           other.selectedCalendarIds == this.selectedCalendarIds &&
-          other.backupHintShown == this.backupHintShown);
+          other.backupHintShown == this.backupHintShown &&
+          other.pipAccessory == this.pipAccessory);
 }
 
 class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
@@ -4882,6 +5690,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
   final Value<int?> eveningPromptMinutes;
   final Value<String> selectedCalendarIds;
   final Value<bool> backupHintShown;
+  final Value<String> pipAccessory;
   final Value<int> rowid;
   const PreferencesTableCompanion({
     this.id = const Value.absent(),
@@ -4905,6 +5714,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     this.eveningPromptMinutes = const Value.absent(),
     this.selectedCalendarIds = const Value.absent(),
     this.backupHintShown = const Value.absent(),
+    this.pipAccessory = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PreferencesTableCompanion.insert({
@@ -4929,6 +5739,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     this.eveningPromptMinutes = const Value.absent(),
     this.selectedCalendarIds = const Value.absent(),
     this.backupHintShown = const Value.absent(),
+    this.pipAccessory = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -4967,6 +5778,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     Expression<int>? eveningPromptMinutes,
     Expression<String>? selectedCalendarIds,
     Expression<bool>? backupHintShown,
+    Expression<String>? pipAccessory,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4998,6 +5810,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
       if (selectedCalendarIds != null)
         'selected_calendar_ids': selectedCalendarIds,
       if (backupHintShown != null) 'backup_hint_shown': backupHintShown,
+      if (pipAccessory != null) 'pip_accessory': pipAccessory,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5024,6 +5837,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     Value<int?>? eveningPromptMinutes,
     Value<String>? selectedCalendarIds,
     Value<bool>? backupHintShown,
+    Value<String>? pipAccessory,
     Value<int>? rowid,
   }) {
     return PreferencesTableCompanion(
@@ -5050,6 +5864,7 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
       eveningPromptMinutes: eveningPromptMinutes ?? this.eveningPromptMinutes,
       selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
       backupHintShown: backupHintShown ?? this.backupHintShown,
+      pipAccessory: pipAccessory ?? this.pipAccessory,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5126,6 +5941,9 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     if (backupHintShown.present) {
       map['backup_hint_shown'] = Variable<bool>(backupHintShown.value);
     }
+    if (pipAccessory.present) {
+      map['pip_accessory'] = Variable<String>(pipAccessory.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5156,6 +5974,536 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
           ..write('eveningPromptMinutes: $eveningPromptMinutes, ')
           ..write('selectedCalendarIds: $selectedCalendarIds, ')
           ..write('backupHintShown: $backupHintShown, ')
+          ..write('pipAccessory: $pipAccessory, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReviewEntriesTable extends ReviewEntries
+    with TableInfo<$ReviewEntriesTable, ReviewEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReviewEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _winMeta = const VerificationMeta('win');
+  @override
+  late final GeneratedColumn<String> win = GeneratedColumn<String>(
+    'win',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _doneCountMeta = const VerificationMeta(
+    'doneCount',
+  );
+  @override
+  late final GeneratedColumn<int> doneCount = GeneratedColumn<int>(
+    'done_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _movedCountMeta = const VerificationMeta(
+    'movedCount',
+  );
+  @override
+  late final GeneratedColumn<int> movedCount = GeneratedColumn<int>(
+    'moved_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    date,
+    win,
+    doneCount,
+    movedCount,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'review_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReviewEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('win')) {
+      context.handle(
+        _winMeta,
+        win.isAcceptableOrUnknown(data['win']!, _winMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_winMeta);
+    }
+    if (data.containsKey('done_count')) {
+      context.handle(
+        _doneCountMeta,
+        doneCount.isAcceptableOrUnknown(data['done_count']!, _doneCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_doneCountMeta);
+    }
+    if (data.containsKey('moved_count')) {
+      context.handle(
+        _movedCountMeta,
+        movedCount.isAcceptableOrUnknown(data['moved_count']!, _movedCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_movedCountMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  ReviewEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReviewEntryRow(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      win: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}win'],
+      )!,
+      doneCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}done_count'],
+      )!,
+      movedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}moved_count'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ReviewEntriesTable createAlias(String alias) {
+    return $ReviewEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class ReviewEntryRow extends DataClass implements Insertable<ReviewEntryRow> {
+  final String date;
+  final String win;
+  final int doneCount;
+  final int movedCount;
+  final int createdAt;
+  const ReviewEntryRow({
+    required this.date,
+    required this.win,
+    required this.doneCount,
+    required this.movedCount,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<String>(date);
+    map['win'] = Variable<String>(win);
+    map['done_count'] = Variable<int>(doneCount);
+    map['moved_count'] = Variable<int>(movedCount);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  ReviewEntriesCompanion toCompanion(bool nullToAbsent) {
+    return ReviewEntriesCompanion(
+      date: Value(date),
+      win: Value(win),
+      doneCount: Value(doneCount),
+      movedCount: Value(movedCount),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ReviewEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReviewEntryRow(
+      date: serializer.fromJson<String>(json['date']),
+      win: serializer.fromJson<String>(json['win']),
+      doneCount: serializer.fromJson<int>(json['doneCount']),
+      movedCount: serializer.fromJson<int>(json['movedCount']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<String>(date),
+      'win': serializer.toJson<String>(win),
+      'doneCount': serializer.toJson<int>(doneCount),
+      'movedCount': serializer.toJson<int>(movedCount),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  ReviewEntryRow copyWith({
+    String? date,
+    String? win,
+    int? doneCount,
+    int? movedCount,
+    int? createdAt,
+  }) => ReviewEntryRow(
+    date: date ?? this.date,
+    win: win ?? this.win,
+    doneCount: doneCount ?? this.doneCount,
+    movedCount: movedCount ?? this.movedCount,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  ReviewEntryRow copyWithCompanion(ReviewEntriesCompanion data) {
+    return ReviewEntryRow(
+      date: data.date.present ? data.date.value : this.date,
+      win: data.win.present ? data.win.value : this.win,
+      doneCount: data.doneCount.present ? data.doneCount.value : this.doneCount,
+      movedCount: data.movedCount.present
+          ? data.movedCount.value
+          : this.movedCount,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewEntryRow(')
+          ..write('date: $date, ')
+          ..write('win: $win, ')
+          ..write('doneCount: $doneCount, ')
+          ..write('movedCount: $movedCount, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, win, doneCount, movedCount, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReviewEntryRow &&
+          other.date == this.date &&
+          other.win == this.win &&
+          other.doneCount == this.doneCount &&
+          other.movedCount == this.movedCount &&
+          other.createdAt == this.createdAt);
+}
+
+class ReviewEntriesCompanion extends UpdateCompanion<ReviewEntryRow> {
+  final Value<String> date;
+  final Value<String> win;
+  final Value<int> doneCount;
+  final Value<int> movedCount;
+  final Value<int> createdAt;
+  final Value<int> rowid;
+  const ReviewEntriesCompanion({
+    this.date = const Value.absent(),
+    this.win = const Value.absent(),
+    this.doneCount = const Value.absent(),
+    this.movedCount = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReviewEntriesCompanion.insert({
+    required String date,
+    required String win,
+    required int doneCount,
+    required int movedCount,
+    required int createdAt,
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       win = Value(win),
+       doneCount = Value(doneCount),
+       movedCount = Value(movedCount),
+       createdAt = Value(createdAt);
+  static Insertable<ReviewEntryRow> custom({
+    Expression<String>? date,
+    Expression<String>? win,
+    Expression<int>? doneCount,
+    Expression<int>? movedCount,
+    Expression<int>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (win != null) 'win': win,
+      if (doneCount != null) 'done_count': doneCount,
+      if (movedCount != null) 'moved_count': movedCount,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReviewEntriesCompanion copyWith({
+    Value<String>? date,
+    Value<String>? win,
+    Value<int>? doneCount,
+    Value<int>? movedCount,
+    Value<int>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ReviewEntriesCompanion(
+      date: date ?? this.date,
+      win: win ?? this.win,
+      doneCount: doneCount ?? this.doneCount,
+      movedCount: movedCount ?? this.movedCount,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (win.present) {
+      map['win'] = Variable<String>(win.value);
+    }
+    if (doneCount.present) {
+      map['done_count'] = Variable<int>(doneCount.value);
+    }
+    if (movedCount.present) {
+      map['moved_count'] = Variable<int>(movedCount.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewEntriesCompanion(')
+          ..write('date: $date, ')
+          ..write('win: $win, ')
+          ..write('doneCount: $doneCount, ')
+          ..write('movedCount: $movedCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReviewHandledDaysTable extends ReviewHandledDays
+    with TableInfo<$ReviewHandledDaysTable, ReviewHandledDayRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReviewHandledDaysTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'review_handled_days';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReviewHandledDayRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  ReviewHandledDayRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReviewHandledDayRow(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+    );
+  }
+
+  @override
+  $ReviewHandledDaysTable createAlias(String alias) {
+    return $ReviewHandledDaysTable(attachedDatabase, alias);
+  }
+}
+
+class ReviewHandledDayRow extends DataClass
+    implements Insertable<ReviewHandledDayRow> {
+  final String date;
+  const ReviewHandledDayRow({required this.date});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<String>(date);
+    return map;
+  }
+
+  ReviewHandledDaysCompanion toCompanion(bool nullToAbsent) {
+    return ReviewHandledDaysCompanion(date: Value(date));
+  }
+
+  factory ReviewHandledDayRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReviewHandledDayRow(date: serializer.fromJson<String>(json['date']));
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{'date': serializer.toJson<String>(date)};
+  }
+
+  ReviewHandledDayRow copyWith({String? date}) =>
+      ReviewHandledDayRow(date: date ?? this.date);
+  ReviewHandledDayRow copyWithCompanion(ReviewHandledDaysCompanion data) {
+    return ReviewHandledDayRow(
+      date: data.date.present ? data.date.value : this.date,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewHandledDayRow(')
+          ..write('date: $date')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => date.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReviewHandledDayRow && other.date == this.date);
+}
+
+class ReviewHandledDaysCompanion extends UpdateCompanion<ReviewHandledDayRow> {
+  final Value<String> date;
+  final Value<int> rowid;
+  const ReviewHandledDaysCompanion({
+    this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReviewHandledDaysCompanion.insert({
+    required String date,
+    this.rowid = const Value.absent(),
+  }) : date = Value(date);
+  static Insertable<ReviewHandledDayRow> custom({
+    Expression<String>? date,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReviewHandledDaysCompanion copyWith({
+    Value<String>? date,
+    Value<int>? rowid,
+  }) {
+    return ReviewHandledDaysCompanion(
+      date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewHandledDaysCompanion(')
+          ..write('date: $date, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5173,6 +6521,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PreferencesTableTable preferencesTable = $PreferencesTableTable(
     this,
   );
+  late final $ReviewEntriesTable reviewEntries = $ReviewEntriesTable(this);
+  late final $ReviewHandledDaysTable reviewHandledDays =
+      $ReviewHandledDaysTable(this);
   late final Index tasksRemindAt = Index(
     'tasks_remind_at',
     'CREATE INDEX tasks_remind_at ON tasks (remind_at)',
@@ -5204,6 +6555,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     focusSessions,
     goals,
     preferencesTable,
+    reviewEntries,
+    reviewHandledDays,
     tasksRemindAt,
     tasksScheduledStart,
     reminderRulesTaskId,
@@ -6060,6 +7413,7 @@ typedef $$ReminderRulesTableCreateCompanionBuilder =
       required String rrule,
       Value<int> leadMinutes,
       Value<int?> until,
+      Value<int?> lastCompletedAt,
       Value<int> rowid,
     });
 typedef $$ReminderRulesTableUpdateCompanionBuilder =
@@ -6072,6 +7426,7 @@ typedef $$ReminderRulesTableUpdateCompanionBuilder =
       Value<String> rrule,
       Value<int> leadMinutes,
       Value<int?> until,
+      Value<int?> lastCompletedAt,
       Value<int> rowid,
     });
 
@@ -6147,6 +7502,11 @@ class $$ReminderRulesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$TasksTableFilterComposer get taskId {
     final $$TasksTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6215,6 +7575,11 @@ class $$ReminderRulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$TasksTableOrderingComposer get taskId {
     final $$TasksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6270,6 +7635,11 @@ class $$ReminderRulesTableAnnotationComposer
 
   GeneratedColumn<int> get until =>
       $composableBuilder(column: $table.until, builder: (column) => column);
+
+  GeneratedColumn<int> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => column,
+  );
 
   $$TasksTableAnnotationComposer get taskId {
     final $$TasksTableAnnotationComposer composer = $composerBuilder(
@@ -6331,6 +7701,7 @@ class $$ReminderRulesTableTableManager
                 Value<String> rrule = const Value.absent(),
                 Value<int> leadMinutes = const Value.absent(),
                 Value<int?> until = const Value.absent(),
+                Value<int?> lastCompletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReminderRulesCompanion(
                 id: id,
@@ -6341,6 +7712,7 @@ class $$ReminderRulesTableTableManager
                 rrule: rrule,
                 leadMinutes: leadMinutes,
                 until: until,
+                lastCompletedAt: lastCompletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6353,6 +7725,7 @@ class $$ReminderRulesTableTableManager
                 required String rrule,
                 Value<int> leadMinutes = const Value.absent(),
                 Value<int?> until = const Value.absent(),
+                Value<int?> lastCompletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReminderRulesCompanion.insert(
                 id: id,
@@ -6363,6 +7736,7 @@ class $$ReminderRulesTableTableManager
                 rrule: rrule,
                 leadMinutes: leadMinutes,
                 until: until,
+                lastCompletedAt: lastCompletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6447,6 +7821,7 @@ typedef $$CalendarEventsTableCreateCompanionBuilder =
       Value<bool> isAllDay,
       Value<bool> isBusy,
       Value<String?> taskId,
+      Value<String?> htmlLink,
       Value<int> rowid,
     });
 typedef $$CalendarEventsTableUpdateCompanionBuilder =
@@ -6464,6 +7839,7 @@ typedef $$CalendarEventsTableUpdateCompanionBuilder =
       Value<bool> isAllDay,
       Value<bool> isBusy,
       Value<String?> taskId,
+      Value<String?> htmlLink,
       Value<int> rowid,
     });
 
@@ -6541,6 +7917,11 @@ class $$CalendarEventsTableFilterComposer
     column: $table.taskId,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get htmlLink => $composableBuilder(
+    column: $table.htmlLink,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$CalendarEventsTableOrderingComposer
@@ -6616,6 +7997,11 @@ class $$CalendarEventsTableOrderingComposer
     column: $table.taskId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get htmlLink => $composableBuilder(
+    column: $table.htmlLink,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CalendarEventsTableAnnotationComposer
@@ -6669,6 +8055,9 @@ class $$CalendarEventsTableAnnotationComposer
 
   GeneratedColumn<String> get taskId =>
       $composableBuilder(column: $table.taskId, builder: (column) => column);
+
+  GeneratedColumn<String> get htmlLink =>
+      $composableBuilder(column: $table.htmlLink, builder: (column) => column);
 }
 
 class $$CalendarEventsTableTableManager
@@ -6721,6 +8110,7 @@ class $$CalendarEventsTableTableManager
                 Value<bool> isAllDay = const Value.absent(),
                 Value<bool> isBusy = const Value.absent(),
                 Value<String?> taskId = const Value.absent(),
+                Value<String?> htmlLink = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CalendarEventsCompanion(
                 id: id,
@@ -6736,6 +8126,7 @@ class $$CalendarEventsTableTableManager
                 isAllDay: isAllDay,
                 isBusy: isBusy,
                 taskId: taskId,
+                htmlLink: htmlLink,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6753,6 +8144,7 @@ class $$CalendarEventsTableTableManager
                 Value<bool> isAllDay = const Value.absent(),
                 Value<bool> isBusy = const Value.absent(),
                 Value<String?> taskId = const Value.absent(),
+                Value<String?> htmlLink = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CalendarEventsCompanion.insert(
                 id: id,
@@ -6768,6 +8160,7 @@ class $$CalendarEventsTableTableManager
                 isAllDay: isAllDay,
                 isBusy: isBusy,
                 taskId: taskId,
+                htmlLink: htmlLink,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6806,6 +8199,10 @@ typedef $$FocusSessionsTableCreateCompanionBuilder =
       required int startedAt,
       Value<int?> endedAt,
       Value<bool> completed,
+      Value<int> pausedMs,
+      Value<int?> pausedAt,
+      Value<String?> win,
+      Value<FocusSessionKind> kind,
       Value<int> rowid,
     });
 typedef $$FocusSessionsTableUpdateCompanionBuilder =
@@ -6819,6 +8216,10 @@ typedef $$FocusSessionsTableUpdateCompanionBuilder =
       Value<int> startedAt,
       Value<int?> endedAt,
       Value<bool> completed,
+      Value<int> pausedMs,
+      Value<int?> pausedAt,
+      Value<String?> win,
+      Value<FocusSessionKind> kind,
       Value<int> rowid,
     });
 
@@ -6899,6 +8300,27 @@ class $$FocusSessionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get pausedMs => $composableBuilder(
+    column: $table.pausedMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get pausedAt => $composableBuilder(
+    column: $table.pausedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get win => $composableBuilder(
+    column: $table.win,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<FocusSessionKind, FocusSessionKind, String>
+  get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   $$TasksTableFilterComposer get taskId {
     final $$TasksTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6972,6 +8394,26 @@ class $$FocusSessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get pausedMs => $composableBuilder(
+    column: $table.pausedMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get pausedAt => $composableBuilder(
+    column: $table.pausedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get win => $composableBuilder(
+    column: $table.win,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$TasksTableOrderingComposer get taskId {
     final $$TasksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7030,6 +8472,18 @@ class $$FocusSessionsTableAnnotationComposer
 
   GeneratedColumn<bool> get completed =>
       $composableBuilder(column: $table.completed, builder: (column) => column);
+
+  GeneratedColumn<int> get pausedMs =>
+      $composableBuilder(column: $table.pausedMs, builder: (column) => column);
+
+  GeneratedColumn<int> get pausedAt =>
+      $composableBuilder(column: $table.pausedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get win =>
+      $composableBuilder(column: $table.win, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<FocusSessionKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
 
   $$TasksTableAnnotationComposer get taskId {
     final $$TasksTableAnnotationComposer composer = $composerBuilder(
@@ -7092,6 +8546,10 @@ class $$FocusSessionsTableTableManager
                 Value<int> startedAt = const Value.absent(),
                 Value<int?> endedAt = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
+                Value<int> pausedMs = const Value.absent(),
+                Value<int?> pausedAt = const Value.absent(),
+                Value<String?> win = const Value.absent(),
+                Value<FocusSessionKind> kind = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FocusSessionsCompanion(
                 id: id,
@@ -7103,6 +8561,10 @@ class $$FocusSessionsTableTableManager
                 startedAt: startedAt,
                 endedAt: endedAt,
                 completed: completed,
+                pausedMs: pausedMs,
+                pausedAt: pausedAt,
+                win: win,
+                kind: kind,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7116,6 +8578,10 @@ class $$FocusSessionsTableTableManager
                 required int startedAt,
                 Value<int?> endedAt = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
+                Value<int> pausedMs = const Value.absent(),
+                Value<int?> pausedAt = const Value.absent(),
+                Value<String?> win = const Value.absent(),
+                Value<FocusSessionKind> kind = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FocusSessionsCompanion.insert(
                 id: id,
@@ -7127,6 +8593,10 @@ class $$FocusSessionsTableTableManager
                 startedAt: startedAt,
                 endedAt: endedAt,
                 completed: completed,
+                pausedMs: pausedMs,
+                pausedAt: pausedAt,
+                win: win,
+                kind: kind,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7208,6 +8678,15 @@ typedef $$GoalsTableCreateCompanionBuilder =
       Value<double> importance,
       Value<double> progress,
       Value<int?> lastProgressAt,
+      Value<int?> targetDate,
+      Value<GoalStatus> status,
+      Value<String?> notes,
+      Value<String?> metricKind,
+      Value<int?> metricTarget,
+      Value<String?> metricUnit,
+      Value<int?> metricCurrent,
+      Value<String?> metricSource,
+      Value<String?> metricPeriod,
       Value<int> rowid,
     });
 typedef $$GoalsTableUpdateCompanionBuilder =
@@ -7222,6 +8701,15 @@ typedef $$GoalsTableUpdateCompanionBuilder =
       Value<double> importance,
       Value<double> progress,
       Value<int?> lastProgressAt,
+      Value<int?> targetDate,
+      Value<GoalStatus> status,
+      Value<String?> notes,
+      Value<String?> metricKind,
+      Value<int?> metricTarget,
+      Value<String?> metricUnit,
+      Value<int?> metricCurrent,
+      Value<String?> metricSource,
+      Value<String?> metricPeriod,
       Value<int> rowid,
     });
 
@@ -7281,6 +8769,52 @@ class $$GoalsTableFilterComposer extends Composer<_$AppDatabase, $GoalsTable> {
 
   ColumnFilters<int> get lastProgressAt => $composableBuilder(
     column: $table.lastProgressAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<GoalStatus, GoalStatus, String> get status =>
+      $composableBuilder(
+        column: $table.status,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricKind => $composableBuilder(
+    column: $table.metricKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get metricTarget => $composableBuilder(
+    column: $table.metricTarget,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricUnit => $composableBuilder(
+    column: $table.metricUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get metricCurrent => $composableBuilder(
+    column: $table.metricCurrent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricSource => $composableBuilder(
+    column: $table.metricSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metricPeriod => $composableBuilder(
+    column: $table.metricPeriod,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7343,6 +8877,51 @@ class $$GoalsTableOrderingComposer
     column: $table.lastProgressAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricKind => $composableBuilder(
+    column: $table.metricKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get metricTarget => $composableBuilder(
+    column: $table.metricTarget,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricUnit => $composableBuilder(
+    column: $table.metricUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get metricCurrent => $composableBuilder(
+    column: $table.metricCurrent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricSource => $composableBuilder(
+    column: $table.metricSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metricPeriod => $composableBuilder(
+    column: $table.metricPeriod,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GoalsTableAnnotationComposer
@@ -7387,6 +8966,47 @@ class $$GoalsTableAnnotationComposer
     column: $table.lastProgressAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get targetDate => $composableBuilder(
+    column: $table.targetDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<GoalStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get metricKind => $composableBuilder(
+    column: $table.metricKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get metricTarget => $composableBuilder(
+    column: $table.metricTarget,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metricUnit => $composableBuilder(
+    column: $table.metricUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get metricCurrent => $composableBuilder(
+    column: $table.metricCurrent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metricSource => $composableBuilder(
+    column: $table.metricSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metricPeriod => $composableBuilder(
+    column: $table.metricPeriod,
+    builder: (column) => column,
+  );
 }
 
 class $$GoalsTableTableManager
@@ -7427,6 +9047,15 @@ class $$GoalsTableTableManager
                 Value<double> importance = const Value.absent(),
                 Value<double> progress = const Value.absent(),
                 Value<int?> lastProgressAt = const Value.absent(),
+                Value<int?> targetDate = const Value.absent(),
+                Value<GoalStatus> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String?> metricKind = const Value.absent(),
+                Value<int?> metricTarget = const Value.absent(),
+                Value<String?> metricUnit = const Value.absent(),
+                Value<int?> metricCurrent = const Value.absent(),
+                Value<String?> metricSource = const Value.absent(),
+                Value<String?> metricPeriod = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalsCompanion(
                 id: id,
@@ -7439,6 +9068,15 @@ class $$GoalsTableTableManager
                 importance: importance,
                 progress: progress,
                 lastProgressAt: lastProgressAt,
+                targetDate: targetDate,
+                status: status,
+                notes: notes,
+                metricKind: metricKind,
+                metricTarget: metricTarget,
+                metricUnit: metricUnit,
+                metricCurrent: metricCurrent,
+                metricSource: metricSource,
+                metricPeriod: metricPeriod,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7453,6 +9091,15 @@ class $$GoalsTableTableManager
                 Value<double> importance = const Value.absent(),
                 Value<double> progress = const Value.absent(),
                 Value<int?> lastProgressAt = const Value.absent(),
+                Value<int?> targetDate = const Value.absent(),
+                Value<GoalStatus> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<String?> metricKind = const Value.absent(),
+                Value<int?> metricTarget = const Value.absent(),
+                Value<String?> metricUnit = const Value.absent(),
+                Value<int?> metricCurrent = const Value.absent(),
+                Value<String?> metricSource = const Value.absent(),
+                Value<String?> metricPeriod = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => GoalsCompanion.insert(
                 id: id,
@@ -7465,6 +9112,15 @@ class $$GoalsTableTableManager
                 importance: importance,
                 progress: progress,
                 lastProgressAt: lastProgressAt,
+                targetDate: targetDate,
+                status: status,
+                notes: notes,
+                metricKind: metricKind,
+                metricTarget: metricTarget,
+                metricUnit: metricUnit,
+                metricCurrent: metricCurrent,
+                metricSource: metricSource,
+                metricPeriod: metricPeriod,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7512,6 +9168,7 @@ typedef $$PreferencesTableTableCreateCompanionBuilder =
       Value<int?> eveningPromptMinutes,
       Value<String> selectedCalendarIds,
       Value<bool> backupHintShown,
+      Value<String> pipAccessory,
       Value<int> rowid,
     });
 typedef $$PreferencesTableTableUpdateCompanionBuilder =
@@ -7537,6 +9194,7 @@ typedef $$PreferencesTableTableUpdateCompanionBuilder =
       Value<int?> eveningPromptMinutes,
       Value<String> selectedCalendarIds,
       Value<bool> backupHintShown,
+      Value<String> pipAccessory,
       Value<int> rowid,
     });
 
@@ -7651,6 +9309,11 @@ class $$PreferencesTableTableFilterComposer
 
   ColumnFilters<bool> get backupHintShown => $composableBuilder(
     column: $table.backupHintShown,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pipAccessory => $composableBuilder(
+    column: $table.pipAccessory,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7768,6 +9431,11 @@ class $$PreferencesTableTableOrderingComposer
     column: $table.backupHintShown,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pipAccessory => $composableBuilder(
+    column: $table.pipAccessory,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PreferencesTableTableAnnotationComposer
@@ -7871,6 +9539,11 @@ class $$PreferencesTableTableAnnotationComposer
     column: $table.backupHintShown,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get pipAccessory => $composableBuilder(
+    column: $table.pipAccessory,
+    builder: (column) => column,
+  );
 }
 
 class $$PreferencesTableTableTableManager
@@ -7931,6 +9604,7 @@ class $$PreferencesTableTableTableManager
                 Value<int?> eveningPromptMinutes = const Value.absent(),
                 Value<String> selectedCalendarIds = const Value.absent(),
                 Value<bool> backupHintShown = const Value.absent(),
+                Value<String> pipAccessory = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PreferencesTableCompanion(
                 id: id,
@@ -7954,6 +9628,7 @@ class $$PreferencesTableTableTableManager
                 eveningPromptMinutes: eveningPromptMinutes,
                 selectedCalendarIds: selectedCalendarIds,
                 backupHintShown: backupHintShown,
+                pipAccessory: pipAccessory,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7979,6 +9654,7 @@ class $$PreferencesTableTableTableManager
                 Value<int?> eveningPromptMinutes = const Value.absent(),
                 Value<String> selectedCalendarIds = const Value.absent(),
                 Value<bool> backupHintShown = const Value.absent(),
+                Value<String> pipAccessory = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PreferencesTableCompanion.insert(
                 id: id,
@@ -8002,6 +9678,7 @@ class $$PreferencesTableTableTableManager
                 eveningPromptMinutes: eveningPromptMinutes,
                 selectedCalendarIds: selectedCalendarIds,
                 backupHintShown: backupHintShown,
+                pipAccessory: pipAccessory,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8029,6 +9706,336 @@ typedef $$PreferencesTableTableProcessedTableManager =
       PreferencesRow,
       PrefetchHooks Function()
     >;
+typedef $$ReviewEntriesTableCreateCompanionBuilder =
+    ReviewEntriesCompanion Function({
+      required String date,
+      required String win,
+      required int doneCount,
+      required int movedCount,
+      required int createdAt,
+      Value<int> rowid,
+    });
+typedef $$ReviewEntriesTableUpdateCompanionBuilder =
+    ReviewEntriesCompanion Function({
+      Value<String> date,
+      Value<String> win,
+      Value<int> doneCount,
+      Value<int> movedCount,
+      Value<int> createdAt,
+      Value<int> rowid,
+    });
+
+class $$ReviewEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ReviewEntriesTable> {
+  $$ReviewEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get win => $composableBuilder(
+    column: $table.win,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get doneCount => $composableBuilder(
+    column: $table.doneCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get movedCount => $composableBuilder(
+    column: $table.movedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReviewEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReviewEntriesTable> {
+  $$ReviewEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get win => $composableBuilder(
+    column: $table.win,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get doneCount => $composableBuilder(
+    column: $table.doneCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get movedCount => $composableBuilder(
+    column: $table.movedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReviewEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReviewEntriesTable> {
+  $$ReviewEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get win =>
+      $composableBuilder(column: $table.win, builder: (column) => column);
+
+  GeneratedColumn<int> get doneCount =>
+      $composableBuilder(column: $table.doneCount, builder: (column) => column);
+
+  GeneratedColumn<int> get movedCount => $composableBuilder(
+    column: $table.movedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ReviewEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReviewEntriesTable,
+          ReviewEntryRow,
+          $$ReviewEntriesTableFilterComposer,
+          $$ReviewEntriesTableOrderingComposer,
+          $$ReviewEntriesTableAnnotationComposer,
+          $$ReviewEntriesTableCreateCompanionBuilder,
+          $$ReviewEntriesTableUpdateCompanionBuilder,
+          (
+            ReviewEntryRow,
+            BaseReferences<_$AppDatabase, $ReviewEntriesTable, ReviewEntryRow>,
+          ),
+          ReviewEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$ReviewEntriesTableTableManager(_$AppDatabase db, $ReviewEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReviewEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReviewEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReviewEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> date = const Value.absent(),
+                Value<String> win = const Value.absent(),
+                Value<int> doneCount = const Value.absent(),
+                Value<int> movedCount = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewEntriesCompanion(
+                date: date,
+                win: win,
+                doneCount: doneCount,
+                movedCount: movedCount,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String date,
+                required String win,
+                required int doneCount,
+                required int movedCount,
+                required int createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewEntriesCompanion.insert(
+                date: date,
+                win: win,
+                doneCount: doneCount,
+                movedCount: movedCount,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReviewEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReviewEntriesTable,
+      ReviewEntryRow,
+      $$ReviewEntriesTableFilterComposer,
+      $$ReviewEntriesTableOrderingComposer,
+      $$ReviewEntriesTableAnnotationComposer,
+      $$ReviewEntriesTableCreateCompanionBuilder,
+      $$ReviewEntriesTableUpdateCompanionBuilder,
+      (
+        ReviewEntryRow,
+        BaseReferences<_$AppDatabase, $ReviewEntriesTable, ReviewEntryRow>,
+      ),
+      ReviewEntryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ReviewHandledDaysTableCreateCompanionBuilder =
+    ReviewHandledDaysCompanion Function({
+      required String date,
+      Value<int> rowid,
+    });
+typedef $$ReviewHandledDaysTableUpdateCompanionBuilder =
+    ReviewHandledDaysCompanion Function({Value<String> date, Value<int> rowid});
+
+class $$ReviewHandledDaysTableFilterComposer
+    extends Composer<_$AppDatabase, $ReviewHandledDaysTable> {
+  $$ReviewHandledDaysTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReviewHandledDaysTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReviewHandledDaysTable> {
+  $$ReviewHandledDaysTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReviewHandledDaysTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReviewHandledDaysTable> {
+  $$ReviewHandledDaysTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+}
+
+class $$ReviewHandledDaysTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReviewHandledDaysTable,
+          ReviewHandledDayRow,
+          $$ReviewHandledDaysTableFilterComposer,
+          $$ReviewHandledDaysTableOrderingComposer,
+          $$ReviewHandledDaysTableAnnotationComposer,
+          $$ReviewHandledDaysTableCreateCompanionBuilder,
+          $$ReviewHandledDaysTableUpdateCompanionBuilder,
+          (
+            ReviewHandledDayRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ReviewHandledDaysTable,
+              ReviewHandledDayRow
+            >,
+          ),
+          ReviewHandledDayRow,
+          PrefetchHooks Function()
+        > {
+  $$ReviewHandledDaysTableTableManager(
+    _$AppDatabase db,
+    $ReviewHandledDaysTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReviewHandledDaysTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReviewHandledDaysTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReviewHandledDaysTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> date = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewHandledDaysCompanion(date: date, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String date,
+                Value<int> rowid = const Value.absent(),
+              }) => ReviewHandledDaysCompanion.insert(date: date, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReviewHandledDaysTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReviewHandledDaysTable,
+      ReviewHandledDayRow,
+      $$ReviewHandledDaysTableFilterComposer,
+      $$ReviewHandledDaysTableOrderingComposer,
+      $$ReviewHandledDaysTableAnnotationComposer,
+      $$ReviewHandledDaysTableCreateCompanionBuilder,
+      $$ReviewHandledDaysTableUpdateCompanionBuilder,
+      (
+        ReviewHandledDayRow,
+        BaseReferences<
+          _$AppDatabase,
+          $ReviewHandledDaysTable,
+          ReviewHandledDayRow
+        >,
+      ),
+      ReviewHandledDayRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8045,4 +10052,8 @@ class $AppDatabaseManager {
       $$GoalsTableTableManager(_db, _db.goals);
   $$PreferencesTableTableTableManager get preferencesTable =>
       $$PreferencesTableTableTableManager(_db, _db.preferencesTable);
+  $$ReviewEntriesTableTableManager get reviewEntries =>
+      $$ReviewEntriesTableTableManager(_db, _db.reviewEntries);
+  $$ReviewHandledDaysTableTableManager get reviewHandledDays =>
+      $$ReviewHandledDaysTableTableManager(_db, _db.reviewHandledDays);
 }

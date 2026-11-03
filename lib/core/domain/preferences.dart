@@ -31,7 +31,10 @@ class Preferences {
     this.eveningPromptMinutes = 20 * 60 + 30,
     this.selectedCalendarIds = const {},
     this.backupHintShown = false,
+    this.pipAccessory = defaultPipAccessory,
   });
+
+  static const defaultPipAccessory = 'scarf';
 
   /// Keyed by [DateTime.monday] … [DateTime.sunday]. Missing day = day off.
   final Map<int, List<TimeRange>> workingHours;
@@ -46,7 +49,8 @@ class Preferences {
   final int weekStart;
   final int defaultReminderLeadMinutes;
 
-  /// No notifications inside this range (may cross midnight by using two).
+  /// No notifications inside this range. May cross midnight: build it with
+  /// [TimeRange.wrapping] (22:00–07:00 has `wrapsMidnight`).
   final TimeRange? quietHours;
   final String timeZoneName;
   final String localeCode;
@@ -62,6 +66,9 @@ class Preferences {
 
   /// Whether the one-time "export a backup" hint was shown (web durability).
   final bool backupHintShown;
+
+  /// Pip's cosmetic accessory id (see the companion feature).
+  final String pipAccessory;
 
   Preferences copyWith({
     Map<int, List<TimeRange>>? workingHours,
@@ -81,6 +88,7 @@ class Preferences {
     Object? eveningPromptMinutes = _unset,
     Map<CalendarSource, List<String>>? selectedCalendarIds,
     bool? backupHintShown,
+    String? pipAccessory,
   }) => Preferences(
     workingHours: workingHours ?? this.workingHours,
     deepWindows: deepWindows ?? this.deepWindows,
@@ -107,6 +115,7 @@ class Preferences {
         : eveningPromptMinutes as int?,
     selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
     backupHintShown: backupHintShown ?? this.backupHintShown,
+    pipAccessory: pipAccessory ?? this.pipAccessory,
   );
 }
 

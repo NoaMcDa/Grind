@@ -10,6 +10,10 @@ import 'database.dart';
 /// Storage format: times are UTC milliseconds since the epoch. Reading
 /// always yields UTC [DateTime]s; sub-millisecond precision is dropped.
 /// Backup JSON: times are ISO-8601 UTC strings, enums are their `name`.
+///
+/// The `*FromJson` readers validate every field they read and throw a
+/// [FormatException] naming the field on a wrong type or value (a missing
+/// optional field takes its default, so older backups keep importing).
 
 // ---------------------------------------------------------------- time
 
@@ -22,17 +26,90 @@ DateTime? fromMillisOrNull(int? ms) => ms == null ? null : fromMillis(ms);
 String _iso(DateTime t) => t.toUtc().toIso8601String();
 String? _isoOrNull(DateTime? t) => t == null ? null : _iso(t);
 
-/// Parses and normalises to UTC at millisecond precision (the storage
-/// precision), so an imported value equals the value read back.
-DateTime _parse(Object? v) {
-  final t = DateTime.parse(v as String).toUtc();
-  return fromMillis(t.millisecondsSinceEpoch);
+// ---------------------------------------------------------------- JSON reader
+
+/// Typed, validating access to one JSON object.
+extension type const _Json(Map<String, Object?> j) {
+  Never _bad(String key, String want) {
+    final v = j[key];
+    final got = v == null ? 'nothing' : '${v.runtimeType} ${jsonEncode(v)}';
+    throw FormatException('"$key" should be $want, got $got.');
+  }
+
+  String str(String key) {
+    final v = j[key];
+    return v is String ? v : _bad(key, 'text');
+  }
+
+  String nonEmpty(String key) {
+    final v = str(key);
+    return v.isEmpty ? _bad(key, 'non-empty text') : v;
+  }
+
+  String? strOrNull(String key) {
+    final v = j[key];
+    if (v == null || v is String) return v as String?;
+    _bad(key, 'text or null');
+  }
+
+  int? intOrNull(String key, {int min = 0}) {
+    final v = j[key];
+    if (v == null) return null;
+    if (v is num && v == v.roundToDouble() && v >= min) return v.toInt();
+    _bad(key, min == 0 ? 'a whole number >= 0' : 'a whole number >= $min');
+  }
+
+  int integer(String key, {int? or, int min = 0}) {
+    final v = intOrNull(key, min: min);
+    if (v != null) return v;
+    return or ?? _bad(key, 'a whole number');
+  }
+
+  double fraction(String key, {required double or}) {
+    final v = j[key];
+    if (v == null) return or;
+    if (v is num && v >= 0 && v <= 1) return v.toDouble();
+    _bad(key, 'a number from 0 to 1');
+  }
+
+  bool boolean(String key, {required bool or}) {
+    final v = j[key];
+    if (v == null) return or;
+    return v is bool ? v : _bad(key, 'true or false');
+  }
+
+  DateTime? timeOrNull(String key) {
+    final v = j[key];
+    if (v == null) return null;
+    final t = v is String ? DateTime.tryParse(v) : null;
+    if (t == null) _bad(key, 'an ISO-8601 time');
+    // Normalise to UTC at storage (millisecond) precision, so an imported
+    // value equals the value read back.
+    return fromMillis(t.toUtc().millisecondsSinceEpoch);
+  }
+
+  DateTime time(String key) => timeOrNull(key) ?? _bad(key, 'a time');
+
+  T enumOf<T extends Enum>(List<T> values, String key, {T? or}) {
+    final v = j[key];
+    if (v == null && or != null) return or;
+    for (final e in values) {
+      if (e.name == v) return e;
+    }
+    _bad(key, 'one of ${values.map((e) => e.name).join(', ')}');
+  }
+
+  Map<String, Object?> object(String key) {
+    final v = j[key];
+    return v is Map ? v.cast<String, Object?>() : _bad(key, 'an object');
+  }
 }
 
-DateTime? _parseOrNull(Object? v) => v == null ? null : _parse(v);
-
-T _enum<T extends Enum>(List<T> values, Object? name) =>
-    values.firstWhere((e) => e.name == name);
+/// [v] as a JSON object, or a [FormatException].
+Map<String, Object?> jsonObject(Object? v, String what) {
+  if (v is Map) return v.cast<String, Object?>();
+  throw FormatException('$what should be an object.');
+}
 
 // ---------------------------------------------------------------- Task
 
@@ -107,7 +184,7 @@ extension TaskMapper on Task {
     'scheduledStart': _isoOrNull(scheduledStart),
     'scheduledEnd': _isoOrNull(scheduledEnd),
     'lockedStart': lockedStart,
-    'notBefore': notBefore?.toUtc().toIso8601String(),
+    'notBefore': _isoOrNull(notBefore),
     'minutesDone': minutesDone,
     'estimatedMinutes': estimatedMinutes,
     'energy': energy.name,
@@ -127,36 +204,41 @@ extension TaskMapper on Task {
   };
 }
 
-Task taskFromJson(Map<String, Object?> j) => Task(
-  id: j['id'] as String,
-  title: j['title'] as String,
-  notes: j['notes'] as String?,
-  goalId: j['goalId'] as String?,
-  dueAt: _parseOrNull(j['dueAt']),
-  remindAt: _parseOrNull(j['remindAt']),
-  scheduledStart: _parseOrNull(j['scheduledStart']),
-  scheduledEnd: _parseOrNull(j['scheduledEnd']),
-  lockedStart: j['lockedStart'] as bool? ?? false,
-  notBefore: j['notBefore'] == null
-      ? null
-      : DateTime.parse(j['notBefore'] as String),
-  minutesDone: j['minutesDone'] as int? ?? 0,
-  estimatedMinutes: j['estimatedMinutes'] as int? ?? 30,
-  energy: _enum(Energy.values, j['energy'] ?? Energy.light.name),
-  firstAction: j['firstAction'] as String?,
-  priority: j['priority'] as int? ?? 2,
-  category: j['category'] as String?,
-  splittable: j['splittable'] as bool? ?? false,
-  minChunkMinutes: j['minChunkMinutes'] as int? ?? 25,
-  status: _enum(TaskStatus.values, j['status'] ?? TaskStatus.open.name),
-  completedAt: _parseOrNull(j['completedAt']),
-  actualMinutes: j['actualMinutes'] as int?,
-  snoozeCount: j['snoozeCount'] as int? ?? 0,
-  calendarEventId: j['calendarEventId'] as String?,
-  createdAt: _parse(j['createdAt']),
-  updatedAt: _parse(j['updatedAt']),
-  deletedAt: _parseOrNull(j['deletedAt']),
-);
+Task taskFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  final priority = j.integer('priority', or: 2, min: 1);
+  if (priority > 3) {
+    throw FormatException('"priority" should be 1, 2 or 3, got $priority.');
+  }
+  return Task(
+    id: j.nonEmpty('id'),
+    title: j.str('title'),
+    notes: j.strOrNull('notes'),
+    goalId: j.strOrNull('goalId'),
+    dueAt: j.timeOrNull('dueAt'),
+    remindAt: j.timeOrNull('remindAt'),
+    scheduledStart: j.timeOrNull('scheduledStart'),
+    scheduledEnd: j.timeOrNull('scheduledEnd'),
+    lockedStart: j.boolean('lockedStart', or: false),
+    notBefore: j.timeOrNull('notBefore'),
+    minutesDone: j.integer('minutesDone', or: 0),
+    estimatedMinutes: j.integer('estimatedMinutes', or: 30),
+    energy: j.enumOf(Energy.values, 'energy', or: Energy.light),
+    firstAction: j.strOrNull('firstAction'),
+    priority: priority,
+    category: j.strOrNull('category'),
+    splittable: j.boolean('splittable', or: false),
+    minChunkMinutes: j.integer('minChunkMinutes', or: 25),
+    status: j.enumOf(TaskStatus.values, 'status', or: TaskStatus.open),
+    completedAt: j.timeOrNull('completedAt'),
+    actualMinutes: j.intOrNull('actualMinutes'),
+    snoozeCount: j.integer('snoozeCount', or: 0),
+    calendarEventId: j.strOrNull('calendarEventId'),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
 
 // ---------------------------------------------------------------- ReminderRule
 
@@ -167,6 +249,7 @@ extension ReminderRuleRowMapper on ReminderRuleRow {
     rrule: rrule,
     leadMinutes: leadMinutes,
     until: fromMillisOrNull(until),
+    lastCompletedAt: fromMillisOrNull(lastCompletedAt),
     createdAt: fromMillis(createdAt),
     updatedAt: fromMillis(updatedAt),
     deletedAt: fromMillisOrNull(deletedAt),
@@ -180,6 +263,7 @@ extension ReminderRuleMapper on ReminderRule {
     rrule: rrule,
     leadMinutes: Value(leadMinutes),
     until: Value(toMillisOrNull(until)),
+    lastCompletedAt: Value(toMillisOrNull(lastCompletedAt)),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
     deletedAt: Value(toMillisOrNull(deletedAt)),
@@ -191,22 +275,27 @@ extension ReminderRuleMapper on ReminderRule {
     'rrule': rrule,
     'leadMinutes': leadMinutes,
     'until': _isoOrNull(until),
+    'lastCompletedAt': _isoOrNull(lastCompletedAt),
     'createdAt': _iso(createdAt),
     'updatedAt': _iso(updatedAt),
     'deletedAt': _isoOrNull(deletedAt),
   };
 }
 
-ReminderRule reminderRuleFromJson(Map<String, Object?> j) => ReminderRule(
-  id: j['id'] as String,
-  taskId: j['taskId'] as String,
-  rrule: j['rrule'] as String,
-  leadMinutes: j['leadMinutes'] as int? ?? 0,
-  until: _parseOrNull(j['until']),
-  createdAt: _parse(j['createdAt']),
-  updatedAt: _parse(j['updatedAt']),
-  deletedAt: _parseOrNull(j['deletedAt']),
-);
+ReminderRule reminderRuleFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return ReminderRule(
+    id: j.nonEmpty('id'),
+    taskId: j.nonEmpty('taskId'),
+    rrule: j.nonEmpty('rrule'),
+    leadMinutes: j.integer('leadMinutes', or: 0),
+    until: j.timeOrNull('until'),
+    lastCompletedAt: j.timeOrNull('lastCompletedAt'),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
 
 // ---------------------------------------------------------------- CalendarEvent
 
@@ -222,6 +311,7 @@ extension CalendarEventRowMapper on CalendarEventRow {
     isAllDay: isAllDay,
     isBusy: isBusy,
     taskId: taskId,
+    htmlLink: htmlLink,
     createdAt: fromMillis(createdAt),
     updatedAt: fromMillis(updatedAt),
     deletedAt: fromMillisOrNull(deletedAt),
@@ -240,6 +330,7 @@ extension CalendarEventMapper on CalendarEvent {
     isAllDay: Value(isAllDay),
     isBusy: Value(isBusy),
     taskId: Value(taskId),
+    htmlLink: Value(htmlLink),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
     deletedAt: Value(toMillisOrNull(deletedAt)),
@@ -256,27 +347,37 @@ extension CalendarEventMapper on CalendarEvent {
     'isAllDay': isAllDay,
     'isBusy': isBusy,
     'taskId': taskId,
+    'htmlLink': htmlLink,
     'createdAt': _iso(createdAt),
     'updatedAt': _iso(updatedAt),
     'deletedAt': _isoOrNull(deletedAt),
   };
 }
 
-CalendarEvent calendarEventFromJson(Map<String, Object?> j) => CalendarEvent(
-  id: j['id'] as String,
-  source: _enum(CalendarSource.values, j['source']),
-  externalId: j['externalId'] as String,
-  calendarId: j['calendarId'] as String?,
-  title: j['title'] as String,
-  start: _parse(j['start']),
-  end: _parse(j['end']),
-  isAllDay: j['isAllDay'] as bool? ?? false,
-  isBusy: j['isBusy'] as bool? ?? true,
-  taskId: j['taskId'] as String?,
-  createdAt: _parse(j['createdAt']),
-  updatedAt: _parse(j['updatedAt']),
-  deletedAt: _parseOrNull(j['deletedAt']),
-);
+CalendarEvent calendarEventFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  final start = j.time('start');
+  final end = j.time('end');
+  if (end.isBefore(start)) {
+    throw const FormatException('"end" is before "start".');
+  }
+  return CalendarEvent(
+    id: j.nonEmpty('id'),
+    source: j.enumOf(CalendarSource.values, 'source'),
+    externalId: j.str('externalId'),
+    calendarId: j.strOrNull('calendarId'),
+    title: j.str('title'),
+    start: start,
+    end: end,
+    isAllDay: j.boolean('isAllDay', or: false),
+    isBusy: j.boolean('isBusy', or: true),
+    taskId: j.strOrNull('taskId'),
+    htmlLink: j.strOrNull('htmlLink'),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
 
 // ---------------------------------------------------------------- FocusSession
 
@@ -288,13 +389,17 @@ extension FocusSessionRowMapper on FocusSessionRow {
     startedAt: fromMillis(startedAt),
     endedAt: fromMillisOrNull(endedAt),
     completed: completed,
+    pausedMs: pausedMs,
+    pausedAt: fromMillisOrNull(pausedAt),
+    win: win,
+    kind: kind,
     createdAt: fromMillis(createdAt),
     updatedAt: fromMillis(updatedAt),
+    deletedAt: fromMillisOrNull(deletedAt),
   );
 }
 
 extension FocusSessionMapper on FocusSession {
-  /// [FocusSession] has no `deletedAt` yet; the column stays null.
   FocusSessionsCompanion toCompanion() => FocusSessionsCompanion.insert(
     id: id,
     taskId: Value(taskId),
@@ -302,8 +407,13 @@ extension FocusSessionMapper on FocusSession {
     startedAt: toMillis(startedAt),
     endedAt: Value(toMillisOrNull(endedAt)),
     completed: Value(completed),
+    pausedMs: Value(pausedMs),
+    pausedAt: Value(toMillisOrNull(pausedAt)),
+    win: Value(win),
+    kind: Value(kind),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
+    deletedAt: Value(toMillisOrNull(deletedAt)),
   );
 
   Map<String, Object?> toJson() => {
@@ -313,21 +423,34 @@ extension FocusSessionMapper on FocusSession {
     'startedAt': _iso(startedAt),
     'endedAt': _isoOrNull(endedAt),
     'completed': completed,
+    'pausedMs': pausedMs,
+    'pausedAt': _isoOrNull(pausedAt),
+    'win': win,
+    'kind': kind.name,
     'createdAt': _iso(createdAt),
     'updatedAt': _iso(updatedAt),
+    'deletedAt': _isoOrNull(deletedAt),
   };
 }
 
-FocusSession focusSessionFromJson(Map<String, Object?> j) => FocusSession(
-  id: j['id'] as String,
-  taskId: j['taskId'] as String?,
-  plannedMinutes: j['plannedMinutes'] as int,
-  startedAt: _parse(j['startedAt']),
-  endedAt: _parseOrNull(j['endedAt']),
-  completed: j['completed'] as bool? ?? false,
-  createdAt: _parse(j['createdAt']),
-  updatedAt: _parse(j['updatedAt']),
-);
+FocusSession focusSessionFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return FocusSession(
+    id: j.nonEmpty('id'),
+    taskId: j.strOrNull('taskId'),
+    plannedMinutes: j.integer('plannedMinutes', min: 1),
+    startedAt: j.time('startedAt'),
+    endedAt: j.timeOrNull('endedAt'),
+    completed: j.boolean('completed', or: false),
+    pausedMs: j.integer('pausedMs', or: 0),
+    pausedAt: j.timeOrNull('pausedAt'),
+    win: j.strOrNull('win'),
+    kind: j.enumOf(FocusSessionKind.values, 'kind', or: FocusSessionKind.focus),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
 
 // ---------------------------------------------------------------- Goal
 
@@ -340,6 +463,15 @@ extension GoalRowMapper on GoalRow {
     importance: importance,
     progress: progress,
     lastProgressAt: fromMillisOrNull(lastProgressAt),
+    targetDate: fromMillisOrNull(targetDate),
+    status: status,
+    notes: notes,
+    metricKind: metricKind,
+    metricTarget: metricTarget,
+    metricUnit: metricUnit,
+    metricCurrent: metricCurrent,
+    metricSource: metricSource,
+    metricPeriod: metricPeriod,
     createdAt: fromMillis(createdAt),
     updatedAt: fromMillis(updatedAt),
     deletedAt: fromMillisOrNull(deletedAt),
@@ -355,6 +487,15 @@ extension GoalMapper on Goal {
     importance: Value(importance),
     progress: Value(progress),
     lastProgressAt: Value(toMillisOrNull(lastProgressAt)),
+    targetDate: Value(toMillisOrNull(targetDate)),
+    status: Value(status),
+    notes: Value(notes),
+    metricKind: Value(metricKind),
+    metricTarget: Value(metricTarget),
+    metricUnit: Value(metricUnit),
+    metricCurrent: Value(metricCurrent),
+    metricSource: Value(metricSource),
+    metricPeriod: Value(metricPeriod),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
     deletedAt: Value(toMillisOrNull(deletedAt)),
@@ -368,24 +509,81 @@ extension GoalMapper on Goal {
     'importance': importance,
     'progress': progress,
     'lastProgressAt': _isoOrNull(lastProgressAt),
+    'targetDate': _isoOrNull(targetDate),
+    'status': status.name,
+    'notes': notes,
+    'metricKind': metricKind,
+    'metricTarget': metricTarget,
+    'metricUnit': metricUnit,
+    'metricCurrent': metricCurrent,
+    'metricSource': metricSource,
+    'metricPeriod': metricPeriod,
     'createdAt': _iso(createdAt),
     'updatedAt': _iso(updatedAt),
     'deletedAt': _isoOrNull(deletedAt),
   };
 }
 
-Goal goalFromJson(Map<String, Object?> j) => Goal(
-  id: j['id'] as String,
-  title: j['title'] as String,
-  area: j['area'] as String?,
-  horizon: _enum(GoalHorizon.values, j['horizon'] ?? GoalHorizon.month.name),
-  importance: (j['importance'] as num?)?.toDouble() ?? 0.5,
-  progress: (j['progress'] as num?)?.toDouble() ?? 0,
-  lastProgressAt: _parseOrNull(j['lastProgressAt']),
-  createdAt: _parse(j['createdAt']),
-  updatedAt: _parse(j['updatedAt']),
-  deletedAt: _parseOrNull(j['deletedAt']),
-);
+Goal goalFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return Goal(
+    id: j.nonEmpty('id'),
+    title: j.str('title'),
+    area: j.strOrNull('area'),
+    horizon: j.enumOf(GoalHorizon.values, 'horizon', or: GoalHorizon.month),
+    importance: j.fraction('importance', or: 0.5),
+    progress: j.fraction('progress', or: 0),
+    lastProgressAt: j.timeOrNull('lastProgressAt'),
+    targetDate: j.timeOrNull('targetDate'),
+    status: j.enumOf(GoalStatus.values, 'status', or: GoalStatus.active),
+    notes: j.strOrNull('notes'),
+    metricKind: j.strOrNull('metricKind'),
+    metricTarget: j.intOrNull('metricTarget', min: 1),
+    metricUnit: j.strOrNull('metricUnit'),
+    metricCurrent: j.intOrNull('metricCurrent'),
+    metricSource: j.strOrNull('metricSource'),
+    metricPeriod: j.strOrNull('metricPeriod'),
+    createdAt: j.time('createdAt'),
+    updatedAt: j.time('updatedAt'),
+    deletedAt: j.timeOrNull('deletedAt'),
+  );
+}
+
+// ---------------------------------------------------------------- Review
+
+final _dayKey = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
+String _day(_Json j, String key) {
+  final v = j.str(key);
+  if (_dayKey.hasMatch(v) && DateTime.tryParse(v) != null) return v;
+  throw FormatException('"$key" should be a day like 2026-11-03, got "$v".');
+}
+
+extension ReviewEntryRowMapper on ReviewEntryRow {
+  /// Not `toJson`: the generated row class has its own, which would win.
+  Map<String, Object?> toBackupJson() => {
+    'date': date,
+    'win': win,
+    'doneCount': doneCount,
+    'movedCount': movedCount,
+    'createdAt': _iso(fromMillis(createdAt)),
+  };
+}
+
+/// A review entry from the backup, ready to insert.
+ReviewEntriesCompanion reviewEntryFromJson(Map<String, Object?> map) {
+  final j = _Json(map);
+  return ReviewEntriesCompanion.insert(
+    date: _day(j, 'date'),
+    win: j.str('win'),
+    doneCount: j.integer('doneCount', or: 0),
+    movedCount: j.integer('movedCount', or: 0),
+    createdAt: toMillis(j.time('createdAt')),
+  );
+}
+
+/// A handled review day (`yyyy-MM-dd`) from the backup.
+String reviewHandledDayFromJson(Object? v) => _day(_Json({'day': v}), 'day');
 
 // ---------------------------------------------------------------- Preferences
 
@@ -393,26 +591,60 @@ List<Map<String, Object?>> _rangesToJson(List<TimeRange> ranges) => [
   for (final r in ranges) r.toJson(),
 ];
 
-List<TimeRange> _rangesFromJson(Object? json) => [
-  for (final r in json as List) TimeRange.fromJson(_map(r)),
-];
+List<TimeRange> _rangesFromJson(Object? json, String key) {
+  if (json is! List) throw FormatException('"$key" should be a list.');
+  return [
+    for (final (i, r) in json.indexed) _range(r, '$key[$i]', allowWrap: false),
+  ];
+}
+
+TimeRange _range(Object? json, String where, {required bool allowWrap}) {
+  try {
+    return TimeRange.fromJson(
+      jsonObject(json, '"$where"'),
+      allowWrap: allowWrap,
+    );
+  } on FormatException catch (e) {
+    throw FormatException('"$where": ${e.message}');
+  }
+}
 
 Map<String, Object?> _workingHoursToJson(Map<int, List<TimeRange>> wh) => {
   for (final e in wh.entries) '${e.key}': _rangesToJson(e.value),
 };
 
-Map<int, List<TimeRange>> _workingHoursFromJson(Object? json) => {
-  for (final e in _map(json).entries)
-    int.parse(e.key): _rangesFromJson(e.value),
-};
+Map<int, List<TimeRange>> _workingHoursFromJson(Object? json) {
+  final map = jsonObject(json, '"workingHours"');
+  return {
+    for (final e in map.entries)
+      _weekday(e.key): _rangesFromJson(e.value, 'workingHours.${e.key}'),
+  };
+}
 
-Map<String, Object?> _map(Object? v) => (v as Map).cast<String, Object?>();
+int _weekday(String key) {
+  final d = int.tryParse(key);
+  if (d == null || d < DateTime.monday || d > DateTime.sunday) {
+    throw FormatException('"workingHours" has a day "$key"; use 1 to 7.');
+  }
+  return d;
+}
+
+TimeRange? _quietFromJson(Object? json) =>
+    json == null ? null : _range(json, 'quietHours', allowWrap: true);
+
+int? _minuteOfDay(_Json j, String key) {
+  final v = j.intOrNull(key);
+  if (v != null && v >= 24 * 60) {
+    throw FormatException('"$key" should be under 1440 minutes, got $v.');
+  }
+  return v;
+}
 
 extension PreferencesRowMapper on PreferencesRow {
   Preferences toDomain() => Preferences(
     workingHours: _workingHoursFromJson(jsonDecode(workingHours)),
-    deepWindows: _rangesFromJson(jsonDecode(deepWindows)),
-    lunch: _rangesFromJson(jsonDecode(lunch)),
+    deepWindows: _rangesFromJson(jsonDecode(deepWindows), 'deepWindows'),
+    lunch: _rangesFromJson(jsonDecode(lunch), 'lunch'),
     maxDeepBlocksPerDay: maxDeepBlocksPerDay,
     deepBlockMinutes: deepBlockMinutes,
     bufferBetweenEventsMinutes: bufferBetweenEventsMinutes,
@@ -421,7 +653,7 @@ extension PreferencesRowMapper on PreferencesRow {
     defaultReminderLeadMinutes: defaultReminderLeadMinutes,
     quietHours: quietHours == null
         ? null
-        : TimeRange.fromJson(_map(jsonDecode(quietHours!))),
+        : _quietFromJson(jsonDecode(quietHours!)),
     timeZoneName: timeZoneName,
     localeCode: localeCode,
     onboardingDone: onboardingDone,
@@ -429,6 +661,7 @@ extension PreferencesRowMapper on PreferencesRow {
     eveningPromptMinutes: eveningPromptMinutes,
     selectedCalendarIds: _calendarIdsFromJson(jsonDecode(selectedCalendarIds)),
     backupHintShown: backupHintShown,
+    pipAccessory: pipAccessory,
   );
 }
 
@@ -459,6 +692,7 @@ extension PreferencesMapper on Preferences {
       jsonEncode(_calendarIdsToJson(selectedCalendarIds)),
     ),
     backupHintShown: Value(backupHintShown),
+    pipAccessory: Value(pipAccessory),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
   );
@@ -481,47 +715,66 @@ extension PreferencesMapper on Preferences {
     'eveningPromptMinutes': eveningPromptMinutes,
     'selectedCalendarIds': _calendarIdsToJson(selectedCalendarIds),
     'backupHintShown': backupHintShown,
+    'pipAccessory': pipAccessory,
   };
 }
 
 /// Missing keys fall back to the [Preferences] defaults, so older backups
-/// keep importing when fields are added.
-Preferences preferencesFromJson(Map<String, Object?> j) {
+/// keep importing when fields are added. Present keys are validated:
+/// time ranges must lie inside one day (only quiet hours may wrap).
+Preferences preferencesFromJson(Map<String, Object?> map) {
   const d = Preferences();
+  final j = _Json(map);
+  final weekStart = j.integer('weekStart', or: d.weekStart, min: 1);
+  if (weekStart > DateTime.sunday) {
+    throw FormatException('"weekStart" should be 1 to 7, got $weekStart.');
+  }
+  final accessory = j.strOrNull('pipAccessory');
   return Preferences(
-    workingHours: j.containsKey('workingHours')
-        ? _workingHoursFromJson(j['workingHours'])
+    workingHours: map.containsKey('workingHours')
+        ? _workingHoursFromJson(map['workingHours'])
         : d.workingHours,
-    deepWindows: j.containsKey('deepWindows')
-        ? _rangesFromJson(j['deepWindows'])
+    deepWindows: map.containsKey('deepWindows')
+        ? _rangesFromJson(map['deepWindows'], 'deepWindows')
         : d.deepWindows,
-    lunch: j.containsKey('lunch') ? _rangesFromJson(j['lunch']) : d.lunch,
-    maxDeepBlocksPerDay:
-        j['maxDeepBlocksPerDay'] as int? ?? d.maxDeepBlocksPerDay,
-    deepBlockMinutes: j['deepBlockMinutes'] as int? ?? d.deepBlockMinutes,
-    bufferBetweenEventsMinutes:
-        j['bufferBetweenEventsMinutes'] as int? ?? d.bufferBetweenEventsMinutes,
-    dailyCushionMinutes:
-        j['dailyCushionMinutes'] as int? ?? d.dailyCushionMinutes,
-    weekStart: j['weekStart'] as int? ?? d.weekStart,
-    defaultReminderLeadMinutes:
-        j['defaultReminderLeadMinutes'] as int? ?? d.defaultReminderLeadMinutes,
-    quietHours: j['quietHours'] == null
-        ? null
-        : TimeRange.fromJson(_map(j['quietHours'])),
-    timeZoneName: j['timeZoneName'] as String? ?? d.timeZoneName,
-    localeCode: j['localeCode'] as String? ?? d.localeCode,
-    onboardingDone: j['onboardingDone'] as bool? ?? d.onboardingDone,
-    morningPromptMinutes: j.containsKey('morningPromptMinutes')
-        ? j['morningPromptMinutes'] as int?
+    lunch: map.containsKey('lunch')
+        ? _rangesFromJson(map['lunch'], 'lunch')
+        : d.lunch,
+    maxDeepBlocksPerDay: j.integer(
+      'maxDeepBlocksPerDay',
+      or: d.maxDeepBlocksPerDay,
+    ),
+    deepBlockMinutes: j.integer('deepBlockMinutes', or: d.deepBlockMinutes),
+    bufferBetweenEventsMinutes: j.integer(
+      'bufferBetweenEventsMinutes',
+      or: d.bufferBetweenEventsMinutes,
+    ),
+    dailyCushionMinutes: j.integer(
+      'dailyCushionMinutes',
+      or: d.dailyCushionMinutes,
+    ),
+    weekStart: weekStart,
+    defaultReminderLeadMinutes: j.integer(
+      'defaultReminderLeadMinutes',
+      or: d.defaultReminderLeadMinutes,
+    ),
+    quietHours: _quietFromJson(map['quietHours']),
+    timeZoneName: j.strOrNull('timeZoneName') ?? d.timeZoneName,
+    localeCode: j.strOrNull('localeCode') ?? d.localeCode,
+    onboardingDone: j.boolean('onboardingDone', or: d.onboardingDone),
+    morningPromptMinutes: map.containsKey('morningPromptMinutes')
+        ? _minuteOfDay(j, 'morningPromptMinutes')
         : d.morningPromptMinutes,
-    eveningPromptMinutes: j.containsKey('eveningPromptMinutes')
-        ? j['eveningPromptMinutes'] as int?
+    eveningPromptMinutes: map.containsKey('eveningPromptMinutes')
+        ? _minuteOfDay(j, 'eveningPromptMinutes')
         : d.eveningPromptMinutes,
-    selectedCalendarIds: j.containsKey('selectedCalendarIds')
-        ? _calendarIdsFromJson(j['selectedCalendarIds'])
+    selectedCalendarIds: map.containsKey('selectedCalendarIds')
+        ? _calendarIdsFromJson(map['selectedCalendarIds'])
         : d.selectedCalendarIds,
-    backupHintShown: j['backupHintShown'] as bool? ?? d.backupHintShown,
+    backupHintShown: j.boolean('backupHintShown', or: d.backupHintShown),
+    pipAccessory: accessory == null || accessory.isEmpty
+        ? d.pipAccessory
+        : accessory,
   );
 }
 
@@ -529,9 +782,20 @@ Map<String, Object?> _calendarIdsToJson(
   Map<CalendarSource, List<String>> ids,
 ) => {for (final e in ids.entries) e.key.name: e.value};
 
-Map<CalendarSource, List<String>> _calendarIdsFromJson(Object? json) => {
-  for (final e in _map(json).entries)
-    CalendarSource.values.byName(e.key): [
-      for (final id in e.value as List) id as String,
-    ],
-};
+Map<CalendarSource, List<String>> _calendarIdsFromJson(Object? json) {
+  final map = jsonObject(json, '"selectedCalendarIds"');
+  final out = <CalendarSource, List<String>>{};
+  for (final e in map.entries) {
+    final source = _Json({
+      'selectedCalendarIds': e.key,
+    }).enumOf(CalendarSource.values, 'selectedCalendarIds');
+    final ids = e.value;
+    if (ids is! List || ids.any((id) => id is! String)) {
+      throw FormatException(
+        '"selectedCalendarIds.${e.key}" should be a list of ids.',
+      );
+    }
+    out[source] = ids.cast<String>();
+  }
+  return out;
+}

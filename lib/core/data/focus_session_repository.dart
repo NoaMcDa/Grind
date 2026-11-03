@@ -4,7 +4,8 @@ import '../domain/domain.dart';
 
 /// Persistence for focus sessions (#19). A session is *active* while its
 /// `endedAt` is null; the focus controller ends the previous one before it
-/// starts another, so at most one is active at a time.
+/// starts another, so at most one is active at a time. Sessions with a
+/// `deletedAt` are hidden from every read.
 ///
 /// Lives in `lib/core/data` rather than `lib/core/repositories` because
 /// feature agents may only add files here; the integrator may move it next
@@ -39,8 +40,9 @@ class InMemoryFocusSessionRepository implements FocusSessionRepository {
   final Map<String, FocusSession> _sessions = {};
   final _changes = StreamController<void>.broadcast();
 
+  /// Live (not soft-deleted) sessions, oldest first.
   List<FocusSession> get _sorted =>
-      _sessions.values.toList()
+      _sessions.values.where((s) => s.deletedAt == null).toList()
         ..sort((a, b) => a.startedAt.compareTo(b.startedAt));
 
   FocusSession? get _active =>

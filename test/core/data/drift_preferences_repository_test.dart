@@ -66,6 +66,24 @@ void main() {
     expect((await repo.get()).quietHours, isNull);
   });
 
+  test('v3: pip accessory and quiet hours across midnight', () async {
+    expect((await repo.get()).pipAccessory, 'scarf');
+    await repo.save(
+      const Preferences(
+        pipAccessory: 'beanie',
+        quietHours: TimeRange.wrapping(
+          startMinutes: 22 * 60,
+          endMinutes: 7 * 60,
+        ),
+      ),
+    );
+    final back = await repo.get();
+    expect(back.pipAccessory, 'beanie');
+    expect(back.quietHours!.startMinutes, 22 * 60);
+    expect(back.quietHours!.endMinutes, 7 * 60);
+    expect(back.quietHours!.wrapsMidnight, isTrue);
+  });
+
   test('watch emits current value then saves', () async {
     final emissions = <bool>[];
     final sub = repo.watch().listen((p) => emissions.add(p.onboardingDone));

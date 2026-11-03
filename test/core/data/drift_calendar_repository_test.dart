@@ -56,6 +56,16 @@ void main() {
     expect((await db.select(db.calendarEvents).get()).length, 1);
   });
 
+  test('v3: htmlLink round-trips and clears', () async {
+    await repo.upsert(
+      event('a', 1, 2).copyWith(htmlLink: 'https://calendar.example/a'),
+    );
+    final got = (await repo.getById('a'))!;
+    expect(got.htmlLink, 'https://calendar.example/a');
+    await repo.upsert(got.copyWith(htmlLink: null));
+    expect((await repo.getById('a'))!.htmlLink, isNull);
+  });
+
   test('getBetween: overlaps of [from, to), sorted by start', () async {
     await repo.upsertAll([
       event('late', 3, 4),
