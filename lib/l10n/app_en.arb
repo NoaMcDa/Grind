@@ -2033,5 +2033,280 @@
   "goalsCounted": "Counted. Nice step.",
   "@goalsCounted": {
     "description": "Toast after adding to a goal"
+  },
+  "capacityTitle": "This week",
+  "@capacityTitle": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacitySubtitle": "Is it realistic? Pip took a look.",
+  "@capacitySubtitle": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityTabWeek": "Week",
+  "@capacityTabWeek": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityTabPriorities": "Priorities",
+  "@capacityTabPriorities": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityBack": "Back",
+  "@capacityBack": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityHoursShort": "{n} h",
+  "@capacityHoursShort": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityMinutesShort": "{n} min",
+  "@capacityMinutesShort": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityTotals": "{free} free · {planned} planned",
+  "@capacityTotals": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityVerdictFits": "It fits, with room to breathe.",
+  "@capacityVerdictFits": {
+    "description": "Week verdict: fits, tight or overbooked"
+  },
+  "capacityVerdictTight": "Tight, but doable. Worth a look at what can wait.",
+  "@capacityVerdictTight": {
+    "description": "Week verdict: fits, tight or overbooked"
+  },
+  "capacityVerdictOver": "Overbooked by {over}. Let's move a few things, no stress.",
+  "@capacityVerdictOver": {
+    "description": "Week verdict: fits, tight or overbooked",
+    "placeholders": {
+      "over": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityStateFits": "Fits",
+  "@capacityStateFits": {
+    "description": "Week verdict: fits, tight or overbooked"
+  },
+  "capacityStateTight": "Tight",
+  "@capacityStateTight": {
+    "description": "Week verdict: fits, tight or overbooked"
+  },
+  "capacityStateOver": "Overbooked",
+  "@capacityStateOver": {
+    "description": "Week verdict: fits, tight or overbooked"
+  },
+  "capacityDayPacked": "Packed",
+  "@capacityDayPacked": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityDaySemantics": "{day}: {free} free, {planned} planned",
+  "@capacityDaySemantics": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityMoveTitle": "What could move",
+  "@capacityMoveTitle": {
+    "description": "Deferral suggestions when the week is overbooked"
+  },
+  "capacityMoveIntro": "Lowest cost first. Nothing here is due this week.",
+  "@capacityMoveIntro": {
+    "description": "Deferral suggestions when the week is overbooked"
+  },
+  "capacityMoveOne": "Move to next week",
+  "@capacityMoveOne": {
+    "description": "Deferral suggestions when the week is overbooked"
+  },
+  "capacityMoveAll": "Move all suggested",
+  "@capacityMoveAll": {
+    "description": "Deferral suggestions when the week is overbooked"
+  },
+  "capacityMovedOne": "Moved to next week. One less thing now.",
+  "@capacityMovedOne": {
+    "description": "Deferral suggestions when the week is overbooked"
+  },
+  "capacityMovedMany": "Moved {count} to next week. Breathe.",
+  "@capacityMovedMany": {
+    "description": "Deferral suggestions when the week is overbooked",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "capacityReasonNoDeadline": "No deadline, so next week works.",
+  "@capacityReasonNoDeadline": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonDue": "Not due until {day}.",
+  "@capacityReasonDue": {
+    "description": "Why a task is ranked where it is (priorities tab)",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "capacitySlack": "{days, plural, =0{Due right after this week} =1{1 day of slack} other{{days} days of slack}}",
+  "@capacitySlack": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "capacityNothingToMove": "Nothing needs to move. Nicely done.",
+  "@capacityNothingToMove": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityPrioTitle": "What matters most",
+  "@capacityPrioTitle": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityPrioIntro": "Pip ranks by deadline, goal and effort. Drag one up and Pip remembers.",
+  "@capacityPrioIntro": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityPrioEmpty": "Nothing open. Enjoy the quiet.",
+  "@capacityPrioEmpty": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityRank": "#{rank}",
+  "@capacityRank": {
+    "description": "Weekly capacity and priorities screen",
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "capacityReasonPinnedTop": "You pinned this to the top",
+  "@capacityReasonPinnedTop": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonOverdue": "Past its date, so it comes first",
+  "@capacityReasonOverdue": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonDueSoon": "Due soon",
+  "@capacityReasonDueSoon": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonMarkedHigh": "You marked it high",
+  "@capacityReasonMarkedHigh": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonGoalMatters": "Matters to a goal you care about",
+  "@capacityReasonGoalMatters": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonGoalStalled": "Its goal hasn't moved in a while",
+  "@capacityReasonGoalStalled": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonGoalMoving": "Its goal is on a roll",
+  "@capacityReasonGoalMoving": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonQuickWin": "A quick win",
+  "@capacityReasonQuickWin": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityReasonSteady": "Steady, no rush",
+  "@capacityReasonSteady": {
+    "description": "Why a task is ranked where it is (priorities tab)"
+  },
+  "capacityPinTop": "Top",
+  "@capacityPinTop": {
+    "description": "Priority pin control (priorities tab)"
+  },
+  "capacityPinHigh": "High",
+  "@capacityPinHigh": {
+    "description": "Priority pin control (priorities tab)"
+  },
+  "capacityPinNormal": "Normal",
+  "@capacityPinNormal": {
+    "description": "Priority pin control (priorities tab)"
+  },
+  "capacityPinLow": "Low",
+  "@capacityPinLow": {
+    "description": "Priority pin control (priorities tab)"
+  },
+  "capacityPinTitle": "How much does this matter?",
+  "@capacityPinTitle": {
+    "description": "Priority pin control (priorities tab)"
+  },
+  "capacityPinLabel": "Priority: {pin}",
+  "@capacityPinLabel": {
+    "description": "Priority pin control (priorities tab)",
+    "placeholders": {
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "capacityDragHandle": "Drag to reorder",
+  "@capacityDragHandle": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityRemembered": "Noted. Pip will remember that.",
+  "@capacityRemembered": {
+    "description": "Weekly capacity and priorities screen"
+  },
+  "capacityWeightsTitle": "Weights",
+  "@capacityWeightsTitle": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightsHint": "Advanced. Tune how Pip ranks things while we're in beta.",
+  "@capacityWeightsHint": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightUrgency": "Deadline",
+  "@capacityWeightUrgency": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightImportance": "Goal importance",
+  "@capacityWeightImportance": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightPriority": "Your priority",
+  "@capacityWeightPriority": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightQuickWin": "Quick wins",
+  "@capacityWeightQuickWin": {
+    "description": "Advanced scoring weights (priorities tab)"
+  },
+  "capacityWeightsReset": "Reset to defaults",
+  "@capacityWeightsReset": {
+    "description": "Advanced scoring weights (priorities tab)"
   }
 }

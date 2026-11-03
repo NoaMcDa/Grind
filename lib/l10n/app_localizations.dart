@@ -2743,6 +2743,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Counted. Nice step.'**
   String get goalsCounted;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get capacityTitle;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Is it realistic? Pip took a look.'**
+  String get capacitySubtitle;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get capacityTabWeek;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Priorities'**
+  String get capacityTabPriorities;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get capacityBack;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'{n} h'**
+  String capacityHoursShort(String n);
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String capacityMinutesShort(String n);
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'{free} free · {planned} planned'**
+  String capacityTotals(String free, String planned);
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'It fits, with room to breathe.'**
+  String get capacityVerdictFits;
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Tight, but doable. Worth a look at what can wait.'**
+  String get capacityVerdictTight;
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Overbooked by {over}. Let\'s move a few things, no stress.'**
+  String capacityVerdictOver(String over);
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Fits'**
+  String get capacityStateFits;
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Tight'**
+  String get capacityStateTight;
+
+  /// Week verdict: fits, tight or overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Overbooked'**
+  String get capacityStateOver;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Packed'**
+  String get capacityDayPacked;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'{day}: {free} free, {planned} planned'**
+  String capacityDaySemantics(String day, String free, String planned);
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'What could move'**
+  String get capacityMoveTitle;
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest cost first. Nothing here is due this week.'**
+  String get capacityMoveIntro;
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Move to next week'**
+  String get capacityMoveOne;
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Move all suggested'**
+  String get capacityMoveAll;
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to next week. One less thing now.'**
+  String get capacityMovedOne;
+
+  /// Deferral suggestions when the week is overbooked
+  ///
+  /// In en, this message translates to:
+  /// **'Moved {count} to next week. Breathe.'**
+  String capacityMovedMany(int count);
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'No deadline, so next week works.'**
+  String get capacityReasonNoDeadline;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Not due until {day}.'**
+  String capacityReasonDue(String day);
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{Due right after this week} =1{1 day of slack} other{{days} days of slack}}'**
+  String capacitySlack(int days);
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs to move. Nicely done.'**
+  String get capacityNothingToMove;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'What matters most'**
+  String get capacityPrioTitle;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Pip ranks by deadline, goal and effort. Drag one up and Pip remembers.'**
+  String get capacityPrioIntro;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing open. Enjoy the quiet.'**
+  String get capacityPrioEmpty;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank}'**
+  String capacityRank(int rank);
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'You pinned this to the top'**
+  String get capacityReasonPinnedTop;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Past its date, so it comes first'**
+  String get capacityReasonOverdue;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get capacityReasonDueSoon;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'You marked it high'**
+  String get capacityReasonMarkedHigh;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Matters to a goal you care about'**
+  String get capacityReasonGoalMatters;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Its goal hasn\'t moved in a while'**
+  String get capacityReasonGoalStalled;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Its goal is on a roll'**
+  String get capacityReasonGoalMoving;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'A quick win'**
+  String get capacityReasonQuickWin;
+
+  /// Why a task is ranked where it is (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Steady, no rush'**
+  String get capacityReasonSteady;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Top'**
+  String get capacityPinTop;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get capacityPinHigh;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get capacityPinNormal;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get capacityPinLow;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'How much does this matter?'**
+  String get capacityPinTitle;
+
+  /// Priority pin control (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Priority: {pin}'**
+  String capacityPinLabel(String pin);
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder'**
+  String get capacityDragHandle;
+
+  /// Weekly capacity and priorities screen
+  ///
+  /// In en, this message translates to:
+  /// **'Noted. Pip will remember that.'**
+  String get capacityRemembered;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Weights'**
+  String get capacityWeightsTitle;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced. Tune how Pip ranks things while we\'re in beta.'**
+  String get capacityWeightsHint;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Deadline'**
+  String get capacityWeightUrgency;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Goal importance'**
+  String get capacityWeightImportance;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Your priority'**
+  String get capacityWeightPriority;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Quick wins'**
+  String get capacityWeightQuickWin;
+
+  /// Advanced scoring weights (priorities tab)
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to defaults'**
+  String get capacityWeightsReset;
 }
 
 class _AppLocalizationsDelegate
