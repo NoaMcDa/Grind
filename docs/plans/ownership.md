@@ -42,6 +42,20 @@ Wave 2 is merged. Everything from waves 1–2 exists on `main`; read before edit
 | W3-B review (code + security + copy) | `docs/reviews/**` (new); targeted bug fixes anywhere **except** the W3-A paths above, each fix small and covered by a test |
 | W3-C localization (after A and B merge) | `lib/l10n/**`, every `*_strings.dart`, and the call sites that use them |
 
+## Wave 5
+Waves 1–4 are merged (contracts v3, l10n part 1, analytics, release prep, review fixes).
+
+| Owner | Paths |
+|---|---|
+| W5-A l10n part 2 | `lib/features/today/**`, `lib/features/plan/**` except `plan_task_sheet.dart` and `scheduler/`, `lib/l10n/**`, their tests |
+| W5-B settings/time zone/focus/calendar follow-ups | `lib/features/settings/**`, `lib/features/onboarding/**`, `lib/features/focus/**`, `lib/features/calendar/**`, `lib/features/plan/plan_task_sheet.dart`, their tests |
+| W5-C recurrence completion | `lib/features/tasks/**`, `lib/features/recurrence/**`, `lib/features/reminders/**`, their tests |
+| W5-D recurring metrics + highlights (#27, #28) | `lib/features/goals/**`, `test/features/goals/**` |
+| W5-E weekly capacity + prioritization (#29, #30) | `lib/features/capacity/**` (new), `test/features/capacity/**` |
+| W5-F celebration + unlocks (#34, #35) | `lib/features/companion/**`, `lib/features/pip/**`, `lib/widgets/celebration/**` (new), their tests |
+
+`lib/core/**`, `lib/app/**`, `main.dart`, `pubspec.yaml` stay integrator-only.
+
 ## Shared rules
 - New code reads contracts through `package:grind/core/core.dart`.
 - Riverpod providers for a feature live in that feature's folder; `lib/core/di.dart` only holds the interface providers.
