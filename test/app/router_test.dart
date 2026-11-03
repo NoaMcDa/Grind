@@ -48,27 +48,27 @@ void main() {
     expect(find.text('Task details are coming soon.'), findsOneWidget);
   });
 
-  testWidgets('Today add button goes to Ask', (tester) async {
+  testWidgets('Today add button opens the task sheet', (tester) async {
     await pumpGrindApp(tester);
     await tester.tap(find.bySemanticsLabel('Add a task'));
     await tester.pumpAndSettle();
-    expect(find.text('Ask Pip'), findsOneWidget);
+    expect(find.text('New task'), findsOneWidget);
   });
 
   testWidgets('Today toggling a task updates the repository', (tester) async {
     final container = await pumpGrindApp(tester);
     final repo = container.read(taskRepositoryProvider);
 
-    expect(find.text('1 of 5 today'), findsOneWidget);
+    expect(find.text('1 of 4 today'), findsOneWidget);
     expect((await repo.getById('gym'))!.status, TaskStatus.open);
 
-    await tester.tap(find.text('Gym'));
+    await tester.tap(find.bySemanticsLabel(RegExp('(Complete|Mark) Gym')));
     await tester.pumpAndSettle();
 
     expect((await repo.getById('gym'))!.status, TaskStatus.done);
-    expect(find.text('2 of 5 today'), findsOneWidget);
+    expect(find.text('2 of 4 today'), findsOneWidget);
 
-    await tester.tap(find.text('Gym'));
+    await tester.tap(find.bySemanticsLabel(RegExp('(Complete|Mark) Gym')));
     await tester.pumpAndSettle();
     expect((await repo.getById('gym'))!.status, TaskStatus.open);
   });
