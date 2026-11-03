@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/pip/pip_screen.dart';
+import 'package:grind/l10n/l10n.dart';
 
 import '../../test_fonts.dart';
 
@@ -21,6 +22,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<Task> tasks, {
   TextDirection dir = TextDirection.ltr,
+  Locale locale = const Locale('en'),
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -32,6 +34,9 @@ Future<void> _pump(
         taskRepositoryProvider.overrideWithValue(InMemoryTaskRepository(tasks)),
       ],
       child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: dir,
           child: const Scaffold(body: PipScreen()),
@@ -78,14 +83,21 @@ void main() {
 
   testWidgets('tapping an unlock changes what Pip wears', (tester) async {
     await _pump(tester, const []);
-    expect(find.text('wearing: scarf'), findsOneWidget);
+    expect(find.text('wearing: Scarf'), findsOneWidget);
     await tester.tap(find.text('Sunglasses'));
     await tester.pumpAndSettle();
-    expect(find.text('wearing: sunglasses'), findsOneWidget);
+    expect(find.text('wearing: Sunglasses'), findsOneWidget);
   });
 
   testWidgets('RTL at 390x844 has no overflow', (tester) async {
-    await _pump(tester, [_done('a', _now)], dir: TextDirection.rtl);
+    await _pump(
+      tester,
+      [_done('a', _now)],
+      dir: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
+    expect(find.text('קבוצת העידוד הפרטית שלך'), findsOneWidget);
+    expect(find.text('Your cheering squad of one'), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.drag(find.byType(ListView), const Offset(0, -600));
     await tester.pumpAndSettle();

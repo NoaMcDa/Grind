@@ -8,7 +8,7 @@ import 'package:grind/widgets/widgets.dart';
 
 import 'review_providers.dart';
 import 'review_repository.dart';
-import 'review_strings.dart';
+import '../../l10n/l10n.dart';
 import 'rollover.dart';
 
 /// Route-ready entry point: add `/review` pointing at this widget.
@@ -51,13 +51,13 @@ class EveningReviewBanner extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              ReviewStrings.bannerTitle,
+              context.l10n.reviewBannerTitle,
               style: AppText.bold(size: 15),
             ),
           ),
           const SizedBox(width: 8),
           PillButton(
-            label: ReviewStrings.bannerAction,
+            label: context.l10n.reviewBannerAction,
             color: AppColors.violet,
             textColor: Colors.white,
             onPressed: onTap,
@@ -240,7 +240,7 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
                               foregroundColor: AppColors.muted,
                             ),
                             child: Text(
-                              ReviewStrings.skip,
+                              context.l10n.commonSkip,
                               style: AppText.bold(
                                 size: 14,
                                 color: AppColors.muted,
@@ -257,54 +257,60 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
                       onPageChanged: (i) => setState(() => _step = i),
                       children: [
                         _page([
-                          _title(ReviewStrings.doneTitle),
+                          _title(context.l10n.reviewDoneTitle),
                           const SizedBox(height: 6),
-                          _hint(ReviewStrings.doneHint),
+                          _hint(context.l10n.reviewDoneHint),
                           const SizedBox(height: 16),
                           if (_today.isEmpty)
-                            _hint(ReviewStrings.doneEmpty)
+                            _hint(context.l10n.reviewDoneEmpty)
                           else
                             for (final t in _today) _doneRow(t),
                           const SizedBox(height: 16),
-                          _primary(ReviewStrings.next, _confirmDone),
+                          _primary(
+                            context.l10n.onboardingContinue,
+                            _confirmDone,
+                          ),
                         ]),
                         _page([
-                          _title(ReviewStrings.moveTitle),
+                          _title(context.l10n.reviewMoveTitle),
                           const SizedBox(height: 6),
-                          _hint(ReviewStrings.moveHint),
+                          _hint(context.l10n.reviewMoveHint),
                           const SizedBox(height: 16),
                           if (_movable.isEmpty)
-                            _hint(ReviewStrings.moveEmpty)
+                            _hint(context.l10n.reviewMoveEmpty)
                           else
                             for (final t in _movable) _moveCard(t),
                           for (final t in _today)
                             if (_isRecurring(t) && !_doneIds.contains(t.id))
                               _recurringNote(t),
                           const SizedBox(height: 16),
-                          _primary(ReviewStrings.next, _confirmMoves),
+                          _primary(
+                            context.l10n.onboardingContinue,
+                            _confirmMoves,
+                          ),
                         ]),
                         _page([
-                          _title(ReviewStrings.winTitle),
+                          _title(context.l10n.reviewWinTitle),
                           const SizedBox(height: 6),
-                          _hint(ReviewStrings.winHint),
+                          _hint(context.l10n.reviewWinHint),
                           const SizedBox(height: 16),
                           StickerTextField(
                             key: const ValueKey('review-win-field'),
                             controller: _win,
-                            hint: ReviewStrings.winField,
+                            hint: context.l10n.reviewWinField,
                             maxLines: 3,
                           ),
                           const SizedBox(height: 16),
-                          _primary(ReviewStrings.save, _saveWin),
+                          _primary(context.l10n.reviewSave, _saveWin),
                         ]),
                         _page([
                           const SizedBox(height: 24),
                           const Center(child: PipAvatar(size: 140)),
                           const SizedBox(height: 20),
-                          _title(ReviewStrings.finishTitle),
+                          _title(context.l10n.reviewFinishTitle),
                           const SizedBox(height: 8),
                           Text(
-                            ReviewStrings.praiseFor(_now.day),
+                            _praise(context.l10n, _now.day),
                             key: const ValueKey('review-praise'),
                             style: AppText.body(
                               size: 16,
@@ -313,10 +319,7 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          _primary(
-                            ReviewStrings.finishButton,
-                            widget.onFinished,
-                          ),
+                          _primary(context.l10n.done, widget.onFinished),
                         ]),
                       ],
                     ),
@@ -401,18 +404,18 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
       shadow: 0,
       padding: const EdgeInsets.all(12),
       child: Text(
-        '${t.title}. ${ReviewStrings.repeatsNote}',
+        '${t.title}. ${context.l10n.reviewRepeatsNote}',
         style: AppText.body(size: 13, color: AppColors.muted),
       ),
     ),
   );
 
   String _label(RolloverChoice c) => switch (c) {
-    RolloverChoice.tomorrow => ReviewStrings.tomorrow,
-    RolloverChoice.laterThisWeek => ReviewStrings.later,
-    RolloverChoice.keep => ReviewStrings.keepToday,
-    RolloverChoice.tomorrowAnyway => ReviewStrings.tomorrowAnyway,
-    RolloverChoice.drop => ReviewStrings.drop,
+    RolloverChoice.tomorrow => context.l10n.commonTomorrow,
+    RolloverChoice.laterThisWeek => context.l10n.reviewLater,
+    RolloverChoice.keep => context.l10n.reviewKeepToday,
+    RolloverChoice.tomorrowAnyway => context.l10n.reviewTomorrowAnyway,
+    RolloverChoice.drop => context.l10n.reviewDrop,
   };
 
   Widget _moveCard(Task t) {
@@ -430,7 +433,7 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
             if (deadline) ...[
               const SizedBox(height: 4),
               Text(
-                ReviewStrings.deadlineNote,
+                context.l10n.reviewDeadlineNote,
                 style: AppText.body(size: 13, color: AppColors.muted),
               ),
             ],
@@ -438,11 +441,14 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
             if (chosen == RolloverChoice.drop)
               Row(
                 children: [
-                  Text(ReviewStrings.dropped, style: AppText.bold(size: 14)),
+                  Text(
+                    context.l10n.reviewDropped,
+                    style: AppText.bold(size: 14),
+                  ),
                   const SizedBox(width: 8),
                   PillButton(
                     key: ValueKey('review-undo-${t.id}'),
-                    label: ReviewStrings.undo,
+                    label: context.l10n.undo,
                     onPressed: () => setState(() => _choices.remove(t.id)),
                   ),
                 ],
@@ -501,4 +507,16 @@ class _Dots extends StatelessWidget {
       ),
     );
   }
+}
+
+/// One praise line, stable for a given [seed] (the day of the month).
+String _praise(AppLocalizations l, int seed) {
+  final lines = [
+    l.reviewPraise1,
+    l.reviewPraise2,
+    l.reviewPraise3,
+    l.reviewPraise4,
+    l.reviewPraise5,
+  ];
+  return lines[seed % lines.length];
 }

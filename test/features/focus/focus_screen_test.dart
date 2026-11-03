@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
-import 'package:grind/features/focus/focus_strings.dart';
+import 'package:grind/l10n/app_localizations.dart';
 import 'package:grind/features/focus/providers.dart';
 
 import '../../test_fonts.dart';
+
+final en = lookupAppLocalizations(const Locale('en'));
 
 void main() {
   setUpAll(loadAppFonts);
@@ -63,18 +65,18 @@ void main() {
     await tester.tap(find.bySemanticsLabel('End'));
     await tester.pumpAndSettle();
 
-    expect(find.text(FocusStrings.earlyTitle), findsOneWidget);
+    expect(find.text(en.focusEarlyTitle), findsOneWidget);
     expect(
-      find.text(FocusStrings.focusedFor(12, 'Deep learning lab 4')),
+      find.text(en.focusFocusedForTask(12, 'Deep learning lab 4')),
       findsOneWidget,
     );
-    await tester.tap(find.bySemanticsLabel(FocusStrings.markDone));
+    await tester.tap(find.bySemanticsLabel(en.focusMarkDone));
     await tester.pumpAndSettle();
 
     final task = (await container.read(taskRepositoryProvider).getById('lab'))!;
     expect(task.isDone, isTrue);
     expect(task.actualMinutes, 12);
-    expect(find.text(FocusStrings.taskDone), findsOneWidget);
+    expect(find.text(en.focusTaskDone), findsOneWidget);
     expect(find.bySemanticsLabel('Start focus'), findsOneWidget);
   });
 
@@ -83,26 +85,26 @@ void main() {
   ) async {
     final clock = FixedClock(testNow);
     await pumpGrindApp(tester, initialLocation: '/focus', clock: clock);
-    expect(find.text(FocusStrings.freeFocus), findsWidgets);
+    expect(find.text(en.focusFree), findsWidgets);
     await tester.tap(find.bySemanticsLabel('Start focus'));
     await tester.pump();
 
     clock.advance(const Duration(minutes: 26));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    expect(find.text(FocusStrings.doneTitle), findsOneWidget);
-    expect(find.bySemanticsLabel(FocusStrings.markDone), findsNothing);
+    expect(find.text(en.focusDoneTitle), findsOneWidget);
+    expect(find.bySemanticsLabel(en.focusMarkDone), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel(FocusStrings.keepGoing));
+    await tester.tap(find.bySemanticsLabel(en.focusKeepGoing));
     await tester.pumpAndSettle();
-    expect(find.text(FocusStrings.breakLabel), findsOneWidget);
+    expect(find.text(en.focusBreak.toUpperCase()), findsOneWidget);
     expect(find.bySemanticsLabel('1 of 4 sessions done'), findsOneWidget);
     expect(remaining(tester), '04:00');
 
     clock.advance(const Duration(minutes: 4));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    expect(find.text(FocusStrings.breakOverToast), findsOneWidget);
+    expect(find.text(en.focusBreakOverToast), findsOneWidget);
     expect(find.text('FOCUS 2 OF 4'), findsOneWidget);
   });
 
@@ -114,9 +116,9 @@ void main() {
     clock.advance(const Duration(minutes: 5));
     await tester.tap(find.bySemanticsLabel('End'));
     await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel(FocusStrings.logWin));
+    await tester.tap(find.bySemanticsLabel(en.focusLogWin));
     await tester.pumpAndSettle();
-    expect(find.text(FocusStrings.winLogged), findsOneWidget);
+    expect(find.text(en.focusWinLogged), findsOneWidget);
   });
 
   testWidgets('a running session is picked up when the screen opens', (
@@ -173,5 +175,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    // Hebrew copy is on screen: the end-of-session sheet title.
+    expect(find.text('הסבב הסתיים. עבודה יפה.'), findsOneWidget);
   });
 }

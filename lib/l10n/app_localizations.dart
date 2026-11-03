@@ -1855,6 +1855,894 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everything stays on this device. No account, no sign-in.'**
   String get settingsPrivacyCopy;
+
+  /// Pill on the Pip hero card when nothing is worn
+  ///
+  /// In en, this message translates to:
+  /// **'no accessory'**
+  String get pipNoAccessory;
+
+  /// Momentum level label
+  ///
+  /// In en, this message translates to:
+  /// **'Steady'**
+  String get momentumSteady;
+
+  /// Momentum level label
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet'**
+  String get momentumQuiet;
+
+  /// Pip hero title
+  ///
+  /// In en, this message translates to:
+  /// **'Pip is warm'**
+  String get pipMoodWarm;
+
+  /// Pip hero title
+  ///
+  /// In en, this message translates to:
+  /// **'Pip is resting'**
+  String get pipMoodResting;
+
+  /// Pip hero sentence with no activity yet
+  ///
+  /// In en, this message translates to:
+  /// **'Pip is here whenever you are. One small thing is plenty.'**
+  String get pipLineHello;
+
+  /// Pip hero sentence, first half
+  ///
+  /// In en, this message translates to:
+  /// **'You showed up {days} of the last 7 days.'**
+  String pipShowedUp(int days);
+
+  /// Pip hero sentence, second half when glowing
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s real momentum.'**
+  String get pipLineGlowing;
+
+  /// Pip hero sentence, second half when warm
+  ///
+  /// In en, this message translates to:
+  /// **'Nicely steady.'**
+  String get pipLineWarm;
+
+  /// Pip hero sentence, second half when quiet
+  ///
+  /// In en, this message translates to:
+  /// **'Every bit counts.'**
+  String get pipLineQuiet;
+
+  /// Caption under the momentum meter
+  ///
+  /// In en, this message translates to:
+  /// **'Momentum fades slowly, one quiet day won\'t reset it.'**
+  String get pipMomentumNote;
+
+  /// Screen reader label of the week chart
+  ///
+  /// In en, this message translates to:
+  /// **'Things finished per day this week. Days with none are rest days.'**
+  String get pipWeekSemantics;
+
+  /// Label in a week chart column with no activity
+  ///
+  /// In en, this message translates to:
+  /// **'rest day'**
+  String get pipRestDay;
+
+  /// Caption under the week chart
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks and sessions finished per day'**
+  String get pipWeekCaption;
+
+  /// Empty state of the wins row
+  ///
+  /// In en, this message translates to:
+  /// **'Your first win will land here.'**
+  String get pipFirstWin;
+
+  /// Caption under a locked unlock
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more session} other{{count} more sessions}}'**
+  String pipMoreSessions(int count);
+
+  /// Title of a focus session without a task
+  ///
+  /// In en, this message translates to:
+  /// **'Free focus'**
+  String get focusFree;
+
+  /// Focus header while on a short break
+  ///
+  /// In en, this message translates to:
+  /// **'Break'**
+  String get focusBreak;
+
+  /// Focus header while on a long break
+  ///
+  /// In en, this message translates to:
+  /// **'Long break'**
+  String get focusLongBreak;
+
+  /// Lock screen status before a session starts
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get focusReady;
+
+  /// Lock screen status while on a break
+  ///
+  /// In en, this message translates to:
+  /// **'On a break'**
+  String get focusOnBreak;
+
+  /// Under the timer: total session length
+  ///
+  /// In en, this message translates to:
+  /// **'of {total}'**
+  String focusOfTotal(String total);
+
+  /// Pill for the upcoming hard mode
+  ///
+  /// In en, this message translates to:
+  /// **'Hard mode · coming soon'**
+  String get focusHardModeSoon;
+
+  /// Button removing minutes from the timer
+  ///
+  /// In en, this message translates to:
+  /// **'−{minutes} min'**
+  String focusMinusMinutes(int minutes);
+
+  /// Main button after a break
+  ///
+  /// In en, this message translates to:
+  /// **'Start next focus'**
+  String get focusStartNext;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'End break'**
+  String get focusEndBreak;
+
+  /// End-of-session sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Session done. Nice work.'**
+  String get focusDoneTitle;
+
+  /// End-of-session sheet title after ending early
+  ///
+  /// In en, this message translates to:
+  /// **'Session ended. It still counts.'**
+  String get focusEarlyTitle;
+
+  /// End-of-session sheet body
+  ///
+  /// In en, this message translates to:
+  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.'**
+  String focusFocusedFor(int minutes);
+
+  /// End-of-session sheet body when the session had a task
+  ///
+  /// In en, this message translates to:
+  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.'**
+  String focusFocusedForTask(int minutes, String task);
+
+  /// End-of-session button
+  ///
+  /// In en, this message translates to:
+  /// **'Mark task done'**
+  String get focusMarkDone;
+
+  /// End-of-session button
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get focusKeepGoing;
+
+  /// End-of-session button
+  ///
+  /// In en, this message translates to:
+  /// **'Log a win'**
+  String get focusLogWin;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Win logged. Pip saw that.'**
+  String get focusWinLogged;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Task done. Pip is proud of you.'**
+  String get focusTaskDone;
+
+  /// In-app alert when a session ends
+  ///
+  /// In en, this message translates to:
+  /// **'Time! Session done, take a breather.'**
+  String get focusSessionOverToast;
+
+  /// In-app alert when a break ends
+  ///
+  /// In en, this message translates to:
+  /// **'Break\'s over. Ready when you are.'**
+  String get focusBreakOverToast;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a length and press play. Pip will keep time.'**
+  String get focusCheerIdle1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'One small step is enough to start. Pip is right here.'**
+  String get focusCheerIdle2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'The first minutes are the hardest, and you already started.'**
+  String get focusCheerStart1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Just the next small step. Nothing else matters right now.'**
+  String get focusCheerStart2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Nice rhythm. Keep it simple.'**
+  String get focusCheerMiddle1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'You are doing the thing. Pip is cheering quietly.'**
+  String get focusCheerMiddle2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re past halfway. Keep going, the first draft just needs to exist.'**
+  String get focusCheerPastHalf1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'More than half done. Steady wins this.'**
+  String get focusCheerPastHalf2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there. Finish the sentence you are on.'**
+  String get focusCheerNearEnd1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'A few minutes left. Land it gently.'**
+  String get focusCheerNearEnd2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Paused. Take a breath, Pip will wait.'**
+  String get focusCheerPaused1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Little pauses are fine. Come back when you are ready.'**
+  String get focusCheerPaused2;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Break time. Stand up, stretch, drink some water.'**
+  String get focusCheerBreak1;
+
+  /// Pip cheering line on the focus screen
+  ///
+  /// In en, this message translates to:
+  /// **'Rest is part of the work. Look at something far away.'**
+  String get focusCheerBreak2;
+
+  /// Evening review banner on Today
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for a one-minute look back?'**
+  String get reviewBannerTitle;
+
+  /// Evening review banner button
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get reviewBannerAction;
+
+  /// Review step title
+  ///
+  /// In en, this message translates to:
+  /// **'What got done?'**
+  String get reviewDoneTitle;
+
+  /// Review step hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tick anything you finished. Pip counts it all.'**
+  String get reviewDoneHint;
+
+  /// Review step empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was waiting on today. Lovely and light.'**
+  String get reviewDoneEmpty;
+
+  /// Review step title
+  ///
+  /// In en, this message translates to:
+  /// **'What moves on?'**
+  String get reviewMoveTitle;
+
+  /// Review step hint
+  ///
+  /// In en, this message translates to:
+  /// **'Give each one a gentle new spot.'**
+  String get reviewMoveHint;
+
+  /// Review step empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to move. You are clear.'**
+  String get reviewMoveEmpty;
+
+  /// Review move option
+  ///
+  /// In en, this message translates to:
+  /// **'Later this week'**
+  String get reviewLater;
+
+  /// Review move option
+  ///
+  /// In en, this message translates to:
+  /// **'Keep today'**
+  String get reviewKeepToday;
+
+  /// Review move option for a task due today
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow anyway'**
+  String get reviewTomorrowAnyway;
+
+  /// Review move option removing a task
+  ///
+  /// In en, this message translates to:
+  /// **'Drop'**
+  String get reviewDrop;
+
+  /// Toast after dropping a task
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped.'**
+  String get reviewDropped;
+
+  /// Note on a task with a deadline today
+  ///
+  /// In en, this message translates to:
+  /// **'This one is due today. Moving it is fine, just your call.'**
+  String get reviewDeadlineNote;
+
+  /// Note on a recurring task
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats on its own, so it stays put.'**
+  String get reviewRepeatsNote;
+
+  /// Review step title
+  ///
+  /// In en, this message translates to:
+  /// **'One win'**
+  String get reviewWinTitle;
+
+  /// Review step hint
+  ///
+  /// In en, this message translates to:
+  /// **'Big or tiny. What are you glad about today?'**
+  String get reviewWinHint;
+
+  /// Review win text field label
+  ///
+  /// In en, this message translates to:
+  /// **'Today I...'**
+  String get reviewWinField;
+
+  /// Review button
+  ///
+  /// In en, this message translates to:
+  /// **'Save and finish'**
+  String get reviewSave;
+
+  /// Review last step title
+  ///
+  /// In en, this message translates to:
+  /// **'Day wrapped'**
+  String get reviewFinishTitle;
+
+  /// Closing line of the evening review
+  ///
+  /// In en, this message translates to:
+  /// **'You showed up today. That is the whole trick.'**
+  String get reviewPraise1;
+
+  /// Closing line of the evening review
+  ///
+  /// In en, this message translates to:
+  /// **'A good day to be you. Sleep well.'**
+  String get reviewPraise2;
+
+  /// Closing line of the evening review
+  ///
+  /// In en, this message translates to:
+  /// **'Small steps still count. Nice work today.'**
+  String get reviewPraise3;
+
+  /// Closing line of the evening review
+  ///
+  /// In en, this message translates to:
+  /// **'Look at you, closing the day with care.'**
+  String get reviewPraise4;
+
+  /// Closing line of the evening review
+  ///
+  /// In en, this message translates to:
+  /// **'Whatever got done, I am proud of you.'**
+  String get reviewPraise5;
+
+  /// Goals screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get goalsTitle;
+
+  /// Goals screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Near and far. Every small step counts.'**
+  String get goalsSubtitle;
+
+  /// Button and form title
+  ///
+  /// In en, this message translates to:
+  /// **'New goal'**
+  String get goalsNewGoal;
+
+  /// Form title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get goalsEditGoal;
+
+  /// Empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No goals yet'**
+  String get goalsEmptyTitle;
+
+  /// Empty state body
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one thing you would love to move this month. Pip will cheer.'**
+  String get goalsEmptyBody;
+
+  /// Empty state button
+  ///
+  /// In en, this message translates to:
+  /// **'Add a goal'**
+  String get goalsEmptyAction;
+
+  /// Goal horizon
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get goalsHorizonWeek;
+
+  /// Goal horizon
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get goalsHorizonMonth;
+
+  /// Goal horizon
+  ///
+  /// In en, this message translates to:
+  /// **'This quarter'**
+  String get goalsHorizonQuarter;
+
+  /// Goal horizon
+  ///
+  /// In en, this message translates to:
+  /// **'This year'**
+  String get goalsHorizonYear;
+
+  /// Goal horizon, short chip
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get goalsHorizonShortWeek;
+
+  /// Goal horizon, short chip
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get goalsHorizonShortMonth;
+
+  /// Goal horizon, short chip
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter'**
+  String get goalsHorizonShortQuarter;
+
+  /// Goal horizon, short chip
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get goalsHorizonShortYear;
+
+  /// Goal status
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get goalsStatusActive;
+
+  /// Goal status
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get goalsStatusPaused;
+
+  /// Goal status
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get goalsStatusDone;
+
+  /// Goal badge
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there'**
+  String get goalsCloseToDone;
+
+  /// Goal badge
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get goalsCompleted;
+
+  /// Goal badge for a paused goal
+  ///
+  /// In en, this message translates to:
+  /// **'Resting'**
+  String get goalsResting;
+
+  /// Goal progress without a unit
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target}'**
+  String goalsOfTarget(int current, int target);
+
+  /// Goal progress with a unit
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target} {unit}'**
+  String goalsOfTargetUnit(int current, int target, String unit);
+
+  /// Goal progress with percent
+  ///
+  /// In en, this message translates to:
+  /// **'{summary} · {percent}%'**
+  String goalsProgressLine(String summary, int percent);
+
+  /// Goal card without a metric
+  ///
+  /// In en, this message translates to:
+  /// **'Add a count to see progress'**
+  String get goalsNoMetric;
+
+  /// Goal target date
+  ///
+  /// In en, this message translates to:
+  /// **'by {date}'**
+  String goalsByDate(String date);
+
+  /// Short date without weekday
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {day}'**
+  String goalsDate(String month, int day);
+
+  /// Goal detail title
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get goalsDetailTitle;
+
+  /// Goal detail when the goal does not exist
+  ///
+  /// In en, this message translates to:
+  /// **'This goal is not here anymore.'**
+  String get goalsNotFound;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Back to goals'**
+  String get goalsBackToGoals;
+
+  /// Counter button label
+  ///
+  /// In en, this message translates to:
+  /// **'Add one'**
+  String get goalsAddOne;
+
+  /// Counter button label with unit
+  ///
+  /// In en, this message translates to:
+  /// **'Add one to {unit}'**
+  String goalsAddOneTo(String unit);
+
+  /// Button and sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit count'**
+  String get goalsEditCount;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Count so far'**
+  String get goalsCountLabel;
+
+  /// Field error
+  ///
+  /// In en, this message translates to:
+  /// **'A whole number from 0 works.'**
+  String get goalsCountInvalid;
+
+  /// Hint for a linked counter
+  ///
+  /// In en, this message translates to:
+  /// **'Counts up when you tick off a linked task.'**
+  String get goalsLinkedCountHint;
+
+  /// Section label
+  ///
+  /// In en, this message translates to:
+  /// **'Linked tasks'**
+  String get goalsLinkedTasks;
+
+  /// Empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No tasks here yet. Link one and it will count toward this goal.'**
+  String get goalsNoLinkedTasks;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Link a task'**
+  String get goalsLinkTask;
+
+  /// Sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Which task moves this goal?'**
+  String get goalsPickTask;
+
+  /// Sheet empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Every open task already has a goal.'**
+  String get goalsNoTasksToLink;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get goalsUnlink;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Target date'**
+  String get goalsTargetDateLabel;
+
+  /// Value when there is no target date
+  ///
+  /// In en, this message translates to:
+  /// **'Whenever it fits'**
+  String get goalsNoTargetDate;
+
+  /// Field label
+  ///
+  /// In en, this message translates to:
+  /// **'Importance'**
+  String get goalsImportanceLabel;
+
+  /// Importance value
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of 5'**
+  String goalsImportanceValue(int n);
+
+  /// Dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get goalsDeleteTitle;
+
+  /// Dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Its tasks stay; they just will not point to a goal anymore.'**
+  String get goalsDeleteBody;
+
+  /// Dialog button
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it'**
+  String get goalsKeep;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Goal deleted'**
+  String get goalsDeleted;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as done'**
+  String get goalsMarkDone;
+
+  /// Button
+  ///
+  /// In en, this message translates to:
+  /// **'Back to active'**
+  String get goalsReopen;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to reach?'**
+  String get goalsTitleLabel;
+
+  /// Form field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the project management course'**
+  String get goalsTitleHint;
+
+  /// Form field error
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a short name and you are set.'**
+  String get goalsTitleRequired;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get goalsAreaLabel;
+
+  /// Chip for a custom area
+  ///
+  /// In en, this message translates to:
+  /// **'Your own'**
+  String get goalsCustomArea;
+
+  /// Custom area field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Name your area'**
+  String get goalsCustomAreaHint;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'Horizon'**
+  String get goalsHorizonLabel;
+
+  /// Form section label
+  ///
+  /// In en, this message translates to:
+  /// **'Measure it (optional)'**
+  String get goalsMetricLabel;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get goalsTargetLabel;
+
+  /// Form field error
+  ///
+  /// In en, this message translates to:
+  /// **'A whole number above 0 works.'**
+  String get goalsTargetInvalid;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get goalsUnitLabel;
+
+  /// Form field hint
+  ///
+  /// In en, this message translates to:
+  /// **'lessons'**
+  String get goalsUnitHint;
+
+  /// Unit used when the field is empty
+  ///
+  /// In en, this message translates to:
+  /// **'steps'**
+  String get goalsDefaultUnit;
+
+  /// Unit used for a count of linked tasks
+  ///
+  /// In en, this message translates to:
+  /// **'tasks'**
+  String get goalsLinkedUnit;
+
+  /// Count mode
+  ///
+  /// In en, this message translates to:
+  /// **'I count'**
+  String get goalsCountManual;
+
+  /// Count mode
+  ///
+  /// In en, this message translates to:
+  /// **'Linked tasks'**
+  String get goalsCountLinked;
+
+  /// Form field label
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get goalsStatusLabel;
+
+  /// Toast when a goal is close to done
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there on \"{title}\". Lovely pace.'**
+  String goalsMilestoneCloseToDone(String title);
+
+  /// Toast when a goal is complete
+  ///
+  /// In en, this message translates to:
+  /// **'You did it: \"{title}\" is complete.'**
+  String goalsMilestoneCompleted(String title);
+
+  /// Toast after adding to a goal
+  ///
+  /// In en, this message translates to:
+  /// **'Counted. Nice step.'**
+  String get goalsCounted;
 }
 
 class _AppLocalizationsDelegate

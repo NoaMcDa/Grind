@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/review/review.dart';
+import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
 import '../../test_fonts.dart';
@@ -29,6 +30,7 @@ void main() {
     WidgetTester tester,
     List<Task> seed, {
     TextDirection dir = TextDirection.ltr,
+    Locale locale = const Locale('en'),
     VoidCallback? onFinished,
   }) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -45,6 +47,9 @@ void main() {
         ],
         child: MaterialApp(
           theme: buildAppTheme(),
+          locale: locale,
+          localizationsDelegates: localizationsDelegates,
+          supportedLocales: supportedLocales,
           home: Directionality(
             textDirection: dir,
             child: EveningReviewFlow(onFinished: onFinished ?? () {}),
@@ -129,9 +134,17 @@ void main() {
   });
 
   testWidgets('lays out in RTL at 390x844', (tester) async {
-    await pump(tester, seed, dir: TextDirection.rtl);
+    final he = lookupAppLocalizations(const Locale('he'));
+    await pump(
+      tester,
+      seed,
+      dir: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
+    expect(find.text(he.reviewDoneTitle), findsOneWidget);
+    expect(find.text('What got done?'), findsNothing);
     expect(tester.takeException(), isNull);
-    await tap(tester, primary('Continue'));
+    await tap(tester, primary(he.onboardingContinue));
     expect(tester.takeException(), isNull);
   });
 }

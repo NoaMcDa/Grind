@@ -5,6 +5,7 @@ import 'package:grind/core/core.dart';
 import 'package:grind/features/settings/backup_actions.dart';
 import 'package:grind/features/settings/settings_screen.dart';
 import 'package:grind/features/settings/settings_store.dart';
+import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
 import '../../test_fonts.dart';
@@ -35,6 +36,8 @@ Future<void> _pump(
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: direction,
           child: SettingsScreen(picker: (_, _) async => 7 * 60),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
-import 'onboarding_strings.dart';
+import '../../l10n/l10n.dart';
 
 /// "09:00" style label for minutes after midnight (1440 shows as 24:00).
 String formatMinutes(int minutes) {
@@ -139,7 +139,7 @@ class WeekdayHoursEditor extends StatelessWidget {
   Widget _row(BuildContext context, int day) {
     final ranges = value[day];
     final on = ranges != null && ranges.isNotEmpty;
-    final name = OnboardingStrings.dayShort[day]!;
+    final name = _dayShort(context, day);
     return Row(
       children: [
         SizedBox(
@@ -161,7 +161,7 @@ class WeekdayHoursEditor extends StatelessWidget {
           TimePill(
             key: ValueKey('day-start-$day'),
             minutes: ranges.first.startMinutes,
-            semanticLabel: '$name ${OnboardingStrings.startTime}',
+            semanticLabel: '$name ${context.l10n.onboardingStartTime}',
             onTap: () => _edit(context, day, true),
           ),
           const Padding(
@@ -171,12 +171,12 @@ class WeekdayHoursEditor extends StatelessWidget {
           TimePill(
             key: ValueKey('day-end-$day'),
             minutes: ranges.first.endMinutes,
-            semanticLabel: '$name ${OnboardingStrings.endTime}',
+            semanticLabel: '$name ${context.l10n.onboardingEndTime}',
             onTap: () => _edit(context, day, false),
           ),
         ] else
           Text(
-            OnboardingStrings.dayOff,
+            context.l10n.onboardingDayOff,
             style: AppText.body(
               size: 14,
               weight: FontWeight.w500,
@@ -186,4 +186,18 @@ class WeekdayHoursEditor extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Localized short weekday name; [day] 1 = Monday ... 7 = Sunday.
+String _dayShort(BuildContext context, int day) {
+  final l = context.l10n;
+  return [
+    l.commonWeekdayShortMon,
+    l.commonWeekdayShortTue,
+    l.commonWeekdayShortWed,
+    l.commonWeekdayShortThu,
+    l.commonWeekdayShortFri,
+    l.commonWeekdayShortSat,
+    l.commonWeekdayShortSun,
+  ][day - 1];
 }

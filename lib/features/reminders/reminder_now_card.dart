@@ -12,7 +12,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/sticker_card.dart';
 import 'reminder_copy.dart';
-import 'reminders_strings.dart';
+import '../../l10n/l10n.dart';
 
 /// What the reminder card shows.
 enum ReminderCardState {
@@ -149,7 +149,7 @@ class ReminderNowCard extends ConsumerWidget {
     final current = ref.watch(currentReminderProvider);
     final prefs = ref.watch(preferencesProvider).valueOrNull;
     if (current == null || prefs == null) return const SizedBox.shrink();
-    final s = RemindersStrings.of(context);
+    final s = context.l10n;
     final locale = Localizations.maybeLocaleOf(context);
     final task = current.task;
 
@@ -180,7 +180,7 @@ class ReminderNowCard extends ConsumerWidget {
           at: current.fireAt,
         );
         return _VioletCard(
-          label: s.reminderNow,
+          label: s.reminderNow.toUpperCase(),
           headline: copy.headline,
           line: copy.line,
           buttons: [
@@ -215,24 +215,24 @@ class ReminderNowCard extends ConsumerWidget {
       case ReminderCardState.reschedule:
         final copy = ReminderCopy.reschedule(task, prefs, locale: locale);
         return _VioletCard(
-          label: s.reminderNow,
+          label: s.reminderNow.toUpperCase(),
           headline: copy.headline,
           line: copy.line,
           buttons: [
             _Button(
               flex: 10,
-              label: s.tonight,
+              label: s.remindersTonight,
               color: AppColors.sun,
               onPressed: () => act(NotificationAction.moveToTonight),
             ),
             _Button(
               flex: 10,
-              label: s.tomorrow,
+              label: s.commonTomorrow,
               onPressed: () => act(NotificationAction.moveToTomorrow),
             ),
             _Button(
               flex: 13,
-              label: s.pickATime,
+              label: s.remindersPickATime,
               color: AppColors.mint,
               onPressed: () =>
                   go(onPickTime, '/task/${Uri.encodeComponent(task.id)}'),
@@ -255,7 +255,7 @@ class ReminderNowCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(s.niceStart, style: AppText.display(size: 20)),
-                    Text(s.happyDance, style: AppText.body(size: 14)),
+                    Text(s.pipHappyDance, style: AppText.body(size: 14)),
                   ],
                 ),
               ),
@@ -279,7 +279,7 @@ class ReminderNowCard extends ConsumerWidget {
                   children: [
                     Text(s.seeYouAt(time), style: AppText.display(size: 20)),
                     Text(
-                      s.snoozeHint,
+                      s.snoozeAgainHint,
                       style: AppText.body(size: 14, color: AppColors.muted),
                     ),
                   ],

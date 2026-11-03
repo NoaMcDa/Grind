@@ -5,6 +5,7 @@ import 'package:grind/core/core.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/notifications/time_zones.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Copy of one reminder, shared by the notification and the Today card.
 class ReminderText {
@@ -53,73 +54,41 @@ abstract final class ReminderCopy {
     'he': ['שוב', 'פספס', 'נכשל', 'כישלון', 'צריך', 'צריכה', 'חייב', 'איחור'],
   };
 
-  /// Encouraging second lines. Hebrew is written in gender-neutral forms
-  /// (infinitives, past tense second person, which is spelled the same).
-  static const _pool = <String, List<String>>{
-    'en': [
-      '25 minutes is enough to start.',
-      'Small steps count.',
-      'Just the first step. Pip has the rest.',
-      'Starting is the hard part, and you are here.',
-      'Five minutes in, it gets easier.',
-      'One page is a fine start.',
-      'Pip has the timer ready.',
-      'No need to finish, just begin.',
-      'You picked this step for a reason.',
-      'Little by little adds up.',
-      'Open it and see how it feels.',
-      'A quick start beats a perfect plan.',
-      'Pip is cheering for you.',
-      'Ten focused minutes go a long way.',
-      'Begin small, keep it light.',
-      'This moment is yours.',
-      'Momentum starts with one move.',
-      'Easy does it. Start where you are.',
-      'Future you will be glad.',
-      'Ready when you are.',
-    ],
-    'he': [
-      'עשרים וחמש דקות מספיקות כדי להתחיל.',
-      'גם צעד קטן נחשב.',
-      'רק הצעד הראשון. פיפ דואג לשאר.',
-      'להתחיל זה החלק הקשה, וכבר הגעת.',
-      'אחרי חמש דקות זה נהיה קל יותר.',
-      'עמוד אחד זו התחלה מצוינת.',
-      'פיפ כבר הכין את הטיימר.',
-      'מספיק להתחיל. לסיים זה בונוס.',
-      'בחרת את הצעד הזה מסיבה טובה.',
-      'לאט לאט זה מצטבר.',
-      'פשוט לפתוח ולראות איך זה מרגיש.',
-      'התחלה מהירה עדיפה על תוכנית מושלמת.',
-      'פיפ מעודד אותך.',
-      'עשר דקות של ריכוז עושות הרבה.',
-      'להתחיל בקטן ובקלילות.',
-      'הרגע הזה שלך.',
-      'תנופה מתחילה בתנועה אחת.',
-      'בנחת. מתחילים מאיפה שנמצאים.',
-      'התחלה קטנה עכשיו, הקלה גדולה אחר כך.',
-      'פיפ כאן, מתי שנוח.',
-    ],
-  };
+  /// Encouraging second lines live in the ARB files (remindersLine01..20).
+  static List<String> _lines(AppLocalizations l) => [
+    l.remindersLine01,
+    l.remindersLine02,
+    l.remindersLine03,
+    l.remindersLine04,
+    l.remindersLine05,
+    l.remindersLine06,
+    l.remindersLine07,
+    l.remindersLine08,
+    l.remindersLine09,
+    l.remindersLine10,
+    l.remindersLine11,
+    l.remindersLine12,
+    l.remindersLine13,
+    l.remindersLine14,
+    l.remindersLine15,
+    l.remindersLine16,
+    l.remindersLine17,
+    l.remindersLine18,
+    l.remindersLine19,
+    l.remindersLine20,
+  ];
+
+  /// Strings for [languageCode]; usable outside any widget tree.
+  static AppLocalizations _l10n(String languageCode) =>
+      lookupAppLocalizations(Locale(_lang(languageCode)));
 
   static const _fallbackTitle = 'Grind';
 
-  /// Pip's smart-snooze offer (#12).
-  static const _moveOffer = <String, String>{
-    'en': 'Want to move this instead?',
-    'he': 'רוצה להזיז את זה?',
-  };
-
-  static String _moveLine(String lang, String title) => lang == 'he'
-      ? 'אפשר למצוא ל"$title" רגע נוח יותר.'
-      : '"$title" can have a calmer moment.';
-
   /// Language codes with copy. Anything else falls back to English.
-  static Iterable<String> get languages => _pool.keys;
+  static Iterable<String> get languages => const ['en', 'he'];
 
   /// The encouraging lines for [languageCode].
-  static List<String> pool(String languageCode) =>
-      _pool[_lang(languageCode)] ?? _pool['en']!;
+  static List<String> pool(String languageCode) => _lines(_l10n(languageCode));
 
   /// Copy for the reminder of [task] firing at [at] (defaults to
   /// `task.remindAt`, else now). The time is shown in the user's zone.
@@ -160,10 +129,11 @@ abstract final class ReminderCopy {
     Locale? locale,
   }) {
     final lang = _lang(locale?.languageCode ?? prefs.localeCode);
+    final l = _l10n(lang);
     return ReminderText(
       title: _fallbackTitle,
-      headline: _moveOffer[lang]!,
-      line: _moveLine(lang, task.title.trim()),
+      headline: l.remindersMoveOffer,
+      line: l.remindersMoveLine(task.title.trim()),
     );
   }
 

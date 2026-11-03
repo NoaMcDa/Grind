@@ -12,7 +12,6 @@ export 'domain/goal_progress.dart';
 export 'domain/goal_record.dart';
 export 'domain/goal_repository.dart';
 export 'goal_providers.dart';
-export 'goals_strings.dart';
 export 'presentation/goal_detail_screen.dart';
 export 'presentation/goal_form.dart';
 export 'presentation/goal_widgets.dart';

@@ -12,7 +12,8 @@ import '../domain/goal_metric.dart';
 import '../domain/goal_progress.dart';
 import '../domain/goal_record.dart';
 import '../goal_providers.dart';
-import '../goals_strings.dart';
+import '../../../l10n/l10n.dart';
+import 'goal_l10n.dart';
 import 'goal_form.dart';
 import 'goal_widgets.dart';
 
@@ -40,7 +41,9 @@ class GoalDetailScreen extends ConsumerWidget {
     if (!context.mounted) return;
     showPipToast(
       context,
-      m == null ? GoalsStrings.counted : GoalsStrings.milestone(m, goal.title),
+      m == null
+          ? context.l10n.goalsCounted
+          : context.l10n.goalMilestone(m, goal.title),
     );
   }
 
@@ -54,9 +57,9 @@ class GoalDetailScreen extends ConsumerWidget {
       body = loading
           ? const Center(child: CircularProgressIndicator())
           : EmptyState(
-              title: GoalsStrings.notFound,
+              title: context.l10n.goalsNotFound,
               body: '',
-              actionLabel: GoalsStrings.backToGoals,
+              actionLabel: context.l10n.goalsBackToGoals,
               onAction: () => context.go('/goals'),
             );
     } else {
@@ -78,7 +81,7 @@ class GoalDetailScreen extends ConsumerWidget {
                     padding: const EdgeInsetsDirectional.only(start: 8),
                     child: Semantics(
                       button: true,
-                      label: GoalsStrings.back,
+                      label: context.l10n.commonBack,
                       excludeSemantics: true,
                       onTap: () => _leave(context),
                       child: GestureDetector(
@@ -118,7 +121,7 @@ class GoalDetailScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsetsDirectional.fromSTEB(20, 4, 20, 32),
       children: [
-        SectionLabel(GoalsStrings.horizon(goal.horizon)),
+        SectionLabel(context.l10n.goalHorizon(goal.horizon)),
         const SizedBox(height: 4),
         Text(goal.title, style: AppText.display(size: 26, height: 1.1)),
         const SizedBox(height: 12),
@@ -129,8 +132,8 @@ class GoalDetailScreen extends ConsumerWidget {
             if (area != null) GoalAreaChip(area: area, height: 28),
             Pill(
               label:
-                  '${GoalsStrings.importanceLabel} '
-                  '${GoalsStrings.importanceValue(goal.importance)}',
+                  '${context.l10n.goalsImportanceLabel} '
+                  '${context.l10n.goalsImportanceValue(goal.importance)}',
               height: 28,
             ),
             GoalStatusPill(goal: goal, progress: progress),
@@ -140,7 +143,7 @@ class GoalDetailScreen extends ConsumerWidget {
         StickerCard(
           child: metric == null
               ? Text(
-                  GoalsStrings.noMetric,
+                  context.l10n.goalsNoMetric,
                   style: AppText.body(color: AppColors.muted),
                 )
               : Column(
@@ -170,7 +173,7 @@ class GoalDetailScreen extends ConsumerWidget {
                               if (!manual) ...[
                                 const SizedBox(height: 6),
                                 Text(
-                                  GoalsStrings.linkedCountHint,
+                                  context.l10n.goalsLinkedCountHint,
                                   style: AppText.body(
                                     size: 13,
                                     color: AppColors.muted,
@@ -188,9 +191,9 @@ class GoalDetailScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Semantics(
-                              label: GoalsStrings.plusOneLabel(progress.unit),
+                              label: context.l10n.goalAddOne(progress.unit),
                               child: PillButton(
-                                label: GoalsStrings.plusOne,
+                                label: '+1',
                                 icon: const Icon(Icons.add),
                                 color: AppColors.mint,
                                 display: true,
@@ -205,7 +208,7 @@ class GoalDetailScreen extends ConsumerWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: PillButton(
-                              label: GoalsStrings.editCount,
+                              label: context.l10n.goalsEditCount,
                               onPressed: () => _editCount(context, ref, goal),
                             ),
                           ),
@@ -222,24 +225,24 @@ class GoalDetailScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _field(
-                GoalsStrings.targetDateLabel,
+                context.l10n.goalsTargetDateLabel,
                 goal.targetDate == null
-                    ? GoalsStrings.noTargetDate
-                    : GoalsStrings.date(goal.targetDate!),
+                    ? context.l10n.goalsNoTargetDate
+                    : context.l10n.goalDate(goal.targetDate!),
               ),
               if (goal.notes != null) ...[
                 const SizedBox(height: 12),
-                _field(GoalsStrings.notesLabel, goal.notes!),
+                _field(context.l10n.tasksNotesLabel, goal.notes!),
               ],
             ],
           ),
         ),
         const SizedBox(height: 20),
-        const SectionLabel(GoalsStrings.linkedTasks),
+        SectionLabel(context.l10n.goalsLinkedTasks),
         const SizedBox(height: 8),
         if (linked.isEmpty)
           Text(
-            GoalsStrings.noLinkedTasks,
+            context.l10n.goalsNoLinkedTasks,
             style: AppText.body(color: AppColors.muted),
           )
         else
@@ -259,7 +262,7 @@ class GoalDetailScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: PillButton(
-                label: GoalsStrings.linkTask,
+                label: context.l10n.goalsLinkTask,
                 icon: const Icon(Icons.link),
                 onPressed: () => _pickTask(context, ref, goal),
               ),
@@ -268,7 +271,7 @@ class GoalDetailScreen extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: PillButton(
-                  label: GoalsStrings.newTask,
+                  label: context.l10n.tasksNewTask,
                   icon: const Icon(Icons.add),
                   color: AppColors.sun,
                   onPressed: () => onAddTask!(context, goal),
@@ -280,8 +283,8 @@ class GoalDetailScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         PillButton(
           label: goal.status == GoalStatus.done
-              ? GoalsStrings.reopen
-              : GoalsStrings.markDone,
+              ? context.l10n.goalsReopen
+              : context.l10n.goalsMarkDone,
           color: goal.status == GoalStatus.done
               ? AppColors.card
               : AppColors.violet,
@@ -306,14 +309,14 @@ class GoalDetailScreen extends ConsumerWidget {
           children: [
             Expanded(
               child: PillButton(
-                label: GoalsStrings.edit,
+                label: context.l10n.edit,
                 onPressed: () => showGoalSheet(context, existing: goal),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: PillButton(
-                label: GoalsStrings.delete,
+                label: context.l10n.commonDelete,
                 color: AppColors.pink,
                 onPressed: () => _confirmDelete(context, ref, goal),
               ),
@@ -366,11 +369,11 @@ class GoalDetailScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(GoalsStrings.pickTask, style: AppText.display(size: 22)),
+          Text(context.l10n.goalsPickTask, style: AppText.display(size: 22)),
           const SizedBox(height: 12),
           if (candidates.isEmpty)
             Text(
-              GoalsStrings.noTasksToLink,
+              context.l10n.goalsNoTasksToLink,
               style: AppText.body(color: AppColors.muted),
             )
           else
@@ -408,10 +411,10 @@ class GoalDetailScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(GoalsStrings.deleteTitle, style: AppText.display(size: 22)),
+          Text(context.l10n.goalsDeleteTitle, style: AppText.display(size: 22)),
           const SizedBox(height: 6),
           Text(
-            GoalsStrings.deleteBody,
+            context.l10n.goalsDeleteBody,
             style: AppText.body(color: AppColors.muted),
           ),
           const SizedBox(height: 16),
@@ -419,14 +422,14 @@ class GoalDetailScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: PillButton(
-                  label: GoalsStrings.keep,
+                  label: context.l10n.goalsKeep,
                   onPressed: () => Navigator.of(ctx).pop(false),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: PillButton(
-                  label: GoalsStrings.delete,
+                  label: context.l10n.commonDelete,
                   color: AppColors.pink,
                   onPressed: () => Navigator.of(ctx).pop(true),
                 ),
@@ -439,7 +442,7 @@ class GoalDetailScreen extends ConsumerWidget {
     if (ok != true || !context.mounted) return;
     await ref.read(goalActionsProvider).delete(goal);
     if (context.mounted) {
-      showPipToast(context, GoalsStrings.deleted);
+      showPipToast(context, context.l10n.goalsDeleted);
       _leave(context);
     }
   }
@@ -513,7 +516,7 @@ class _LinkedTaskRow extends StatelessWidget {
           ),
           Semantics(
             button: true,
-            label: '${GoalsStrings.unlink} ${task.title}',
+            label: '${context.l10n.goalsUnlink} ${task.title}',
             excludeSemantics: true,
             onTap: onUnlink,
             child: GestureDetector(
@@ -567,15 +570,15 @@ class _CountSheetState extends State<_CountSheet> {
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      Text(GoalsStrings.editCount, style: AppText.display(size: 22)),
+      Text(context.l10n.goalsEditCount, style: AppText.display(size: 22)),
       const SizedBox(height: 12),
       StickerTextField(
         controller: _c,
         autofocus: true,
         label: widget.unit.isEmpty
-            ? GoalsStrings.countLabel
-            : '${GoalsStrings.countLabel} (${widget.unit})',
-        errorText: _invalid ? GoalsStrings.countInvalid : null,
+            ? context.l10n.goalsCountLabel
+            : '${context.l10n.goalsCountLabel} (${widget.unit})',
+        errorText: _invalid ? context.l10n.goalsCountInvalid : null,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         textInputAction: TextInputAction.done,
@@ -586,14 +589,14 @@ class _CountSheetState extends State<_CountSheet> {
         children: [
           Expanded(
             child: PillButton(
-              label: GoalsStrings.cancel,
+              label: context.l10n.commonCancel,
               onPressed: () => Navigator.of(context).maybePop(),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: PillButton(
-              label: GoalsStrings.save,
+              label: context.l10n.commonSave,
               color: AppColors.violet,
               textColor: Colors.white,
               onPressed: _save,

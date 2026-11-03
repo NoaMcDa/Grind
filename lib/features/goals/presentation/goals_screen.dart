@@ -9,7 +9,8 @@ import '../../../widgets/widgets.dart';
 import '../domain/goal_area.dart';
 import '../domain/goal_record.dart';
 import '../goal_providers.dart';
-import '../goals_strings.dart';
+import '../../../l10n/l10n.dart';
+import 'goal_l10n.dart';
 import 'goal_form.dart';
 import 'goal_widgets.dart';
 
@@ -45,10 +46,10 @@ class GoalsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(GoalsStrings.title, style: AppText.display(size: 30)),
+                Text(context.l10n.goalsTitle, style: AppText.display(size: 30)),
                 const SizedBox(height: 4),
                 Text(
-                  GoalsStrings.subtitle,
+                  context.l10n.goalsSubtitle,
                   style: AppText.body(color: AppColors.muted),
                 ),
               ],
@@ -56,7 +57,7 @@ class GoalsScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
           PillButton(
-            label: GoalsStrings.newGoal,
+            label: context.l10n.goalsNewGoal,
             icon: const Icon(Icons.add),
             color: AppColors.violet,
             textColor: Colors.white,
@@ -71,9 +72,9 @@ class GoalsScreen extends ConsumerWidget {
       body = const Center(child: CircularProgressIndicator());
     } else if (empty) {
       body = EmptyState(
-        title: GoalsStrings.emptyTitle,
-        body: GoalsStrings.emptyBody,
-        actionLabel: GoalsStrings.emptyAction,
+        title: context.l10n.goalsEmptyTitle,
+        body: context.l10n.goalsEmptyBody,
+        actionLabel: context.l10n.goalsEmptyAction,
         onAction: () => showGoalSheet(context),
       );
     } else {
@@ -82,7 +83,7 @@ class GoalsScreen extends ConsumerWidget {
         children: [
           for (final h in GoalHorizon.values)
             if (byHorizon[h]!.isNotEmpty) ...[
-              SectionLabel(GoalsStrings.horizon(h)),
+              SectionLabel(context.l10n.goalHorizon(h)),
               const SizedBox(height: 10),
               for (final g in byHorizon[h]!) ...[
                 GoalCard(goal: g, onTap: () => _open(context, g)),
@@ -129,8 +130,8 @@ class GoalCard extends ConsumerWidget {
     final color = area?.color ?? AppColors.violet;
     final done = progress.isCompleted;
     final line = progress.hasMetric
-        ? GoalsStrings.progressLine(progress)
-        : GoalsStrings.noMetric;
+        ? context.l10n.goalProgressLine(progress)
+        : context.l10n.goalsNoMetric;
 
     return Semantics(
       button: onTap != null,
@@ -177,7 +178,7 @@ class GoalCard extends ConsumerWidget {
                   if (goal.targetDate != null) ...[
                     const SizedBox(width: 8),
                     Text(
-                      GoalsStrings.byDate(goal.targetDate!),
+                      context.l10n.goalByDate(goal.targetDate!),
                       style: AppText.body(size: 13, color: AppColors.muted),
                     ),
                   ],
