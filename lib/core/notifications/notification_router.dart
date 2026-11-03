@@ -81,6 +81,19 @@ class NotificationRouter {
             updatedAt: now,
           ),
         );
+      case NotificationAction.moveToTonight:
+      case NotificationAction.moveToTomorrow:
+        // Smart snooze (#12) decides the new time; until it lands, treat a
+        // move like a snooze so the tap is never lost.
+        final base = task.remindAt?.toUtc();
+        final from = base == null || base.isBefore(now) ? now : base;
+        await _tasks.upsert(
+          task.copyWith(
+            remindAt: from.add(snoozeBy),
+            snoozeCount: task.snoozeCount + 1,
+            updatedAt: now,
+          ),
+        );
       case NotificationAction.startFocus:
         break;
     }

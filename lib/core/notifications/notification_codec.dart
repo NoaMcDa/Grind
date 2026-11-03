@@ -10,17 +10,23 @@ const grindReminderCategory = 'GRIND_REMINDER';
 const actionIdDone = 'done';
 const actionIdSnooze = 'snooze';
 const actionIdStartFocus = 'start_focus';
+const actionIdMoveToTonight = 'move_tonight';
+const actionIdMoveToTomorrow = 'move_tomorrow';
 
 String actionIdFor(NotificationAction action) => switch (action) {
   NotificationAction.done => actionIdDone,
   NotificationAction.snooze => actionIdSnooze,
   NotificationAction.startFocus => actionIdStartFocus,
+  NotificationAction.moveToTonight => actionIdMoveToTonight,
+  NotificationAction.moveToTomorrow => actionIdMoveToTomorrow,
 };
 
 NotificationAction? actionFromId(String? id) => switch (id) {
   actionIdDone => NotificationAction.done,
   actionIdSnooze => NotificationAction.snooze,
   actionIdStartFocus => NotificationAction.startFocus,
+  actionIdMoveToTonight => NotificationAction.moveToTonight,
+  actionIdMoveToTomorrow => NotificationAction.moveToTomorrow,
   _ => null,
 };
 
