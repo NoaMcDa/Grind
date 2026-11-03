@@ -8,7 +8,7 @@ import '../../../widgets/widgets.dart';
 import '../domain/goal_area.dart';
 import '../domain/goal_progress.dart';
 import '../domain/goal_record.dart';
-import '../goals_strings.dart';
+import '../../../l10n/l10n.dart';
 
 /// Area tag: palette colour, stroke icon, label.
 class GoalAreaChip extends StatelessWidget {
@@ -37,21 +37,21 @@ class GoalStatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (progress.isCompleted) {
-      return const Pill(
-        label: GoalsStrings.completed,
+      return Pill(
+        label: context.l10n.goalsCompleted,
         color: AppColors.mint,
         icon: Icon(Icons.check),
       );
     }
     if (goal.status == GoalStatus.paused) {
-      return const Pill(
-        label: GoalsStrings.paused,
+      return Pill(
+        label: context.l10n.goalsResting,
         icon: Icon(Icons.pause_outlined),
       );
     }
     if (progress.isCloseToDone) {
-      return const Pill(
-        label: GoalsStrings.closeToDone,
+      return Pill(
+        label: context.l10n.goalsCloseToDone,
         color: AppColors.sun,
         icon: Icon(Icons.auto_awesome_outlined),
       );

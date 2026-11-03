@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/companion/effort_score.dart';
 import 'package:grind/features/companion/mood.dart';
+import 'package:grind/l10n/app_localizations.dart';
+import 'dart:ui' show Locale;
 
+final _en = lookupAppLocalizations(const Locale('en'));
 final _now = DateTime(2026, 11, 3, 12);
 
 Task _done(String id, DateTime at) => Task(
@@ -34,7 +37,7 @@ void main() {
     expect(s.level, MomentumLevel.quiet);
     expect(s.showedUpDays, 0);
     expect(s.dayCounts, everyElement(0));
-    final copy = MoodCopy.line(moodFor(s.level), s.showedUpDays);
+    final copy = MoodCopy.line(_en, moodFor(s.level), s.showedUpDays);
     expect(copy, contains('whenever you are'));
     expect(copy.toLowerCase(), isNot(contains('0 of')));
   });
@@ -145,7 +148,8 @@ void main() {
   test('all mood copy is free of negative words', () {
     for (final m in PipMood.values) {
       for (final n in [0, 1, 7]) {
-        final t = '${MoodCopy.title(m)} ${MoodCopy.line(m, n)}'.toLowerCase();
+        final t = '${MoodCopy.title(_en, m)} ${MoodCopy.line(_en, m, n)}'
+            .toLowerCase();
         for (final w in ['should', 'failed', 'missed', 'again', 'behind']) {
           expect(t, isNot(contains(w)));
         }

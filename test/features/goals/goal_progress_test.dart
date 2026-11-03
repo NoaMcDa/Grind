@@ -1,7 +1,11 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/goals/data/goal_extras_store.dart';
 import 'package:grind/features/goals/goals.dart';
+import 'package:grind/features/goals/presentation/goal_l10n.dart';
+import 'package:grind/l10n/app_localizations.dart';
 import 'package:grind/theme/tokens.dart';
 
 void main() {
@@ -40,7 +44,10 @@ void main() {
       expect(p.percent, 67);
       expect(p.fraction, closeTo(0.667, 0.001));
       expect(p.status, GoalProgressStatus.inProgress);
-      expect(GoalsStrings.progressLine(p), '8 of 12 lessons · 67%');
+      expect(
+        lookupAppLocalizations(const Locale('en')).goalProgressLine(p),
+        '8 of 12 lessons · 67%',
+      );
     });
 
     test('thresholds: 0, started, 80 % close to done, target completed', () {

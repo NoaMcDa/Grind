@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/onboarding/onboarding_flow.dart';
 import 'package:grind/features/onboarding/weekday_hours_editor.dart';
+import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
 import '../../test_fonts.dart';
@@ -15,6 +16,7 @@ Future<void> _pump(
   FakeCalendarProvider? google,
   VoidCallback? onFinished,
   TextDirection direction = TextDirection.ltr,
+  Locale locale = const Locale('en'),
   MinutesPicker? picker,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
@@ -30,6 +32,9 @@ Future<void> _pump(
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: direction,
           child: OnboardingFlow(
@@ -170,10 +175,18 @@ void main() {
 
   testWidgets('RTL render has no overflow on every step', (tester) async {
     final prefs = InMemoryPreferencesRepository();
-    await _pump(tester, prefs: prefs, direction: TextDirection.rtl);
+    final he = lookupAppLocalizations(const Locale('he'));
+    await _pump(
+      tester,
+      prefs: prefs,
+      direction: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
+    expect(find.text(he.onboardingWelcomeTitle), findsOneWidget);
+    expect(find.text('Skip'), findsNothing);
     expect(tester.takeException(), isNull);
     for (var i = 0; i < 4; i++) {
-      await _tapText(tester, 'Skip');
+      await _tapText(tester, he.commonSkip);
       expect(tester.takeException(), isNull);
     }
   });

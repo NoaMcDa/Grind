@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/goals/goals.dart';
+import 'package:grind/features/goals/presentation/goal_l10n.dart';
 import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
 
@@ -110,22 +111,35 @@ void main() {
       testWidgets('sections, cards and status pills (${locale.languageCode})', (
         tester,
       ) async {
+        final l = lookupAppLocalizations(locale);
         await _pump(tester, const GoalsScreen(), locale: locale);
         expect(
           Directionality.of(tester.element(find.byType(GoalsScreen))),
           locale.languageCode == 'he' ? TextDirection.rtl : TextDirection.ltr,
         );
-        expect(find.text('THIS WEEK'), findsOneWidget);
-        expect(find.text('THIS MONTH'), findsOneWidget);
-        expect(find.text('8 of 12 lessons · 67%'), findsOneWidget);
+        expect(find.text(l.goalsHorizonWeek.toUpperCase()), findsOneWidget);
+        expect(find.text(l.goalsHorizonMonth.toUpperCase()), findsOneWidget);
+        expect(
+          find.text(
+            l.goalsProgressLine(l.goalsOfTargetUnit(8, 12, 'lessons'), 67),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('Learning'), findsOneWidget);
         expect(find.text('Kitchen'), findsOneWidget);
-        expect(find.text('by Dec 31'), findsOneWidget);
+        expect(
+          find.text(l.goalByDate(DateTime.utc(2026, 12, 31, 21, 59))),
+          findsOneWidget,
+        );
+        if (locale.languageCode == 'he') {
+          expect(find.text(l.goalsTitle), findsWidgets);
+          expect(find.text('Almost there'), findsNothing);
+        }
         // 9 of 10 is close to done.
-        expect(find.text('Almost there'), findsOneWidget);
+        expect(find.text(l.goalsCloseToDone), findsOneWidget);
         await tester.scrollUntilVisible(find.text('Run a 10k'), 200);
-        expect(find.text('THIS YEAR'), findsOneWidget);
-        expect(find.text('Completed'), findsOneWidget);
+        expect(find.text(l.goalsHorizonYear.toUpperCase()), findsOneWidget);
+        expect(find.text(l.goalsCompleted), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
@@ -231,6 +245,7 @@ void main() {
       testWidgets('ring, linked tasks, actions (${locale.languageCode})', (
         tester,
       ) async {
+        final l = lookupAppLocalizations(locale);
         await _pump(
           tester,
           GoalDetailScreen(goalId: 'pm', onAddTask: (_, _) {}),
@@ -250,8 +265,8 @@ void main() {
         expect(find.text('Task a'), findsOneWidget);
         expect(find.text('Task b'), findsOneWidget);
         expect(find.text('Task c'), findsNothing);
-        await tester.scrollUntilVisible(find.text('New task'), 200);
-        expect(find.text('Link a task'), findsOneWidget);
+        await tester.scrollUntilVisible(find.text(l.tasksNewTask), 200);
+        expect(find.text(l.goalsLinkTask), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }

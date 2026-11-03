@@ -111,7 +111,7 @@ void main() {
     expect(t.snoozeCount, 1);
     expect(find.text('See you at 07:20'), findsOneWidget);
     expect(
-      find.text('Snooze again and Pip will offer to move it instead.'),
+      find.text('Need a bit more time? Pip can offer to move it instead.'),
       findsOneWidget,
     );
     await tester.tap(find.text('Undo'));

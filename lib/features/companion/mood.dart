@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import 'effort_score.dart';
 
 /// How Pip looks and sounds. All three are kind: even [quiet] is a rested,
@@ -12,28 +13,27 @@ PipMood moodFor(MomentumLevel level) => switch (level) {
 
 /// Copy for the Pip screen. No negative wording anywhere (docs/tone-guide.md).
 abstract final class MoodCopy {
-  static String title(PipMood m) => switch (m) {
-    PipMood.glowing => 'Pip is glowing',
-    PipMood.warm => 'Pip is warm',
-    PipMood.quiet => 'Pip is resting',
+  static String title(AppLocalizations l, PipMood m) => switch (m) {
+    PipMood.glowing => l.pipGlowing,
+    PipMood.warm => l.pipMoodWarm,
+    PipMood.quiet => l.pipMoodResting,
   };
 
-  static String momentumLabel(MomentumLevel l) => switch (l) {
-    MomentumLevel.strong => 'Strong',
-    MomentumLevel.steady => 'Steady',
-    MomentumLevel.quiet => 'Quiet',
-  };
+  static String momentumLabel(AppLocalizations l, MomentumLevel level) =>
+      switch (level) {
+        MomentumLevel.strong => l.momentumStrong,
+        MomentumLevel.steady => l.momentumSteady,
+        MomentumLevel.quiet => l.momentumQuiet,
+      };
 
   /// Hero sentence. With no activity Pip just says hello.
-  static String line(PipMood m, int showedUpDays) {
-    if (showedUpDays <= 0) {
-      return 'Pip is here whenever you are. One small thing is plenty.';
-    }
-    final days = 'You showed up $showedUpDays of the last 7 days.';
+  static String line(AppLocalizations l, PipMood m, int showedUpDays) {
+    if (showedUpDays <= 0) return l.pipLineHello;
+    final days = l.pipShowedUp(showedUpDays);
     return switch (m) {
-      PipMood.glowing => "$days That's real momentum.",
-      PipMood.warm => '$days Nicely steady.',
-      PipMood.quiet => '$days Every bit counts.',
+      PipMood.glowing => '$days ${l.pipLineGlowing}',
+      PipMood.warm => '$days ${l.pipLineWarm}',
+      PipMood.quiet => '$days ${l.pipLineQuiet}',
     };
   }
 }

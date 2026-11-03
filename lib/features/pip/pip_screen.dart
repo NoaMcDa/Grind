@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grind/core/core.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../companion/mood.dart';
 import '../companion/pip_providers.dart';
@@ -14,10 +15,9 @@ import '../../widgets/sticker_card.dart';
 class PipScreen extends ConsumerWidget {
   const PipScreen({super.key});
 
-  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final top = MediaQuery.paddingOf(context).top;
     final score = ref.watch(effortScoreProvider);
     final mood = ref.watch(pipMoodProvider);
@@ -42,7 +42,7 @@ class PipScreen extends ConsumerWidget {
     final maxCount = counts.fold<int>(1, (m, c) => c > m ? c : m);
     final dayLabels = [
       for (var i = 0; i < 7; i++)
-        _dayNames[now.subtract(Duration(days: 6 - i)).weekday - 1],
+        _dayShort(l, now.subtract(Duration(days: 6 - i)).weekday),
     ];
     void wear(PipAccessory a) =>
         ref.read(companionPrefsProvider.notifier).wear(a.name);
@@ -54,10 +54,10 @@ class PipScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Pip', style: AppText.display(height: 1.2)),
+            Text(l.tabPip, style: AppText.display(height: 1.2)),
             Flexible(
               child: Text(
-                'Your cheering squad of one',
+                l.pipCheeringSquad,
                 textAlign: TextAlign.end,
                 style: AppText.body(
                   size: 13,
@@ -88,19 +88,19 @@ class PipScreen extends ConsumerWidget {
                       children: [
                         Pill(
                           label: equipped == PipAccessory.none
-                              ? 'no accessory'
-                              : 'wearing: ${equipped.name}',
+                              ? l.pipNoAccessory
+                              : l.pipWearing(_accessoryName(l, equipped)),
                           height: 22,
                           fontSize: 12,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          MoodCopy.title(mood),
+                          MoodCopy.title(l, mood),
                           style: AppText.display(size: 24, height: 1.1),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          MoodCopy.line(mood, score.showedUpDays),
+                          MoodCopy.line(l, mood, score.showedUpDays),
                           style: AppText.body(
                             size: 14,
                             weight: FontWeight.w500,
@@ -119,9 +119,9 @@ class PipScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SectionLabel('Momentum'),
+            SectionLabel(l.sectionMomentum),
             Pill(
-              label: MoodCopy.momentumLabel(momentum.level),
+              label: MoodCopy.momentumLabel(l, momentum.level),
               color: AppColors.violet,
               textColor: Colors.white,
               height: 24,
@@ -134,19 +134,18 @@ class PipScreen extends ConsumerWidget {
         _TwoToneMeter(recent: momentum.recent, carry: momentum.carry),
         const SizedBox(height: 6),
         Text(
-          "Momentum fades slowly, one quiet day won't reset it.",
+          l.pipMomentumNote,
           style: AppText.body(size: 13, color: AppColors.muted),
         ),
         const SizedBox(height: 12),
-        const SectionLabel('This week'),
+        SectionLabel(l.sectionThisWeek),
         const SizedBox(height: 6),
         StickerCard(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
           child: Column(
             children: [
               Semantics(
-                label:
-                    'Things finished per day this week. Days with none are rest days.',
+                label: l.pipWeekSemantics,
                 child: SizedBox(
                   height: 84,
                   child: Row(
@@ -159,7 +158,7 @@ class PipScreen extends ConsumerWidget {
                             children: [
                               if (counts[i] == 0)
                                 Text(
-                                  'rest day',
+                                  l.pipRestDay,
                                   textAlign: TextAlign.center,
                                   style: AppText.body(
                                     size: 10,
@@ -203,18 +202,18 @@ class PipScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Tasks and sessions finished per day',
+                l.pipWeekCaption,
                 style: AppText.body(size: 12, color: AppColors.muted),
               ),
             ],
           ),
         ),
         const SizedBox(height: 12),
-        const SectionLabel('Wins you logged'),
+        SectionLabel(l.sectionWins),
         const SizedBox(height: 6),
         if (wins.isEmpty)
           Text(
-            'Your first win will land here.',
+            l.pipFirstWin,
             style: AppText.body(size: 13, color: AppColors.muted),
           )
         else
@@ -235,14 +234,15 @@ class PipScreen extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 12),
-        const SectionLabel('Unlocks'),
+        SectionLabel(l.sectionUnlocks),
         const SizedBox(height: 6),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _unlock(
-                'Scarf',
+                l,
+                l.accScarf,
                 PipAccessory.scarf,
                 equipped,
                 wear,
@@ -251,7 +251,8 @@ class PipScreen extends ConsumerWidget {
             ),
             Expanded(
               child: _unlock(
-                'Sunglasses',
+                l,
+                l.accSunglasses,
                 PipAccessory.sunglasses,
                 equipped,
                 wear,
@@ -260,8 +261,8 @@ class PipScreen extends ConsumerWidget {
             ),
             Expanded(
               child: _UnlockSlot(
-                label: 'Party hat',
-                caption: '3 more sessions',
+                label: l.accPartyHat,
+                caption: l.pipMoreSessions(3),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -283,12 +284,12 @@ class PipScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const Expanded(
+            Expanded(
               child: _UnlockSlot(
-                label: 'Rain boots',
-                caption: 'Coming soon',
+                label: l.accRainBoots,
+                caption: l.comingSoon,
                 locked: true,
-                child: Icon(Icons.lock_outline, color: AppColors.muted),
+                child: const Icon(Icons.lock_outline, color: AppColors.muted),
               ),
             ),
           ],
@@ -298,6 +299,7 @@ class PipScreen extends ConsumerWidget {
   }
 
   Widget _unlock(
+    AppLocalizations l,
     String label,
     PipAccessory a,
     PipAccessory equipped,
@@ -307,7 +309,7 @@ class PipScreen extends ConsumerWidget {
     final on = equipped == a;
     return _UnlockSlot(
       label: label,
-      caption: on ? 'Wearing' : 'Tap to wear',
+      caption: on ? l.wearing : l.tapToWear,
       captionColor: on ? AppColors.violet : AppColors.muted,
       onTap: () => wear(a),
       child: Container(
@@ -343,7 +345,7 @@ class _TwoToneMeter extends StatelessWidget {
     final c = carry.clamp(0.0, 1.0 - r);
     final pct = ((r + c) * 100).round();
     return Semantics(
-      label: 'Momentum',
+      label: context.l10n.sectionMomentum,
       value: '$pct%',
       child: Container(
         height: 24,
@@ -527,3 +529,20 @@ class _ConfettiPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ConfettiPainter old) => false;
 }
+
+/// Short weekday name; [weekday] 1 = Monday ... 7 = Sunday.
+String _dayShort(AppLocalizations l, int weekday) => [
+  l.commonWeekdayShortMon,
+  l.commonWeekdayShortTue,
+  l.commonWeekdayShortWed,
+  l.commonWeekdayShortThu,
+  l.commonWeekdayShortFri,
+  l.commonWeekdayShortSat,
+  l.commonWeekdayShortSun,
+][weekday - 1];
+
+String _accessoryName(AppLocalizations l, PipAccessory a) => switch (a) {
+  PipAccessory.scarf => l.accScarf,
+  PipAccessory.sunglasses => l.accSunglasses,
+  PipAccessory.none => l.pipNoAccessory,
+};

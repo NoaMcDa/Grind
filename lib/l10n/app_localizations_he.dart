@@ -1026,4 +1026,503 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get settingsPrivacyCopy =>
       'הכול נשאר במכשיר הזה. בלי חשבון, בלי הרשמה.';
+
+  @override
+  String get pipNoAccessory => 'בלי אביזר';
+
+  @override
+  String get momentumSteady => 'יציב';
+
+  @override
+  String get momentumQuiet => 'שקט';
+
+  @override
+  String get pipMoodWarm => 'פיפ חם ונעים';
+
+  @override
+  String get pipMoodResting => 'פיפ נח';
+
+  @override
+  String get pipLineHello => 'פיפ כאן מתי שנוח לך. דבר קטן אחד מספיק.';
+
+  @override
+  String pipShowedUp(int days) {
+    return 'הופעת $days מתוך 7 הימים האחרונים.';
+  }
+
+  @override
+  String get pipLineGlowing => 'זו תנופה אמיתית.';
+
+  @override
+  String get pipLineWarm => 'יציב ויפה.';
+
+  @override
+  String get pipLineQuiet => 'כל קצת נחשב.';
+
+  @override
+  String get pipMomentumNote => 'התנופה דועכת לאט, יום שקט אחד לא מאפס אותה.';
+
+  @override
+  String get pipWeekSemantics =>
+      'מה הושלם בכל יום השבוע. ימים בלי השלמות הם ימי מנוחה.';
+
+  @override
+  String get pipRestDay => 'יום מנוחה';
+
+  @override
+  String get pipWeekCaption => 'משימות וסבבים שהושלמו בכל יום';
+
+  @override
+  String get pipFirstWin => 'הניצחון הראשון שלך יופיע כאן.';
+
+  @override
+  String pipMoreSessions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count סבבים נוספים',
+      one: 'סבב אחד נוסף',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get focusFree => 'ריכוז חופשי';
+
+  @override
+  String get focusBreak => 'הפסקה';
+
+  @override
+  String get focusLongBreak => 'הפסקה ארוכה';
+
+  @override
+  String get focusReady => 'מוכן';
+
+  @override
+  String get focusOnBreak => 'בהפסקה';
+
+  @override
+  String focusOfTotal(String total) {
+    return 'מתוך $total';
+  }
+
+  @override
+  String get focusHardModeSoon => 'מצב קשוח · בקרוב';
+
+  @override
+  String focusMinusMinutes(int minutes) {
+    return '−$minutes דק׳';
+  }
+
+  @override
+  String get focusStartNext => 'להתחיל ריכוז הבא';
+
+  @override
+  String get focusEndBreak => 'לסיים הפסקה';
+
+  @override
+  String get focusDoneTitle => 'הסבב הסתיים. עבודה יפה.';
+
+  @override
+  String get focusEarlyTitle => 'הסבב הסתיים. הוא עדיין נחשב.';
+
+  @override
+  String focusFocusedFor(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes דקות',
+      one: 'דקה אחת',
+    );
+    return 'התרכזת $_temp0.';
+  }
+
+  @override
+  String focusFocusedForTask(int minutes, String task) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes דקות',
+      one: 'דקה אחת',
+    );
+    return 'התרכזת $_temp0 על $task.';
+  }
+
+  @override
+  String get focusMarkDone => 'לסמן משימה כבוצעה';
+
+  @override
+  String get focusKeepGoing => 'להמשיך';
+
+  @override
+  String get focusLogWin => 'לרשום ניצחון';
+
+  @override
+  String get focusWinLogged => 'הניצחון נרשם. פיפ ראה.';
+
+  @override
+  String get focusTaskDone => 'המשימה בוצעה. פיפ גאה בך.';
+
+  @override
+  String get focusSessionOverToast => 'הזמן נגמר! הסבב הסתיים, אפשר לנשום.';
+
+  @override
+  String get focusBreakOverToast => 'ההפסקה נגמרה. מוכנים כשנוח לך.';
+
+  @override
+  String get focusCheerIdle1 =>
+      'בוחרים אורך ולוחצים על התחלה. פיפ ישמור על הזמן.';
+
+  @override
+  String get focusCheerIdle2 => 'צעד קטן אחד מספיק כדי להתחיל. פיפ כאן לידך.';
+
+  @override
+  String get focusCheerStart1 => 'הדקות הראשונות הן הקשות, וכבר התחלת.';
+
+  @override
+  String get focusCheerStart2 => 'רק הצעד הקטן הבא. שום דבר אחר לא חשוב עכשיו.';
+
+  @override
+  String get focusCheerMiddle1 => 'קצב יפה. נשארים פשוטים.';
+
+  @override
+  String get focusCheerMiddle2 => 'אתם בתוך זה. פיפ מעודד בשקט.';
+
+  @override
+  String get focusCheerPastHalf1 =>
+      'עברתם את החצי. ממשיכים, מספיק שהטיוטה הראשונה תהיה קיימת.';
+
+  @override
+  String get focusCheerPastHalf2 => 'יותר מחצי כבר מאחורינו. בקצב יציב מגיעים.';
+
+  @override
+  String get focusCheerNearEnd1 => 'כמעט שם. מסיימים את המשפט שאתם באמצעו.';
+
+  @override
+  String get focusCheerNearEnd2 => 'נשארו כמה דקות. נוחתים בעדינות.';
+
+  @override
+  String get focusCheerPaused1 => 'בהשהיה. נושמים, פיפ יחכה.';
+
+  @override
+  String get focusCheerPaused2 => 'הפסקות קטנות הן בסדר. חוזרים כשמוכנים.';
+
+  @override
+  String get focusCheerBreak1 => 'זמן הפסקה. קמים, מתמתחים, שותים מים.';
+
+  @override
+  String get focusCheerBreak2 => 'מנוחה היא חלק מהעבודה. מסתכלים על משהו רחוק.';
+
+  @override
+  String get reviewBannerTitle => 'מוכנים להסתכלות קצרה אחורה?';
+
+  @override
+  String get reviewBannerAction => 'להתחיל';
+
+  @override
+  String get reviewDoneTitle => 'מה הושלם?';
+
+  @override
+  String get reviewDoneHint => 'מסמנים כל מה שסיימתם. פיפ סופר הכול.';
+
+  @override
+  String get reviewDoneEmpty => 'שום דבר לא חיכה היום. קליל ונעים.';
+
+  @override
+  String get reviewMoveTitle => 'מה ממשיך הלאה?';
+
+  @override
+  String get reviewMoveHint => 'נותנים לכל אחד מקום חדש ונעים.';
+
+  @override
+  String get reviewMoveEmpty => 'אין מה להזיז. הכול פנוי.';
+
+  @override
+  String get reviewLater => 'בהמשך השבוע';
+
+  @override
+  String get reviewKeepToday => 'להשאיר להיום';
+
+  @override
+  String get reviewTomorrowAnyway => 'למחר בכל זאת';
+
+  @override
+  String get reviewDrop => 'להוריד';
+
+  @override
+  String get reviewDropped => 'הוסר.';
+
+  @override
+  String get reviewDeadlineNote =>
+      'המשימה הזו מיועדת להיום. אפשר להזיז אותה, ההחלטה שלך.';
+
+  @override
+  String get reviewRepeatsNote => 'חוזרת מעצמה, אז היא נשארת במקומה.';
+
+  @override
+  String get reviewWinTitle => 'ניצחון אחד';
+
+  @override
+  String get reviewWinHint => 'גדול או קטנטן. על מה שמחתם היום?';
+
+  @override
+  String get reviewWinField => 'היום אני...';
+
+  @override
+  String get reviewSave => 'לשמור ולסיים';
+
+  @override
+  String get reviewFinishTitle => 'היום נסגר';
+
+  @override
+  String get reviewPraise1 => 'הגעתם היום. זה כל הסוד.';
+
+  @override
+  String get reviewPraise2 => 'יום טוב להיות אתם. לילה טוב.';
+
+  @override
+  String get reviewPraise3 => 'צעדים קטנים עדיין נחשבים. עבודה יפה היום.';
+
+  @override
+  String get reviewPraise4 => 'תראו אתכם, סוגרים את היום בתשומת לב.';
+
+  @override
+  String get reviewPraise5 => 'מה שלא יהיה שהושלם, אני גאה בכם.';
+
+  @override
+  String get goalsTitle => 'יעדים';
+
+  @override
+  String get goalsSubtitle => 'קרובים ורחוקים. כל צעד קטן נחשב.';
+
+  @override
+  String get goalsNewGoal => 'יעד חדש';
+
+  @override
+  String get goalsEditGoal => 'עריכת יעד';
+
+  @override
+  String get goalsEmptyTitle => 'עדיין אין יעדים';
+
+  @override
+  String get goalsEmptyBody =>
+      'בוחרים דבר אחד שהייתם שמחים להזיז החודש. פיפ יעודד.';
+
+  @override
+  String get goalsEmptyAction => 'להוסיף יעד';
+
+  @override
+  String get goalsHorizonWeek => 'השבוע';
+
+  @override
+  String get goalsHorizonMonth => 'החודש';
+
+  @override
+  String get goalsHorizonQuarter => 'הרבעון';
+
+  @override
+  String get goalsHorizonYear => 'השנה';
+
+  @override
+  String get goalsHorizonShortWeek => 'שבוע';
+
+  @override
+  String get goalsHorizonShortMonth => 'חודש';
+
+  @override
+  String get goalsHorizonShortQuarter => 'רבעון';
+
+  @override
+  String get goalsHorizonShortYear => 'שנה';
+
+  @override
+  String get goalsStatusActive => 'פעיל';
+
+  @override
+  String get goalsStatusPaused => 'בהשהיה';
+
+  @override
+  String get goalsStatusDone => 'הושלם';
+
+  @override
+  String get goalsCloseToDone => 'כמעט שם';
+
+  @override
+  String get goalsCompleted => 'הושלם';
+
+  @override
+  String get goalsResting => 'במנוחה';
+
+  @override
+  String goalsOfTarget(int current, int target) {
+    return '$current מתוך $target';
+  }
+
+  @override
+  String goalsOfTargetUnit(int current, int target, String unit) {
+    return '$current מתוך $target $unit';
+  }
+
+  @override
+  String goalsProgressLine(String summary, int percent) {
+    return '$summary · $percent%';
+  }
+
+  @override
+  String get goalsNoMetric => 'מוסיפים ספירה כדי לראות התקדמות';
+
+  @override
+  String goalsByDate(String date) {
+    return 'עד $date';
+  }
+
+  @override
+  String goalsDate(String month, int day) {
+    return '$day ב$month';
+  }
+
+  @override
+  String get goalsDetailTitle => 'יעד';
+
+  @override
+  String get goalsNotFound => 'היעד הזה כבר לא כאן.';
+
+  @override
+  String get goalsBackToGoals => 'חזרה ליעדים';
+
+  @override
+  String get goalsAddOne => 'להוסיף אחד';
+
+  @override
+  String goalsAddOneTo(String unit) {
+    return 'להוסיף אחד ל$unit';
+  }
+
+  @override
+  String get goalsEditCount => 'עריכת הספירה';
+
+  @override
+  String get goalsCountLabel => 'ספירה עד עכשיו';
+
+  @override
+  String get goalsCountInvalid => 'מספר שלם מ-0 ומעלה מתאים.';
+
+  @override
+  String get goalsLinkedCountHint => 'עולה כשמסמנים משימה מקושרת.';
+
+  @override
+  String get goalsLinkedTasks => 'משימות מקושרות';
+
+  @override
+  String get goalsNoLinkedTasks =>
+      'עדיין אין כאן משימות. מקשרים אחת והיא תיספר ליעד.';
+
+  @override
+  String get goalsLinkTask => 'לקשר משימה';
+
+  @override
+  String get goalsPickTask => 'איזו משימה מקדמת את היעד?';
+
+  @override
+  String get goalsNoTasksToLink => 'לכל משימה פתוחה כבר יש יעד.';
+
+  @override
+  String get goalsUnlink => 'לנתק';
+
+  @override
+  String get goalsTargetDateLabel => 'תאריך יעד';
+
+  @override
+  String get goalsNoTargetDate => 'מתי שמתאים';
+
+  @override
+  String get goalsImportanceLabel => 'חשיבות';
+
+  @override
+  String goalsImportanceValue(int n) {
+    return '$n מתוך 5';
+  }
+
+  @override
+  String get goalsDeleteTitle => 'למחוק את היעד?';
+
+  @override
+  String get goalsDeleteBody =>
+      'המשימות שלו נשארות; הן רק לא יצביעו יותר על יעד.';
+
+  @override
+  String get goalsKeep => 'להשאיר';
+
+  @override
+  String get goalsDeleted => 'היעד נמחק';
+
+  @override
+  String get goalsMarkDone => 'לסמן כהושלם';
+
+  @override
+  String get goalsReopen => 'חזרה לפעיל';
+
+  @override
+  String get goalsTitleLabel => 'מה רוצים להשיג?';
+
+  @override
+  String get goalsTitleHint => 'לסיים את הקורס בניהול פרויקטים';
+
+  @override
+  String get goalsTitleRequired => 'נותנים שם קצר וזה מוכן.';
+
+  @override
+  String get goalsAreaLabel => 'תחום';
+
+  @override
+  String get goalsCustomArea => 'משלכם';
+
+  @override
+  String get goalsCustomAreaHint => 'נותנים שם לתחום';
+
+  @override
+  String get goalsHorizonLabel => 'טווח';
+
+  @override
+  String get goalsMetricLabel => 'למדוד (לא חובה)';
+
+  @override
+  String get goalsTargetLabel => 'יעד מספרי';
+
+  @override
+  String get goalsTargetInvalid => 'מספר שלם מעל 0 מתאים.';
+
+  @override
+  String get goalsUnitLabel => 'יחידה';
+
+  @override
+  String get goalsUnitHint => 'שיעורים';
+
+  @override
+  String get goalsDefaultUnit => 'צעדים';
+
+  @override
+  String get goalsLinkedUnit => 'משימות';
+
+  @override
+  String get goalsCountManual => 'אני סופר';
+
+  @override
+  String get goalsCountLinked => 'משימות מקושרות';
+
+  @override
+  String get goalsStatusLabel => 'סטטוס';
+
+  @override
+  String goalsMilestoneCloseToDone(String title) {
+    return 'כמעט שם עם \"$title\". קצב נהדר.';
+  }
+
+  @override
+  String goalsMilestoneCompleted(String title) {
+    return 'עשיתם את זה: \"$title\" הושלם.';
+  }
+
+  @override
+  String get goalsCounted => 'נספר. צעד יפה.';
 }

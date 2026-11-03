@@ -1348,5 +1348,690 @@
   "settingsPrivacyCopy": "Everything stays on this device. No account, no sign-in.",
   "@settingsPrivacyCopy": {
     "description": "Privacy statement"
+  },
+  "pipNoAccessory": "no accessory",
+  "@pipNoAccessory": {
+    "description": "Pill on the Pip hero card when nothing is worn"
+  },
+  "momentumSteady": "Steady",
+  "@momentumSteady": {
+    "description": "Momentum level label"
+  },
+  "momentumQuiet": "Quiet",
+  "@momentumQuiet": {
+    "description": "Momentum level label"
+  },
+  "pipMoodWarm": "Pip is warm",
+  "@pipMoodWarm": {
+    "description": "Pip hero title"
+  },
+  "pipMoodResting": "Pip is resting",
+  "@pipMoodResting": {
+    "description": "Pip hero title"
+  },
+  "pipLineHello": "Pip is here whenever you are. One small thing is plenty.",
+  "@pipLineHello": {
+    "description": "Pip hero sentence with no activity yet"
+  },
+  "pipShowedUp": "You showed up {days} of the last 7 days.",
+  "@pipShowedUp": {
+    "description": "Pip hero sentence, first half",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "pipLineGlowing": "That's real momentum.",
+  "@pipLineGlowing": {
+    "description": "Pip hero sentence, second half when glowing"
+  },
+  "pipLineWarm": "Nicely steady.",
+  "@pipLineWarm": {
+    "description": "Pip hero sentence, second half when warm"
+  },
+  "pipLineQuiet": "Every bit counts.",
+  "@pipLineQuiet": {
+    "description": "Pip hero sentence, second half when quiet"
+  },
+  "pipMomentumNote": "Momentum fades slowly, one quiet day won't reset it.",
+  "@pipMomentumNote": {
+    "description": "Caption under the momentum meter"
+  },
+  "pipWeekSemantics": "Things finished per day this week. Days with none are rest days.",
+  "@pipWeekSemantics": {
+    "description": "Screen reader label of the week chart"
+  },
+  "pipRestDay": "rest day",
+  "@pipRestDay": {
+    "description": "Label in a week chart column with no activity"
+  },
+  "pipWeekCaption": "Tasks and sessions finished per day",
+  "@pipWeekCaption": {
+    "description": "Caption under the week chart"
+  },
+  "pipFirstWin": "Your first win will land here.",
+  "@pipFirstWin": {
+    "description": "Empty state of the wins row"
+  },
+  "pipMoreSessions": "{count, plural, =1{1 more session} other{{count} more sessions}}",
+  "@pipMoreSessions": {
+    "description": "Caption under a locked unlock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "focusFree": "Free focus",
+  "@focusFree": {
+    "description": "Title of a focus session without a task"
+  },
+  "focusBreak": "Break",
+  "@focusBreak": {
+    "description": "Focus header while on a short break"
+  },
+  "focusLongBreak": "Long break",
+  "@focusLongBreak": {
+    "description": "Focus header while on a long break"
+  },
+  "focusReady": "Ready",
+  "@focusReady": {
+    "description": "Lock screen status before a session starts"
+  },
+  "focusOnBreak": "On a break",
+  "@focusOnBreak": {
+    "description": "Lock screen status while on a break"
+  },
+  "focusOfTotal": "of {total}",
+  "@focusOfTotal": {
+    "description": "Under the timer: total session length",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "focusHardModeSoon": "Hard mode · coming soon",
+  "@focusHardModeSoon": {
+    "description": "Pill for the upcoming hard mode"
+  },
+  "focusMinusMinutes": "−{minutes} min",
+  "@focusMinusMinutes": {
+    "description": "Button removing minutes from the timer",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "focusStartNext": "Start next focus",
+  "@focusStartNext": {
+    "description": "Main button after a break"
+  },
+  "focusEndBreak": "End break",
+  "@focusEndBreak": {
+    "description": "Button"
+  },
+  "focusDoneTitle": "Session done. Nice work.",
+  "@focusDoneTitle": {
+    "description": "End-of-session sheet title"
+  },
+  "focusEarlyTitle": "Session ended. It still counts.",
+  "@focusEarlyTitle": {
+    "description": "End-of-session sheet title after ending early"
+  },
+  "focusFocusedFor": "You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.",
+  "@focusFocusedFor": {
+    "description": "End-of-session sheet body",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "focusFocusedForTask": "You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.",
+  "@focusFocusedForTask": {
+    "description": "End-of-session sheet body when the session had a task",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "focusMarkDone": "Mark task done",
+  "@focusMarkDone": {
+    "description": "End-of-session button"
+  },
+  "focusKeepGoing": "Keep going",
+  "@focusKeepGoing": {
+    "description": "End-of-session button"
+  },
+  "focusLogWin": "Log a win",
+  "@focusLogWin": {
+    "description": "End-of-session button"
+  },
+  "focusWinLogged": "Win logged. Pip saw that.",
+  "@focusWinLogged": {
+    "description": "Toast"
+  },
+  "focusTaskDone": "Task done. Pip is proud of you.",
+  "@focusTaskDone": {
+    "description": "Toast"
+  },
+  "focusSessionOverToast": "Time! Session done, take a breather.",
+  "@focusSessionOverToast": {
+    "description": "In-app alert when a session ends"
+  },
+  "focusBreakOverToast": "Break's over. Ready when you are.",
+  "@focusBreakOverToast": {
+    "description": "In-app alert when a break ends"
+  },
+  "focusCheerIdle1": "Pick a length and press play. Pip will keep time.",
+  "@focusCheerIdle1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerIdle2": "One small step is enough to start. Pip is right here.",
+  "@focusCheerIdle2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerStart1": "The first minutes are the hardest, and you already started.",
+  "@focusCheerStart1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerStart2": "Just the next small step. Nothing else matters right now.",
+  "@focusCheerStart2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerMiddle1": "Nice rhythm. Keep it simple.",
+  "@focusCheerMiddle1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerMiddle2": "You are doing the thing. Pip is cheering quietly.",
+  "@focusCheerMiddle2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerPastHalf1": "You're past halfway. Keep going, the first draft just needs to exist.",
+  "@focusCheerPastHalf1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerPastHalf2": "More than half done. Steady wins this.",
+  "@focusCheerPastHalf2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerNearEnd1": "Almost there. Finish the sentence you are on.",
+  "@focusCheerNearEnd1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerNearEnd2": "A few minutes left. Land it gently.",
+  "@focusCheerNearEnd2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerPaused1": "Paused. Take a breath, Pip will wait.",
+  "@focusCheerPaused1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerPaused2": "Little pauses are fine. Come back when you are ready.",
+  "@focusCheerPaused2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerBreak1": "Break time. Stand up, stretch, drink some water.",
+  "@focusCheerBreak1": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "focusCheerBreak2": "Rest is part of the work. Look at something far away.",
+  "@focusCheerBreak2": {
+    "description": "Pip cheering line on the focus screen"
+  },
+  "reviewBannerTitle": "Ready for a one-minute look back?",
+  "@reviewBannerTitle": {
+    "description": "Evening review banner on Today"
+  },
+  "reviewBannerAction": "Start",
+  "@reviewBannerAction": {
+    "description": "Evening review banner button"
+  },
+  "reviewDoneTitle": "What got done?",
+  "@reviewDoneTitle": {
+    "description": "Review step title"
+  },
+  "reviewDoneHint": "Tick anything you finished. Pip counts it all.",
+  "@reviewDoneHint": {
+    "description": "Review step hint"
+  },
+  "reviewDoneEmpty": "Nothing was waiting on today. Lovely and light.",
+  "@reviewDoneEmpty": {
+    "description": "Review step empty state"
+  },
+  "reviewMoveTitle": "What moves on?",
+  "@reviewMoveTitle": {
+    "description": "Review step title"
+  },
+  "reviewMoveHint": "Give each one a gentle new spot.",
+  "@reviewMoveHint": {
+    "description": "Review step hint"
+  },
+  "reviewMoveEmpty": "Nothing left to move. You are clear.",
+  "@reviewMoveEmpty": {
+    "description": "Review step empty state"
+  },
+  "reviewLater": "Later this week",
+  "@reviewLater": {
+    "description": "Review move option"
+  },
+  "reviewKeepToday": "Keep today",
+  "@reviewKeepToday": {
+    "description": "Review move option"
+  },
+  "reviewTomorrowAnyway": "Tomorrow anyway",
+  "@reviewTomorrowAnyway": {
+    "description": "Review move option for a task due today"
+  },
+  "reviewDrop": "Drop",
+  "@reviewDrop": {
+    "description": "Review move option removing a task"
+  },
+  "reviewDropped": "Dropped.",
+  "@reviewDropped": {
+    "description": "Toast after dropping a task"
+  },
+  "reviewDeadlineNote": "This one is due today. Moving it is fine, just your call.",
+  "@reviewDeadlineNote": {
+    "description": "Note on a task with a deadline today"
+  },
+  "reviewRepeatsNote": "Repeats on its own, so it stays put.",
+  "@reviewRepeatsNote": {
+    "description": "Note on a recurring task"
+  },
+  "reviewWinTitle": "One win",
+  "@reviewWinTitle": {
+    "description": "Review step title"
+  },
+  "reviewWinHint": "Big or tiny. What are you glad about today?",
+  "@reviewWinHint": {
+    "description": "Review step hint"
+  },
+  "reviewWinField": "Today I...",
+  "@reviewWinField": {
+    "description": "Review win text field label"
+  },
+  "reviewSave": "Save and finish",
+  "@reviewSave": {
+    "description": "Review button"
+  },
+  "reviewFinishTitle": "Day wrapped",
+  "@reviewFinishTitle": {
+    "description": "Review last step title"
+  },
+  "reviewPraise1": "You showed up today. That is the whole trick.",
+  "@reviewPraise1": {
+    "description": "Closing line of the evening review"
+  },
+  "reviewPraise2": "A good day to be you. Sleep well.",
+  "@reviewPraise2": {
+    "description": "Closing line of the evening review"
+  },
+  "reviewPraise3": "Small steps still count. Nice work today.",
+  "@reviewPraise3": {
+    "description": "Closing line of the evening review"
+  },
+  "reviewPraise4": "Look at you, closing the day with care.",
+  "@reviewPraise4": {
+    "description": "Closing line of the evening review"
+  },
+  "reviewPraise5": "Whatever got done, I am proud of you.",
+  "@reviewPraise5": {
+    "description": "Closing line of the evening review"
+  },
+  "goalsTitle": "Goals",
+  "@goalsTitle": {
+    "description": "Goals screen title"
+  },
+  "goalsSubtitle": "Near and far. Every small step counts.",
+  "@goalsSubtitle": {
+    "description": "Goals screen subtitle"
+  },
+  "goalsNewGoal": "New goal",
+  "@goalsNewGoal": {
+    "description": "Button and form title"
+  },
+  "goalsEditGoal": "Edit goal",
+  "@goalsEditGoal": {
+    "description": "Form title"
+  },
+  "goalsEmptyTitle": "No goals yet",
+  "@goalsEmptyTitle": {
+    "description": "Empty state title"
+  },
+  "goalsEmptyBody": "Pick one thing you would love to move this month. Pip will cheer.",
+  "@goalsEmptyBody": {
+    "description": "Empty state body"
+  },
+  "goalsEmptyAction": "Add a goal",
+  "@goalsEmptyAction": {
+    "description": "Empty state button"
+  },
+  "goalsHorizonWeek": "This week",
+  "@goalsHorizonWeek": {
+    "description": "Goal horizon"
+  },
+  "goalsHorizonMonth": "This month",
+  "@goalsHorizonMonth": {
+    "description": "Goal horizon"
+  },
+  "goalsHorizonQuarter": "This quarter",
+  "@goalsHorizonQuarter": {
+    "description": "Goal horizon"
+  },
+  "goalsHorizonYear": "This year",
+  "@goalsHorizonYear": {
+    "description": "Goal horizon"
+  },
+  "goalsHorizonShortWeek": "Week",
+  "@goalsHorizonShortWeek": {
+    "description": "Goal horizon, short chip"
+  },
+  "goalsHorizonShortMonth": "Month",
+  "@goalsHorizonShortMonth": {
+    "description": "Goal horizon, short chip"
+  },
+  "goalsHorizonShortQuarter": "Quarter",
+  "@goalsHorizonShortQuarter": {
+    "description": "Goal horizon, short chip"
+  },
+  "goalsHorizonShortYear": "Year",
+  "@goalsHorizonShortYear": {
+    "description": "Goal horizon, short chip"
+  },
+  "goalsStatusActive": "Active",
+  "@goalsStatusActive": {
+    "description": "Goal status"
+  },
+  "goalsStatusPaused": "Paused",
+  "@goalsStatusPaused": {
+    "description": "Goal status"
+  },
+  "goalsStatusDone": "Done",
+  "@goalsStatusDone": {
+    "description": "Goal status"
+  },
+  "goalsCloseToDone": "Almost there",
+  "@goalsCloseToDone": {
+    "description": "Goal badge"
+  },
+  "goalsCompleted": "Completed",
+  "@goalsCompleted": {
+    "description": "Goal badge"
+  },
+  "goalsResting": "Resting",
+  "@goalsResting": {
+    "description": "Goal badge for a paused goal"
+  },
+  "goalsOfTarget": "{current} of {target}",
+  "@goalsOfTarget": {
+    "description": "Goal progress without a unit",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsOfTargetUnit": "{current} of {target} {unit}",
+  "@goalsOfTargetUnit": {
+    "description": "Goal progress with a unit",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsProgressLine": "{summary} · {percent}%",
+  "@goalsProgressLine": {
+    "description": "Goal progress with percent",
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsNoMetric": "Add a count to see progress",
+  "@goalsNoMetric": {
+    "description": "Goal card without a metric"
+  },
+  "goalsByDate": "by {date}",
+  "@goalsByDate": {
+    "description": "Goal target date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDate": "{month} {day}",
+  "@goalsDate": {
+    "description": "Short date without weekday",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsDetailTitle": "Goal",
+  "@goalsDetailTitle": {
+    "description": "Goal detail title"
+  },
+  "goalsNotFound": "This goal is not here anymore.",
+  "@goalsNotFound": {
+    "description": "Goal detail when the goal does not exist"
+  },
+  "goalsBackToGoals": "Back to goals",
+  "@goalsBackToGoals": {
+    "description": "Button"
+  },
+  "goalsAddOne": "Add one",
+  "@goalsAddOne": {
+    "description": "Counter button label"
+  },
+  "goalsAddOneTo": "Add one to {unit}",
+  "@goalsAddOneTo": {
+    "description": "Counter button label with unit",
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsEditCount": "Edit count",
+  "@goalsEditCount": {
+    "description": "Button and sheet title"
+  },
+  "goalsCountLabel": "Count so far",
+  "@goalsCountLabel": {
+    "description": "Field label"
+  },
+  "goalsCountInvalid": "A whole number from 0 works.",
+  "@goalsCountInvalid": {
+    "description": "Field error"
+  },
+  "goalsLinkedCountHint": "Counts up when you tick off a linked task.",
+  "@goalsLinkedCountHint": {
+    "description": "Hint for a linked counter"
+  },
+  "goalsLinkedTasks": "Linked tasks",
+  "@goalsLinkedTasks": {
+    "description": "Section label"
+  },
+  "goalsNoLinkedTasks": "No tasks here yet. Link one and it will count toward this goal.",
+  "@goalsNoLinkedTasks": {
+    "description": "Empty state"
+  },
+  "goalsLinkTask": "Link a task",
+  "@goalsLinkTask": {
+    "description": "Button"
+  },
+  "goalsPickTask": "Which task moves this goal?",
+  "@goalsPickTask": {
+    "description": "Sheet title"
+  },
+  "goalsNoTasksToLink": "Every open task already has a goal.",
+  "@goalsNoTasksToLink": {
+    "description": "Sheet empty state"
+  },
+  "goalsUnlink": "Unlink",
+  "@goalsUnlink": {
+    "description": "Button"
+  },
+  "goalsTargetDateLabel": "Target date",
+  "@goalsTargetDateLabel": {
+    "description": "Field label"
+  },
+  "goalsNoTargetDate": "Whenever it fits",
+  "@goalsNoTargetDate": {
+    "description": "Value when there is no target date"
+  },
+  "goalsImportanceLabel": "Importance",
+  "@goalsImportanceLabel": {
+    "description": "Field label"
+  },
+  "goalsImportanceValue": "{n} of 5",
+  "@goalsImportanceValue": {
+    "description": "Importance value",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsDeleteTitle": "Delete this goal?",
+  "@goalsDeleteTitle": {
+    "description": "Dialog title"
+  },
+  "goalsDeleteBody": "Its tasks stay; they just will not point to a goal anymore.",
+  "@goalsDeleteBody": {
+    "description": "Dialog body"
+  },
+  "goalsKeep": "Keep it",
+  "@goalsKeep": {
+    "description": "Dialog button"
+  },
+  "goalsDeleted": "Goal deleted",
+  "@goalsDeleted": {
+    "description": "Toast"
+  },
+  "goalsMarkDone": "Mark as done",
+  "@goalsMarkDone": {
+    "description": "Button"
+  },
+  "goalsReopen": "Back to active",
+  "@goalsReopen": {
+    "description": "Button"
+  },
+  "goalsTitleLabel": "What do you want to reach?",
+  "@goalsTitleLabel": {
+    "description": "Form field label"
+  },
+  "goalsTitleHint": "Finish the project management course",
+  "@goalsTitleHint": {
+    "description": "Form field hint"
+  },
+  "goalsTitleRequired": "Give it a short name and you are set.",
+  "@goalsTitleRequired": {
+    "description": "Form field error"
+  },
+  "goalsAreaLabel": "Area",
+  "@goalsAreaLabel": {
+    "description": "Form field label"
+  },
+  "goalsCustomArea": "Your own",
+  "@goalsCustomArea": {
+    "description": "Chip for a custom area"
+  },
+  "goalsCustomAreaHint": "Name your area",
+  "@goalsCustomAreaHint": {
+    "description": "Custom area field hint"
+  },
+  "goalsHorizonLabel": "Horizon",
+  "@goalsHorizonLabel": {
+    "description": "Form field label"
+  },
+  "goalsMetricLabel": "Measure it (optional)",
+  "@goalsMetricLabel": {
+    "description": "Form section label"
+  },
+  "goalsTargetLabel": "Target",
+  "@goalsTargetLabel": {
+    "description": "Form field label"
+  },
+  "goalsTargetInvalid": "A whole number above 0 works.",
+  "@goalsTargetInvalid": {
+    "description": "Form field error"
+  },
+  "goalsUnitLabel": "Unit",
+  "@goalsUnitLabel": {
+    "description": "Form field label"
+  },
+  "goalsUnitHint": "lessons",
+  "@goalsUnitHint": {
+    "description": "Form field hint"
+  },
+  "goalsDefaultUnit": "steps",
+  "@goalsDefaultUnit": {
+    "description": "Unit used when the field is empty"
+  },
+  "goalsLinkedUnit": "tasks",
+  "@goalsLinkedUnit": {
+    "description": "Unit used for a count of linked tasks"
+  },
+  "goalsCountManual": "I count",
+  "@goalsCountManual": {
+    "description": "Count mode"
+  },
+  "goalsCountLinked": "Linked tasks",
+  "@goalsCountLinked": {
+    "description": "Count mode"
+  },
+  "goalsStatusLabel": "Status",
+  "@goalsStatusLabel": {
+    "description": "Form field label"
+  },
+  "goalsMilestoneCloseToDone": "Almost there on \"{title}\". Lovely pace.",
+  "@goalsMilestoneCloseToDone": {
+    "description": "Toast when a goal is close to done",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneCompleted": "You did it: \"{title}\" is complete.",
+  "@goalsMilestoneCompleted": {
+    "description": "Toast when a goal is complete",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsCounted": "Counted. Nice step.",
+  "@goalsCounted": {
+    "description": "Toast after adding to a goal"
   }
 }

@@ -10,7 +10,8 @@ import '../domain/goal_area.dart';
 import '../domain/goal_metric.dart';
 import '../domain/goal_record.dart';
 import '../goal_providers.dart';
-import '../goals_strings.dart';
+import '../../../l10n/l10n.dart';
+import 'goal_l10n.dart';
 import 'goal_widgets.dart';
 
 /// Opens the new-goal sheet, or the edit sheet when [existing] is given.
@@ -84,7 +85,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
   }
 
   String? get _titleError => _showErrors && _title.text.trim().isEmpty
-      ? GoalsStrings.titleRequired
+      ? context.l10n.goalsTitleRequired
       : null;
 
   /// Null when the field is empty (no metric).
@@ -93,7 +94,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
   String? get _targetError {
     if (!_showErrors || _target.text.trim().isEmpty) return null;
     final v = _targetValue;
-    return v == null || v <= 0 ? GoalsStrings.targetInvalid : null;
+    return v == null || v <= 0 ? context.l10n.goalsTargetInvalid : null;
   }
 
   Future<void> _save() async {
@@ -108,8 +109,8 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
     final unit = unitText.isNotEmpty
         ? unitText
         : _source == MetricSource.linkedTasks
-        ? GoalsStrings.linkedUnit
-        : GoalsStrings.defaultUnit;
+        ? context.l10n.goalsLinkedUnit
+        : context.l10n.goalsDefaultUnit;
     final old = _existing?.finite;
     final GoalMetric? metric = target == null
         ? null
@@ -180,15 +181,17 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    editing ? GoalsStrings.editGoal : GoalsStrings.newGoal,
+                    editing
+                        ? context.l10n.goalsEditGoal
+                        : context.l10n.goalsNewGoal,
                     style: AppText.display(size: 22),
                   ),
                   const SizedBox(height: 12),
                   StickerTextField(
                     controller: _title,
                     autofocus: !editing,
-                    label: GoalsStrings.titleLabel,
-                    hint: GoalsStrings.titleHint,
+                    label: context.l10n.goalsTitleLabel,
+                    hint: context.l10n.goalsTitleHint,
                     errorText: _titleError,
                     textInputAction: TextInputAction.done,
                     onChanged: (_) {
@@ -197,7 +200,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     onSubmitted: (_) => _save(),
                   ),
                   const SizedBox(height: 16),
-                  const SectionLabel(GoalsStrings.areaLabel),
+                  SectionLabel(context.l10n.goalsAreaLabel),
                   const SizedBox(height: 4),
                   Wrap(
                     spacing: 8,
@@ -215,7 +218,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                           }),
                         ),
                       ChoicePill(
-                        label: GoalsStrings.customArea,
+                        label: context.l10n.goalsCustomArea,
                         icon: Icons.star_outline,
                         selected: _customMode,
                         selectedColor: AppColors.sky,
@@ -229,32 +232,32 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     StickerTextField(
                       controller: _customArea,
                       pill: true,
-                      label: GoalsStrings.customAreaHint,
+                      label: context.l10n.goalsCustomAreaHint,
                     ),
                   ],
                   const SizedBox(height: 14),
-                  const SectionLabel(GoalsStrings.horizonLabel),
+                  SectionLabel(context.l10n.goalsHorizonLabel),
                   const SizedBox(height: 4),
                   Wrap(
                     spacing: 8,
                     children: [
                       for (final h in GoalHorizon.values)
                         ChoicePill(
-                          label: GoalsStrings.horizonShort(h),
+                          label: context.l10n.goalHorizonShort(h),
                           selected: _horizon == h,
                           onTap: () => setState(() => _horizon = h),
                         ),
                     ],
                   ),
                   const SizedBox(height: 14),
-                  const SectionLabel(GoalsStrings.importanceLabel),
+                  SectionLabel(context.l10n.goalsImportanceLabel),
                   const SizedBox(height: 4),
                   _ImportancePicker(
                     value: _importance,
                     onChanged: (v) => setState(() => _importance = v),
                   ),
                   const SizedBox(height: 14),
-                  const SectionLabel(GoalsStrings.targetDateLabel),
+                  SectionLabel(context.l10n.goalsTargetDateLabel),
                   const SizedBox(height: 4),
                   Wrap(
                     spacing: 8,
@@ -262,15 +265,15 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     children: [
                       ChoicePill(
                         label: _targetDate == null
-                            ? GoalsStrings.pickDate
-                            : GoalsStrings.date(_targetDate!),
+                            ? context.l10n.tasksPickDate
+                            : context.l10n.goalDate(_targetDate!),
                         icon: Icons.calendar_today_outlined,
                         selected: _targetDate != null,
                         onTap: _pickDate,
                       ),
                       if (_targetDate != null)
                         ChoicePill(
-                          label: GoalsStrings.clear,
+                          label: context.l10n.commonClear,
                           icon: Icons.close,
                           selected: false,
                           onTap: () => setState(() => _targetDate = null),
@@ -278,7 +281,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  const SectionLabel(GoalsStrings.metricLabel),
+                  SectionLabel(context.l10n.goalsMetricLabel),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,8 +290,8 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                         flex: 2,
                         child: StickerTextField(
                           controller: _target,
-                          label: GoalsStrings.targetLabel,
-                          hint: GoalsStrings.targetHint,
+                          label: context.l10n.goalsTargetLabel,
+                          hint: '12',
                           errorText: _targetError,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -304,8 +307,8 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                         flex: 3,
                         child: StickerTextField(
                           controller: _unit,
-                          label: GoalsStrings.unitLabel,
-                          hint: GoalsStrings.unitHint,
+                          label: context.l10n.goalsUnitLabel,
+                          hint: context.l10n.goalsUnitHint,
                         ),
                       ),
                     ],
@@ -315,13 +318,13 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     spacing: 8,
                     children: [
                       ChoicePill(
-                        label: GoalsStrings.countManual,
+                        label: context.l10n.goalsCountManual,
                         selected: _source == MetricSource.manual,
                         onTap: () =>
                             setState(() => _source = MetricSource.manual),
                       ),
                       ChoicePill(
-                        label: GoalsStrings.countLinked,
+                        label: context.l10n.goalsCountLinked,
                         icon: Icons.checklist,
                         selected: _source == MetricSource.linkedTasks,
                         onTap: () =>
@@ -331,14 +334,14 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                   ),
                   if (editing) ...[
                     const SizedBox(height: 14),
-                    const SectionLabel(GoalsStrings.statusLabel),
+                    SectionLabel(context.l10n.goalsStatusLabel),
                     const SizedBox(height: 4),
                     Wrap(
                       spacing: 8,
                       children: [
                         for (final s in GoalStatus.values)
                           ChoicePill(
-                            label: GoalsStrings.status(s),
+                            label: context.l10n.goalStatus(s),
                             selected: _status == s,
                             onTap: () => setState(() => _status = s),
                           ),
@@ -348,7 +351,7 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                   const SizedBox(height: 14),
                   StickerTextField(
                     controller: _notes,
-                    label: GoalsStrings.notesLabel,
+                    label: context.l10n.tasksNotesLabel,
                     maxLines: 3,
                   ),
                   const SizedBox(height: 16),
@@ -360,14 +363,14 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
             children: [
               Expanded(
                 child: PillButton(
-                  label: GoalsStrings.cancel,
+                  label: context.l10n.commonCancel,
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: PillButton(
-                  label: GoalsStrings.save,
+                  label: context.l10n.commonSave,
                   color: AppColors.violet,
                   textColor: Colors.white,
                   display: true,
@@ -397,7 +400,7 @@ class _ImportancePicker extends StatelessWidget {
         Semantics(
           button: true,
           selected: i == value,
-          label: '${GoalsStrings.importanceLabel} $i',
+          label: '${context.l10n.goalsImportanceLabel} $i',
           excludeSemantics: true,
           onTap: () => onChanged(i),
           child: GestureDetector(
@@ -424,7 +427,7 @@ class _ImportancePicker extends StatelessWidget {
         ),
       const SizedBox(width: 6),
       Text(
-        GoalsStrings.importanceValue(value),
+        context.l10n.goalsImportanceValue(value),
         style: AppText.bold(size: 13, color: AppColors.muted),
       ),
     ],

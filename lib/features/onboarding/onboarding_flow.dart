@@ -10,7 +10,7 @@ import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 import 'choice_pills.dart';
 import 'onboarding_providers.dart';
-import 'onboarding_strings.dart';
+import '../../l10n/l10n.dart';
 import 'permission_rationale_card.dart';
 import 'weekday_hours_editor.dart';
 
@@ -79,7 +79,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                         foregroundColor: AppColors.muted,
                       ),
                       child: Text(
-                        OnboardingStrings.skip,
+                        context.l10n.commonSkip,
                         style: AppText.bold(size: 14, color: AppColors.muted),
                       ),
                     ),
@@ -180,14 +180,14 @@ class _WelcomeStep extends StatelessWidget {
         const SizedBox(height: 24),
         const Center(child: PipAvatar(size: 160)),
         const SizedBox(height: 24),
-        _title(OnboardingStrings.welcomeTitle),
+        _title(context.l10n.onboardingWelcomeTitle),
         const SizedBox(height: 10),
-        _body(OnboardingStrings.welcomeBody),
+        _body(context.l10n.onboardingWelcomeBody),
         const SizedBox(height: 28),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: PillButton(
-            label: OnboardingStrings.welcomeStart,
+            label: context.l10n.onboardingWelcomeStart,
             color: AppColors.violet,
             textColor: Colors.white,
             display: true,
@@ -232,19 +232,19 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
   Widget build(BuildContext context) {
     return _StepScaffold(
       children: [
-        _title(OnboardingStrings.notifTitle),
+        _title(context.l10n.onboardingNotifTitle),
         const SizedBox(height: 16),
         PermissionRationaleCard(
           icon: Icons.notifications_none_rounded,
-          title: OnboardingStrings.notifRationaleTitle,
-          body: OnboardingStrings.notifRationale,
+          title: context.l10n.onboardingNotifRationaleTitle,
+          body: context.l10n.onboardingNotifRationale,
         ),
         const SizedBox(height: 16),
         if (_perm == _Perm.granted)
           StickerCard(
             color: AppColors.mint.withValues(alpha: 0.25),
             child: Text(
-              OnboardingStrings.notifGranted,
+              context.l10n.onboardingNotifGranted,
               style: AppText.bold(size: 14),
             ),
           ),
@@ -253,7 +253,7 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
             key: const ValueKey('notif-denied'),
             color: AppColors.sun.withValues(alpha: 0.35),
             child: Text(
-              OnboardingStrings.notifDenied,
+              context.l10n.onboardingNotifDenied,
               style: AppText.body(
                 size: 14,
                 weight: FontWeight.w500,
@@ -268,13 +268,13 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
             runSpacing: 12,
             children: [
               PillButton(
-                label: OnboardingStrings.notifAllow,
+                label: context.l10n.onboardingNotifAllow,
                 color: AppColors.violet,
                 textColor: Colors.white,
                 onPressed: _allow,
               ),
               PillButton(
-                label: OnboardingStrings.notifNotNow,
+                label: context.l10n.onboardingNotifNotNow,
                 onPressed: widget.onNext,
               ),
             ],
@@ -283,7 +283,7 @@ class _NotificationsStepState extends ConsumerState<_NotificationsStep> {
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: PillButton(
-              label: OnboardingStrings.continueLabel,
+              label: context.l10n.onboardingContinue,
               color: AppColors.violet,
               textColor: Colors.white,
               onPressed: widget.onNext,
@@ -305,30 +305,30 @@ class _CalendarStep extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return _StepScaffold(
       children: [
-        _title(OnboardingStrings.calTitle),
+        _title(context.l10n.onboardingCalTitle),
         const SizedBox(height: 12),
-        _body(OnboardingStrings.calRationale),
+        _body(context.l10n.onboardingCalRationale),
         const SizedBox(height: 16),
         _CalendarRow(
-          label: OnboardingStrings.calGoogle,
+          label: context.l10n.commonGoogleCalendar,
           provider: googleCalendarProvider,
           color: AppColors.sky,
         ),
         if (_isIos) ...[
           const SizedBox(height: 14),
           _CalendarRow(
-            label: OnboardingStrings.calApple,
+            label: context.l10n.commonAppleCalendar,
             provider: appleCalendarProvider,
             color: AppColors.pink,
           ),
         ],
         const SizedBox(height: 14),
-        _body(OnboardingStrings.calLater),
+        _body(context.l10n.onboardingCalLater),
         const SizedBox(height: 20),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: PillButton(
-            label: OnboardingStrings.continueLabel,
+            label: context.l10n.onboardingContinue,
             color: AppColors.violet,
             textColor: Colors.white,
             onPressed: onNext,
@@ -417,14 +417,14 @@ class _CalendarRowState extends ConsumerState<_CalendarRow> {
                 ),
               ),
               if (_connected)
-                const Pill(
-                  label: OnboardingStrings.calConnected,
+                Pill(
+                  label: context.l10n.commonConnected,
                   color: AppColors.mint,
                   height: 30,
                 )
               else
                 PillButton(
-                  label: OnboardingStrings.calConnect,
+                  label: context.l10n.commonConnect,
                   color: AppColors.violet,
                   textColor: Colors.white,
                   onPressed: _connect,
@@ -434,7 +434,7 @@ class _CalendarRowState extends ConsumerState<_CalendarRow> {
           if (_failed) ...[
             const SizedBox(height: 10),
             Text(
-              OnboardingStrings.calFailed,
+              context.l10n.onboardingCalFailed,
               style: AppText.body(
                 size: 13,
                 weight: FontWeight.w500,
@@ -467,9 +467,9 @@ class _HoursStep extends ConsumerWidget {
     final prefs = ref.watch(preferencesProvider).value ?? const Preferences();
     return _StepScaffold(
       children: [
-        _title(OnboardingStrings.hoursTitle),
+        _title(context.l10n.onboardingHoursTitle),
         const SizedBox(height: 10),
-        _body(OnboardingStrings.hoursBody),
+        _body(context.l10n.onboardingHoursBody),
         const SizedBox(height: 12),
         StickerCard(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -482,28 +482,28 @@ class _HoursStep extends ConsumerWidget {
         ),
         const SizedBox(height: 18),
         Text(
-          OnboardingStrings.weekStartLabel,
+          context.l10n.onboardingWeekStartLabel,
           style: AppText.bold(size: 14, color: AppColors.muted),
         ),
         const SizedBox(height: 8),
         ChoicePills<int>(
-          options: const {
-            DateTime.sunday: OnboardingStrings.sunday,
-            DateTime.monday: OnboardingStrings.monday,
+          options: {
+            DateTime.sunday: context.l10n.commonSunday,
+            DateTime.monday: context.l10n.commonMonday,
           },
           selected: prefs.weekStart,
           onSelected: (v) => _update(ref, (p) => p.copyWith(weekStart: v)),
         ),
         const SizedBox(height: 18),
         Text(
-          OnboardingStrings.languageLabel,
+          context.l10n.onboardingLanguageLabel,
           style: AppText.bold(size: 14, color: AppColors.muted),
         ),
         const SizedBox(height: 8),
         ChoicePills<String>(
-          options: const {
-            'en': OnboardingStrings.english,
-            'he': OnboardingStrings.hebrew,
+          options: {
+            'en': context.l10n.commonLanguageEnglish,
+            'he': context.l10n.commonLanguageHebrew,
           },
           selected: prefs.localeCode,
           onSelected: (v) => _update(ref, (p) => p.copyWith(localeCode: v)),
@@ -512,7 +512,7 @@ class _HoursStep extends ConsumerWidget {
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: PillButton(
-            label: OnboardingStrings.continueLabel,
+            label: context.l10n.onboardingContinue,
             color: AppColors.violet,
             textColor: Colors.white,
             onPressed: onNext,
@@ -535,14 +535,14 @@ class _DoneStep extends StatelessWidget {
         const SizedBox(height: 24),
         const Center(child: PipAvatar(size: 160, cheering: true)),
         const SizedBox(height: 24),
-        _title(OnboardingStrings.doneTitle),
+        _title(context.l10n.onboardingDoneTitle),
         const SizedBox(height: 10),
-        _body(OnboardingStrings.doneBody),
+        _body(context.l10n.onboardingDoneBody),
         const SizedBox(height: 28),
         Align(
           alignment: AlignmentDirectional.centerStart,
           child: PillButton(
-            label: OnboardingStrings.doneButton,
+            label: context.l10n.onboardingDoneButton,
             color: AppColors.violet,
             textColor: Colors.white,
             display: true,

@@ -16,7 +16,6 @@ import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_bottom_sheet.dart';
 import '../../widgets/sticker_card.dart';
 import '../tasks/task_actions.dart';
-import 'focus_strings.dart';
 import 'providers.dart';
 
 /// Productive layer: a full-screen focus session with Pip cheering.
@@ -79,7 +78,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
     final what = await _ctrl.tick();
     if (!mounted) return;
     if (what == FocusTick.breakOver) {
-      _alert(FocusStrings.breakOverToast);
+      _alert(context.l10n.focusBreakOverToast);
     }
     setState(() {});
   }
@@ -93,7 +92,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
   }
 
   Future<void> _showEndSheet(FocusOutcome outcome) async {
-    if (outcome.completed) _alert(FocusStrings.sessionOverToast);
+    if (outcome.completed) _alert(context.l10n.focusSessionOverToast);
     final task = _task(outcome.taskId);
     final choice = await showStickerSheet<_EndChoice>(
       context,
@@ -105,7 +104,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
       case _EndChoice.markDone:
         if (task != null) {
           await ref.read(taskActionsProvider).setDone(task, true);
-          if (mounted) showPipToast(context, FocusStrings.taskDone);
+          if (mounted) showPipToast(context, context.l10n.focusTaskDone);
         }
       case _EndChoice.keepGoing:
         // A finished session rolls into its break; an early end starts a
@@ -113,10 +112,39 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
         if (!outcome.completed) await _ctrl.start(taskId: outcome.taskId);
       case _EndChoice.logWin:
         // No field to store it yet; see the PR's proposed `win` field.
-        showPipToast(context, FocusStrings.winLogged);
+        showPipToast(context, context.l10n.focusWinLogged);
       case null:
         break;
     }
+  }
+
+  /// A line for [progress] (0..1). [seed] picks within the pool so the line
+  /// stays put for a session instead of flickering every tick.
+  String _cheer(
+    AppLocalizations l, {
+    required bool idle,
+    required bool paused,
+    required bool onBreak,
+    required double progress,
+    int seed = 0,
+  }) {
+    final List<String> pool;
+    if (onBreak) {
+      pool = [l.focusCheerBreak1, l.focusCheerBreak2];
+    } else if (idle) {
+      pool = [l.focusCheerIdle1, l.focusCheerIdle2];
+    } else if (paused) {
+      pool = [l.focusCheerPaused1, l.focusCheerPaused2];
+    } else if (progress < 0.25) {
+      pool = [l.focusCheerStart1, l.focusCheerStart2];
+    } else if (progress < 0.5) {
+      pool = [l.focusCheerMiddle1, l.focusCheerMiddle2];
+    } else if (progress < 0.85) {
+      pool = [l.focusCheerPastHalf1, l.focusCheerPastHalf2];
+    } else {
+      pool = [l.focusCheerNearEnd1, l.focusCheerNearEnd2];
+    }
+    return pool[seed.abs() % pool.length];
   }
 
   Task? _task(String? id) {
@@ -147,7 +175,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
     final task = taskId == null
         ? null
         : tasks.where((t) => t.id == taskId).firstOrNull;
-    final title = task?.title ?? FocusStrings.freeFocus;
+    final title = task?.title ?? l.focusFree;
 
     final idle = s.phase == FocusPhase.idle;
     final paused = s.phase == FocusPhase.paused;
@@ -160,8 +188,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
     final String header;
     if (onBreak) {
       header = s.completedInCycle >= cycle
-          ? FocusStrings.longBreakLabel
-          : FocusStrings.breakLabel;
+          ? l.focusLongBreak.toUpperCase()
+          : l.focusBreak.toUpperCase();
     } else {
       header = l.focusProgress(s.currentNumber, cycle).toUpperCase();
     }
@@ -181,10 +209,10 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
             style: AppText.display(size: 22, color: Colors.white, height: 1.2),
           ),
           const SizedBox(height: 10),
-          const Align(
+          Align(
             alignment: AlignmentDirectional.centerStart,
             child: Pill(
-              label: FocusStrings.hardModeSoon,
+              label: l.focusHardModeSoon,
               color: AppColors.sun,
               height: 32,
               fontSize: 13,
@@ -236,7 +264,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
                           )
                         else
                           Text(
-                            FocusStrings.ofTotal(_format(s.total)),
+                            l.focusOfTotal(_format(s.total)),
                             style: AppText.body(
                               size: 16,
                               weight: FontWeight.w500,
@@ -252,7 +280,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
           ),
           const SizedBox(height: 22),
           _PipBubble(
-            text: FocusStrings.cheer(
+            text: _cheer(
+              l,
               idle: idle,
               paused: paused,
               onBreak: onBreak,
@@ -306,9 +335,9 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
           const SizedBox(height: 8),
           _LockScreenPreview(
             status: onBreak
-                ? FocusStrings.onBreak
+                ? l.focusOnBreak.toUpperCase()
                 : idle
-                ? FocusStrings.ready
+                ? l.focusReady.toUpperCase()
                 : paused
                 ? l.paused.toUpperCase()
                 : l.focusing.toUpperCase(),
@@ -332,7 +361,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
     switch (s.phase) {
       case FocusPhase.idle:
         left = PillButton(
-          label: FocusStrings.minusMinutes(step),
+          label: l.focusMinusMinutes(step),
           height: 48,
           shadow: 3,
           fontSize: 15,
@@ -386,14 +415,14 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
           onPressed: () => _ctrl.extend(),
         );
         right = PillButton(
-          label: FocusStrings.endBreak,
+          label: l.focusEndBreak,
           height: 48,
           shadow: 3,
           fontSize: 15,
           horizontalPadding: 18,
           onPressed: _ctrl.skipBreak,
         );
-        mainLabel = FocusStrings.startNext;
+        mainLabel = l.focusStartNext;
         mainIcon = Icons.play_arrow;
         mainAction = () => _ctrl.start(taskId: taskId);
     }
@@ -565,6 +594,7 @@ class _EndSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final canMarkDone = task != null && !task!.isDone;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -577,9 +607,7 @@ class _EndSheet extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                outcome.completed
-                    ? FocusStrings.doneTitle
-                    : FocusStrings.earlyTitle,
+                outcome.completed ? l.focusDoneTitle : l.focusEarlyTitle,
                 style: AppText.display(size: 20, height: 1.2),
               ),
             ),
@@ -587,13 +615,15 @@ class _EndSheet extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          FocusStrings.focusedFor(outcome.focusedMinutes, task?.title),
+          task == null
+              ? l.focusFocusedFor(outcome.focusedMinutes)
+              : l.focusFocusedForTask(outcome.focusedMinutes, task!.title),
           style: AppText.body(weight: FontWeight.w500),
         ),
         const SizedBox(height: 16),
         if (canMarkDone) ...[
           PillButton(
-            label: FocusStrings.markDone,
+            label: l.focusMarkDone,
             color: AppColors.sun,
             height: 48,
             shadow: 3,
@@ -604,7 +634,7 @@ class _EndSheet extends StatelessWidget {
           const SizedBox(height: 10),
         ],
         PillButton(
-          label: FocusStrings.keepGoing,
+          label: l.focusKeepGoing,
           height: 48,
           shadow: 3,
           fontSize: 15,
@@ -612,7 +642,7 @@ class _EndSheet extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         PillButton(
-          label: FocusStrings.logWin,
+          label: l.focusLogWin,
           height: 48,
           shadow: 3,
           fontSize: 15,

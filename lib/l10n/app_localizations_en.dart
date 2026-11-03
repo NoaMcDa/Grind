@@ -1031,4 +1031,515 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsPrivacyCopy =>
       'Everything stays on this device. No account, no sign-in.';
+
+  @override
+  String get pipNoAccessory => 'no accessory';
+
+  @override
+  String get momentumSteady => 'Steady';
+
+  @override
+  String get momentumQuiet => 'Quiet';
+
+  @override
+  String get pipMoodWarm => 'Pip is warm';
+
+  @override
+  String get pipMoodResting => 'Pip is resting';
+
+  @override
+  String get pipLineHello =>
+      'Pip is here whenever you are. One small thing is plenty.';
+
+  @override
+  String pipShowedUp(int days) {
+    return 'You showed up $days of the last 7 days.';
+  }
+
+  @override
+  String get pipLineGlowing => 'That\'s real momentum.';
+
+  @override
+  String get pipLineWarm => 'Nicely steady.';
+
+  @override
+  String get pipLineQuiet => 'Every bit counts.';
+
+  @override
+  String get pipMomentumNote =>
+      'Momentum fades slowly, one quiet day won\'t reset it.';
+
+  @override
+  String get pipWeekSemantics =>
+      'Things finished per day this week. Days with none are rest days.';
+
+  @override
+  String get pipRestDay => 'rest day';
+
+  @override
+  String get pipWeekCaption => 'Tasks and sessions finished per day';
+
+  @override
+  String get pipFirstWin => 'Your first win will land here.';
+
+  @override
+  String pipMoreSessions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more sessions',
+      one: '1 more session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get focusFree => 'Free focus';
+
+  @override
+  String get focusBreak => 'Break';
+
+  @override
+  String get focusLongBreak => 'Long break';
+
+  @override
+  String get focusReady => 'Ready';
+
+  @override
+  String get focusOnBreak => 'On a break';
+
+  @override
+  String focusOfTotal(String total) {
+    return 'of $total';
+  }
+
+  @override
+  String get focusHardModeSoon => 'Hard mode · coming soon';
+
+  @override
+  String focusMinusMinutes(int minutes) {
+    return '−$minutes min';
+  }
+
+  @override
+  String get focusStartNext => 'Start next focus';
+
+  @override
+  String get focusEndBreak => 'End break';
+
+  @override
+  String get focusDoneTitle => 'Session done. Nice work.';
+
+  @override
+  String get focusEarlyTitle => 'Session ended. It still counts.';
+
+  @override
+  String focusFocusedFor(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+    );
+    return 'You focused for $_temp0.';
+  }
+
+  @override
+  String focusFocusedForTask(int minutes, String task) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes minutes',
+      one: '1 minute',
+    );
+    return 'You focused for $_temp0 on $task.';
+  }
+
+  @override
+  String get focusMarkDone => 'Mark task done';
+
+  @override
+  String get focusKeepGoing => 'Keep going';
+
+  @override
+  String get focusLogWin => 'Log a win';
+
+  @override
+  String get focusWinLogged => 'Win logged. Pip saw that.';
+
+  @override
+  String get focusTaskDone => 'Task done. Pip is proud of you.';
+
+  @override
+  String get focusSessionOverToast => 'Time! Session done, take a breather.';
+
+  @override
+  String get focusBreakOverToast => 'Break\'s over. Ready when you are.';
+
+  @override
+  String get focusCheerIdle1 =>
+      'Pick a length and press play. Pip will keep time.';
+
+  @override
+  String get focusCheerIdle2 =>
+      'One small step is enough to start. Pip is right here.';
+
+  @override
+  String get focusCheerStart1 =>
+      'The first minutes are the hardest, and you already started.';
+
+  @override
+  String get focusCheerStart2 =>
+      'Just the next small step. Nothing else matters right now.';
+
+  @override
+  String get focusCheerMiddle1 => 'Nice rhythm. Keep it simple.';
+
+  @override
+  String get focusCheerMiddle2 =>
+      'You are doing the thing. Pip is cheering quietly.';
+
+  @override
+  String get focusCheerPastHalf1 =>
+      'You\'re past halfway. Keep going, the first draft just needs to exist.';
+
+  @override
+  String get focusCheerPastHalf2 => 'More than half done. Steady wins this.';
+
+  @override
+  String get focusCheerNearEnd1 =>
+      'Almost there. Finish the sentence you are on.';
+
+  @override
+  String get focusCheerNearEnd2 => 'A few minutes left. Land it gently.';
+
+  @override
+  String get focusCheerPaused1 => 'Paused. Take a breath, Pip will wait.';
+
+  @override
+  String get focusCheerPaused2 =>
+      'Little pauses are fine. Come back when you are ready.';
+
+  @override
+  String get focusCheerBreak1 =>
+      'Break time. Stand up, stretch, drink some water.';
+
+  @override
+  String get focusCheerBreak2 =>
+      'Rest is part of the work. Look at something far away.';
+
+  @override
+  String get reviewBannerTitle => 'Ready for a one-minute look back?';
+
+  @override
+  String get reviewBannerAction => 'Start';
+
+  @override
+  String get reviewDoneTitle => 'What got done?';
+
+  @override
+  String get reviewDoneHint => 'Tick anything you finished. Pip counts it all.';
+
+  @override
+  String get reviewDoneEmpty =>
+      'Nothing was waiting on today. Lovely and light.';
+
+  @override
+  String get reviewMoveTitle => 'What moves on?';
+
+  @override
+  String get reviewMoveHint => 'Give each one a gentle new spot.';
+
+  @override
+  String get reviewMoveEmpty => 'Nothing left to move. You are clear.';
+
+  @override
+  String get reviewLater => 'Later this week';
+
+  @override
+  String get reviewKeepToday => 'Keep today';
+
+  @override
+  String get reviewTomorrowAnyway => 'Tomorrow anyway';
+
+  @override
+  String get reviewDrop => 'Drop';
+
+  @override
+  String get reviewDropped => 'Dropped.';
+
+  @override
+  String get reviewDeadlineNote =>
+      'This one is due today. Moving it is fine, just your call.';
+
+  @override
+  String get reviewRepeatsNote => 'Repeats on its own, so it stays put.';
+
+  @override
+  String get reviewWinTitle => 'One win';
+
+  @override
+  String get reviewWinHint => 'Big or tiny. What are you glad about today?';
+
+  @override
+  String get reviewWinField => 'Today I...';
+
+  @override
+  String get reviewSave => 'Save and finish';
+
+  @override
+  String get reviewFinishTitle => 'Day wrapped';
+
+  @override
+  String get reviewPraise1 => 'You showed up today. That is the whole trick.';
+
+  @override
+  String get reviewPraise2 => 'A good day to be you. Sleep well.';
+
+  @override
+  String get reviewPraise3 => 'Small steps still count. Nice work today.';
+
+  @override
+  String get reviewPraise4 => 'Look at you, closing the day with care.';
+
+  @override
+  String get reviewPraise5 => 'Whatever got done, I am proud of you.';
+
+  @override
+  String get goalsTitle => 'Goals';
+
+  @override
+  String get goalsSubtitle => 'Near and far. Every small step counts.';
+
+  @override
+  String get goalsNewGoal => 'New goal';
+
+  @override
+  String get goalsEditGoal => 'Edit goal';
+
+  @override
+  String get goalsEmptyTitle => 'No goals yet';
+
+  @override
+  String get goalsEmptyBody =>
+      'Pick one thing you would love to move this month. Pip will cheer.';
+
+  @override
+  String get goalsEmptyAction => 'Add a goal';
+
+  @override
+  String get goalsHorizonWeek => 'This week';
+
+  @override
+  String get goalsHorizonMonth => 'This month';
+
+  @override
+  String get goalsHorizonQuarter => 'This quarter';
+
+  @override
+  String get goalsHorizonYear => 'This year';
+
+  @override
+  String get goalsHorizonShortWeek => 'Week';
+
+  @override
+  String get goalsHorizonShortMonth => 'Month';
+
+  @override
+  String get goalsHorizonShortQuarter => 'Quarter';
+
+  @override
+  String get goalsHorizonShortYear => 'Year';
+
+  @override
+  String get goalsStatusActive => 'Active';
+
+  @override
+  String get goalsStatusPaused => 'Paused';
+
+  @override
+  String get goalsStatusDone => 'Done';
+
+  @override
+  String get goalsCloseToDone => 'Almost there';
+
+  @override
+  String get goalsCompleted => 'Completed';
+
+  @override
+  String get goalsResting => 'Resting';
+
+  @override
+  String goalsOfTarget(int current, int target) {
+    return '$current of $target';
+  }
+
+  @override
+  String goalsOfTargetUnit(int current, int target, String unit) {
+    return '$current of $target $unit';
+  }
+
+  @override
+  String goalsProgressLine(String summary, int percent) {
+    return '$summary · $percent%';
+  }
+
+  @override
+  String get goalsNoMetric => 'Add a count to see progress';
+
+  @override
+  String goalsByDate(String date) {
+    return 'by $date';
+  }
+
+  @override
+  String goalsDate(String month, int day) {
+    return '$month $day';
+  }
+
+  @override
+  String get goalsDetailTitle => 'Goal';
+
+  @override
+  String get goalsNotFound => 'This goal is not here anymore.';
+
+  @override
+  String get goalsBackToGoals => 'Back to goals';
+
+  @override
+  String get goalsAddOne => 'Add one';
+
+  @override
+  String goalsAddOneTo(String unit) {
+    return 'Add one to $unit';
+  }
+
+  @override
+  String get goalsEditCount => 'Edit count';
+
+  @override
+  String get goalsCountLabel => 'Count so far';
+
+  @override
+  String get goalsCountInvalid => 'A whole number from 0 works.';
+
+  @override
+  String get goalsLinkedCountHint =>
+      'Counts up when you tick off a linked task.';
+
+  @override
+  String get goalsLinkedTasks => 'Linked tasks';
+
+  @override
+  String get goalsNoLinkedTasks =>
+      'No tasks here yet. Link one and it will count toward this goal.';
+
+  @override
+  String get goalsLinkTask => 'Link a task';
+
+  @override
+  String get goalsPickTask => 'Which task moves this goal?';
+
+  @override
+  String get goalsNoTasksToLink => 'Every open task already has a goal.';
+
+  @override
+  String get goalsUnlink => 'Unlink';
+
+  @override
+  String get goalsTargetDateLabel => 'Target date';
+
+  @override
+  String get goalsNoTargetDate => 'Whenever it fits';
+
+  @override
+  String get goalsImportanceLabel => 'Importance';
+
+  @override
+  String goalsImportanceValue(int n) {
+    return '$n of 5';
+  }
+
+  @override
+  String get goalsDeleteTitle => 'Delete this goal?';
+
+  @override
+  String get goalsDeleteBody =>
+      'Its tasks stay; they just will not point to a goal anymore.';
+
+  @override
+  String get goalsKeep => 'Keep it';
+
+  @override
+  String get goalsDeleted => 'Goal deleted';
+
+  @override
+  String get goalsMarkDone => 'Mark as done';
+
+  @override
+  String get goalsReopen => 'Back to active';
+
+  @override
+  String get goalsTitleLabel => 'What do you want to reach?';
+
+  @override
+  String get goalsTitleHint => 'Finish the project management course';
+
+  @override
+  String get goalsTitleRequired => 'Give it a short name and you are set.';
+
+  @override
+  String get goalsAreaLabel => 'Area';
+
+  @override
+  String get goalsCustomArea => 'Your own';
+
+  @override
+  String get goalsCustomAreaHint => 'Name your area';
+
+  @override
+  String get goalsHorizonLabel => 'Horizon';
+
+  @override
+  String get goalsMetricLabel => 'Measure it (optional)';
+
+  @override
+  String get goalsTargetLabel => 'Target';
+
+  @override
+  String get goalsTargetInvalid => 'A whole number above 0 works.';
+
+  @override
+  String get goalsUnitLabel => 'Unit';
+
+  @override
+  String get goalsUnitHint => 'lessons';
+
+  @override
+  String get goalsDefaultUnit => 'steps';
+
+  @override
+  String get goalsLinkedUnit => 'tasks';
+
+  @override
+  String get goalsCountManual => 'I count';
+
+  @override
+  String get goalsCountLinked => 'Linked tasks';
+
+  @override
+  String get goalsStatusLabel => 'Status';
+
+  @override
+  String goalsMilestoneCloseToDone(String title) {
+    return 'Almost there on \"$title\". Lovely pace.';
+  }
+
+  @override
+  String goalsMilestoneCompleted(String title) {
+    return 'You did it: \"$title\" is complete.';
+  }
+
+  @override
+  String get goalsCounted => 'Counted. Nice step.';
 }
