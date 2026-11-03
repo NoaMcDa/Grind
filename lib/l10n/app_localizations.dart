@@ -1958,6 +1958,42 @@ abstract class AppLocalizations {
   /// **'Your first win will land here.'**
   String get pipFirstWin;
 
+  /// Cosmetic
+  ///
+  /// In en, this message translates to:
+  /// **'Crown'**
+  String get accCrown;
+
+  /// Caption under a locked unlock
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more task} other{{count} more tasks}}'**
+  String pipMoreTasks(int count);
+
+  /// Caption under a locked unlock
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more day} other{{count} more days}}'**
+  String pipMoreDays(int count);
+
+  /// Caption under the locked crown
+  ///
+  /// In en, this message translates to:
+  /// **'Finish a goal'**
+  String get pipFinishGoal;
+
+  /// Toast when an accessory unlocks
+  ///
+  /// In en, this message translates to:
+  /// **'New for Pip: {item}. Tap Pip\'s wardrobe to wear it.'**
+  String pipUnlockedToast(String item);
+
+  /// Hint on an unlocked accessory
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to wear or take off'**
+  String get pipToggleWear;
+
   /// Caption under a locked unlock
   ///
   /// In en, this message translates to:

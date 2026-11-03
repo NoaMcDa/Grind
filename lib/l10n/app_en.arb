@@ -1427,6 +1427,45 @@
   "@pipFirstWin": {
     "description": "Empty state of the wins row"
   },
+  "accCrown": "Crown",
+  "@accCrown": {
+    "description": "Cosmetic"
+  },
+  "pipMoreTasks": "{count, plural, =1{1 more task} other{{count} more tasks}}",
+  "@pipMoreTasks": {
+    "description": "Caption under a locked unlock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pipMoreDays": "{count, plural, =1{1 more day} other{{count} more days}}",
+  "@pipMoreDays": {
+    "description": "Caption under a locked unlock",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pipFinishGoal": "Finish a goal",
+  "@pipFinishGoal": {
+    "description": "Caption under the locked crown"
+  },
+  "pipUnlockedToast": "New for Pip: {item}. Tap Pip's wardrobe to wear it.",
+  "@pipUnlockedToast": {
+    "description": "Toast when an accessory unlocks",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "pipToggleWear": "Tap to wear or take off",
+  "@pipToggleWear": {
+    "description": "Hint on an unlocked accessory"
+  },
   "pipMoreSessions": "{count, plural, =1{1 more session} other{{count} more sessions}}",
   "@pipMoreSessions": {
     "description": "Caption under a locked unlock",
