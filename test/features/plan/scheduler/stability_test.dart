@@ -95,8 +95,7 @@ void main() {
     // c (undated, last in queue) grows from 45 to 60 min: its 45-min prev
     // slot can no longer cover it, so it drops the bias and refits.
     final grew = [
-      for (final t in tasks)
-        t.id == 'c' ? t.copyWith(estimatedMinutes: 60) : t,
+      for (final t in tasks) t.id == 'c' ? t.copyWith(estimatedMinutes: 60) : t,
     ];
     final r = againStable(grew, [meeting]);
     // c is placed with 60 min now.
@@ -130,8 +129,9 @@ void main() {
     final r = againStable(tasks, [meeting], at_: at(0, 10, 20));
     // Pin at 9:00 is in the past — dropped.
     expect(
-      r.diff.removed
-          .any((rem) => rem.taskId == 'pinned' && rem.reason.contains('passed')),
+      r.diff.removed.any(
+        (rem) => rem.taskId == 'pinned' && rem.reason.contains('passed'),
+      ),
       isTrue,
     );
     // a's old 9:30-10:30 is also in the past — it must be re-placed later.
