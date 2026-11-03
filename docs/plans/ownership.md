@@ -56,6 +56,21 @@ Waves 1–4 are merged (contracts v3, l10n part 1, analytics, release prep, revi
 
 `lib/core/**`, `lib/app/**`, `main.dart`, `pubspec.yaml` stay integrator-only.
 
+## Wave 6
+Wave 5 is merged (recurring metrics, highlights, capacity, celebrations, device time zone, recurrence completion). ARB files: append keys at the end only; the integrator merges them by key union.
+
+| Owner | Paths |
+|---|---|
+| W6-A l10n part 3a | `lib/features/tasks/**`, `lib/features/companion/**`, `lib/features/plan/plan_task_sheet.dart`, `lib/features/plan/plan_strings.dart`, `lib/features/recurrence/{recurrence_picker,series_edit,recurrence_strings}.dart`, `lib/l10n/**` (append only), their tests |
+| W6-B daily plan drafting (#17) | `lib/features/plan/scheduler/**`, `lib/features/plan/draft/**` (new), `lib/features/plan/plan_replan_sheet.dart`, `lib/features/today/**`, their tests |
+| W6-C milestones (#25) | `lib/features/goals/**`, `lib/core/domain/milestone.dart` (new, exported from `core.dart`), `lib/core/data/**` for the schema v4 milestones table only, `test/features/goals/**`, `test/core/data/**` |
+| W6-D notifications follow-ups (#37, recap notification, recurrence completion) | `lib/core/notifications/**`, `lib/features/reminders/**`, `lib/features/recurrence/**` except the three W6-A files, `lib/features/review/**`, their tests |
+| W6-E Live Activity (#20) | `ios/**` (new plugin + widget extension; `Info.plist` and `AppDelegate.swift` additions only), `lib/features/focus/**`, `test/features/focus/**`, `docs/adr/0007-live-activity.md` |
+| W6-F review | `docs/reviews/**`; small tested fixes in `lib/widgets/**`, `lib/features/{capacity,pip,onboarding}/**`, `web/**` only |
+| W6-G l10n part 3b | `lib/features/settings/**`, `lib/features/calendar/**`, `lib/features/analytics/**`, `lib/l10n/**` (append only), their tests |
+
+`lib/core/**` (except the W6-C exceptions above), `lib/app/**`, `main.dart`, `pubspec.yaml` stay integrator-only.
+
 ## Shared rules
 - New code reads contracts through `package:grind/core/core.dart`.
 - Riverpod providers for a feature live in that feature's folder; `lib/core/di.dart` only holds the interface providers.
