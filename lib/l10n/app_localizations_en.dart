@@ -2227,4 +2227,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'Sent from Grind';
+
+  @override
+  String get goalsMilestones => 'Milestones';
+
+  @override
+  String goalsMilestonesProgress(int done, int total) {
+    return '$done of $total reached';
+  }
+
+  @override
+  String get goalsMilestonesEmpty =>
+      'Break a long goal into a few steps. Each step gets its own weekly tasks.';
+
+  @override
+  String get goalsMilestoneAdd => 'Add a milestone';
+
+  @override
+  String get goalsMilestoneNew => 'New milestone';
+
+  @override
+  String get goalsMilestoneEdit => 'Edit milestone';
+
+  @override
+  String get goalsMilestoneTitleLabel => 'Milestone';
+
+  @override
+  String get goalsMilestoneTitleHint => 'Finish module 3';
+
+  @override
+  String get goalsMilestoneTitleRequired => 'Give it a short name';
+
+  @override
+  String get goalsMilestoneDateLabel => 'Date';
+
+  @override
+  String get goalsMilestoneNoDate => 'No date';
+
+  @override
+  String goalsMilestoneNextLine(String title, String date) {
+    return 'Next: $title, $date';
+  }
+
+  @override
+  String goalsMilestoneNextNoDate(String title) {
+    return 'Next: $title';
+  }
+
+  @override
+  String get goalsMilestoneMoved => 'Moved';
+
+  @override
+  String goalsMilestoneMovedBody(String date) {
+    return 'Its date slipped by. A new one: $date?';
+  }
+
+  @override
+  String goalsMilestoneMoveAccept(String date) {
+    return 'Use $date';
+  }
+
+  @override
+  String goalsMilestoneMovedToast(String date) {
+    return 'Moved to $date. Plenty of room.';
+  }
+
+  @override
+  String goalsMilestoneReachedToast(String title) {
+    return 'Milestone reached: $title';
+  }
+
+  @override
+  String get goalsMilestoneMoveUp => 'Move up';
+
+  @override
+  String get goalsMilestoneMoveDown => 'Move down';
+
+  @override
+  String get goalsMilestoneDeleteTitle => 'Delete this milestone?';
+
+  @override
+  String get goalsMilestoneDeleteBody => 'Its tasks stay with the goal.';
+
+  @override
+  String get goalsMilestoneDeleted => 'Milestone deleted';
+
+  @override
+  String get goalsMilestoneAddTask => 'Add a task';
+
+  @override
+  String goalsMilestoneTaskSheetTitle(String title) {
+    return 'A task for $title';
+  }
+
+  @override
+  String get goalsMilestoneTaskHint => 'Watch lesson 7';
+
+  @override
+  String get goalsMilestoneWeekLabel => 'Which week';
+
+  @override
+  String get goalsMilestoneThisWeek => 'This week';
+
+  @override
+  String get goalsMilestoneNextWeek => 'Next week';
+
+  @override
+  String get goalsMilestoneEstimateLabel => 'About how long';
+
+  @override
+  String get goalsMilestoneTaskAdded =>
+      'Task added. The plan will find it a spot.';
+
+  @override
+  String goalsMilestoneTasksCount(int done, int total) {
+    return '$done of $total tasks done';
+  }
+
+  @override
+  String get goalsNextTask => 'Next scheduled task';
+
+  @override
+  String get goalsNextTaskNone =>
+      'Nothing on the calendar yet. Ready when you are.';
+
+  @override
+  String goalsNextTaskWhen(String date, String time) {
+    return '$date, $time';
+  }
+
+  @override
+  String get goalsMilestoneOptions => 'Milestone options';
 }

@@ -3044,5 +3044,211 @@
   "recapShareFooter": "Sent from Grind",
   "@recapShareFooter": {
     "description": "Shared recap: last line"
+  },
+  "goalsMilestones": "Milestones",
+  "@goalsMilestones": {
+    "description": "Goal detail: milestone section label"
+  },
+  "goalsMilestonesProgress": "{done} of {total} reached",
+  "@goalsMilestonesProgress": {
+    "description": "Goal detail: milestones reached so far",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsMilestonesEmpty": "Break a long goal into a few steps. Each step gets its own weekly tasks.",
+  "@goalsMilestonesEmpty": {
+    "description": "Goal detail: no milestones yet"
+  },
+  "goalsMilestoneAdd": "Add a milestone",
+  "@goalsMilestoneAdd": {
+    "description": "Goal detail: button"
+  },
+  "goalsMilestoneNew": "New milestone",
+  "@goalsMilestoneNew": {
+    "description": "Milestone sheet title (new)"
+  },
+  "goalsMilestoneEdit": "Edit milestone",
+  "@goalsMilestoneEdit": {
+    "description": "Milestone sheet title (edit)"
+  },
+  "goalsMilestoneTitleLabel": "Milestone",
+  "@goalsMilestoneTitleLabel": {
+    "description": "Milestone sheet: title field"
+  },
+  "goalsMilestoneTitleHint": "Finish module 3",
+  "@goalsMilestoneTitleHint": {
+    "description": "Milestone sheet: title hint"
+  },
+  "goalsMilestoneTitleRequired": "Give it a short name",
+  "@goalsMilestoneTitleRequired": {
+    "description": "Milestone sheet: empty title"
+  },
+  "goalsMilestoneDateLabel": "Date",
+  "@goalsMilestoneDateLabel": {
+    "description": "Milestone sheet: date field"
+  },
+  "goalsMilestoneNoDate": "No date",
+  "@goalsMilestoneNoDate": {
+    "description": "Milestone row: no date"
+  },
+  "goalsMilestoneNextLine": "Next: {title}, {date}",
+  "@goalsMilestoneNextLine": {
+    "description": "Goal detail: next open milestone with its date",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneNextNoDate": "Next: {title}",
+  "@goalsMilestoneNextNoDate": {
+    "description": "Goal detail: next open milestone without a date",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneMoved": "Moved",
+  "@goalsMilestoneMoved": {
+    "description": "Milestone row: its date passed while open (never 'missed')"
+  },
+  "goalsMilestoneMovedBody": "Its date slipped by. A new one: {date}?",
+  "@goalsMilestoneMovedBody": {
+    "description": "Milestone row: gentle rollover suggestion",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneMoveAccept": "Use {date}",
+  "@goalsMilestoneMoveAccept": {
+    "description": "Milestone row: accept the suggested date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneMovedToast": "Moved to {date}. Plenty of room.",
+  "@goalsMilestoneMovedToast": {
+    "description": "Toast after accepting a new milestone date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneReachedToast": "Milestone reached: {title}",
+  "@goalsMilestoneReachedToast": {
+    "description": "Toast after completing a milestone",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneMoveUp": "Move up",
+  "@goalsMilestoneMoveUp": {
+    "description": "Milestone row: reorder"
+  },
+  "goalsMilestoneMoveDown": "Move down",
+  "@goalsMilestoneMoveDown": {
+    "description": "Milestone row: reorder"
+  },
+  "goalsMilestoneDeleteTitle": "Delete this milestone?",
+  "@goalsMilestoneDeleteTitle": {
+    "description": "Milestone delete confirmation"
+  },
+  "goalsMilestoneDeleteBody": "Its tasks stay with the goal.",
+  "@goalsMilestoneDeleteBody": {
+    "description": "Milestone delete confirmation body"
+  },
+  "goalsMilestoneDeleted": "Milestone deleted",
+  "@goalsMilestoneDeleted": {
+    "description": "Toast"
+  },
+  "goalsMilestoneAddTask": "Add a task",
+  "@goalsMilestoneAddTask": {
+    "description": "Milestone row: add a weekly task"
+  },
+  "goalsMilestoneTaskSheetTitle": "A task for {title}",
+  "@goalsMilestoneTaskSheetTitle": {
+    "description": "Milestone task sheet title",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneTaskHint": "Watch lesson 7",
+  "@goalsMilestoneTaskHint": {
+    "description": "Milestone task sheet: title hint"
+  },
+  "goalsMilestoneWeekLabel": "Which week",
+  "@goalsMilestoneWeekLabel": {
+    "description": "Milestone task sheet: week choice"
+  },
+  "goalsMilestoneThisWeek": "This week",
+  "@goalsMilestoneThisWeek": {
+    "description": "Milestone task sheet: week choice"
+  },
+  "goalsMilestoneNextWeek": "Next week",
+  "@goalsMilestoneNextWeek": {
+    "description": "Milestone task sheet: week choice"
+  },
+  "goalsMilestoneEstimateLabel": "About how long",
+  "@goalsMilestoneEstimateLabel": {
+    "description": "Milestone task sheet: estimate"
+  },
+  "goalsMilestoneTaskAdded": "Task added. The plan will find it a spot.",
+  "@goalsMilestoneTaskAdded": {
+    "description": "Toast after adding a milestone task"
+  },
+  "goalsMilestoneTasksCount": "{done} of {total} tasks done",
+  "@goalsMilestoneTasksCount": {
+    "description": "Milestone row: its tasks",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsNextTask": "Next scheduled task",
+  "@goalsNextTask": {
+    "description": "Goal detail: label"
+  },
+  "goalsNextTaskNone": "Nothing on the calendar yet. Ready when you are.",
+  "@goalsNextTaskNone": {
+    "description": "Goal detail: no scheduled task"
+  },
+  "goalsNextTaskWhen": "{date}, {time}",
+  "@goalsNextTaskWhen": {
+    "description": "Goal detail: when the next task is scheduled",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMilestoneOptions": "Milestone options",
+  "@goalsMilestoneOptions": {
+    "description": "Milestone row: edit button label"
   }
 }

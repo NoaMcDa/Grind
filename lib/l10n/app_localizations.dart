@@ -3721,6 +3721,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent from Grind'**
   String get recapShareFooter;
+
+  /// Goal detail: milestone section label
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones'**
+  String get goalsMilestones;
+
+  /// Goal detail: milestones reached so far
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} reached'**
+  String goalsMilestonesProgress(int done, int total);
+
+  /// Goal detail: no milestones yet
+  ///
+  /// In en, this message translates to:
+  /// **'Break a long goal into a few steps. Each step gets its own weekly tasks.'**
+  String get goalsMilestonesEmpty;
+
+  /// Goal detail: button
+  ///
+  /// In en, this message translates to:
+  /// **'Add a milestone'**
+  String get goalsMilestoneAdd;
+
+  /// Milestone sheet title (new)
+  ///
+  /// In en, this message translates to:
+  /// **'New milestone'**
+  String get goalsMilestoneNew;
+
+  /// Milestone sheet title (edit)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit milestone'**
+  String get goalsMilestoneEdit;
+
+  /// Milestone sheet: title field
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone'**
+  String get goalsMilestoneTitleLabel;
+
+  /// Milestone sheet: title hint
+  ///
+  /// In en, this message translates to:
+  /// **'Finish module 3'**
+  String get goalsMilestoneTitleHint;
+
+  /// Milestone sheet: empty title
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a short name'**
+  String get goalsMilestoneTitleRequired;
+
+  /// Milestone sheet: date field
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get goalsMilestoneDateLabel;
+
+  /// Milestone row: no date
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get goalsMilestoneNoDate;
+
+  /// Goal detail: next open milestone with its date
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}, {date}'**
+  String goalsMilestoneNextLine(String title, String date);
+
+  /// Goal detail: next open milestone without a date
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String goalsMilestoneNextNoDate(String title);
+
+  /// Milestone row: its date passed while open (never 'missed')
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get goalsMilestoneMoved;
+
+  /// Milestone row: gentle rollover suggestion
+  ///
+  /// In en, this message translates to:
+  /// **'Its date slipped by. A new one: {date}?'**
+  String goalsMilestoneMovedBody(String date);
+
+  /// Milestone row: accept the suggested date
+  ///
+  /// In en, this message translates to:
+  /// **'Use {date}'**
+  String goalsMilestoneMoveAccept(String date);
+
+  /// Toast after accepting a new milestone date
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {date}. Plenty of room.'**
+  String goalsMilestoneMovedToast(String date);
+
+  /// Toast after completing a milestone
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone reached: {title}'**
+  String goalsMilestoneReachedToast(String title);
+
+  /// Milestone row: reorder
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get goalsMilestoneMoveUp;
+
+  /// Milestone row: reorder
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get goalsMilestoneMoveDown;
+
+  /// Milestone delete confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this milestone?'**
+  String get goalsMilestoneDeleteTitle;
+
+  /// Milestone delete confirmation body
+  ///
+  /// In en, this message translates to:
+  /// **'Its tasks stay with the goal.'**
+  String get goalsMilestoneDeleteBody;
+
+  /// Toast
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone deleted'**
+  String get goalsMilestoneDeleted;
+
+  /// Milestone row: add a weekly task
+  ///
+  /// In en, this message translates to:
+  /// **'Add a task'**
+  String get goalsMilestoneAddTask;
+
+  /// Milestone task sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'A task for {title}'**
+  String goalsMilestoneTaskSheetTitle(String title);
+
+  /// Milestone task sheet: title hint
+  ///
+  /// In en, this message translates to:
+  /// **'Watch lesson 7'**
+  String get goalsMilestoneTaskHint;
+
+  /// Milestone task sheet: week choice
+  ///
+  /// In en, this message translates to:
+  /// **'Which week'**
+  String get goalsMilestoneWeekLabel;
+
+  /// Milestone task sheet: week choice
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get goalsMilestoneThisWeek;
+
+  /// Milestone task sheet: week choice
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get goalsMilestoneNextWeek;
+
+  /// Milestone task sheet: estimate
+  ///
+  /// In en, this message translates to:
+  /// **'About how long'**
+  String get goalsMilestoneEstimateLabel;
+
+  /// Toast after adding a milestone task
+  ///
+  /// In en, this message translates to:
+  /// **'Task added. The plan will find it a spot.'**
+  String get goalsMilestoneTaskAdded;
+
+  /// Milestone row: its tasks
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} tasks done'**
+  String goalsMilestoneTasksCount(int done, int total);
+
+  /// Goal detail: label
+  ///
+  /// In en, this message translates to:
+  /// **'Next scheduled task'**
+  String get goalsNextTask;
+
+  /// Goal detail: no scheduled task
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing on the calendar yet. Ready when you are.'**
+  String get goalsNextTaskNone;
+
+  /// Goal detail: when the next task is scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, {time}'**
+  String goalsNextTaskWhen(String date, String time);
+
+  /// Milestone row: edit button label
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone options'**
+  String get goalsMilestoneOptions;
 }
 
 class _AppLocalizationsDelegate
