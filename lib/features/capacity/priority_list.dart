@@ -194,7 +194,10 @@ class WeightsSection extends ConsumerWidget {
           children: [
             SizedBox(
               width: 112,
-              child: Text(label, style: AppText.body(size: 13)),
+              // The slider announces the name itself (below).
+              child: ExcludeSemantics(
+                child: Text(label, style: AppText.body(size: 13)),
+              ),
             ),
             Expanded(
               child: Slider(
@@ -202,15 +205,21 @@ class WeightsSection extends ConsumerWidget {
                 divisions: 20,
                 activeColor: AppColors.violet,
                 inactiveColor: AppColors.rule,
+                // The slider node has no label slot; the name rides on the
+                // announced value ("Deadline 40%").
+                semanticFormatterCallback: (v) =>
+                    '$label ${(v * 100).round()}%',
                 onChanged: onChanged,
               ),
             ),
             SizedBox(
               width: 34,
-              child: Text(
-                value.toStringAsFixed(2),
-                textAlign: TextAlign.end,
-                style: AppText.body(size: 12, color: AppColors.muted),
+              child: ExcludeSemantics(
+                child: Text(
+                  value.toStringAsFixed(2),
+                  textAlign: TextAlign.end,
+                  style: AppText.body(size: 12, color: AppColors.muted),
+                ),
               ),
             ),
           ],

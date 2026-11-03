@@ -78,7 +78,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 8, 0),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 8, 0),
               child: Row(
                 children: [
                   _ProgressDots(count: _stepCount, index: _step),
@@ -133,7 +133,7 @@ class _ProgressDots extends StatelessWidget {
           for (var i = 0; i < count; i++)
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 6),
+              margin: const EdgeInsetsDirectional.only(end: 6),
               width: i == index ? 26 : 12,
               height: 12,
               decoration: BoxDecoration(
@@ -161,7 +161,7 @@ class _StepScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 24),
       children: children,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/focus_tap.dart';
 
 /// A row of mutually exclusive pill choices (44px targets).
 class ChoicePills<T> extends StatelessWidget {
@@ -27,11 +28,11 @@ class ChoicePills<T> extends StatelessWidget {
           Semantics(
             button: true,
             selected: e.key == selected,
+            inMutuallyExclusiveGroup: true,
             label: e.value,
             excludeSemantics: true,
-            child: GestureDetector(
+            child: FocusTap(
               onTap: () => onSelected(e.key),
-              behavior: HitTestBehavior.opaque,
               child: Container(
                 constraints: const BoxConstraints(minHeight: 44, minWidth: 56),
                 // No `alignment`: it would stretch each chip to the Wrap's width.

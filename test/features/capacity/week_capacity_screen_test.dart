@@ -172,6 +172,42 @@ void main() {
         expect(find.byType(WeekBars), findsOneWidget);
       });
 
+      testWidgets('weight sliders are named for screen readers', (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        await _pump(tester, locale: locale, tasks: _overbooked, tab: 1);
+        await tester.ensureVisible(find.text(l.capacityWeightsTitle));
+        await tester.tap(find.text(l.capacityWeightsTitle));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text(l.capacityWeightsReset));
+        await tester.pumpAndSettle();
+        for (final name in [
+          l.capacityWeightUrgency,
+          l.capacityWeightImportance,
+          l.capacityWeightPriority,
+          l.capacityWeightQuickWin,
+        ]) {
+          final node = tester.getSemantics(
+            find
+                .byWidgetPredicate(
+                  (w) => w is Slider && w.semanticFormatterCallback != null,
+                )
+                .at(
+                  [
+                    l.capacityWeightUrgency,
+                    l.capacityWeightImportance,
+                    l.capacityWeightPriority,
+                    l.capacityWeightQuickWin,
+                  ].indexOf(name),
+                ),
+          );
+          expect(node.value, startsWith(name));
+          expect(node.flagsCollection.isSlider, isTrue);
+        }
+        handle.dispose();
+      });
+
       testWidgets('pin sheet sets a priority', (tester) async {
         final container = await _pump(
           tester,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_text.dart';
 import '../theme/tokens.dart';
+import 'focus_tap.dart';
 
 /// Pill-shaped button, at least 44px tall, ink border, optional hard shadow.
 class PillButton extends StatelessWidget {
@@ -43,9 +44,8 @@ class PillButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       onTap: onPressed,
-      child: GestureDetector(
+      child: FocusTap(
         onTap: onPressed,
-        behavior: HitTestBehavior.opaque,
         child: _target(
           Container(
             height: height,
