@@ -40,13 +40,13 @@ class MomentumMeter extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadii.pill),
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: AlignmentDirectional.centerStart,
             child: FractionallySizedBox(
               widthFactor: v == 0 ? 0.0001 : v,
               child: Container(
                 decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(
+                  border: BorderDirectional(
+                    end: BorderSide(
                       color: AppColors.ink,
                       width: AppStroke.border,
                     ),
@@ -61,8 +61,8 @@ class MomentumMeter extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: segments[i],
                             border: i < segments.length - 1
-                                ? const Border(
-                                    right: BorderSide(
+                                ? const BorderDirectional(
+                                    end: BorderSide(
                                       color: AppColors.ink,
                                       width: AppStroke.border,
                                     ),

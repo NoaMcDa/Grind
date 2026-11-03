@@ -39,42 +39,56 @@ class PillButton extends StatelessWidget {
         : AppText.bold(size: fontSize, color: textColor, height: 1);
     return Semantics(
       button: true,
+      enabled: onPressed != null,
       label: label,
+      excludeSemantics: true,
+      onTap: onPressed,
       child: GestureDetector(
         onTap: onPressed,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          height: height,
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(AppRadii.pill),
-            border: Border.all(color: AppColors.ink, width: AppStroke.border),
-            boxShadow: shadow > 0 ? AppShadows.hard(shadow) : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                IconTheme(
-                  data: IconThemeData(color: textColor, size: fontSize + 4),
-                  child: icon!,
+        child: _target(
+          Container(
+            height: height,
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(AppRadii.pill),
+              border: Border.all(color: AppColors.ink, width: AppStroke.border),
+              boxShadow: shadow > 0 ? AppShadows.hard(shadow) : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  IconTheme(
+                    data: IconThemeData(color: textColor, size: fontSize + 4),
+                    child: icon!,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    style: style,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(width: 6),
               ],
-              Flexible(
-                child: Text(
-                  label,
-                  style: style,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Visual height may be below 44, but the hit target never is.
+  Widget _target(Widget pill) {
+    if (height >= 44) return pill;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 44),
+      child: Center(widthFactor: 1, heightFactor: 1, child: pill),
     );
   }
 }
@@ -146,6 +160,9 @@ class SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text.toUpperCase(), style: AppText.label(color: color));
+    return Semantics(
+      header: true,
+      child: Text(text.toUpperCase(), style: AppText.label(color: color)),
+    );
   }
 }
