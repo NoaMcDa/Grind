@@ -29,6 +29,7 @@ class TestApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GrindApp(
       initialLocation: initialLocation,
+      startServices: false,
       overrides: [
         ...demoOverrides(clock: clock),
         ...overrides,
