@@ -45,6 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Grind reads your calendar so Pip plans tasks around the time you already have booked. Your events stay on this phone.</string>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Grind adds the tasks you schedule to your calendar, so your plan shows up next to everything else.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Grind reads your calendar so Pip plans tasks around the time you already have booked, and adds the tasks you schedule back to it. Your events stay on this phone.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
