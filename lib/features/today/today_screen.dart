@@ -12,6 +12,7 @@ import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
+import 'plan_my_day_card.dart';
 import 'today_providers.dart';
 
 import '../../theme/app_text.dart';
@@ -140,6 +141,8 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
               ],
             ),
             const SizedBox(height: 18),
+            // Mornings only, while nothing is scheduled today yet.
+            const PlanMyDayCard(),
             ReminderNowCard(onStartFocus: _startFocus),
             // Shows only after the evening prompt time, once per day.
             EveningReviewBanner(
