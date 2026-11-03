@@ -49,6 +49,9 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
   late int _importance;
   DateTime? _targetDate;
   late MetricSource _source;
+
+  /// Null: a finite total; otherwise a recurring quota per period.
+  MetricPeriod? _period;
   late GoalStatus _status;
   bool _showErrors = false;
 
@@ -59,13 +62,21 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
     super.initState();
     final g = _existing;
     final m = g?.finite;
+    final rec = g?.recurring;
     _title = TextEditingController(text: g?.title ?? '');
     final area = GoalArea.resolve(g?.area);
     _customMode = area != null && !area.isPreset;
     _area = _customMode ? null : area?.id;
     _customArea = TextEditingController(text: _customMode ? area!.label : '');
-    _target = TextEditingController(text: m == null ? '' : '${m.target}');
-    _unit = TextEditingController(text: m?.unit ?? '');
+    _target = TextEditingController(
+      text: m != null
+          ? '${m.target}'
+          : rec != null
+          ? '${rec.quota}'
+          : '',
+    );
+    _unit = TextEditingController(text: m?.unit ?? rec?.unit ?? '');
+    _period = rec?.period;
     _notes = TextEditingController(text: g?.notes ?? '');
     _horizon = g?.horizon ?? widget.initialHorizon ?? GoalHorizon.month;
     _importance = g?.importance ?? 3;
@@ -106,14 +117,19 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
     final notes = _notes.text.trim();
     final target = _targetValue;
     final unitText = _unit.text.trim();
+    final period = _period;
     final unit = unitText.isNotEmpty
         ? unitText
+        : period != null
+        ? context.l10n.goalsDefaultRecurringUnit
         : _source == MetricSource.linkedTasks
         ? context.l10n.goalsLinkedUnit
         : context.l10n.goalsDefaultUnit;
     final old = _existing?.finite;
     final GoalMetric? metric = target == null
         ? null
+        : period != null
+        ? RecurringMetric(quota: target, unit: unit, period: period)
         : FiniteMetric(
             target: target,
             unit: unit,
@@ -282,6 +298,31 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                   ),
                   const SizedBox(height: 14),
                   SectionLabel(context.l10n.goalsMetricLabel),
+                  const SizedBox(height: 4),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoicePill(
+                        label: context.l10n.goalsMetricFinite,
+                        selected: _period == null,
+                        onTap: () => setState(() => _period = null),
+                      ),
+                      ChoicePill(
+                        label: context.l10n.goalsMetricPerWeek,
+                        icon: Icons.refresh,
+                        selected: _period == MetricPeriod.week,
+                        onTap: () =>
+                            setState(() => _period = MetricPeriod.week),
+                      ),
+                      ChoicePill(
+                        label: context.l10n.goalsMetricPerMonth,
+                        icon: Icons.refresh,
+                        selected: _period == MetricPeriod.month,
+                        onTap: () =>
+                            setState(() => _period = MetricPeriod.month),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,8 +331,10 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                         flex: 2,
                         child: StickerTextField(
                           controller: _target,
-                          label: context.l10n.goalsTargetLabel,
-                          hint: '12',
+                          label: _period == null
+                              ? context.l10n.goalsTargetLabel
+                              : context.l10n.goalsQuotaLabel,
+                          hint: _period == null ? '12' : '4',
                           errorText: _targetError,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
@@ -314,24 +357,34 @@ class _GoalFormSheetState extends ConsumerState<GoalFormSheet> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoicePill(
-                        label: context.l10n.goalsCountManual,
-                        selected: _source == MetricSource.manual,
-                        onTap: () =>
-                            setState(() => _source = MetricSource.manual),
+                  if (_period != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Text(
+                        context.l10n.goalRecurringHint(_period!),
+                        style: AppText.body(size: 13, color: AppColors.muted),
                       ),
-                      ChoicePill(
-                        label: context.l10n.goalsCountLinked,
-                        icon: Icons.checklist,
-                        selected: _source == MetricSource.linkedTasks,
-                        onTap: () =>
-                            setState(() => _source = MetricSource.linkedTasks),
-                      ),
-                    ],
-                  ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoicePill(
+                          label: context.l10n.goalsCountManual,
+                          selected: _source == MetricSource.manual,
+                          onTap: () =>
+                              setState(() => _source = MetricSource.manual),
+                        ),
+                        ChoicePill(
+                          label: context.l10n.goalsCountLinked,
+                          icon: Icons.checklist,
+                          selected: _source == MetricSource.linkedTasks,
+                          onTap: () => setState(
+                            () => _source = MetricSource.linkedTasks,
+                          ),
+                        ),
+                      ],
+                    ),
                   if (editing) ...[
                     const SizedBox(height: 14),
                     SectionLabel(context.l10n.goalsStatusLabel),

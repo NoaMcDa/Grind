@@ -1542,4 +1542,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsCounted => 'Counted. Nice step.';
+
+  @override
+  String get goalsMetricKindLabel => 'How it counts';
+
+  @override
+  String get goalsMetricNone => 'No count';
+
+  @override
+  String get goalsMetricFinite => 'Total';
+
+  @override
+  String get goalsMetricPerWeek => 'Per week';
+
+  @override
+  String get goalsMetricPerMonth => 'Per month';
+
+  @override
+  String get goalsQuotaLabel => 'How many';
+
+  @override
+  String get goalsRecurringHintWeek =>
+      'Starts fresh every week. Your +1 taps and linked tasks both count.';
+
+  @override
+  String get goalsRecurringHintMonth =>
+      'Starts fresh every month. Your +1 taps and linked tasks both count.';
+
+  @override
+  String get goalsDefaultRecurringUnit => 'times';
+
+  @override
+  String goalsThisWeek(int current, int target, String unit) {
+    return '$current of $target $unit this week';
+  }
+
+  @override
+  String goalsThisMonth(int current, int target, String unit) {
+    return '$current of $target $unit this month';
+  }
+
+  @override
+  String get goalsQuotaHitWeek => 'Done for the week';
+
+  @override
+  String get goalsQuotaHitMonth => 'Done for the month';
+
+  @override
+  String get goalsUndoTick => 'Take one back';
+
+  @override
+  String get goalsTickUndone => 'Took one back.';
+
+  @override
+  String get goalsRecurringCountHint => 'Ticked linked tasks count here too.';
+
+  @override
+  String get goalsTrendWeeks => 'Last 8 weeks';
+
+  @override
+  String get goalsTrendMonths => 'Last 8 months';
+
+  @override
+  String goalsTrendSummary(int hit, int tracked) {
+    return 'Reached the quota in $hit of $tracked.';
+  }
+
+  @override
+  String get goalsTrendQuietNote =>
+      'Quiet stretches are just data. Nothing resets.';
+
+  @override
+  String get goalsTrendBefore => 'Before this goal';
+
+  @override
+  String goalsMilestoneMetricHit(String title) {
+    return '\"$title\": quota reached. That\'s the rhythm.';
+  }
+
+  @override
+  String get highlightsTitle => 'Highlights';
+
+  @override
+  String get highlightsSubtitle => 'Every goal at a glance.';
+
+  @override
+  String get highlightsGroupCompleted => 'Completed';
+
+  @override
+  String get highlightsGroupCloseToDone => 'Close to done';
+
+  @override
+  String get highlightsGroupOnTrack => 'On track';
+
+  @override
+  String get highlightsGroupStalled => 'Waiting for you';
+
+  @override
+  String highlightsStalledNote(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Quiet for $days days',
+      one: 'Quiet for a day',
+    );
+    return '$_temp0. One small step wakes it up.';
+  }
+
+  @override
+  String get highlightsEmptyTitle => 'Nothing to highlight yet';
+
+  @override
+  String get highlightsEmptyBody =>
+      'Add a goal and Pip will keep the scoreboard.';
+
+  @override
+  String get recapTitleThisWeek => 'Your week with Pip';
+
+  @override
+  String get recapTitleLastWeek => 'Last week with Pip';
+
+  @override
+  String recapRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String recapLeadGoalCompleted(String title) {
+    return 'You finished \"$title\". That\'s a big one.';
+  }
+
+  @override
+  String recapLeadMetricHit(String title, int count, int quota, String unit) {
+    return '\"$title\": $count of $quota $unit. Right on rhythm.';
+  }
+
+  @override
+  String recapLeadWin(String win) {
+    return 'Best moment: $win';
+  }
+
+  @override
+  String recapLeadTasksDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count things done',
+      one: 'One thing done',
+    );
+    return '$_temp0. It adds up.';
+  }
+
+  @override
+  String get recapLeadQuiet => 'A quiet week. Rest counts too.';
+
+  @override
+  String get recapStatDone => 'Tasks done';
+
+  @override
+  String get recapStatMoved => 'Goals moved';
+
+  @override
+  String get recapStatHit => 'Quotas hit';
+
+  @override
+  String get recapStatRolled => 'Moved on';
+
+  @override
+  String get recapWins => 'Wins you logged';
+
+  @override
+  String recapRolledOverLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tasks moved to another day. That\'s planning, not falling behind.',
+      one:
+          'One task moved to another day. That\'s planning, not falling behind.',
+      zero: 'Nothing needed moving.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recapShare => 'Share';
+
+  @override
+  String recapShareHeader(String range) {
+    return 'My week with Pip ($range)';
+  }
+
+  @override
+  String recapShareWins(String list) {
+    return 'Wins: $list';
+  }
+
+  @override
+  String recapShareHits(String list) {
+    return 'Quotas hit: $list';
+  }
+
+  @override
+  String recapShareMoved(String list) {
+    return 'Goals that moved: $list';
+  }
+
+  @override
+  String recapShareDone(int count) {
+    return 'Tasks done: $count';
+  }
+
+  @override
+  String get recapShareFooter => 'Sent from Grind';
 }

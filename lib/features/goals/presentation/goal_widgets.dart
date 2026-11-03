@@ -9,6 +9,7 @@ import '../domain/goal_area.dart';
 import '../domain/goal_progress.dart';
 import '../domain/goal_record.dart';
 import '../../../l10n/l10n.dart';
+import 'goal_l10n.dart';
 
 /// Area tag: palette colour, stroke icon, label.
 class GoalAreaChip extends StatelessWidget {
@@ -27,7 +28,8 @@ class GoalAreaChip extends StatelessWidget {
   );
 }
 
-/// "Almost there" / "Completed" / "Resting", or nothing.
+/// "Almost there" / "Completed" / "Done for the week" / "Resting", or
+/// nothing.
 class GoalStatusPill extends StatelessWidget {
   const GoalStatusPill({super.key, required this.goal, required this.progress});
 
@@ -36,6 +38,16 @@ class GoalStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final period = progress.period;
+    if (period != null &&
+        progress.isCompleted &&
+        goal.status != GoalStatus.done) {
+      return Pill(
+        label: context.l10n.goalQuotaHit(period),
+        color: AppColors.mint,
+        icon: Icon(Icons.check),
+      );
+    }
     if (progress.isCompleted) {
       return Pill(
         label: context.l10n.goalsCompleted,

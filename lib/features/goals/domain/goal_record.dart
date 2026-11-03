@@ -96,7 +96,13 @@ class GoalRecord {
   /// The stored metric as finite, or null.
   FiniteMetric? get finite => switch (metric) {
     final FiniteMetric m => m,
-    null => null,
+    _ => null,
+  };
+
+  /// The stored metric as recurring, or null.
+  RecurringMetric? get recurring => switch (metric) {
+    final RecurringMetric m => m,
+    _ => null,
   };
 
   static double importanceToCore(int level) => level.clamp(1, 5) / 5;

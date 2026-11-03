@@ -18,9 +18,12 @@ import 'goal_widgets.dart';
 /// `/goals`. Tapping a card calls [onOpenGoal], by default pushing
 /// `/goals/:id`.
 class GoalsScreen extends ConsumerWidget {
-  const GoalsScreen({super.key, this.onOpenGoal});
+  const GoalsScreen({super.key, this.onOpenGoal, this.onOpenHighlights});
 
   final void Function(BuildContext context, GoalRecord goal)? onOpenGoal;
+
+  /// The header's Highlights link; by default pushes `/highlights`.
+  final void Function(BuildContext context)? onOpenHighlights;
 
   void _open(BuildContext context, GoalRecord goal) {
     final cb = onOpenGoal;
@@ -51,6 +54,20 @@ class GoalsScreen extends ConsumerWidget {
                 Text(
                   context.l10n.goalsSubtitle,
                   style: AppText.body(color: AppColors.muted),
+                ),
+                const SizedBox(height: 8),
+                PillButton(
+                  label: context.l10n.highlightsTitle,
+                  icon: const Icon(Icons.auto_awesome_outlined),
+                  color: AppColors.sun,
+                  onPressed: () {
+                    final cb = onOpenHighlights;
+                    if (cb != null) {
+                      cb(context);
+                    } else {
+                      context.push('/highlights');
+                    }
+                  },
                 ),
               ],
             ),
@@ -118,10 +135,13 @@ class GoalsScreen extends ConsumerWidget {
 /// A goal on the list: area chip, status pill, title, progress bar and
 /// "8 of 12 lessons · 67%".
 class GoalCard extends ConsumerWidget {
-  const GoalCard({super.key, required this.goal, this.onTap});
+  const GoalCard({super.key, required this.goal, this.onTap, this.footer});
 
   final GoalRecord goal;
   final VoidCallback? onTap;
+
+  /// Extra line under the progress (Highlights: "Quiet for 12 days").
+  final String? footer;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -135,7 +155,9 @@ class GoalCard extends ConsumerWidget {
 
     return Semantics(
       button: onTap != null,
-      label: '${goal.title}. $line',
+      label: footer == null
+          ? '${goal.title}. $line'
+          : '${goal.title}. $line. $footer',
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
@@ -184,6 +206,13 @@ class GoalCard extends ConsumerWidget {
                   ],
                 ],
               ),
+              if (footer != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  footer!,
+                  style: AppText.body(size: 13, color: AppColors.muted),
+                ),
+              ],
             ],
           ),
         ),

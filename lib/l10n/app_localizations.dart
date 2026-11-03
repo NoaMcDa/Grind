@@ -2743,6 +2743,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Counted. Nice step.'**
   String get goalsCounted;
+
+  /// Goal form: metric kind
+  ///
+  /// In en, this message translates to:
+  /// **'How it counts'**
+  String get goalsMetricKindLabel;
+
+  /// Goal form: no metric
+  ///
+  /// In en, this message translates to:
+  /// **'No count'**
+  String get goalsMetricNone;
+
+  /// Goal form: finite metric (X of Y overall)
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get goalsMetricFinite;
+
+  /// Goal form: weekly quota
+  ///
+  /// In en, this message translates to:
+  /// **'Per week'**
+  String get goalsMetricPerWeek;
+
+  /// Goal form: monthly quota
+  ///
+  /// In en, this message translates to:
+  /// **'Per month'**
+  String get goalsMetricPerMonth;
+
+  /// Goal form: quota field
+  ///
+  /// In en, this message translates to:
+  /// **'How many'**
+  String get goalsQuotaLabel;
+
+  /// Goal form: weekly quota explanation
+  ///
+  /// In en, this message translates to:
+  /// **'Starts fresh every week. Your +1 taps and linked tasks both count.'**
+  String get goalsRecurringHintWeek;
+
+  /// Goal form: monthly quota explanation
+  ///
+  /// In en, this message translates to:
+  /// **'Starts fresh every month. Your +1 taps and linked tasks both count.'**
+  String get goalsRecurringHintMonth;
+
+  /// Default unit of a recurring quota
+  ///
+  /// In en, this message translates to:
+  /// **'times'**
+  String get goalsDefaultRecurringUnit;
+
+  /// Recurring metric progress, weekly
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target} {unit} this week'**
+  String goalsThisWeek(int current, int target, String unit);
+
+  /// Recurring metric progress, monthly
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target} {unit} this month'**
+  String goalsThisMonth(int current, int target, String unit);
+
+  /// Pill: weekly quota reached
+  ///
+  /// In en, this message translates to:
+  /// **'Done for the week'**
+  String get goalsQuotaHitWeek;
+
+  /// Pill: monthly quota reached
+  ///
+  /// In en, this message translates to:
+  /// **'Done for the month'**
+  String get goalsQuotaHitMonth;
+
+  /// Removes the latest +1 of this period
+  ///
+  /// In en, this message translates to:
+  /// **'Take one back'**
+  String get goalsUndoTick;
+
+  /// Toast after taking back a +1
+  ///
+  /// In en, this message translates to:
+  /// **'Took one back.'**
+  String get goalsTickUndone;
+
+  /// Recurring metric card hint
+  ///
+  /// In en, this message translates to:
+  /// **'Ticked linked tasks count here too.'**
+  String get goalsRecurringCountHint;
+
+  /// Trend card title, weekly
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 weeks'**
+  String get goalsTrendWeeks;
+
+  /// Trend card title, monthly
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 months'**
+  String get goalsTrendMonths;
+
+  /// Trend summary
+  ///
+  /// In en, this message translates to:
+  /// **'Reached the quota in {hit} of {tracked}.'**
+  String goalsTrendSummary(int hit, int tracked);
+
+  /// Trend note: misses are not failures
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet stretches are just data. Nothing resets.'**
+  String get goalsTrendQuietNote;
+
+  /// Trend bar for a period before the goal existed
+  ///
+  /// In en, this message translates to:
+  /// **'Before this goal'**
+  String get goalsTrendBefore;
+
+  /// Toast when a recurring quota is reached
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\": quota reached. That\'s the rhythm.'**
+  String goalsMilestoneMetricHit(String title);
+
+  /// Highlights screen title and link
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights'**
+  String get highlightsTitle;
+
+  /// Highlights subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Every goal at a glance.'**
+  String get highlightsSubtitle;
+
+  /// Highlights group
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get highlightsGroupCompleted;
+
+  /// Highlights group
+  ///
+  /// In en, this message translates to:
+  /// **'Close to done'**
+  String get highlightsGroupCloseToDone;
+
+  /// Highlights group
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get highlightsGroupOnTrack;
+
+  /// Highlights group: goals with no recent progress
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get highlightsGroupStalled;
+
+  /// Stalled goal note
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Quiet for a day} other{Quiet for {days} days}}. One small step wakes it up.'**
+  String highlightsStalledNote(int days);
+
+  /// Highlights empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to highlight yet'**
+  String get highlightsEmptyTitle;
+
+  /// Highlights empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Add a goal and Pip will keep the scoreboard.'**
+  String get highlightsEmptyBody;
+
+  /// Recap card title on the week's last day
+  ///
+  /// In en, this message translates to:
+  /// **'Your week with Pip'**
+  String get recapTitleThisWeek;
+
+  /// Recap card title for the previous week
+  ///
+  /// In en, this message translates to:
+  /// **'Last week with Pip'**
+  String get recapTitleLastWeek;
+
+  /// Recap date range
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String recapRange(String start, String end);
+
+  /// Recap headline: a goal completed
+  ///
+  /// In en, this message translates to:
+  /// **'You finished \"{title}\". That\'s a big one.'**
+  String recapLeadGoalCompleted(String title);
+
+  /// Recap headline: quota reached
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\": {count} of {quota} {unit}. Right on rhythm.'**
+  String recapLeadMetricHit(String title, int count, int quota, String unit);
+
+  /// Recap headline: a logged win
+  ///
+  /// In en, this message translates to:
+  /// **'Best moment: {win}'**
+  String recapLeadWin(String win);
+
+  /// Recap headline: tasks done
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One thing done} other{{count} things done}}. It adds up.'**
+  String recapLeadTasksDone(int count);
+
+  /// Recap headline: nothing logged
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet week. Rest counts too.'**
+  String get recapLeadQuiet;
+
+  /// Recap stat
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks done'**
+  String get recapStatDone;
+
+  /// Recap stat
+  ///
+  /// In en, this message translates to:
+  /// **'Goals moved'**
+  String get recapStatMoved;
+
+  /// Recap stat
+  ///
+  /// In en, this message translates to:
+  /// **'Quotas hit'**
+  String get recapStatHit;
+
+  /// Recap stat: tasks rolled over to another day
+  ///
+  /// In en, this message translates to:
+  /// **'Moved on'**
+  String get recapStatRolled;
+
+  /// Recap wins label
+  ///
+  /// In en, this message translates to:
+  /// **'Wins you logged'**
+  String get recapWins;
+
+  /// Recap rolled-over line, never guilt
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing needed moving.} =1{One task moved to another day. That\'s planning, not falling behind.} other{{count} tasks moved to another day. That\'s planning, not falling behind.}}'**
+  String recapRolledOverLine(int count);
+
+  /// Recap share button
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get recapShare;
+
+  /// Shared recap: first line
+  ///
+  /// In en, this message translates to:
+  /// **'My week with Pip ({range})'**
+  String recapShareHeader(String range);
+
+  /// Shared recap line
+  ///
+  /// In en, this message translates to:
+  /// **'Wins: {list}'**
+  String recapShareWins(String list);
+
+  /// Shared recap line
+  ///
+  /// In en, this message translates to:
+  /// **'Quotas hit: {list}'**
+  String recapShareHits(String list);
+
+  /// Shared recap line
+  ///
+  /// In en, this message translates to:
+  /// **'Goals that moved: {list}'**
+  String recapShareMoved(String list);
+
+  /// Shared recap line
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks done: {count}'**
+  String recapShareDone(int count);
+
+  /// Shared recap: last line
+  ///
+  /// In en, this message translates to:
+  /// **'Sent from Grind'**
+  String get recapShareFooter;
 }
 
 class _AppLocalizationsDelegate
