@@ -4,12 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/core.dart';
 import '../../theme/tokens.dart';
 
-/// Tasks with a reminder, ordered by reminder time: the "Up next" list.
-final todayTasksProvider = Provider<List<Task>>((ref) {
-  final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
-  return all.where((t) => t.remindAt != null).toList()
-    ..sort((a, b) => a.remindAt!.compareTo(b.remindAt!));
-});
+export '../tasks/task_providers.dart' show todayTasksProvider;
 
 /// "Thursday, Oct 29" for the clock's current day.
 final todayLabelProvider = Provider<String>((ref) {
