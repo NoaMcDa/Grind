@@ -5,6 +5,8 @@ import 'package:grind/core/notifications/notifications.dart';
 import 'helpers.dart';
 
 void main() {
+  setUpAll(ensureTimeZones);
+
   final now = DateTime.utc(2026, 11, 3, 9);
   late InMemoryTaskRepository repo;
   late NotificationRouter router;
@@ -200,5 +202,54 @@ void main() {
       actionFromId(actionIdFor(NotificationAction.moveToTomorrow)),
       NotificationAction.moveToTomorrow,
     );
+  });
+
+  group('recurring tasks', () {
+    // Daily 07:00 series anchored on 1 Nov; "now" is the 3rd at 09:00.
+    final anchor = DateTime.utc(2026, 11, 1, 7);
+    late InMemoryReminderRepository rules;
+    late NotificationRouter recurring;
+
+    setUp(() async {
+      await repo.upsert(task('daily', remindAt: anchor));
+      rules = InMemoryReminderRepository([
+        ReminderRule(
+          id: 'rule-daily',
+          taskId: 'daily',
+          rrule: 'FREQ=DAILY',
+          createdAt: epoch,
+          updatedAt: epoch,
+        ),
+      ]);
+      recurring = NotificationRouter(
+        tasks: repo,
+        clock: FixedClock(now),
+        reminders: rules,
+        preferences: InMemoryPreferencesRepository(utcPrefs),
+      );
+    });
+
+    tearDown(() => recurring.dispose());
+
+    test('done completes the occurrence, not the series', () async {
+      await recurring.handle(r('daily', NotificationAction.done));
+      final t = (await repo.getById('daily'))!;
+      expect(t.status, TaskStatus.open);
+      expect(t.completedAt, isNull);
+      expect(t.remindAt, DateTime.utc(2026, 11, 4, 7));
+    });
+
+    test('snooze and moves leave the series anchor alone', () async {
+      for (final a in [
+        NotificationAction.snooze,
+        NotificationAction.moveToTonight,
+        NotificationAction.moveToTomorrow,
+      ]) {
+        await recurring.handle(r('daily', a));
+      }
+      final t = (await repo.getById('daily'))!;
+      expect(t.remindAt, anchor);
+      expect(t.snoozeCount, 0);
+    });
   });
 }

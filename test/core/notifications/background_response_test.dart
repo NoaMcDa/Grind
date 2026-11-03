@@ -178,7 +178,10 @@ void main() {
         ),
       ]),
     );
-    expect((await tasks.getById('a'))!.snoozeCount, 1);
+    // The series anchor is left alone, and so are its pending occurrences.
+    final after = (await tasks.getById('a'))!;
+    expect(after.snoozeCount, 0);
+    expect(after.remindAt, a.remindAt);
     expect(backend.notificationIds, before);
   });
 }

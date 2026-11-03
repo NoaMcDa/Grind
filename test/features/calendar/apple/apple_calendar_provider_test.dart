@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/calendar/apple/apple_calendar.dart';
+import 'package:grind/features/calendar/sync/calendar_sync_engine.dart';
 
 final _now = DateTime.utc(2026, 11, 3, 8);
 int _ms(DateTime d) => d.millisecondsSinceEpoch;
@@ -164,7 +165,11 @@ void main() {
         from: day,
         to: day.add(const Duration(days: 1)),
       );
-      expect(events.map((e) => e.externalId), ['ev1', 'ev2', 'ev3']);
+      expect(events.map((e) => e.externalId), [
+        'ev1',
+        'ev2',
+        'ev3@${_ms(day.add(const Duration(hours: 12)))}',
+      ]);
 
       final dentist = events[0];
       expect(dentist.id, 'apple:ev1');
@@ -189,6 +194,46 @@ void main() {
         events[2].id,
         'apple:ev3@${_ms(day.add(const Duration(hours: 12)))}',
       );
+    });
+
+    test('every occurrence of a recurring event survives a sync', () async {
+      final day = DateTime.utc(2026, 11, 3);
+      for (final d in [0, 7]) {
+        channel.events.add(
+          AppleEventData(
+            eventIdentifier: 'weekly',
+            calendarIdentifier: 'home',
+            title: 'Standup',
+            startMs: _ms(day.add(Duration(days: d, hours: 9))),
+            endMs: _ms(day.add(Duration(days: d, hours: 10))),
+            isRecurring: true,
+          ),
+        );
+      }
+      final calendars = InMemoryCalendarRepository();
+      final engine = CalendarSyncEngine(
+        provider: make(),
+        calendarRepository: calendars,
+        taskRepository: InMemoryTaskRepository(),
+        preferencesRepository: InMemoryPreferencesRepository(
+          const Preferences(
+            selectedCalendarIds: {
+              CalendarSource.apple: ['home'],
+            },
+          ),
+        ),
+        clock: FixedClock(_now),
+        writeBack: false,
+      );
+      await engine.pull();
+      final mirrored = await calendars.getBetween(
+        day,
+        day.add(const Duration(days: 14)),
+      );
+      expect(mirrored.map((e) => e.start), [
+        day.add(const Duration(hours: 9)),
+        day.add(const Duration(days: 7, hours: 9)),
+      ]);
     });
 
     test('no calendars chosen or an empty range reads nothing', () async {

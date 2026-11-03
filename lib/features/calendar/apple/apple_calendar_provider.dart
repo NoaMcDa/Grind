@@ -134,17 +134,21 @@ class AppleCalendarProvider implements CalendarProvider {
   }
 
   /// Maps one EventKit event to the shared model. Recurring occurrences
-  /// share an `eventIdentifier`, so their local id adds the start time.
+  /// share an `eventIdentifier`, so both their local id and their
+  /// `externalId` add the start time: the sync engine keys events by
+  /// `(source, externalId)` and would otherwise keep only the first
+  /// occurrence of a weekly meeting.
   CalendarEvent toCalendarEvent(AppleEventData e) {
     final now = _clock.now().toUtc();
     DateTime utc(int ms) =>
         DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+    final key = e.isRecurring
+        ? '${e.eventIdentifier}@${e.startMs}'
+        : e.eventIdentifier;
     return CalendarEvent(
-      id: e.isRecurring
-          ? 'apple:${e.eventIdentifier}@${e.startMs}'
-          : 'apple:${e.eventIdentifier}',
+      id: 'apple:$key',
       source: CalendarSource.apple,
-      externalId: e.eventIdentifier,
+      externalId: key,
       calendarId: e.calendarIdentifier.isEmpty ? null : e.calendarIdentifier,
       title: e.title,
       start: utc(e.startMs),

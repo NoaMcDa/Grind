@@ -127,6 +127,7 @@ final reminderActionsProvider = Provider<NotificationRouter>((ref) {
     clock: ref.watch(clockProvider),
     notifications: ref.watch(notificationServiceProvider),
     preferences: ref.watch(preferencesRepositoryProvider),
+    reminders: ref.watch(reminderRepositoryProvider),
   );
   ref.onDispose(router.dispose);
   return router;

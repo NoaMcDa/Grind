@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:grind/core/core.dart';
+import 'package:grind/features/recurrence/occurrence_completion.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'notification_scheduler.dart';
@@ -11,7 +12,12 @@ import 'time_zones.dart';
 ///
 /// - `done`: status done, `completedAt` now, and the task's other pending
 ///   notifications are cancelled at once (the re-plan would drop them too,
-///   but a background isolate has no re-plan).
+///   but a background isolate has no re-plan). A recurring task (one with a
+///   [ReminderRule]) is not completed: its `remindAt` anchor advances to the
+///   next occurrence and its other pending reminders stay.
+/// - `snooze`, `moveToTonight`, `moveToTomorrow` on a recurring task: ignored.
+///   `remindAt` is the series anchor there, and moving it would shift every
+///   later occurrence. (Proposed: a one-off snooze on `ReminderRule`.)
 /// - `snooze`: `remindAt` moves to 15 minutes after the later of the old
 ///   reminder and now (a late tap never snoozes into the past),
 ///   `snoozeCount + 1`. From the second snooze on the scheduler sends the
@@ -33,16 +39,19 @@ class NotificationRouter {
     required Clock clock,
     NotificationService? notifications,
     PreferencesRepository? preferences,
+    ReminderRepository? reminders,
     this.snoozeBy = const Duration(minutes: 15),
   }) : _tasks = tasks,
        _clock = clock,
        _notifications = notifications,
-       _prefs = preferences;
+       _prefs = preferences,
+       _reminders = reminders;
 
   final TaskRepository _tasks;
   final Clock _clock;
   final NotificationService? _notifications;
   final PreferencesRepository? _prefs;
+  final ReminderRepository? _reminders;
   final Duration snoozeBy;
 
   final _focus = StreamController<String>.broadcast();
@@ -86,6 +95,11 @@ class NotificationRouter {
     final task = await _tasks.getById(response.taskId);
     if (task == null || task.status != TaskStatus.open) return;
     final now = _clock.now().toUtc();
+    final rule = await _reminders?.getForTask(task.id);
+    if (rule != null) {
+      await _handleRecurring(task, rule, action, now);
+      return;
+    }
     switch (action) {
       case NotificationAction.done:
         await _tasks.upsert(
@@ -135,6 +149,27 @@ class NotificationRouter {
       case NotificationAction.startFocus:
         break;
     }
+  }
+
+  /// Done completes one occurrence (the series goes on); every move would
+  /// shift the series anchor, so those are left alone.
+  Future<void> _handleRecurring(
+    Task task,
+    ReminderRule rule,
+    NotificationAction action,
+    DateTime now,
+  ) async {
+    if (action != NotificationAction.done) return;
+    final prefs = await _prefs?.get();
+    await _tasks.upsert(
+      completeOccurrence(
+        task: task,
+        rule: rule,
+        occurrenceAt: now,
+        timeZoneName: prefs?.timeZoneName ?? 'UTC',
+        now: now,
+      ),
+    );
   }
 
   Future<tz.Location> _location() async {

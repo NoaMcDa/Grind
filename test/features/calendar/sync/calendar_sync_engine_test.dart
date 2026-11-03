@@ -22,6 +22,9 @@ class LiveFakeProvider extends FakeCalendarProvider {
   final List<String> calls = [];
   Object? failWith;
 
+  /// Like the real providers: only events of the asked-for calendars.
+  bool onlyFetchCalendars = false;
+
   @override
   Future<List<ExternalCalendar>> listCalendars() async => calendars;
 
@@ -33,7 +36,14 @@ class LiveFakeProvider extends FakeCalendarProvider {
   }) async {
     if (failWith != null) throw failWith!;
     fetchedIds.add(calendarIds);
-    return super.fetchEvents(calendarIds: calendarIds, from: from, to: to);
+    final all = await super.fetchEvents(
+      calendarIds: calendarIds,
+      from: from,
+      to: to,
+    );
+    return onlyFetchCalendars
+        ? all.where((e) => calendarIds.contains(e.calendarId)).toList()
+        : all;
   }
 
   @override
@@ -378,6 +388,33 @@ void main() {
   });
 
   group('sync', () {
+    test('a write-back in an unselected calendar is not mistaken for a '
+        'deletion', () async {
+      // Only "work" is read, but write-backs go to the primary calendar.
+      provider = LiveFakeProvider(
+        calendars: const [
+          ExternalCalendar(id: 'primary', name: 'Me', isPrimary: true),
+          ExternalCalendar(id: 'work', name: 'Work'),
+        ],
+      )..onlyFetchCalendars = true;
+      prefs = InMemoryPreferencesRepository(
+        const Preferences(
+          selectedCalendarIds: {
+            CalendarSource.google: ['work'],
+          },
+        ),
+      );
+      engine = build();
+      await tasks.upsert(task('t1', day: 4));
+      await engine.sync();
+      await engine.sync();
+      await engine.sync();
+      expect(provider.calls, ['create primary t1'], reason: 'no duplicates');
+      final t = (await tasks.getById('t1'))!;
+      expect(t.calendarEventId, 'fake-1');
+      expect(t.isScheduled, isTrue);
+    });
+
     test(
       'creates write-backs for scheduled open tasks in the window',
       () async {

@@ -148,9 +148,13 @@ class NotificationSync {
         )
         .join('\n');
     if (!force && signature == _lastSignature) return;
-    _lastSignature = signature;
     replaceCount++;
+    // Remember the plan only once it is in place: a failed replaceAll (the
+    // OS refused one request) has already cleared the pending set, and an
+    // identical plan must be allowed to try again.
+    _lastSignature = null;
     await _service.replaceAll(plan);
+    _lastSignature = signature;
   }
 
   Future<void> dispose() async {
