@@ -23,6 +23,13 @@ import flutter_local_notifications
     UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
 
     GeneratedPluginRegistrant.register(with: self)
+
+    // In-house EventKit bridge for Apple Calendar (#14). Main isolate only:
+    // background notification actions never touch the calendar.
+    // See docs/adr/0004-apple-calendar.md.
+    if let registrar = registrar(forPlugin: "AppleCalendarPlugin") {
+      AppleCalendarPlugin.register(with: registrar)
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
