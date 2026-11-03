@@ -2227,4 +2227,153 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'Sent from Grind';
+
+  @override
+  String get settingsSyncing => 'Syncing...';
+
+  @override
+  String get settingsSyncIdle => 'Up to date';
+
+  @override
+  String get settingsSyncError => 'Pip could not reach your calendar just now.';
+
+  @override
+  String settingsLastSynced(String time) {
+    return 'Last synced $time';
+  }
+
+  @override
+  String get settingsTimeZone => 'Time zone';
+
+  @override
+  String get settingsTimeZoneSearch => 'Search, e.g. London';
+
+  @override
+  String get settingsTimeZoneNoMatch => 'No zone by that name. Try a city.';
+
+  @override
+  String settingsUseDeviceZone(String zone) {
+    return 'Use this device: $zone';
+  }
+
+  @override
+  String get settingsExportHint =>
+      'Includes calendar events Pip mirrored, such as meeting titles.';
+
+  @override
+  String get settingsPrivacyBody =>
+      'Your plans stay on this device. No account, no analytics. If you connect a calendar, Pip reads its events to plan around them and writes back only the tasks you schedule. Disconnect any time.';
+
+  @override
+  String get calendarSyncGenericError =>
+      'Pip couldn\'t reach your calendar just now. Another try is coming soon.';
+
+  @override
+  String get calendarSyncReconnect =>
+      'Pip is waiting for a fresh hello from your calendar. Reconnect it in Settings.';
+
+  @override
+  String get calendarUntitledEvent => '(No title)';
+
+  @override
+  String get calendarWrittenByGrind => 'Planned with Grind.';
+
+  @override
+  String get analyticsTitle => 'Your numbers';
+
+  @override
+  String get analyticsSubtitle => 'Just what happened. No grades.';
+
+  @override
+  String get analyticsEmptyTitle => 'Nothing to chart yet';
+
+  @override
+  String get analyticsEmptyBody =>
+      'Finish a task or a focus session and your numbers show up here.';
+
+  @override
+  String get analyticsFocusTitle => 'Focus minutes';
+
+  @override
+  String get analyticsFocusSub => 'Last 14 days';
+
+  @override
+  String get analyticsRestLegend => 'Pale bars are rest days. Rest counts too.';
+
+  @override
+  String get analyticsFocusTotalNone => 'A quiet stretch. Pip is patient.';
+
+  @override
+  String analyticsFocusTotalMinutes(int minutes) {
+    return '$minutes min of focus in two weeks';
+  }
+
+  @override
+  String analyticsFocusTotalHours(int hours) {
+    return '$hours h of focus in two weeks';
+  }
+
+  @override
+  String analyticsFocusTotalHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min of focus in two weeks';
+  }
+
+  @override
+  String get analyticsCompletionTitle => 'Completion rate';
+
+  @override
+  String get analyticsCompletionSub => 'Last 8 weeks';
+
+  @override
+  String get analyticsCompletionNote =>
+      'Share of each week\'s tasks you finished. A dash means nothing was planned.';
+
+  @override
+  String get analyticsAccuracyTitle => 'Estimate accuracy';
+
+  @override
+  String get analyticsAccuracySub => 'Planned time vs real time';
+
+  @override
+  String get analyticsAccuracyWaiting => 'A few more tasks and Pip will know.';
+
+  @override
+  String get analyticsAccuracyHow =>
+      'Pip uses this to plan with a little more room where it helps.';
+
+  @override
+  String analyticsAccuracyLonger(String category, String ratio) {
+    return '$category tasks usually run $ratio× longer';
+  }
+
+  @override
+  String analyticsAccuracyShorter(String category, String ratio) {
+    return '$category tasks usually take $ratio× the time';
+  }
+
+  @override
+  String analyticsAccuracyOnTarget(String category) {
+    return '$category tasks usually land right on the estimate';
+  }
+
+  @override
+  String analyticsSamples(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tasks',
+      one: '1 task',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsSemanticsFocus(int minutes, int restDays) {
+    return 'Focus minutes, last 14 days: $minutes in total, $restDays rest days';
+  }
+
+  @override
+  String analyticsSemanticsCompletion(int done, int planned) {
+    return 'Completion rate, last 8 weeks: $done of $planned tasks finished';
+  }
 }

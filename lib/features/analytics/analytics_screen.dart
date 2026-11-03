@@ -1,15 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/sticker_card.dart';
 import 'analytics_providers.dart';
-import 'analytics_strings.dart';
 import 'stats.dart';
 
-const _dayInitials = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+/// One-letter weekday for the bar labels (weekday 1 = Monday).
+String _dayInitial(AppLocalizations l, int weekday) => switch (weekday) {
+  DateTime.monday => l.commonWeekdayLetterMon,
+  DateTime.tuesday => l.commonWeekdayLetterTue,
+  DateTime.wednesday => l.commonWeekdayLetterWed,
+  DateTime.thursday => l.commonWeekdayLetterThu,
+  DateTime.friday => l.commonWeekdayLetterFri,
+  DateTime.saturday => l.commonWeekdayLetterSat,
+  _ => l.commonWeekdayLetterSun,
+};
+
+/// "2 h 5 min of focus in two weeks"; a quiet stretch reads as patience.
+String _focusTotal(AppLocalizations l, int minutes) {
+  if (minutes == 0) return l.analyticsFocusTotalNone;
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  if (h == 0) return l.analyticsFocusTotalMinutes(m);
+  if (m == 0) return l.analyticsFocusTotalHours(h);
+  return l.analyticsFocusTotalHoursMinutes(h, m);
+}
+
+/// "study tasks usually run 1.4x longer".
+String _accuracyLine(AppLocalizations l, String category, double ratio) {
+  final r = ratio.toStringAsFixed(1);
+  if (ratio >= 1.1) return l.analyticsAccuracyLonger(category, r);
+  if (ratio <= 0.9) return l.analyticsAccuracyShorter(category, r);
+  return l.analyticsAccuracyOnTarget(category);
+}
 
 /// "Your numbers": the detailed view behind the Pip screen's week bars.
 /// Route `/analytics`.
@@ -18,6 +45,7 @@ class AnalyticsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final focus = ref.watch(focusWeekProvider).value ?? const <DayMinutes>[];
     final weeks = ref.watch(completionTrendProvider);
     final accuracy = ref.watch(estimateAccuracyProvider);
@@ -37,7 +65,7 @@ class AnalyticsScreen extends ConsumerWidget {
               children: [
                 Semantics(
                   button: true,
-                  label: AnalyticsStrings.back,
+                  label: l.commonBack,
                   child: InkResponse(
                     onTap: () => Navigator.maybePop(context),
                     radius: 24,
@@ -54,7 +82,7 @@ class AnalyticsScreen extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    AnalyticsStrings.title,
+                    l.analyticsTitle,
                     style: AppText.display(height: 1.2),
                   ),
                 ),
@@ -63,14 +91,14 @@ class AnalyticsScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 48, bottom: 14),
               child: Text(
-                AnalyticsStrings.subtitle,
+                l.analyticsSubtitle,
                 style: AppText.body(color: AppColors.muted),
               ),
             ),
             if (!hasData)
-              const EmptyState(
-                title: AnalyticsStrings.emptyTitle,
-                body: AnalyticsStrings.emptyBody,
+              EmptyState(
+                title: l.analyticsEmptyTitle,
+                body: l.analyticsEmptyBody,
               )
             else ...[
               _FocusCard(days: focus),
@@ -112,21 +140,19 @@ class _FocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final total = days.fold<int>(0, (s, d) => s + d.minutes);
     final rest = days.where((d) => d.isRest).length;
     final peak = days.fold<int>(0, (m, d) => d.minutes > m ? d.minutes : m);
     return Semantics(
       container: true,
-      label: AnalyticsStrings.semanticsFocus(total, rest),
+      label: l.analyticsSemanticsFocus(total, rest),
       child: ExcludeSemantics(
         child: StickerCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _CardHeader(
-                AnalyticsStrings.focusTitle,
-                AnalyticsStrings.focusSub,
-              ),
+              _CardHeader(l.analyticsFocusTitle, l.analyticsFocusSub),
               SizedBox(
                 height: 120,
                 width: double.infinity,
@@ -148,7 +174,7 @@ class _FocusCard extends StatelessWidget {
                   for (final d in days)
                     Expanded(
                       child: Text(
-                        _dayInitials[d.day.weekday - 1],
+                        _dayInitial(l, d.day.weekday),
                         textAlign: TextAlign.center,
                         style: AppText.label(size: 11),
                       ),
@@ -156,13 +182,10 @@ class _FocusCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              Text(
-                AnalyticsStrings.focusTotal(total),
-                style: AppText.bold(size: 14),
-              ),
+              Text(_focusTotal(l, total), style: AppText.bold(size: 14)),
               if (rest > 0)
                 Text(
-                  AnalyticsStrings.restLegend,
+                  l.analyticsRestLegend,
                   style: AppText.body(size: 13, color: AppColors.muted),
                 ),
             ],
@@ -179,20 +202,18 @@ class _CompletionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final done = weeks.fold<int>(0, (s, w) => s + w.completed);
     final planned = weeks.fold<int>(0, (s, w) => s + w.planned);
     return Semantics(
       container: true,
-      label: AnalyticsStrings.semanticsCompletion(done, planned),
+      label: l.analyticsSemanticsCompletion(done, planned),
       child: ExcludeSemantics(
         child: StickerCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _CardHeader(
-                AnalyticsStrings.completionTitle,
-                AnalyticsStrings.completionSub,
-              ),
+              _CardHeader(l.analyticsCompletionTitle, l.analyticsCompletionSub),
               SizedBox(
                 height: 110,
                 width: double.infinity,
@@ -221,7 +242,7 @@ class _CompletionCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                AnalyticsStrings.completionNote,
+                l.analyticsCompletionNote,
                 style: AppText.body(size: 13, color: AppColors.muted),
               ),
             ],
@@ -238,17 +259,15 @@ class _AccuracyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final trusted = items.where((c) => c.trusted).toList();
     return StickerCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _CardHeader(
-            AnalyticsStrings.accuracyTitle,
-            AnalyticsStrings.accuracySub,
-          ),
+          _CardHeader(l.analyticsAccuracyTitle, l.analyticsAccuracySub),
           if (trusted.isEmpty)
-            Text(AnalyticsStrings.accuracyWaiting, style: AppText.bold())
+            Text(l.analyticsAccuracyWaiting, style: AppText.bold())
           else ...[
             for (final c in trusted)
               Padding(
@@ -257,20 +276,20 @@ class _AccuracyCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        AnalyticsStrings.accuracyLine(c.category, c.ratio),
+                        _accuracyLine(l, c.category, c.ratio),
                         style: AppText.bold(size: 15),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      AnalyticsStrings.samples(c.n),
+                      l.analyticsSamples(c.n),
                       style: AppText.body(size: 12, color: AppColors.muted),
                     ),
                   ],
                 ),
               ),
             Text(
-              AnalyticsStrings.accuracyHow,
+              l.analyticsAccuracyHow,
               style: AppText.body(size: 13, color: AppColors.muted),
             ),
           ],

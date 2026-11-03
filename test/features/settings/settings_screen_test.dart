@@ -21,6 +21,7 @@ Future<void> _pump(
   InMemoryCalendarRepository? calendars,
   Clock? clock,
   TextDirection direction = TextDirection.ltr,
+  Locale? locale,
   int Function()? pick,
   DeviceTimeZone? device,
   FakeCalendarProvider? apple,
@@ -43,6 +44,7 @@ Future<void> _pump(
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
+        locale: locale,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales,
         home: Directionality(
@@ -321,13 +323,17 @@ void main() {
     );
   });
 
-  testWidgets('RTL render at 390x844 has no overflow', (tester) async {
+  testWidgets('Hebrew RTL render at 390x844 has no overflow', (tester) async {
+    final he = lookupAppLocalizations(const Locale('he'));
     await _pump(
       tester,
       prefs: InMemoryPreferencesRepository(),
       direction: TextDirection.rtl,
+      locale: const Locale('he'),
     );
     expect(tester.takeException(), isNull);
+    expect(find.text(he.settingsTitle), findsOneWidget);
+    expect(find.text(he.settingsCalendars.toUpperCase()), findsOneWidget);
     for (var i = 0; i < 6; i++) {
       await tester.drag(find.byType(Scrollable).first, const Offset(0, -500));
       await tester.pumpAndSettle();
@@ -394,6 +400,29 @@ void main() {
       find.descendant(
         of: find.byKey(const ValueKey('sync-status-google')),
         matching: find.textContaining("Pip couldn't reach your calendar"),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the sync pill localizes the engine error in Hebrew', (
+    tester,
+  ) async {
+    final he = lookupAppLocalizations(const Locale('he'));
+    await _pump(
+      tester,
+      prefs: InMemoryPreferencesRepository(),
+      google: _BrokenFetch(),
+      clock: FixedClock(DateTime.utc(2026, 11, 3, 8)),
+      direction: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
+    await tester.tap(find.text(he.commonConnect));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('sync-status-google')),
+        matching: find.text(he.calendarSyncGenericError),
       ),
       findsOneWidget,
     );

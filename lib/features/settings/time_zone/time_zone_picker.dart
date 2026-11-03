@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../theme/app_text.dart';
 import '../../../theme/tokens.dart';
 import '../../../widgets/pill.dart';
 import '../../../widgets/sticker_bottom_sheet.dart';
 import '../../../widgets/sticker_text_field.dart';
-import '../settings_strings.dart';
 import 'device_time_zone.dart';
 
 /// "America/New_York" -> "America/New York".
@@ -62,6 +62,7 @@ class _TimeZonePickerState extends State<TimeZonePicker> {
     final device = isKnownTimeZone(widget.deviceZone)
         ? widget.deviceZone
         : null;
+    final l = context.l10n;
     final height = MediaQuery.sizeOf(context).height * 0.5;
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -71,7 +72,7 @@ class _TimeZonePickerState extends State<TimeZonePicker> {
         children: [
           const SizedBox(height: 12),
           Text(
-            SettingsStrings.timeZone,
+            l.settingsTimeZone,
             style: AppText.display(size: 20, height: 1.2),
           ),
           const SizedBox(height: 12),
@@ -80,7 +81,7 @@ class _TimeZonePickerState extends State<TimeZonePicker> {
               alignment: AlignmentDirectional.centerStart,
               child: PillButton(
                 key: const ValueKey('tz-use-device'),
-                label: SettingsStrings.useDeviceZone(timeZoneLabel(device)),
+                label: l.settingsUseDeviceZone(timeZoneLabel(device)),
                 color: AppColors.sun,
                 height: 44,
                 shadow: 3,
@@ -94,7 +95,7 @@ class _TimeZonePickerState extends State<TimeZonePicker> {
           StickerTextField(
             key: const ValueKey('tz-search'),
             controller: _query,
-            hint: SettingsStrings.timeZoneSearch,
+            hint: l.settingsTimeZoneSearch,
             pill: true,
             prefixIcon: const Icon(Icons.search, color: AppColors.ink),
             textInputAction: TextInputAction.search,
@@ -107,7 +108,7 @@ class _TimeZonePickerState extends State<TimeZonePicker> {
                 ? Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
-                      SettingsStrings.timeZoneNoMatch,
+                      l.settingsTimeZoneNoMatch,
                       style: AppText.body(
                         size: 14,
                         weight: FontWeight.w500,

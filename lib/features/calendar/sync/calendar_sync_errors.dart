@@ -1,21 +1,24 @@
-import 'calendar_sync_strings.dart';
+/// Which calm message the UI shows for a sync failure. The copy itself lives
+/// in the ARB files (`calendarSyncGenericError`, `calendarSyncReconnect`) so
+/// it follows the app language at display time.
+enum SyncErrorKind { generic, reconnect }
 
-/// A sync failure with copy that is safe to show on screen.
+/// A sync failure that is safe to show on screen.
 ///
 /// Providers throw this (or a subclass) so the engine can surface a specific
-/// message; anything else becomes [CalendarSyncStrings.genericError].
+/// [kind]; anything else becomes [SyncErrorKind.generic].
 class CalendarSyncException implements Exception {
   const CalendarSyncException(
     this.message, {
-    this.userMessage = CalendarSyncStrings.genericError,
+    this.kind = SyncErrorKind.generic,
     this.cause,
   });
 
   /// Technical, for logs.
   final String message;
 
-  /// Calm, specific, never guilt.
-  final String userMessage;
+  /// Selects the calm, specific, never-guilt copy shown to the user.
+  final SyncErrorKind kind;
   final Object? cause;
 
   @override
@@ -26,7 +29,7 @@ class CalendarSyncException implements Exception {
 /// web, the browser session ended). The user has to tap Connect again.
 class CalendarAuthException extends CalendarSyncException {
   const CalendarAuthException(super.message, {super.cause})
-    : super(userMessage: CalendarSyncStrings.reconnect);
+    : super(kind: SyncErrorKind.reconnect);
 }
 
 /// The external event a task points at no longer exists. The engine reacts

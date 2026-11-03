@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/core.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
@@ -18,9 +19,11 @@ import 'calendar_selection.dart';
 import 'quiet_hours.dart';
 import 'settings_row.dart';
 import 'settings_store.dart';
-import 'settings_strings.dart';
 import 'time_zone/device_time_zone.dart';
 import 'time_zone/time_zone_picker.dart';
+
+/// Shown in About; not copy, so it stays out of the ARB files.
+const _appVersion = '0.1.0';
 
 bool get _isIos => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -42,6 +45,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final prefs = ref.watch(preferencesProvider).value ?? const Preferences();
     final canPop = Navigator.of(context).canPop();
     return Scaffold(
@@ -54,7 +58,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 if (canPop)
                   IconButton(
-                    tooltip: SettingsStrings.back,
+                    tooltip: l.commonBack,
                     constraints: const BoxConstraints(
                       minWidth: 44,
                       minHeight: 44,
@@ -67,33 +71,33 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 Expanded(
                   child: Text(
-                    SettingsStrings.title,
+                    l.settingsTitle,
                     style: AppText.display(height: 1.2),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            _section(SettingsStrings.calendars, [
+            _section(l.settingsCalendars, [
               _CalendarProviderTile(
-                label: SettingsStrings.google,
+                label: l.commonGoogleCalendar,
                 providerOf: googleCalendarProvider,
                 statusOf: syncStatusProvider,
               ),
               if (_isIos)
                 _CalendarProviderTile(
-                  label: SettingsStrings.apple,
+                  label: l.commonAppleCalendar,
                   providerOf: appleCalendarProvider,
                   statusOf: appleSyncStatusProvider,
                 ),
             ]),
-            _section(SettingsStrings.notifications, [
+            _section(l.settingsNotifications, [
               const _NotificationPermissionRow(),
-              SettingsRow(label: SettingsStrings.leadTime),
+              SettingsRow(label: l.settingsLeadTime),
               ChoicePills<int>(
                 options: {
                   for (final m in const [0, 5, 10, 15, 30])
-                    m: SettingsStrings.minutesBefore(m),
+                    m: m == 0 ? l.settingsLeadAtTime : l.commonMinutes(m),
                 },
                 selected: prefs.defaultReminderLeadMinutes,
                 onSelected: (v) => _update(
@@ -103,8 +107,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               SettingsRow(
-                label: SettingsStrings.quietHours,
-                subtitle: SettingsStrings.quietHoursHint,
+                label: l.settingsQuietHours,
+                subtitle: l.settingsQuietHoursHint,
                 trailing: Switch(
                   key: const ValueKey('quiet-switch'),
                   value: prefs.quietHours != null,
@@ -130,9 +134,9 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               _PromptTimes(picker: picker),
             ]),
-            _section(SettingsStrings.planning, [
+            _section(l.settingsPlanning, [
               _TimeZoneRow(timeZoneName: prefs.timeZoneName),
-              const SettingsRow(label: SettingsStrings.workingHours),
+              SettingsRow(label: l.settingsWorkingHours),
               WeekdayHoursEditor(
                 value: prefs.workingHours,
                 weekStart: prefs.weekStart,
@@ -141,36 +145,36 @@ class SettingsScreen extends ConsumerWidget {
                     _update(ref, (p) => p.copyWith(workingHours: h)),
               ),
               const SizedBox(height: 8),
-              const SettingsRow(label: SettingsStrings.weekStart),
+              SettingsRow(label: l.settingsWeekStart),
               ChoicePills<int>(
-                options: const {
-                  DateTime.sunday: SettingsStrings.sunday,
-                  DateTime.monday: SettingsStrings.monday,
+                options: {
+                  DateTime.sunday: l.commonSunday,
+                  DateTime.monday: l.commonMonday,
                 },
                 selected: prefs.weekStart,
                 onSelected: (v) =>
                     _update(ref, (p) => p.copyWith(weekStart: v)),
               ),
             ]),
-            _section(SettingsStrings.language, [
+            _section(l.settingsLanguage, [
               ChoicePills<String>(
-                options: const {
-                  'en': SettingsStrings.english,
-                  'he': SettingsStrings.hebrew,
+                options: {
+                  'en': l.commonLanguageEnglish,
+                  'he': l.commonLanguageHebrew,
                 },
                 selected: prefs.localeCode,
                 onSelected: (v) =>
                     _update(ref, (p) => p.copyWith(localeCode: v)),
               ),
             ]),
-            _section(SettingsStrings.data, [const _DataActions()]),
-            _section(SettingsStrings.about, [
-              const SettingsRow(
-                label: SettingsStrings.version,
-                trailing: Pill(label: SettingsStrings.appVersion),
+            _section(l.settingsData, [const _DataActions()]),
+            _section(l.settingsAbout, [
+              SettingsRow(
+                label: l.settingsVersion,
+                trailing: Pill(label: _appVersion),
               ),
               SettingsRow(
-                label: SettingsStrings.licences,
+                label: l.settingsLicences,
                 trailing: const Icon(
                   Icons.chevron_right_rounded,
                   color: AppColors.ink,
@@ -178,12 +182,12 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'Grind',
-                  applicationVersion: SettingsStrings.appVersion,
+                  applicationVersion: _appVersion,
                 ),
               ),
-              const SettingsRow(
-                label: SettingsStrings.privacy,
-                subtitle: SettingsStrings.privacyCopy,
+              SettingsRow(
+                label: l.settingsPrivacy,
+                subtitle: l.settingsPrivacyBody,
               ),
             ]),
           ],
@@ -228,6 +232,7 @@ class _TimeRangeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     Future<void> edit(bool start) async {
       final v = await picker(
         context,
@@ -260,18 +265,18 @@ class _TimeRangeRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(SettingsStrings.quietFrom, style: AppText.bold(size: 14)),
+          Text(l.settingsQuietFrom, style: AppText.bold(size: 14)),
           TimePill(
             key: const ValueKey('quiet-start'),
             minutes: range.startMinutes,
-            semanticLabel: SettingsStrings.quietFrom,
+            semanticLabel: l.settingsQuietFrom,
             onTap: () => edit(true),
           ),
-          Text(SettingsStrings.quietTo, style: AppText.bold(size: 14)),
+          Text(l.settingsQuietTo, style: AppText.bold(size: 14)),
           TimePill(
             key: const ValueKey('quiet-end'),
             minutes: range.endMinutes,
-            semanticLabel: SettingsStrings.quietTo,
+            semanticLabel: l.settingsQuietTo,
             onTap: () => edit(false),
           ),
         ],
@@ -300,9 +305,10 @@ class _TimeZoneRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     return SettingsRow(
       key: const ValueKey('time-zone-row'),
-      label: SettingsStrings.timeZone,
+      label: l.settingsTimeZone,
       subtitle: timeZoneLabel(timeZoneName),
       trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.ink),
       onTap: () => _edit(context, ref),
@@ -390,11 +396,12 @@ class _PromptTimesState extends ConsumerState<_PromptTimes> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded) return const SizedBox.shrink();
+    final l = context.l10n;
     final store = ref.read(settingsStoreProvider);
     return Column(
       children: [
         _row(
-          SettingsStrings.morningPrompt,
+          l.settingsMorningPrompt,
           _morning,
           'morning',
           store.setMorningPromptMinutes,
@@ -402,7 +409,7 @@ class _PromptTimesState extends ConsumerState<_PromptTimes> {
           8 * 60,
         ),
         _row(
-          SettingsStrings.eveningPrompt,
+          l.settingsEveningPrompt,
           _evening,
           'evening',
           store.setEveningPromptMinutes,
@@ -412,7 +419,7 @@ class _PromptTimesState extends ConsumerState<_PromptTimes> {
         Padding(
           padding: const EdgeInsets.only(bottom: 4),
           child: Text(
-            SettingsStrings.promptsHint,
+            l.settingsPromptsHint,
             style: AppText.body(
               size: 13,
               weight: FontWeight.w500,
@@ -465,17 +472,18 @@ class _NotificationPermissionRowState
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final granted = _granted ?? false;
     return SettingsRow(
-      label: SettingsStrings.notifPermission,
+      label: l.settingsNotifPermission,
       subtitle: _granted == null
           ? null
           : (granted
-                ? SettingsStrings.notifPermissionOn
-                : SettingsStrings.notifPermissionOff),
+                ? l.settingsNotifPermissionOn
+                : l.settingsNotifPermissionOff),
       trailing: granted || _granted == null
           ? null
-          : _SmallButton(label: 'Allow', onPressed: _request),
+          : _SmallButton(label: l.onboardingNotifAllow, onPressed: _request),
     );
   }
 }
@@ -621,18 +629,15 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsRow(
           label: widget.label,
-          subtitle: _connected
-              ? SettingsStrings.connected
-              : SettingsStrings.notConnected,
+          subtitle: _connected ? l.commonConnected : l.settingsNotConnected,
           trailing: _SmallButton(
-            label: _connected
-                ? SettingsStrings.disconnect
-                : SettingsStrings.connect,
+            label: _connected ? l.settingsDisconnect : l.commonConnect,
             primary: !_connected,
             onPressed: _connected ? _disconnect : _connect,
           ),
@@ -646,7 +651,7 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
-              SettingsStrings.connectFailed,
+              l.settingsConnectFailed,
               style: AppText.body(
                 size: 13,
                 weight: FontWeight.w500,
@@ -655,7 +660,7 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
             ),
           ),
         if (_connected && _selection != null) ...[
-          Text(SettingsStrings.calendarsToUse, style: AppText.label(size: 12)),
+          Text(l.settingsCalendarsToUse, style: AppText.label(size: 12)),
           for (final c in _calendars)
             CheckboxListTile(
               key: ValueKey('cal-${widget.label}-${c.id}'),
@@ -688,17 +693,21 @@ class _SyncStatusPill extends StatelessWidget {
 
   static String two(int v) => v.toString().padLeft(2, '0');
 
-  static String label(SyncStatus s) {
+  static String label(AppLocalizations l, SyncStatus s) {
     switch (s.phase) {
       case SyncPhase.syncing:
-        return SettingsStrings.syncing;
+        return l.settingsSyncing;
       case SyncPhase.error:
-        return s.message ?? SettingsStrings.syncError;
+        return switch (s.error) {
+          SyncErrorKind.generic => l.calendarSyncGenericError,
+          SyncErrorKind.reconnect => l.calendarSyncReconnect,
+          null => l.settingsSyncError,
+        };
       case SyncPhase.idle:
         final t = s.lastSyncedAt?.toLocal();
         return t == null
-            ? SettingsStrings.syncIdle
-            : SettingsStrings.lastSynced('${two(t.hour)}:${two(t.minute)}');
+            ? l.settingsSyncIdle
+            : l.settingsLastSynced('${two(t.hour)}:${two(t.minute)}');
     }
   }
 
@@ -713,7 +722,7 @@ class _SyncStatusPill extends StatelessWidget {
         child: Pill(
           key: ValueKey('sync-status-${source.name}'),
           height: 28,
-          label: label(s),
+          label: label(context.l10n, s),
           color: s.isError ? AppColors.card : AppColors.lilac,
         ),
       ),
@@ -730,42 +739,42 @@ class _DataActions extends ConsumerWidget {
     String done,
   ) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l = context.l10n;
     String msg;
     try {
       await action();
       msg = done;
     } catch (_) {
-      msg = SettingsStrings.actionFailed;
+      msg = l.settingsActionFailed;
     }
     messenger.showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
     final backup = ref.read(backupActionsProvider);
     return Column(
       children: [
         SettingsRow(
-          label: SettingsStrings.exportBackup,
-          subtitle: SettingsStrings.exportHint,
+          label: l.settingsExportBackup,
+          subtitle: l.settingsExportHint,
           trailing: const Icon(
             Icons.file_upload_outlined,
             color: AppColors.ink,
           ),
-          onTap: () =>
-              _run(context, backup.exportBackup, SettingsStrings.exportDone),
+          onTap: () => _run(context, backup.exportBackup, l.settingsExportDone),
         ),
         SettingsRow(
-          label: SettingsStrings.importBackup,
+          label: l.settingsImportBackup,
           trailing: const Icon(
             Icons.file_download_outlined,
             color: AppColors.ink,
           ),
-          onTap: () =>
-              _run(context, backup.importBackup, SettingsStrings.importDone),
+          onTap: () => _run(context, backup.importBackup, l.settingsImportDone),
         ),
         SettingsRow(
-          label: SettingsStrings.deleteAll,
+          label: l.settingsDeleteAll,
           destructive: true,
           trailing: const Icon(
             Icons.delete_outline_rounded,
@@ -775,26 +784,22 @@ class _DataActions extends ConsumerWidget {
             final ok = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text(SettingsStrings.deleteConfirmTitle),
-                content: const Text(SettingsStrings.deleteConfirmBody),
+                title: Text(l.settingsDeleteConfirmTitle),
+                content: Text(l.settingsDeleteConfirmBody),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text(SettingsStrings.cancel),
+                    child: Text(l.commonCancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text(SettingsStrings.deleteConfirm),
+                    child: Text(l.settingsDeleteConfirm),
                   ),
                 ],
               ),
             );
             if (ok == true && context.mounted) {
-              await _run(
-                context,
-                backup.deleteAllData,
-                SettingsStrings.deleted,
-              );
+              await _run(context, backup.deleteAllData, l.settingsDeleted);
             }
           },
         ),

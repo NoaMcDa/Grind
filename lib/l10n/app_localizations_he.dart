@@ -2207,4 +2207,154 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get recapShareFooter => 'נשלח מ-Grind';
+
+  @override
+  String get settingsSyncing => 'מסנכרן...';
+
+  @override
+  String get settingsSyncIdle => 'מעודכן';
+
+  @override
+  String get settingsSyncError => 'פיפ לא הצליח להגיע ליומן כרגע.';
+
+  @override
+  String settingsLastSynced(String time) {
+    return 'סונכרן לאחרונה ב-$time';
+  }
+
+  @override
+  String get settingsTimeZone => 'אזור זמן';
+
+  @override
+  String get settingsTimeZoneSearch => 'חיפוש, למשל לונדון';
+
+  @override
+  String get settingsTimeZoneNoMatch => 'אין אזור בשם הזה. אפשר לנסות עיר.';
+
+  @override
+  String settingsUseDeviceZone(String zone) {
+    return 'להשתמש בזמן המכשיר: $zone';
+  }
+
+  @override
+  String get settingsExportHint =>
+      'כולל אירועי יומן שפיפ שיקף, כמו שמות של פגישות.';
+
+  @override
+  String get settingsPrivacyBody =>
+      'התוכניות שלך נשארות במכשיר הזה. בלי חשבון, בלי ניתוחי שימוש. אם מחברים יומן, פיפ קורא את האירועים כדי לתכנן סביבם, וכותב בחזרה רק את המשימות שקבעת. אפשר לנתק בכל עת.';
+
+  @override
+  String get calendarSyncGenericError =>
+      'פיפ לא הצליח להגיע ליומן כרגע. ניסיון נוסף בדרך.';
+
+  @override
+  String get calendarSyncReconnect =>
+      'פיפ מחכה לשלום חדש מהיומן. אפשר לחבר אותו מחדש בהגדרות.';
+
+  @override
+  String get calendarUntitledEvent => '(ללא כותרת)';
+
+  @override
+  String get calendarWrittenByGrind => 'תוכנן עם Grind.';
+
+  @override
+  String get analyticsTitle => 'המספרים שלך';
+
+  @override
+  String get analyticsSubtitle => 'רק מה שקרה. בלי ציונים.';
+
+  @override
+  String get analyticsEmptyTitle => 'עוד אין מה להציג';
+
+  @override
+  String get analyticsEmptyBody =>
+      'אחרי משימה או סשן פוקוס, המספרים שלך יופיעו כאן.';
+
+  @override
+  String get analyticsFocusTitle => 'דקות פוקוס';
+
+  @override
+  String get analyticsFocusSub => '14 הימים האחרונים';
+
+  @override
+  String get analyticsRestLegend =>
+      'עמודות חיוורות הן ימי מנוחה. גם מנוחה נחשבת.';
+
+  @override
+  String get analyticsFocusTotalNone => 'תקופה שקטה. פיפ סבלן.';
+
+  @override
+  String analyticsFocusTotalMinutes(int minutes) {
+    return '$minutes דק׳ של פוקוס בשבועיים';
+  }
+
+  @override
+  String analyticsFocusTotalHours(int hours) {
+    return '$hours שע׳ של פוקוס בשבועיים';
+  }
+
+  @override
+  String analyticsFocusTotalHoursMinutes(int hours, int minutes) {
+    return '$hours שע׳ ו-$minutes דק׳ של פוקוס בשבועיים';
+  }
+
+  @override
+  String get analyticsCompletionTitle => 'אחוז השלמה';
+
+  @override
+  String get analyticsCompletionSub => '8 השבועות האחרונים';
+
+  @override
+  String get analyticsCompletionNote =>
+      'החלק מהמשימות של כל שבוע שסיימת. מקף אומר שלא תוכננו משימות.';
+
+  @override
+  String get analyticsAccuracyTitle => 'דיוק ההערכות';
+
+  @override
+  String get analyticsAccuracySub => 'זמן מתוכנן מול זמן בפועל';
+
+  @override
+  String get analyticsAccuracyWaiting => 'עוד כמה משימות ופיפ יידע.';
+
+  @override
+  String get analyticsAccuracyHow =>
+      'פיפ משתמש בזה כדי לתכנן עם קצת יותר מרווח במקומות שזה עוזר.';
+
+  @override
+  String analyticsAccuracyLonger(String category, String ratio) {
+    return 'משימות $category לרוב נמשכות פי $ratio יותר';
+  }
+
+  @override
+  String analyticsAccuracyShorter(String category, String ratio) {
+    return 'משימות $category לרוב לוקחות פי $ratio מהזמן';
+  }
+
+  @override
+  String analyticsAccuracyOnTarget(String category) {
+    return 'משימות $category לרוב מסתיימות בדיוק לפי ההערכה';
+  }
+
+  @override
+  String analyticsSamples(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות',
+      one: 'משימה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsSemanticsFocus(int minutes, int restDays) {
+    return 'דקות פוקוס, 14 הימים האחרונים: $minutes בסך הכול, $restDays ימי מנוחה';
+  }
+
+  @override
+  String analyticsSemanticsCompletion(int done, int planned) {
+    return 'אחוז השלמה, 8 השבועות האחרונים: $done מתוך $planned משימות הושלמו';
+  }
 }
