@@ -7,7 +7,7 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
-  drift: ^2.31.0
+  drift: ^2.35.3
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   file_picker: ^11.0.3
   flutter:
