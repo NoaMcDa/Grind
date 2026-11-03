@@ -121,8 +121,12 @@ Plan plan({
     final deadline = due == null ? end : minTime(due, end);
     final protectFocus =
         !deep && queue.skip(qi + 1).any((t) => t.energy == Energy.deep);
+    // Urgent work takes the earliest fit; the rest may wait for a gap it
+    // fills, keeping longer gaps whole for longer tasks.
+    final preferSnug = breakdown.urgency <= urgentAbove;
 
     final chunks = <Slot>[];
+    final chunkNotes = <_Option>[];
     var remaining = need;
     while (remaining > 0) {
       final minLen = task.splittable
@@ -134,6 +138,8 @@ Plan plan({
         notBefore: start,
         deadline: deadline,
         minLen: minLen,
+        fitMinutes: remaining,
+        preferSnug: preferSnug,
         deep: deep,
         protectFocus: protectFocus,
         deepUsed: deepUsed,
@@ -155,6 +161,7 @@ Plan plan({
         option.slot.start.add(Duration(minutes: chunk)),
       );
       chunks.add(s);
+      chunkNotes.add(option);
       remaining -= chunk;
       slots = subtractSlots(slots, [
         s,
@@ -186,6 +193,7 @@ Plan plan({
             breakdown: breakdown,
             chunk: c,
             chunkWord: chunkWord,
+            option: chunkNotes[i],
             prefs: prefs,
             now: start,
           ),
@@ -216,6 +224,8 @@ Plan plan({
                       minLen: task.splittable
                           ? math.min(task.minChunkMinutes, remaining)
                           : remaining,
+                      fitMinutes: remaining,
+                      preferSnug: preferSnug,
                       deep: deep,
                       protectFocus: false,
                       deepUsed: deepUsed,
@@ -259,6 +269,10 @@ Plan plan({
   );
 }
 
+/// Urgency above which a task is "due soon": it says so in its reasons and
+/// takes the earliest fit instead of waiting for a snug gap.
+const urgentAbove = 0.6;
+
 /// Open, not deleted.
 bool isOpenTask(Task t) => t.status == TaskStatus.open && t.deletedAt == null;
 
@@ -289,7 +303,13 @@ DateTime defaultHorizonEnd(DateTime now, Preferences prefs) {
 }
 
 class _Option {
-  const _Option(this.slot, {required this.inDeep, required this.touchesDeep});
+  const _Option(
+    this.slot, {
+    required this.inDeep,
+    required this.touchesDeep,
+    this.snug = false,
+    this.keptFocusClear = false,
+  });
 
   final Slot slot;
 
@@ -298,6 +318,22 @@ class _Option {
 
   /// Overlaps a deep window at all.
   final bool touchesDeep;
+
+  /// The task fills the gap: what is left over is shorter than
+  /// [minSlotMinutes], so no other task could use it.
+  final bool snug;
+
+  /// A light task placed outside the focus windows although an earlier
+  /// option on the same day touched one (kept clear for deep work).
+  final bool keptFocusClear;
+
+  _Option copyWith({bool? snug, bool? keptFocusClear}) => _Option(
+    slot,
+    inDeep: inDeep,
+    touchesDeep: touchesDeep,
+    snug: snug ?? this.snug,
+    keptFocusClear: keptFocusClear ?? this.keptFocusClear,
+  );
 }
 
 _Option? _bestOption({
@@ -306,6 +342,8 @@ _Option? _bestOption({
   required DateTime notBefore,
   required DateTime deadline,
   required int minLen,
+  required int fitMinutes,
+  required bool preferSnug,
   required bool deep,
   required bool protectFocus,
   required Map<DateTime, int> deepUsed,
@@ -313,6 +351,8 @@ _Option? _bestOption({
 }) {
   _Option? best;
   DateTime? bestDay;
+  // Earliest start per day among every usable option (for "kept clear").
+  final earliestTouching = <DateTime, DateTime>{};
   int cmp(_Option o, DateTime day, _Option b, DateTime bDay) {
     if (deep) {
       return _cmpChain([
@@ -324,6 +364,8 @@ _Option? _bestOption({
       day.compareTo(bDay),
       if (protectFocus)
         (o.touchesDeep ? 1 : 0).compareTo(b.touchesDeep ? 1 : 0),
+      // Duration fit: a gap the task fills beats one it would fragment.
+      if (preferSnug) (o.snug ? 0 : 1).compareTo(b.snug ? 0 : 1),
       o.slot.start.compareTo(b.slot.start),
     ]);
   }
@@ -354,8 +396,17 @@ _Option? _bestOption({
       }
       if (touches) options.add(_Option(eff, inDeep: false, touchesDeep: true));
     }
-    for (final o in options) {
-      if (o.slot.minutes < minLen) continue;
+    for (final raw in options) {
+      if (raw.slot.minutes < minLen) continue;
+      final o = raw.copyWith(
+        snug: raw.slot.minutes - fitMinutes < minSlotMinutes,
+      );
+      if (o.touchesDeep) {
+        final e = earliestTouching[day];
+        if (e == null || o.slot.start.isBefore(e)) {
+          earliestTouching[day] = o.slot.start;
+        }
+      }
       final b = best;
       if (b == null || cmp(o, day, b, bestDay!) < 0) {
         best = o;
@@ -363,7 +414,12 @@ _Option? _bestOption({
       }
     }
   }
-  return best;
+  final b = best;
+  if (b == null || deep || !protectFocus || b.touchesDeep) return b;
+  final e = earliestTouching[bestDay!];
+  return e != null && e.isBefore(b.slot.start)
+      ? b.copyWith(keptFocusClear: true)
+      : b;
 }
 
 List<String> _reasons({
@@ -372,15 +428,20 @@ List<String> _reasons({
   required ScoreBreakdown breakdown,
   required Slot chunk,
   required String? chunkWord,
+  required _Option option,
   required Preferences prefs,
   required DateTime now,
 }) {
   final due = task.dueAt;
+  final deep = task.energy == Energy.deep;
   final others = <String>[
-    if (due != null && breakdown.urgency > 0.6) 'due ${dayWord(due, now)}',
+    if (due != null && breakdown.urgency > urgentAbove)
+      'due ${dayWord(due, now)}',
     if (goal != null && breakdown.importance > 0.7) 'part of ${goal.title}',
-    if (task.energy == Energy.deep && _inDeepWindow(chunk, prefs))
-      'your focus window',
+    if (deep && _inDeepWindow(chunk, prefs)) 'your focus window',
+    if (!deep && option.keptFocusClear) 'keeps your focus window clear',
+    if (!deep && option.snug && chunkWord == null)
+      'fills a ${option.slot.minutes}-minute gap',
   ];
   final out = <String>[...others.take(chunkWord == null ? 3 : 2), ?chunkWord];
   if (out.isEmpty) {
@@ -413,8 +474,11 @@ String _unplacedReason({
     return 'the due date has passed, want to pick a new one?';
   }
   final dueInside = due != null && !due.isAfter(horizonEnd);
+  final oneDay = !horizonEnd.isAfter(addDays(startOfDay(now), 1));
   final by = dueInside
       ? 'before ${deadlineWord(due, now)}'
+      : oneDay
+      ? 'today'
       : (calendarDaysBetween(startOfDay(now), startOfDay(horizonEnd)) <= 8
             ? 'this week'
             : 'before ${dayWord(horizonEnd, now)}');

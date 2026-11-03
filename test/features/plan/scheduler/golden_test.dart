@@ -129,7 +129,12 @@ void main() {
           taskId: 'expenses',
           start: at(1, 13),
           end: at(1, 13, 15),
-          reasons: const ['due today'],
+          // Kept out of the 09:00 and 11:40 focus gaps for the slides.
+          reasons: const [
+            'due today',
+            'keeps your focus window clear',
+            'fills a 20-minute gap',
+          ],
         ),
       ]);
       expect(result.unplaced, const [
