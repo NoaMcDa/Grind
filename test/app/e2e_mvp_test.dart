@@ -9,6 +9,7 @@ import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/time_zones.dart';
 import 'package:grind/features/plan/plan_strings.dart';
 
+import '../features/tasks/zone_test_support.dart';
 import '../test_fonts.dart';
 
 final _day = DateTime(2026, 10, 29);
@@ -47,7 +48,7 @@ void main() {
   testWidgets(
     'capture on Today, schedule it for me, see it on Plan, done updates momentum',
     (t) async {
-      final c = await pumpGrindApp(t);
+      final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
       final repo = c.read(taskRepositoryProvider);
       expect(find.text('1 of 4 today'), findsOneWidget);
 
@@ -107,6 +108,7 @@ void main() {
     final c = await pumpGrindApp(
       t,
       clock: FixedClock(DateTime(2026, 10, 29, 12, 35)),
+      overrides: [devicePrefsOverride()],
     );
     final repo = c.read(taskRepositoryProvider);
     expect(find.text('REMINDER · NOW'), findsOneWidget);
@@ -139,6 +141,7 @@ void main() {
         t,
         initialLocation: '/plan',
         overrides: [
+          devicePrefsOverride(),
           taskRepositoryProvider.overrideWithValue(
             InMemoryTaskRepository([
               ...demoTasks(_day),
@@ -215,8 +218,84 @@ void main() {
     },
   );
 
+  testWidgets(
+    'a weekly task: on Today now and next week; completing this week keeps '
+    'next week',
+    (t) async {
+      final clock = FixedClock(testNow);
+      final c = await pumpGrindApp(
+        t,
+        clock: clock,
+        overrides: [devicePrefsOverride()],
+      );
+      final repo = c.read(taskRepositoryProvider);
+      final row = find.text('Team retro');
+
+      Future<void> setDay(DateTime now) async {
+        clock.set(now);
+        await t.pump(const Duration(minutes: 1)); // Today re-reads the clock
+        await t.pumpAndSettle();
+      }
+
+      // Create it with "Repeats: Weekly" from the quick-add sheet.
+      await t.tap(find.bySemanticsLabel('Add a task'));
+      await t.pumpAndSettle();
+      await t.enterText(find.byType(TextField).first, 'Team retro');
+      final chip = find.byKey(const Key('task-form-recurrence'));
+      await t.ensureVisible(chip);
+      await t.pumpAndSettle();
+      await t.tap(chip);
+      await t.pumpAndSettle();
+      await t.tap(find.text('Weekly'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Done').last);
+      await t.pumpAndSettle();
+      await t.tap(find.bySemanticsLabel('Save'));
+      await t.pumpAndSettle();
+      final id = (await repo.getAll())
+          .firstWhere((x) => x.title == 'Team retro')
+          .id;
+      final rule = await c.read(reminderRepositoryProvider).getForTask(id);
+      expect(rule!.rrule, startsWith('FREQ=WEEKLY'));
+
+      // Today, at the series' 09:00.
+      expect(row, findsOneWidget);
+      expect(find.text('1 of 5 today'), findsOneWidget);
+      final nextWeek = testNow.add(const Duration(days: 7));
+
+      // Next week it is there too (and the demo day's tasks are not).
+      await setDay(nextWeek);
+      expect(row, findsOneWidget);
+      expect(find.text('0 of 1 today'), findsOneWidget);
+      await setDay(testNow);
+      expect(row, findsOneWidget);
+
+      // Complete today's occurrence: the series continues.
+      await t.tap(find.bySemanticsLabel('Complete Team retro'));
+      await t.pumpAndSettle();
+      expect(
+        find.text('Nicely done. The next one is lined up.'),
+        findsOneWidget,
+      );
+      await _clearToasts(t);
+      final after = (await repo.getById(id))!;
+      expect(after.isDone, isFalse);
+      // The same wall-clock time a week on.
+      expect(
+        after.remindAt!.difference(DateTime(2026, 10, 29, 9).toUtc()),
+        const Duration(days: 7),
+      );
+      expect(row, findsNothing);
+
+      await setDay(nextWeek);
+      expect(row, findsOneWidget);
+      expect(find.text('09:00'), findsOneWidget);
+      expect(t.takeException(), isNull);
+    },
+  );
+
   testWidgets('settings are reachable from the Today header', (t) async {
-    await pumpGrindApp(t);
+    await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
     await t.tap(find.byKey(const Key('today-settings')));
     await t.pumpAndSettle();
     expect(find.text('Good morning!'), findsNothing);
@@ -233,7 +312,7 @@ void main() {
         t,
         overrides: [
           preferencesRepositoryProvider.overrideWithValue(
-            InMemoryPreferencesRepository(const Preferences()),
+            InMemoryPreferencesRepository(devicePrefs()),
           ),
         ],
       );
