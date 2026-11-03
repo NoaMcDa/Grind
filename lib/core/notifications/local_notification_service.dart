@@ -36,7 +36,9 @@ abstract interface class LocalNotificationsBackend {
     required String title,
     required String body,
     required String payload,
-    required bool withActions,
+
+    /// iOS category (`categoryFor`), null for no action buttons.
+    required String? category,
   });
 
   Future<void> cancel(int platformId);
@@ -61,6 +63,7 @@ class LocalNotificationService implements NotificationService, TimeZoneAware {
     Clock clock = const SystemClock(),
     this.maxPending = 60,
     String timeZoneName = 'UTC',
+    this.replayJournal = true,
   }) : _backend = backend,
        _store = store,
        _clock = clock,
@@ -70,6 +73,10 @@ class LocalNotificationService implements NotificationService, TimeZoneAware {
   final NotificationStore _store;
   final Clock _clock;
   final int maxPending;
+
+  /// False in the background isolate: the journal belongs to the next app
+  /// launch, and nobody listens to [responses] there.
+  final bool replayJournal;
   String _timeZoneName;
 
   final _live = StreamController<NotificationResponse>.broadcast();
@@ -92,6 +99,7 @@ class LocalNotificationService implements NotificationService, TimeZoneAware {
   Future<void> _init() async {
     await _backend.initialize(onResponse: _onRaw);
     await _loadIndex();
+    if (!replayJournal) return;
     for (final raw in await drainPendingResponses(_store)) {
       _emit(raw.decode());
     }
@@ -148,22 +156,56 @@ class LocalNotificationService implements NotificationService, TimeZoneAware {
         await _backend.cancelAllPending();
         _index.clear();
         for (final n in trimmed) {
-          var pid = platformIdFor(n.id);
-          while (_index.containsKey(pid)) {
-            pid = (pid + 1) & 0x7fffffff;
-          }
-          _index[pid] = _IndexEntry(n.id, n.taskId);
-          await _backend.schedule(
-            platformId: pid,
-            at: tz.TZDateTime.from(n.fireAt, location),
-            title: n.title,
-            body: n.body,
-            payload: encodePayload(n),
-            withActions: n.actions.isNotEmpty,
-          );
+          await _scheduleOne(n, location);
         }
         await _saveIndex();
       });
+
+  /// Replaces only [taskId]'s own reminders (ids `task:<taskId>:…`) with
+  /// [notifications], leaving prompts and recurrence occurrences alone.
+  /// Used by the background isolate after a snooze or a move, where there
+  /// is no full re-plan (recurrence extras live in the main isolate).
+  Future<void> replaceTaskReminders(
+    String taskId,
+    List<ScheduledNotification> notifications,
+  ) => _serial(() async {
+    final prefix = 'task:$taskId:';
+    final stale = [
+      for (final e in _index.entries)
+        if (e.value.id.startsWith(prefix)) e.key,
+    ];
+    for (final id in stale) {
+      await _backend.cancel(id);
+      _index.remove(id);
+    }
+    final now = _clock.now().toUtc();
+    final location = locationFor(_timeZoneName);
+    for (final n in notifications) {
+      if (!n.fireAt.toUtc().isAfter(now)) continue;
+      if (_index.length >= maxPending) break;
+      await _scheduleOne(n, location);
+    }
+    await _saveIndex();
+  });
+
+  Future<void> _scheduleOne(
+    ScheduledNotification n,
+    tz.Location location,
+  ) async {
+    var pid = platformIdFor(n.id);
+    while (_index.containsKey(pid)) {
+      pid = (pid + 1) & 0x7fffffff;
+    }
+    _index[pid] = _IndexEntry(n.id, n.taskId);
+    await _backend.schedule(
+      platformId: pid,
+      at: tz.TZDateTime.from(n.fireAt, location),
+      title: n.title,
+      body: n.body,
+      payload: encodePayload(n),
+      category: categoryFor(n.actions),
+    );
+  }
 
   @override
   Future<void> cancelForTask(String taskId) => _serial(() async {

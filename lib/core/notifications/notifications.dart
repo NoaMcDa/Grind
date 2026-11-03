@@ -10,6 +10,7 @@ export 'local_notification_service.dart'
         TimeZoneAware,
         appendPendingResponse,
         drainPendingResponses;
+export 'background_response.dart';
 export 'notification_codec.dart';
 export 'notification_router.dart';
 export 'notification_scheduler.dart';
@@ -17,5 +18,6 @@ export 'notification_service_factory.dart';
 export 'notification_store.dart';
 export 'notification_sync.dart';
 export 'providers.dart';
+export 'reschedule_times.dart';
 export 'time_zones.dart';
 export 'web_notification_service.dart';

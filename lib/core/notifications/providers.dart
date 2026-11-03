@@ -11,6 +11,8 @@ final notificationRouterProvider = Provider<NotificationRouter>((ref) {
   final router = NotificationRouter(
     tasks: ref.watch(taskRepositoryProvider),
     clock: ref.watch(clockProvider),
+    notifications: ref.watch(notificationServiceProvider),
+    preferences: ref.watch(preferencesRepositoryProvider),
   );
   final sub = router.attach(ref.watch(notificationServiceProvider).responses);
   ref.onDispose(() {
@@ -20,6 +22,11 @@ final notificationRouterProvider = Provider<NotificationRouter>((ref) {
   return router;
 });
 
+/// Feature-supplied reminders for the plan. Null by default; the integrator
+/// overrides it with the recurrence hook (#11), e.g.
+/// `notificationExtraProvider.overrideWith((ref) => ref.watch(recurrenceExtraProvider))`.
+final notificationExtraProvider = Provider<ExtraNotifications?>((_) => null);
+
 /// Keeps pending notifications in step with tasks and preferences. Reading
 /// it starts listening; the app should also call `refresh()` on launch and
 /// `bindAppLifecycle()` once.
@@ -27,8 +34,10 @@ final notificationSyncProvider = Provider<NotificationSync>((ref) {
   final sync = NotificationSync(
     tasks: ref.watch(taskRepositoryProvider),
     preferences: ref.watch(preferencesRepositoryProvider),
+    reminders: ref.watch(reminderRepositoryProvider),
     service: ref.watch(notificationServiceProvider),
     clock: ref.watch(clockProvider),
+    extra: ref.watch(notificationExtraProvider),
   )..start();
   ref.onDispose(sync.dispose);
   return sync;
