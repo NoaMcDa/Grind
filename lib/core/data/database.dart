@@ -1,0 +1,173 @@
+import 'package:drift/drift.dart';
+
+import '../domain/domain.dart'
+    show CalendarSource, Energy, GoalHorizon, TaskStatus;
+
+part 'database.g.dart';
+
+/// Columns every table carries. Times are stored as UTC milliseconds since
+/// the epoch (integers), so comparisons in SQL are exact and cheap and the
+/// format is identical on iOS (sqlite3 native) and web (sqlite3 wasm).
+mixin _Row on Table {
+  TextColumn get id => text()();
+  IntColumn get createdAt => integer()();
+  IntColumn get updatedAt => integer()();
+  IntColumn get deletedAt => integer().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('TaskRow')
+@TableIndex(name: 'tasks_remind_at', columns: {#remindAt})
+@TableIndex(name: 'tasks_scheduled_start', columns: {#scheduledStart})
+class Tasks extends Table with _Row {
+  TextColumn get title => text()();
+  TextColumn get notes => text().nullable()();
+  TextColumn get goalId => text().nullable()();
+  IntColumn get dueAt => integer().nullable()();
+  IntColumn get remindAt => integer().nullable()();
+  IntColumn get scheduledStart => integer().nullable()();
+  IntColumn get scheduledEnd => integer().nullable()();
+  BoolColumn get lockedStart => boolean().withDefault(const Constant(false))();
+  IntColumn get estimatedMinutes => integer().withDefault(const Constant(30))();
+  TextColumn get energy =>
+      textEnum<Energy>().withDefault(Constant(Energy.light.name))();
+  TextColumn get firstAction => text().nullable()();
+  IntColumn get priority => integer().withDefault(const Constant(2))();
+  TextColumn get category => text().nullable()();
+  BoolColumn get splittable => boolean().withDefault(const Constant(false))();
+  IntColumn get minChunkMinutes => integer().withDefault(const Constant(25))();
+  TextColumn get status =>
+      textEnum<TaskStatus>().withDefault(Constant(TaskStatus.open.name))();
+  IntColumn get completedAt => integer().nullable()();
+  IntColumn get actualMinutes => integer().nullable()();
+  IntColumn get snoozeCount => integer().withDefault(const Constant(0))();
+  TextColumn get calendarEventId => text().nullable()();
+}
+
+@DataClassName('ReminderRuleRow')
+@TableIndex(name: 'reminder_rules_task_id', columns: {#taskId})
+class ReminderRules extends Table with _Row {
+  TextColumn get taskId =>
+      text().references(Tasks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get rrule => text()();
+  IntColumn get leadMinutes => integer().withDefault(const Constant(0))();
+  IntColumn get until => integer().nullable()();
+}
+
+@DataClassName('CalendarEventRow')
+@TableIndex(name: 'calendar_events_start_at', columns: {#startAt})
+@TableIndex(name: 'calendar_events_external', columns: {#source, #externalId})
+class CalendarEvents extends Table with _Row {
+  TextColumn get source => textEnum<CalendarSource>()();
+  TextColumn get externalId => text()();
+  TextColumn get calendarId => text().nullable()();
+  TextColumn get title => text()();
+  IntColumn get startAt => integer()();
+  IntColumn get endAt => integer()();
+  BoolColumn get isAllDay => boolean().withDefault(const Constant(false))();
+  BoolColumn get isBusy => boolean().withDefault(const Constant(true))();
+
+  /// No foreign key: sync may mirror an event before its task exists.
+  TextColumn get taskId => text().nullable()();
+}
+
+@DataClassName('FocusSessionRow')
+class FocusSessions extends Table with _Row {
+  TextColumn get taskId =>
+      text().nullable().references(Tasks, #id, onDelete: KeyAction.setNull)();
+  IntColumn get plannedMinutes => integer()();
+  IntColumn get startedAt => integer()();
+  IntColumn get endedAt => integer().nullable()();
+  BoolColumn get completed => boolean().withDefault(const Constant(false))();
+}
+
+@DataClassName('GoalRow')
+class Goals extends Table with _Row {
+  TextColumn get title => text()();
+  TextColumn get area => text().nullable()();
+  TextColumn get horizon =>
+      textEnum<GoalHorizon>().withDefault(Constant(GoalHorizon.month.name))();
+  RealColumn get importance => real().withDefault(const Constant(0.5))();
+  RealColumn get progress => real().withDefault(const Constant(0.0))();
+  IntColumn get lastProgressAt => integer().nullable()();
+}
+
+/// The single preferences row (id [PreferencesRows.singletonId]). Maps and
+/// lists of [TimeRange] are stored as JSON text.
+@DataClassName('PreferencesRow')
+class PreferencesTable extends Table with _Row {
+  @override
+  String get tableName => 'preferences';
+
+  /// JSON: `{"1": [{"start": 540, "end": 1080}], ...}` keyed by weekday.
+  TextColumn get workingHours => text()();
+
+  /// JSON: `[{"start": 540, "end": 720}]`.
+  TextColumn get deepWindows => text()();
+  TextColumn get lunch => text()();
+  IntColumn get maxDeepBlocksPerDay => integer()();
+  IntColumn get deepBlockMinutes => integer()();
+  IntColumn get bufferBetweenEventsMinutes => integer()();
+  IntColumn get dailyCushionMinutes => integer()();
+  IntColumn get weekStart => integer()();
+  IntColumn get defaultReminderLeadMinutes => integer()();
+
+  /// JSON `{"start": .., "end": ..}` or null.
+  TextColumn get quietHours => text().nullable()();
+  TextColumn get timeZoneName => text()();
+  TextColumn get localeCode => text()();
+  BoolColumn get onboardingDone => boolean()();
+}
+
+abstract final class PreferencesRows {
+  static const singletonId = 'preferences';
+}
+
+/// Grind's local database: the permanent home of the user's data.
+///
+/// Open with a platform connection from `connection/connection.dart`, or
+/// `NativeDatabase.memory()` in tests.
+@DriftDatabase(
+  tables: [
+    Tasks,
+    ReminderRules,
+    CalendarEvents,
+    FocusSessions,
+    Goals,
+    PreferencesTable,
+  ],
+)
+class AppDatabase extends _$AppDatabase {
+  AppDatabase(super.executor);
+
+  /// Bump on every schema change and add a step in [migration].
+  static const currentSchemaVersion = 1;
+
+  @override
+  int get schemaVersion => currentSchemaVersion;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // Future versions: add `if (from < 2) { ... }` steps here, in order,
+      // and cover each with a migration test (drift_dev schema dump).
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
+
+  /// Every table, children first: the order for hard deletes. Reverse it
+  /// for inserts.
+  List<TableInfo<Table, Object?>> get tablesChildrenFirst => [
+    reminderRules,
+    focusSessions,
+    calendarEvents,
+    tasks,
+    goals,
+    preferencesTable,
+  ];
+}
