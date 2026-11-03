@@ -70,8 +70,7 @@ PlanExplanation explainDayDraft({
   ];
 
   final focus = draft.items.any(
-    (i) =>
-        i.energy == Energy.deep && i.reasons.contains(_focusWindowReason),
+    (i) => i.energy == Energy.deep && i.reasons.contains(_focusWindowReason),
   );
   if (focus) {
     sentences.add(l.planExplainFocus);

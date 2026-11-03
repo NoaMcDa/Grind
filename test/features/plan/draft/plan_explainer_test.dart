@@ -63,17 +63,12 @@ void main() {
   group('edge cases', () {
     test('no open tasks and free time: Pip offers the day back', () {
       final e = explainDayDraft(draft: _syntheticDraft(), l: en);
-      expect(e.sentences, [
-        'Nothing to plan right now. Your day is yours.',
-      ]);
+      expect(e.sentences, ['Nothing to plan right now. Your day is yours.']);
       expect(e.text, 'Nothing to plan right now. Your day is yours.');
     });
 
     test('no open tasks and no free time: Pip points to tomorrow', () {
-      final e = explainDayDraft(
-        draft: _syntheticDraft(freeMinutes: 0),
-        l: en,
-      );
+      final e = explainDayDraft(draft: _syntheticDraft(freeMinutes: 0), l: en);
       expect(e.sentences, [
         "No room left on today's calendar. Tomorrow is a fresh page.",
       ]);
@@ -153,28 +148,26 @@ void main() {
       ]);
     });
 
-    test('no deep block but open tasks wait: later-day note is the trailer',
-        () {
-      final e = explainDayDraft(
-        draft: _syntheticDraft(
-          items: [
-            _item(start: at(0, 13), end: at(0, 13, 30)),
-          ],
-          laterCount: 2,
-        ),
-        l: en,
-      );
-      expect(e.sentences.length, 3);
-      expect(e.sentences[2], '2 more things can wait for another day.');
-    });
+    test(
+      'no deep block but open tasks wait: later-day note is the trailer',
+      () {
+        final e = explainDayDraft(
+          draft: _syntheticDraft(
+            items: [_item(start: at(0, 13), end: at(0, 13, 30))],
+            laterCount: 2,
+          ),
+          l: en,
+        );
+        expect(e.sentences.length, 3);
+        expect(e.sentences[2], '2 more things can wait for another day.');
+      },
+    );
 
     test('no deep block, nothing for later, only the unplaced: trailer names '
         'that count', () {
       final e = explainDayDraft(
         draft: _syntheticDraft(
-          items: [
-            _item(start: at(0, 13), end: at(0, 13, 30)),
-          ],
+          items: [_item(start: at(0, 13), end: at(0, 13, 30))],
           unplaced: const [
             UnplacedTask(
               taskId: 'u',
@@ -210,7 +203,10 @@ void main() {
         ),
         l: en,
       );
-      expect(e.sentences[1], 'One block between 13:00 and 13:45, 45 min in all.');
+      expect(
+        e.sentences[1],
+        'One block between 13:00 and 13:45, 45 min in all.',
+      );
     });
 
     test('a deep block OUTSIDE a focus window does not trigger the focus '
