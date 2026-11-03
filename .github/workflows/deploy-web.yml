@@ -1,0 +1,50 @@
+name: Deploy web
+
+# Deploys main to GitHub Pages (no secrets needed).
+# One-time setup: repo Settings > Pages > Source = "GitHub Actions".
+# Served at https://<owner>.github.io/Grind/ so base href is /Grind/.
+# TODO(#49): per-PR previews need a host with preview URLs (Cloudflare Pages,
+# Vercel, Firebase) and therefore secrets; Pages cannot do them without secrets.
+# TODO(#49): custom domain would change --base-href to /.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build web --release --no-web-resources-cdn --base-href /Grind/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
