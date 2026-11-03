@@ -42,6 +42,14 @@ void main() {
     expect(find.text('FOCUS 1 OF 4'), findsOneWidget);
   });
 
+  testWidgets('grind:// scheme links map host + path to a route', (
+    tester,
+  ) async {
+    await pumpGrindApp(tester, initialLocation: 'grind://task/gym');
+    expect(find.text('Gym'), findsWidgets);
+    expect(find.text('Good morning!'), findsNothing);
+  });
+
   testWidgets('deep link /task/:id opens the task detail', (tester) async {
     await pumpGrindApp(tester, initialLocation: '/task/gym');
     expect(find.text('Gym'), findsWidgets);

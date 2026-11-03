@@ -13,6 +13,7 @@ import 'features/focus/providers.dart';
 import 'features/goals/data/drift_goal_repository.dart';
 import 'features/goals/goals.dart';
 import 'features/recurrence/providers.dart';
+import 'features/reminders/weekly_recap_notification.dart';
 import 'features/review/drift_review_repository.dart';
 
 Future<void> main() async {
@@ -35,9 +36,13 @@ Future<void> main() async {
           (ref) => DriftGoalRepository(db, clock: ref.watch(clockProvider)),
         ),
         ...notificationOverrides(),
-        // Recurring reminders feed their occurrences into the scheduler.
+        // Recurring reminders feed their occurrences into the scheduler, and
+        // the weekly recap adds one notification on the week's last evening.
         notificationExtraProvider.overrideWith(
-          (ref) => ref.watch(recurrenceExtraProvider),
+          (ref) => combineExtras([
+            ref.watch(recurrenceExtraProvider),
+            ref.watch(recapExtraProvider),
+          ]),
         ),
         backupActionsOverride(),
         googleCalendarOverride(),

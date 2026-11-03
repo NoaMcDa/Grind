@@ -36,6 +36,12 @@ GoRouter createRouter({
   return GoRouter(
     initialLocation: initialLocation,
     redirect: (context, state) {
+      // Custom-scheme deep links (`grind://focus`, `grind://task/<id>` from
+      // Apple Calendar write-backs): the first segment parses as the host.
+      final uri = state.uri;
+      if (uri.scheme == 'grind' && uri.host.isNotEmpty) {
+        return '/${uri.host}${uri.path}';
+      }
       final done = onboardingDone?.call();
       final atOnboarding = state.matchedLocation == '/onboarding';
       if (done == false && !atOnboarding) return '/onboarding';
