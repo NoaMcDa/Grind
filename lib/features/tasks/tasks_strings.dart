@@ -26,6 +26,8 @@ abstract final class TasksStrings {
   static const save = 'Save';
   static const cancel = 'Cancel';
   static const addTask = 'Add a task';
+  static const goalLabel = 'Goal';
+  static const noGoal = 'No goal';
 
   static const detailTitle = 'Task';
   static const notFound = 'This task is not here anymore.';

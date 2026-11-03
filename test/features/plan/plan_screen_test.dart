@@ -8,6 +8,7 @@ import 'package:grind/features/plan/plan_screen.dart';
 import 'package:grind/features/plan/plan_strings.dart';
 
 import '../../test_fonts.dart';
+import '../tasks/zone_test_support.dart';
 
 final _day = DateTime(2026, 10, 29);
 
@@ -38,6 +39,7 @@ Future<ProviderContainer> _pump(
     tester,
     initialLocation: '/plan',
     overrides: [
+      devicePrefsOverride(),
       calendarRepositoryProvider.overrideWithValue(
         InMemoryCalendarRepository([...demoEvents(_day), ...extraEvents]),
       ),
@@ -238,7 +240,10 @@ void main() {
     addTearDown(t.view.resetPhysicalSize);
     await t.pumpWidget(
       ProviderScope(
-        overrides: demoOverrides(clock: FixedClock(testNow)),
+        overrides: [
+          ...demoOverrides(clock: FixedClock(testNow)),
+          devicePrefsOverride(),
+        ],
         child: MaterialApp(
           builder: (c, w) =>
               Directionality(textDirection: TextDirection.rtl, child: w!),

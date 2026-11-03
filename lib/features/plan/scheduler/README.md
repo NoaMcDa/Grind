@@ -75,6 +75,13 @@ instants, so a stray UTC value still compares correctly, but day boundaries
 come from the device's local zone, not `Preferences.timeZoneName`. Output
 `Placement` times are local.
 
+The app wiring (`plan_scheduler.dart`) therefore does not pass `.toLocal()`
+values: it passes wall-clock fields in the user's zone
+(`zoneWall(instant, locationFor(prefs.timeZoneName))`, see
+`lib/features/tasks/day_bounds.dart`) and converts placements back with
+`fromZoneWall`. The core's "local" day is then the user's day, whatever zone
+the device is in. Callers outside the app wiring should do the same.
+
 ## Fields the domain model is missing
 
 Proposed additions to `lib/core` (integrator), none required today:

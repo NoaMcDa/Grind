@@ -20,3 +20,8 @@ final recurrenceExtraProvider = Provider<ExtraNotifications>(
     clock: ref.watch(clockProvider),
   ),
 );
+
+/// Every live recurrence rule.
+final reminderRulesProvider = StreamProvider<List<ReminderRule>>(
+  (ref) => ref.watch(reminderRepositoryProvider).watchAll(),
+);

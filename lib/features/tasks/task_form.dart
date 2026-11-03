@@ -1,29 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grind/features/goals/goals.dart'
+    show GoalRecord, GoalStatus, goalsProvider;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../recurrence/recurrence.dart';
+import '../recurrence/recurrence_picker.dart';
+import 'day_bounds.dart';
 import 'task_actions.dart';
 import 'tasks_strings.dart';
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
-/// Resolves to the saved task, or null when dismissed.
-Future<Task?> showTaskSheet(BuildContext context, {Task? existing}) {
+/// [initialGoalId] presets the goal of a new task. Resolves to the saved
+/// task, or null when dismissed.
+Future<Task?> showTaskSheet(
+  BuildContext context, {
+  Task? existing,
+  String? initialGoalId,
+}) {
   return showStickerSheet<Task>(
     context,
-    (_) => TaskFormSheet(existing: existing),
+    (_) => TaskFormSheet(existing: existing, initialGoalId: initialGoalId),
   );
 }
+
+/// The quick-add sheet with [goal] preset, in the shape of
+/// `GoalDetailScreen.onAddTask`.
+Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
+    showTaskSheet(context, initialGoalId: goal.id);
 
 const _presets = [15, 30, 45, 60, 90];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
-  const TaskFormSheet({super.key, this.existing});
+  const TaskFormSheet({super.key, this.existing, this.initialGoalId});
 
   final Task? existing;
+
+  /// The goal a new task starts linked to (ignored when editing).
+  final String? initialGoalId;
 
   @override
   ConsumerState<TaskFormSheet> createState() => _TaskFormSheetState();
@@ -43,8 +62,18 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   bool _customMode = false;
   late Energy _energy;
   bool _showError = false;
+  String? _goalId;
+
+  /// The repeat rule as picked; [_rule] is the stored one when editing.
+  Recurrence? _recurrence;
+  ReminderRule? _rule;
+  bool _recurrenceTouched = false;
+  bool _saving = false;
 
   Task? get _existing => widget.existing;
+
+  /// Days and times in the form are in the user's zone.
+  tz.Location get _location => ref.read(zoneLocationProvider);
 
   @override
   void initState() {
@@ -57,24 +86,42 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _customMode = !_presets.contains(_minutes);
     _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
     _energy = t?.energy ?? Energy.light;
+    _goalId = t == null ? widget.initialGoalId : t.goalId;
     if (t == null) {
-      final now = ref.read(clockProvider).now().toLocal();
-      _date = DateTime(now.year, now.month, now.day);
+      _date = _today;
     } else {
-      final due = t.dueAt?.toLocal();
+      _loadRule(t.id);
+      final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       if (due != null) {
         _date = DateTime(due.year, due.month, due.day);
         if (!(due.hour == 23 && due.minute == 59)) {
           _dueTime = TimeOfDay.fromDateTime(due);
         }
       }
-      final remind = t.remindAt?.toLocal();
+      final remind = t.remindAt == null
+          ? null
+          : zoneWall(t.remindAt!, _location);
       if (remind != null) {
         _date ??= DateTime(remind.year, remind.month, remind.day);
         _remindTime = TimeOfDay.fromDateTime(remind);
         _remindTouched = _remindTime != _dueTime;
       }
     }
+  }
+
+  Future<void> _loadRule(String taskId) async {
+    final rule = await ref.read(reminderRepositoryProvider).getForTask(taskId);
+    if (!mounted || rule == null || _recurrenceTouched) return;
+    Recurrence? parsed;
+    try {
+      parsed = Recurrence.parse(rule.rrule);
+    } on FormatException {
+      parsed = null;
+    }
+    setState(() {
+      _rule = rule;
+      _recurrence = parsed;
+    });
   }
 
   @override
@@ -86,18 +133,65 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     super.dispose();
   }
 
-  DateTime get _today {
-    final n = ref.read(clockProvider).now().toLocal();
-    return DateTime(n.year, n.month, n.day);
-  }
+  DateTime get _today =>
+      localDayBoundsIn(ref.read(clockProvider).now(), _location).date;
 
   /// The reminder follows the due time until the user sets it themselves.
   TimeOfDay? get _effectiveRemind => _remindTouched ? _remindTime : _dueTime;
 
-  DateTime _at(DateTime day, TimeOfDay t) =>
-      DateTime(day.year, day.month, day.day, t.hour, t.minute).toUtc();
+  /// [t] on [day] in the user's zone, as UTC.
+  DateTime _at(DateTime day, TimeOfDay t) => fromZoneWall(
+    DateTime(day.year, day.month, day.day, t.hour, t.minute),
+    _location,
+  );
 
-  void _save() {
+  /// Where a series starts: the reminder, else the due time, else 09:00 on
+  /// the task's day (as on the detail screen).
+  DateTime _seriesAnchor() => _at(
+    _date ?? _today,
+    _effectiveRemind ?? _dueTime ?? const TimeOfDay(hour: 9, minute: 0),
+  );
+
+  Future<void> _pickRecurrence() async {
+    final pick = await showRecurrencePicker(
+      context,
+      _recurrence,
+      anchor: zoneWall(_seriesAnchor(), _location),
+    );
+    if (pick == null || !mounted) return;
+    setState(() {
+      _recurrence = pick.value;
+      _recurrenceTouched = true;
+    });
+  }
+
+  /// Writes, replaces or removes the task's rule after a change here.
+  Future<void> _saveRule(Task task) async {
+    if (!_recurrenceTouched) return;
+    final rules = ref.read(reminderRepositoryProvider);
+    final rule = _rule ?? await rules.getForTask(task.id);
+    final value = _recurrence;
+    final now = ref.read(clockProvider).now().toUtc();
+    if (value == null) {
+      if (rule != null) await rules.delete(rule.id);
+      return;
+    }
+    final rrule = value.toRRule();
+    await rules.upsert(
+      rule == null
+          ? ReminderRule(
+              id: 'rule-${task.id}',
+              taskId: task.id,
+              rrule: rrule,
+              createdAt: now,
+              updatedAt: now,
+            )
+          : rule.copyWith(rrule: rrule, updatedAt: now),
+    );
+  }
+
+  Future<void> _save() async {
+    if (_saving) return;
     final title = _title.text.trim();
     if (title.isEmpty) {
       setState(() => _showError = true);
@@ -108,11 +202,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     final day = _date;
     final dueAt = day == null
         ? null
-        : (_dueTime == null
-              ? DateTime(day.year, day.month, day.day, 23, 59).toUtc()
-              : _at(day, _dueTime!));
+        : _at(day, _dueTime ?? const TimeOfDay(hour: 23, minute: 59));
     final remind = _effectiveRemind;
-    final remindAt = remind == null ? null : _at(day ?? _today, remind);
+    var remindAt = remind == null ? null : _at(day ?? _today, remind);
+    // A series is anchored at its reminder.
+    if (_recurrence != null) remindAt ??= _seriesAnchor();
     final first = _firstAction.text.trim();
     final notes = _notes.text.trim();
 
@@ -128,6 +222,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         energy: _energy,
         firstAction: first.isEmpty ? null : first,
         notes: notes.isEmpty ? null : notes,
+        goalId: _goalId,
       );
     } else {
       task = existing.copyWith(
@@ -138,10 +233,50 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         energy: _energy,
         firstAction: first.isEmpty ? null : first,
         notes: notes.isEmpty ? null : notes,
+        goalId: _goalId,
       );
     }
-    actions.save(task);
-    Navigator.of(context).pop(task);
+    _saving = true;
+    await actions.save(task);
+    await _saveRule(task);
+    if (mounted) Navigator.of(context).pop(task);
+  }
+
+  /// "Goal": No goal plus the active goals (and the linked one, whatever
+  /// its status). Hidden when there is nothing to link to.
+  List<Widget> _goalPicker() {
+    final goals = ref.watch(goalsProvider).valueOrNull ?? const <GoalRecord>[];
+    final options = [
+      for (final g in goals)
+        if (g.deletedAt == null &&
+            (g.status == GoalStatus.active || g.id == _goalId))
+          g,
+    ];
+    if (options.isEmpty) return const [];
+    return [
+      const SizedBox(height: 16),
+      const SectionLabel(TasksStrings.goalLabel),
+      const SizedBox(height: 8),
+      Wrap(
+        key: const Key('task-form-goal'),
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _Choice(
+            label: TasksStrings.noGoal,
+            selected: _goalId == null,
+            onTap: () => setState(() => _goalId = null),
+          ),
+          for (final g in options)
+            _Choice(
+              label: g.title,
+              selected: _goalId == g.id,
+              icon: Icons.flag_outlined,
+              onTap: () => setState(() => _goalId = g.id),
+            ),
+        ],
+      ),
+    ];
   }
 
   Future<void> _pickDate() async {
@@ -261,6 +396,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       _remindTouched = true;
                     }),
                   ),
+                  const SizedBox(height: 12),
+                  const SectionLabel(TasksStrings.repeatsLabel),
+                  const SizedBox(height: 2),
+                  RecurrenceSummaryChip(
+                    key: const Key('task-form-recurrence'),
+                    recurrence: _recurrence,
+                    onTap: _pickRecurrence,
+                  ),
                   const SizedBox(height: 16),
                   const SectionLabel(TasksStrings.estimateLabel),
                   const SizedBox(height: 8),
@@ -319,6 +462,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       ),
                     ],
                   ),
+                  ..._goalPicker(),
                   const SizedBox(height: 16),
                   StickerTextField(
                     controller: _firstAction,

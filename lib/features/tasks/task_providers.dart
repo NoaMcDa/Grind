@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rrule/rrule.dart';
 
 import '../../core/core.dart';
+import '../recurrence/occurrence_expander.dart';
+import '../recurrence/providers.dart';
+import 'day_bounds.dart';
 
 /// The live task with [id], or null when missing or deleted.
 final taskByIdProvider = Provider.family<Task?, String>((ref, id) {
@@ -28,31 +32,112 @@ final openTasksProvider = Provider<List<Task>>((ref) {
     ..sort(_byWhen);
 });
 
-/// Tasks whose reminder or due time falls on today's local day (per
-/// [clockProvider]): open ones by time first, done ones sink to the end.
-final todayTasksProvider = Provider<List<Task>>((ref) {
-  final now = ref.watch(clockProvider).now().toLocal();
-  final start = DateTime(now.year, now.month, now.day);
-  final end = DateTime(now.year, now.month, now.day + 1);
-  bool today(DateTime? t) {
-    if (t == null) return false;
-    final l = t.toLocal();
-    return !l.isBefore(start) && l.isBefore(end);
-  }
+/// One row of the Today list: a task, and for a recurring task the
+/// occurrence that falls on the day.
+class TodayItem {
+  const TodayItem(this.task, {this.at, this.occurrence = false});
 
-  final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
-  final list = all
-      .where((t) => t.deletedAt == null)
-      .where((t) => today(t.remindAt) || today(t.dueAt))
-      .toList();
-  list.sort((a, b) {
+  final Task task;
+
+  /// The time shown on the row (UTC): the occurrence for a series, else
+  /// the task's reminder.
+  final DateTime? at;
+
+  /// True for an occurrence of a recurring task: completing it completes
+  /// this occurrence only.
+  final bool occurrence;
+
+  bool get isDone => task.isDone;
+
+  /// Stable per row (a series can occur more than once a day).
+  String get key =>
+      occurrence ? '${task.id}@${at!.millisecondsSinceEpoch}' : task.id;
+
+  @override
+  bool operator ==(Object other) =>
+      other is TodayItem &&
+      other.task == task &&
+      other.at == at &&
+      other.occurrence == occurrence;
+
+  @override
+  int get hashCode => Object.hash(task, at, occurrence);
+}
+
+/// What falls on [day]: one-off tasks whose reminder or due time is on the
+/// day, and each occurrence of a recurring task on the day (expanded from
+/// its rule in the day's zone). A series whose rule cannot be expanded, or
+/// a finished one, is treated as a one-off. Open first by time, done last.
+///
+/// A completed occurrence moves the series' anchor on, so it leaves the
+/// list. Once `ReminderRule.lastCompletedAt` exists, an occurrence at or
+/// before it on [day] can stay in the list as done instead.
+List<TodayItem> itemsOnDay({
+  required Iterable<Task> tasks,
+  required Map<String, ReminderRule> rules,
+  required DayBounds day,
+}) {
+  final out = <TodayItem>[];
+  for (final t in tasks) {
+    if (t.deletedAt != null) continue;
+    final rule = rules[t.id];
+    final anchor = t.remindAt;
+    if (rule != null && anchor != null && !t.isDone && _expandable(rule)) {
+      final occurrences = expandOccurrences(
+        rule: rule.copyWith(leadMinutes: 0),
+        anchor: anchor,
+        from: day.start,
+        to: day.end,
+        timeZoneName: day.location.name,
+      );
+      for (final o in occurrences) {
+        out.add(TodayItem(t, at: utcOf(o), occurrence: true));
+      }
+      continue;
+    }
+    if (day.contains(t.remindAt) || day.contains(t.dueAt)) {
+      out.add(TodayItem(t, at: t.remindAt));
+    }
+  }
+  out.sort((a, b) {
     if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
-    return _byWhen(a, b);
+    final x = a.at ?? a.task.dueAt, y = b.at ?? b.task.dueAt;
+    if (x == null && y == null) {
+      return a.task.createdAt.compareTo(b.task.createdAt);
+    }
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return x.compareTo(y);
   });
-  return list;
+  return out;
+}
+
+bool _expandable(ReminderRule rule) {
+  final body = RruleText.parse(rule.rrule).body;
+  if (body.isEmpty) return false;
+  try {
+    RecurrenceRule.fromString('RRULE:$body');
+    return true;
+  } on Object {
+    return false;
+  }
+}
+
+/// Today's rows in the user's zone (`Preferences.timeZoneName`), per
+/// [clockProvider]; see [itemsOnDay].
+final todayTasksProvider = Provider.autoDispose<List<TodayItem>>((ref) {
+  final day = ref.watch(todayBoundsProvider);
+  final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+  final rules =
+      ref.watch(reminderRulesProvider).valueOrNull ?? const <ReminderRule>[];
+  return itemsOnDay(
+    tasks: all,
+    rules: {for (final r in rules) r.taskId: r},
+    day: day,
+  );
 });
 
-/// How many of today's tasks are done.
-final todayDoneCountProvider = Provider<int>(
+/// How many of today's rows are done.
+final todayDoneCountProvider = Provider.autoDispose<int>(
   (ref) => ref.watch(todayTasksProvider).where((t) => t.isDone).length,
 );

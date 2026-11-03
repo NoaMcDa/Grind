@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../core/notifications/time_zones.dart';
+import '../tasks/day_bounds.dart';
 import 'plan_layout.dart' show dateOnly, nextDay, weekOf;
 import 'plan_providers.dart';
 import 'plan_strings.dart';
@@ -14,14 +17,19 @@ class PlanProposal {
     required this.weekEnd,
     required this.plan,
     required this.tasks,
+    required this.location,
   });
 
-  /// Local midnight of the first day / of the day after the last day.
+  /// Midnight of the first day / of the day after the last day, as
+  /// wall-clock values in [location].
   final DateTime weekStart;
   final DateTime weekEnd;
 
-  /// The scheduler's output, in local time.
+  /// The scheduler's output, as wall-clock values in [location].
   final Plan plan;
+
+  /// The user's zone when the proposal was made.
+  final tz.Location location;
 
   /// The tasks the plan talks about, by id (UTC, as stored).
   final Map<String, Task> tasks;
@@ -55,9 +63,12 @@ class SingleSchedule {
 }
 
 /// Connects the pure scheduler (`scheduler/`) to the repositories, the
-/// clock and the selected week. The scheduler works in local wall-clock
-/// time and the repositories store UTC, so every value is converted here,
-/// at the boundary, and nowhere else.
+/// clock and the selected week. The scheduler works in "local" wall-clock
+/// `DateTime`s and the repositories store UTC, so every value is converted
+/// here, at the boundary, and nowhere else: instants become wall-clock
+/// fields in the user's zone (`Preferences.timeZoneName`, see [zoneWall])
+/// and placements go back through [fromZoneWall]. Working hours, "today"
+/// and the week are therefore the user's, whatever zone the device is in.
 class PlanScheduler {
   PlanScheduler(this._ref);
 
@@ -65,7 +76,7 @@ class PlanScheduler {
 
   TaskRepository get _tasks => _ref.read(taskRepositoryProvider);
   CalendarRepository get _events => _ref.read(calendarRepositoryProvider);
-  DateTime get _now => _ref.read(clockProvider).now().toLocal();
+  DateTime get _nowUtc => _ref.read(clockProvider).now().toUtc();
 
   Future<Preferences> _prefs() =>
       _ref.read(preferencesRepositoryProvider).get();
@@ -80,24 +91,28 @@ class PlanScheduler {
   /// never planned; a past week gives an empty plan.
   Future<PlanProposal> proposeWeek(DateTime day) async {
     final prefs = await _prefs();
+    final loc = locationFor(prefs.timeZoneName);
     final week = weekOf(dateOnly(day), prefs.weekStart);
     final start = week.first;
     final end = nextDay(week.last);
-    final now = _now;
+    final now = zoneWall(_nowUtc, loc);
     final from = now.isAfter(start) ? now : start;
 
     final all = await _tasks.getAll();
     final input = [
       for (final t in all)
-        if (_isOpen(t) && !_pinnedOutside(t, start, end)) t,
+        if (_isOpen(t) && !_pinnedOutside(t, start, end, loc)) t,
     ];
-    final events = await _events.getBetween(start.toUtc(), end.toUtc());
+    final events = await _events.getBetween(
+      fromZoneWall(start, loc),
+      fromZoneWall(end, loc),
+    );
 
     final plan = from.isBefore(end)
         ? scheduler.plan(
-            tasks: [for (final t in input) _toSchedulerTask(t)],
+            tasks: [for (final t in input) _toSchedulerTask(t, loc)],
             goals: const {},
-            events: [for (final e in events) _toLocalEvent(e)],
+            events: [for (final e in events) _toLocalEvent(e, loc)],
             prefs: prefs,
             now: from,
             horizonEnd: end,
@@ -108,6 +123,7 @@ class PlanScheduler {
       weekEnd: end,
       plan: plan,
       tasks: {for (final t in input) t.id: t},
+      location: loc,
     );
   }
 
@@ -115,13 +131,14 @@ class PlanScheduler {
   /// that were finished or deleted since the proposal, are left alone.
   /// Returns how many tasks were scheduled.
   Future<int> apply(PlanProposal proposal) async {
-    final nowUtc = _now.toUtc();
+    final nowUtc = _nowUtc;
+    final loc = proposal.location;
     final updates = <Task>[];
     for (final p in proposal.changes) {
       final t = await _tasks.getById(p.taskId);
       if (t == null || !_isOpen(t) || _isPinned(t)) continue;
-      final start = p.start.toUtc();
-      final end = p.end.toUtc();
+      final start = fromZoneWall(p.start, loc);
+      final end = fromZoneWall(p.end, loc);
       if (t.scheduledStart == start && t.scheduledEnd == end) continue;
       updates.add(
         t.copyWith(
@@ -142,8 +159,9 @@ class PlanScheduler {
   /// the result when it fits.
   Future<SingleSchedule> scheduleOne(String taskId) async {
     final prefs = await _prefs();
+    final loc = locationFor(prefs.timeZoneName);
     final task = await _tasks.getById(taskId);
-    final now = _now;
+    final now = zoneWall(_nowUtc, loc);
     if (task == null || !_isOpen(task)) {
       return SingleSchedule.unplaced(
         UnplacedTask(
@@ -154,7 +172,7 @@ class PlanScheduler {
       );
     }
     final defaultEnd = scheduler.defaultHorizonEnd(now, prefs);
-    final due = task.dueAt?.toLocal();
+    final due = task.dueAt == null ? null : zoneWall(task.dueAt!, loc);
     final horizonEnd = due != null && due.isAfter(defaultEnd)
         ? nextDay(due)
         : defaultEnd;
@@ -165,7 +183,10 @@ class PlanScheduler {
         if (t.id != taskId && _isOpen(t) && t.isScheduled)
           t.copyWith(lockedStart: true),
     ];
-    final events = await _events.getBetween(now.toUtc(), horizonEnd.toUtc());
+    final events = await _events.getBetween(
+      _nowUtc,
+      fromZoneWall(horizonEnd, loc),
+    );
     final target = task.copyWith(
       scheduledStart: null,
       scheduledEnd: null,
@@ -173,10 +194,10 @@ class PlanScheduler {
     );
     final plan = scheduler.plan(
       tasks: [
-        for (final t in [target, ...others]) _toSchedulerTask(t),
+        for (final t in [target, ...others]) _toSchedulerTask(t, loc),
       ],
       goals: const {},
-      events: [for (final e in events) _toLocalEvent(e)],
+      events: [for (final e in events) _toLocalEvent(e, loc)],
       prefs: prefs,
       now: now,
       horizonEnd: horizonEnd,
@@ -196,10 +217,10 @@ class PlanScheduler {
     final p = placed.first;
     await _tasks.upsert(
       task.copyWith(
-        scheduledStart: p.start.toUtc(),
-        scheduledEnd: p.end.toUtc(),
+        scheduledStart: fromZoneWall(p.start, loc),
+        scheduledEnd: fromZoneWall(p.end, loc),
         lockedStart: false,
-        updatedAt: now.toUtc(),
+        updatedAt: _nowUtc,
       ),
     );
     return SingleSchedule.placed(p);
@@ -209,25 +230,29 @@ class PlanScheduler {
 bool _isOpen(Task t) => t.status == TaskStatus.open && t.deletedAt == null;
 bool _isPinned(Task t) => t.lockedStart && t.isScheduled;
 
-bool _pinnedOutside(Task t, DateTime start, DateTime end) {
+bool _pinnedOutside(Task t, DateTime start, DateTime end, tz.Location loc) {
   if (!_isPinned(t)) return false;
-  final s = t.scheduledStart!.toLocal();
-  final e = t.scheduledEnd!.toLocal();
+  final s = zoneWall(t.scheduledStart!, loc);
+  final e = zoneWall(t.scheduledEnd!, loc);
   return !(s.isBefore(end) && e.isAfter(start));
 }
 
-/// UTC → local, and one block per task (see [PlanScheduler.proposeWeek]).
-Task _toSchedulerTask(Task t) => t.copyWith(
-  dueAt: t.dueAt?.toLocal(),
-  remindAt: t.remindAt?.toLocal(),
-  scheduledStart: t.scheduledStart?.toLocal(),
-  scheduledEnd: t.scheduledEnd?.toLocal(),
-  notBefore: t.notBefore?.toLocal(),
+DateTime? _wall(DateTime? t, tz.Location loc) =>
+    t == null ? null : zoneWall(t, loc);
+
+/// UTC → wall clock in [loc], and one block per task (see
+/// [PlanScheduler.proposeWeek]).
+Task _toSchedulerTask(Task t, tz.Location loc) => t.copyWith(
+  dueAt: _wall(t.dueAt, loc),
+  remindAt: _wall(t.remindAt, loc),
+  scheduledStart: _wall(t.scheduledStart, loc),
+  scheduledEnd: _wall(t.scheduledEnd, loc),
+  notBefore: _wall(t.notBefore, loc),
   splittable: false,
 );
 
-CalendarEvent _toLocalEvent(CalendarEvent e) =>
-    e.copyWith(start: e.start.toLocal(), end: e.end.toLocal());
+CalendarEvent _toLocalEvent(CalendarEvent e, tz.Location loc) =>
+    e.copyWith(start: zoneWall(e.start, loc), end: zoneWall(e.end, loc));
 
 final planSchedulerProvider = Provider<PlanScheduler>(PlanScheduler.new);
 
@@ -246,21 +271,23 @@ final planWeekCapacityProvider = Provider.autoDispose<scheduler.WeekCapacity>((
   final events =
       ref.watch(planWeekEventsProvider).valueOrNull ?? const <CalendarEvent>[];
   final end = nextDay(week.last);
-  final now = ref.watch(clockProvider).now().toLocal();
+  final loc = locationFor(prefs.timeZoneName);
+  // The same window as "Re-plan with Pip", in the same zone.
+  final now = zoneWall(ref.watch(clockProvider).now(), loc);
   final start = now.isAfter(week.first) && now.isBefore(end) ? now : week.first;
   final planned = [
     for (final t in tasks)
       if (_isOpen(t) &&
           t.isScheduled &&
-          t.scheduledStart!.toLocal().isBefore(end) &&
-          t.scheduledEnd!.toLocal().isAfter(start))
-        _toSchedulerTask(t).copyWith(lockedStart: true),
+          zoneWall(t.scheduledStart!, loc).isBefore(end) &&
+          zoneWall(t.scheduledEnd!, loc).isAfter(start))
+        _toSchedulerTask(t, loc).copyWith(lockedStart: true),
   ];
   return scheduler.weekCapacity(
     from: start,
     to: end,
     prefs: prefs,
-    events: [for (final e in events) _toLocalEvent(e)],
+    events: [for (final e in events) _toLocalEvent(e, loc)],
     tasks: planned,
   );
 });

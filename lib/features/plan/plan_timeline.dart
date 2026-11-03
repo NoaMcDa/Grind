@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../theme/app_text.dart';
@@ -52,9 +53,14 @@ class PlanTimeline extends StatefulWidget {
     required this.onMove,
     this.onRejectedDrop,
     this.onSwipe,
+    this.location,
   });
 
   final DateTime day;
+
+  /// The user's zone: instants are drawn on its wall clock (the device zone
+  /// when null).
+  final tz.Location? location;
   final List<Task> tasks;
   final List<CalendarEvent> events;
   final Preferences prefs;
@@ -89,15 +95,15 @@ class _PlanTimelineState extends State<PlanTimeline> {
       if (!e.isAllDay)
         _Item.event(
           e,
-          minutesIntoDay(e.start, _dayStart),
-          minutesIntoDay(e.end, _dayStart),
+          minutesIntoDay(e.start, _dayStart, widget.location),
+          minutesIntoDay(e.end, _dayStart, widget.location),
         ),
   ];
 
   _Item _taskItem(Task t) => _Item.task(
     t,
-    minutesIntoDay(t.scheduledStart!, _dayStart),
-    minutesIntoDay(t.scheduledEnd!, _dayStart),
+    minutesIntoDay(t.scheduledStart!, _dayStart, widget.location),
+    minutesIntoDay(t.scheduledEnd!, _dayStart, widget.location),
   );
 
   // ---- drag ------------------------------------------------------------
@@ -274,7 +280,9 @@ class _PlanTimelineState extends State<PlanTimeline> {
 
   Widget _nowLine(TextDirection textDir, double Function(num) y) {
     final now = widget.now!;
-    final m = now.difference(_dayStart).inMinutes;
+    final m = widget.location == null
+        ? now.difference(_dayStart).inMinutes
+        : minutesIntoDay(now, _dayStart, widget.location);
     final top = y(m);
     if (top < 0 || top > (y(24 * 60))) return const SizedBox.shrink();
     return Positioned.directional(
@@ -361,7 +369,9 @@ class _PlanTimelineState extends State<PlanTimeline> {
       32.0,
       double.infinity,
     );
-    final time = '${formatClock(e.start)}–${formatClock(e.end)}';
+    final time =
+        '${formatClock(e.start, widget.location)}–'
+        '${formatClock(e.end, widget.location)}';
     final compact = h < 52 || p.columns > 1;
     final roomy = h >= 66 && p.columns == 1;
     return GestureDetector(
@@ -471,7 +481,7 @@ class _PlanTimelineState extends State<PlanTimeline> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  formatClock(t.scheduledStart!),
+                  formatClock(t.scheduledStart!, widget.location),
                   style: AppText.body(
                     size: 11,
                     weight: FontWeight.w500,
@@ -514,7 +524,8 @@ class _PlanTimelineState extends State<PlanTimeline> {
     final deco = done ? TextDecoration.lineThrough : null;
     final time =
         timeOverride ??
-        '${formatClock(t.scheduledStart!)}–${formatClock(t.scheduledEnd!)}';
+        '${formatClock(t.scheduledStart!, widget.location)}–'
+            '${formatClock(t.scheduledEnd!, widget.location)}';
     TextStyle bold() => AppText.bold(
       size: 14,
       color: fg,

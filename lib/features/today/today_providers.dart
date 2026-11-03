@@ -1,20 +1,23 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../theme/tokens.dart';
+import '../tasks/day_bounds.dart';
 
-export '../tasks/task_providers.dart' show todayTasksProvider;
+export '../tasks/task_providers.dart' show TodayItem, todayTasksProvider;
 
-/// "Thursday, Oct 29" for the clock's current day.
-final todayLabelProvider = Provider<String>((ref) {
-  final d = ref.watch(clockProvider).now();
+/// "Thursday, Oct 29" for the current day in the user's zone.
+final todayLabelProvider = Provider.autoDispose<String>((ref) {
+  final d = ref.watch(todayBoundsProvider).date;
   return '${_weekdays[d.weekday - 1]}, ${_months[d.month - 1]} ${d.day}';
 });
 
-/// "12:30" in local time.
-String formatClock(DateTime t) {
-  final l = t.toLocal();
+/// "12:30" in [location] (the user's zone), or device-local time without
+/// one (for values that already are wall-clock fields).
+String formatClock(DateTime t, [tz.Location? location]) {
+  final l = location == null ? t.toLocal() : tz.TZDateTime.from(t, location);
   return '${l.hour.toString().padLeft(2, '0')}:'
       '${l.minute.toString().padLeft(2, '0')}';
 }

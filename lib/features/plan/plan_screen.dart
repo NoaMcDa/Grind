@@ -12,8 +12,9 @@ import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_date_time_picker.dart';
 import '../calendar/sync/providers.dart';
 import '../calendar/sync/sync_status.dart';
+import '../tasks/day_bounds.dart';
+import '../tasks/task_actions.dart';
 import '../tasks/task_form.dart';
-import 'plan_layout.dart';
 import 'plan_providers.dart';
 import 'plan_replan_sheet.dart';
 import 'plan_scheduler.dart';
@@ -61,27 +62,22 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   void _startFocus() => (widget.onStartFocus ?? () => context.go('/focus'))();
   void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
 
+  /// Same as Today: on a recurring task, completes the current occurrence
+  /// and the series continues.
   Future<void> _toggle(Task task) async {
-    final repo = ref.read(taskRepositoryProvider);
-    final t = await repo.getById(task.id);
-    if (t == null) return;
-    final now = ref.read(clockProvider).now().toUtc();
-    await repo.upsert(
-      t.copyWith(
-        status: t.isDone ? TaskStatus.open : TaskStatus.done,
-        completedAt: t.isDone ? null : now,
-        updatedAt: now,
-      ),
-    );
+    final t = await ref.read(taskRepositoryProvider).getById(task.id);
+    if (t == null || !mounted) return;
+    await ref.read(taskActionsProvider).toggle(context, t);
   }
 
   /// A manual placement: the sync engine writes it back to the calendars.
+  /// [localStart] is wall-clock time in the user's zone.
   Future<void> _move(Task task, DateTime localStart) async {
     final repo = ref.read(taskRepositoryProvider);
     final t = await repo.getById(task.id);
     if (t == null || !t.isScheduled) return;
     final dur = t.scheduledEnd!.difference(t.scheduledStart!);
-    final start = localStart.toUtc();
+    final start = fromZoneWall(localStart, ref.read(zoneLocationProvider));
     await repo.upsert(
       t.copyWith(
         scheduledStart: start,
@@ -149,7 +145,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
         ref.watch(planEventsProvider).valueOrNull ?? const <CalendarEvent>[];
     final prefs = ref.watch(planPrefsProvider);
     final clock = ref.watch(clockProvider);
-    final isToday = dateOnly(clock.now()) == day;
+    final isToday = ref.watch(planTodayProvider) == day;
     final now = isToday
         ? (ref.watch(planNowProvider).valueOrNull ?? clock.now())
         : null;
@@ -294,6 +290,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                 tasks: tasks,
                 events: events,
                 prefs: prefs,
+                location: ref.watch(zoneLocationProvider),
                 now: now,
                 nowKey: _nowKey,
                 onToggle: _toggle,

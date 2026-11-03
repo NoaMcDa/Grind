@@ -49,6 +49,20 @@ void main() {
       tz.TZDateTime(loc, y, m, d, h, mi).toUtc();
 
   group('expandOccurrences', () {
+    test('a window that ends before the anchor gives nothing', () {
+      // Today's list asks for one day while the series already moved on to
+      // next week (a completed occurrence); this used to trip an assertion
+      // inside the rrule package.
+      final out = expandOccurrences(
+        rule: rule('FREQ=WEEKLY;BYDAY=TU'),
+        anchor: at(2026, 11, 10),
+        from: at(2026, 11, 3, 0),
+        to: at(2026, 11, 4, 0),
+        timeZoneName: zone,
+      );
+      expect(out, isEmpty);
+    });
+
     test('Mon/Wed/Fri 07:00 stays 07:00 across the March DST change', () {
       // Israel springs forward Fri 27 Mar 2026 (02:00 -> 03:00).
       final out = expandOccurrences(
