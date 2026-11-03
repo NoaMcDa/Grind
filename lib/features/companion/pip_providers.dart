@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grind/core/core.dart';
 
@@ -43,18 +45,54 @@ final momentumProvider = Provider<Momentum>((ref) {
   );
 });
 
-/// Cosmetic choice, in memory for now (see report: `Preferences.pipAccessory`).
+/// Cosmetic choice, stored as [Preferences.pipAccessory].
 class CompanionPrefs {
-  const CompanionPrefs({this.accessory = 'scarf'});
+  const CompanionPrefs({this.accessory = Preferences.defaultPipAccessory});
   final String accessory;
 }
 
+/// Mirrors [Preferences.pipAccessory] from [PreferencesRepository]. [wear]
+/// updates the state at once and saves in the background; stored changes
+/// (another screen, an import) flow back in through `watch()`.
 class CompanionPrefsNotifier extends StateNotifier<CompanionPrefs> {
-  CompanionPrefsNotifier() : super(const CompanionPrefs());
-  void wear(String accessory) => state = CompanionPrefs(accessory: accessory);
+  CompanionPrefsNotifier(this._repo) : super(const CompanionPrefs()) {
+    _sub = _repo.watch().listen(_onStored, onError: (Object _) {});
+  }
+
+  final PreferencesRepository _repo;
+  late final StreamSubscription<Preferences> _sub;
+
+  /// The accessory being saved; stored values that differ are older.
+  String? _pending;
+
+  void _onStored(Preferences p) {
+    final stored = p.pipAccessory;
+    if (_pending != null) {
+      if (stored != _pending) return;
+      _pending = null;
+    }
+    if (stored != state.accessory) state = CompanionPrefs(accessory: stored);
+  }
+
+  void wear(String accessory) {
+    state = CompanionPrefs(accessory: accessory);
+    _pending = accessory;
+    unawaited(_save(accessory));
+  }
+
+  Future<void> _save(String accessory) async {
+    final p = await _repo.get();
+    await _repo.save(p.copyWith(pipAccessory: accessory));
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 }
 
 final companionPrefsProvider =
     StateNotifierProvider<CompanionPrefsNotifier, CompanionPrefs>(
-      (_) => CompanionPrefsNotifier(),
+      (ref) => CompanionPrefsNotifier(ref.watch(preferencesRepositoryProvider)),
     );
