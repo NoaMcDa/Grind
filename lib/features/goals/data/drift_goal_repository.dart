@@ -3,26 +3,17 @@ import 'package:drift/drift.dart';
 import '../../../core/core.dart';
 import '../../../core/data/database.dart';
 import '../../../core/data/mappers.dart';
+import '../domain/goal_metric.dart';
 import '../domain/goal_record.dart';
 import '../domain/goal_repository.dart';
-import 'goal_extras_store.dart';
 
-/// [GoalRepository] on the existing `goals` table (schema v2).
-///
-/// The table has title, area, horizon, importance, progress and
-/// lastProgressAt; the rest of a goal ([GoalExtras]) goes to [extras].
-/// Extras are written before the row, so the row's `watch()` emission
-/// already sees them.
+/// [GoalRepository] on the `goals` table (schema v3). Every field of a
+/// [GoalRecord] is a column: nothing is kept in memory.
 class DriftGoalRepository implements GoalRepository {
-  DriftGoalRepository(
-    this._db, {
-    GoalExtrasStore? extras,
-    Clock clock = const SystemClock(),
-  }) : _extras = extras ?? InMemoryGoalExtrasStore(),
-       _clock = clock;
+  DriftGoalRepository(this._db, {Clock clock = const SystemClock()})
+    : _clock = clock;
 
   final AppDatabase _db;
-  final GoalExtrasStore _extras;
   final Clock _clock;
 
   $GoalsTable get _t => _db.goals;
@@ -34,8 +25,7 @@ class DriftGoalRepository implements GoalRepository {
       (t) => OrderingTerm(expression: t.id),
     ]);
 
-  GoalRecord _map(GoalRow row) =>
-      GoalRecord.fromCore(row.toDomain(), _extras.get(row.id));
+  GoalRecord _map(GoalRow row) => goalRecordFromCore(row.toDomain());
 
   @override
   Future<List<GoalRecord>> getAll() async =>
@@ -50,10 +40,8 @@ class DriftGoalRepository implements GoalRepository {
   }
 
   @override
-  Future<void> upsert(GoalRecord goal) async {
-    _extras.put(goal.id, goal.extras);
-    await _db.into(_t).insertOnConflictUpdate(goal.toCore().toCompanion());
-  }
+  Future<void> upsert(GoalRecord goal) =>
+      _db.into(_t).insertOnConflictUpdate(goalRecordToCore(goal).toCompanion());
 
   @override
   Future<void> delete(String id) async {
@@ -70,4 +58,50 @@ class DriftGoalRepository implements GoalRepository {
   @override
   Stream<GoalRecord?> watchById(String id) =>
       watchAll().map((all) => findGoal(all, id)).distinct();
+}
+
+/// The full core [Goal] for [goal]: [GoalRecord.toCore] plus the target
+/// date, status, notes and the metric flattened into the `metric*` fields.
+Goal goalRecordToCore(GoalRecord goal) {
+  final core = goal.toCore().copyWith(
+    targetDate: goal.targetDate,
+    status: goal.status,
+    notes: goal.notes,
+  );
+  return switch (goal.metric) {
+    null => core,
+    final FiniteMetric m => core.copyWith(
+      metricKind: 'finite',
+      metricTarget: m.target,
+      metricUnit: m.unit,
+      metricCurrent: m.current,
+      metricSource: m.source.name,
+    ),
+  };
+}
+
+/// The [GoalRecord] stored in [g]. An unknown metric kind reads as no
+/// metric rather than failing the whole list.
+GoalRecord goalRecordFromCore(Goal g) {
+  final kind = g.metricKind;
+  final target = g.metricTarget;
+  final metric = kind == null || target == null || target <= 0
+      ? null
+      : GoalMetric.fromJson({
+          'kind': kind,
+          'target': target,
+          'unit': g.metricUnit,
+          'current': g.metricCurrent,
+          'source': g.metricSource,
+          'period': g.metricPeriod,
+        });
+  return GoalRecord.fromCore(
+    g,
+    GoalExtras(
+      targetDate: g.targetDate,
+      status: g.status,
+      notes: g.notes,
+      metric: metric,
+    ),
+  );
 }

@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
-import 'package:grind/features/goals/data/goal_extras_store.dart';
 import 'package:grind/features/goals/goals.dart';
 import 'package:grind/theme/tokens.dart';
 
@@ -156,10 +157,9 @@ void main() {
           source: MetricSource.linkedTasks,
         ),
       );
-      final store = InMemoryGoalExtrasStore({'g': extras});
-      final back = InMemoryGoalExtrasStore.fromJsonString(
-        store.toJsonString(),
-      ).get('g')!;
+      final back = GoalExtras.fromJson(
+        (jsonDecode(jsonEncode(extras.toJson())) as Map).cast(),
+      );
       expect(back.targetDate, extras.targetDate);
       expect(back.status, GoalStatus.paused);
       expect(back.notes, 'Module 3 next');
