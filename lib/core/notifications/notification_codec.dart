@@ -2,8 +2,12 @@ import 'dart:convert';
 
 import 'package:grind/core/core.dart';
 
-/// iOS category registered at launch; every task reminder uses it.
+/// iOS category of a normal task reminder: Done / Snooze 15 / Start focus.
 const grindReminderCategory = 'GRIND_REMINDER';
+
+/// iOS category of the smart-snooze variant (#12), used once a task has
+/// been snoozed twice: Tonight / Tomorrow / Pick a time.
+const grindRescheduleCategory = 'GRIND_RESCHEDULE';
 
 /// Action identifiers shared by the iOS category, the payload codec and the
 /// background handler.
@@ -12,6 +16,22 @@ const actionIdSnooze = 'snooze';
 const actionIdStartFocus = 'start_focus';
 const actionIdMoveToTonight = 'move_tonight';
 const actionIdMoveToTomorrow = 'move_tomorrow';
+
+/// "Pick a time" on the reschedule category. It has the `foreground`
+/// option, so it opens the app; it deliberately decodes to no
+/// [NotificationAction] and is handled like a body tap (open `/task/<id>`).
+const actionIdPickTime = 'pick_time';
+
+/// The iOS category for a notification's [actions]: none for prompts, the
+/// reschedule category when it offers a move, the reminder category
+/// otherwise.
+String? categoryFor(List<NotificationAction> actions) {
+  if (actions.isEmpty) return null;
+  final moves =
+      actions.contains(NotificationAction.moveToTonight) ||
+      actions.contains(NotificationAction.moveToTomorrow);
+  return moves ? grindRescheduleCategory : grindReminderCategory;
+}
 
 String actionIdFor(NotificationAction action) => switch (action) {
   NotificationAction.done => actionIdDone,

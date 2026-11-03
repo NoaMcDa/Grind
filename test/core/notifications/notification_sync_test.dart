@@ -129,4 +129,36 @@ void main() {
     expect(service.pending.map((n) => n.id), contains('rec:1'));
     await withExtra.dispose();
   });
+
+  test('rules: a rule-only edit re-plans and skips the rule task\'s '
+      'remindAt', () async {
+    final rules = InMemoryReminderRepository();
+    final withRules = NotificationSync(
+      tasks: tasks,
+      preferences: prefs,
+      reminders: rules,
+      service: service,
+      clock: FixedClock(now),
+      debounce: debounce,
+    );
+    addTearDown(withRules.dispose);
+    await tasks.upsert(task('r', remindAt: now.add(const Duration(hours: 1))));
+    withRules.start();
+    await settle();
+    final before = service.calls;
+    expect(service.pending.where((n) => n.taskId == 'r'), hasLength(1));
+
+    await rules.upsert(
+      ReminderRule(
+        id: 'rule1',
+        taskId: 'r',
+        rrule: 'FREQ=DAILY',
+        createdAt: epoch,
+        updatedAt: epoch,
+      ),
+    );
+    await settle();
+    expect(service.calls, before + 1);
+    expect(service.pending.where((n) => n.taskId == 'r'), isEmpty);
+  });
 }
