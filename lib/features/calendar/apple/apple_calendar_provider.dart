@@ -4,7 +4,7 @@ import 'apple_calendar_channel.dart';
 import 'platform_support.dart';
 import 'write_back_marker.dart';
 
-/// [CalendarProvider] over EventKit (#14). See docs/adr/0004-apple-calendar.md.
+/// [CalendarProvider] over EventKit (#14). See docs/adr/0006-apple-calendar.md.
 ///
 /// Off iOS (web, Android, desktop, tests) every call reports "unavailable"
 /// gracefully: [connect] returns false, lists are empty, [changes] never

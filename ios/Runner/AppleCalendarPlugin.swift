@@ -3,7 +3,7 @@ import Flutter
 import Foundation
 
 /// Grind's bridge to EventKit. Dart side: lib/features/calendar/apple/.
-/// Decision and manual test plan: docs/adr/0004-apple-calendar.md.
+/// Decision and manual test plan: docs/adr/0006-apple-calendar.md.
 ///
 /// Method channel `grind/apple_calendar`:
 ///   authorizationStatus, requestFullAccess, requestWriteOnlyAccess

@@ -1,4 +1,4 @@
-# ADR 0004: Apple Calendar (EventKit, iOS)
+# ADR 0006: Apple Calendar (EventKit, iOS)
 
 - Status: accepted
 - Issue: #14
