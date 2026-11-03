@@ -1168,6 +1168,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get focusWinLogged => 'Win logged. Pip saw that.';
 
   @override
+  String get focusWinTitle => 'What got done?';
+
+  @override
+  String get focusWinHint => 'Drafted section 2';
+
+  @override
   String get focusTaskDone => 'Task done. Pip is proud of you.';
 
   @override

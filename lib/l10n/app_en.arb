@@ -1518,6 +1518,14 @@
   "@focusWinLogged": {
     "description": "Toast"
   },
+  "focusWinTitle": "What got done?",
+  "@focusWinTitle": {
+    "description": "Title of the sheet that saves a one-line win for a focus session"
+  },
+  "focusWinHint": "Drafted section 2",
+  "@focusWinHint": {
+    "description": "Example text in the win field"
+  },
   "focusTaskDone": "Task done. Pip is proud of you.",
   "@focusTaskDone": {
     "description": "Toast"

@@ -1161,6 +1161,12 @@ class AppLocalizationsHe extends AppLocalizations {
   String get focusWinLogged => 'הניצחון נרשם. פיפ ראה.';
 
   @override
+  String get focusWinTitle => 'מה הספקת?';
+
+  @override
+  String get focusWinHint => 'טיוטה של פרק 2';
+
+  @override
   String get focusTaskDone => 'המשימה בוצעה. פיפ גאה בך.';
 
   @override

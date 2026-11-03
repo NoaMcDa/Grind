@@ -327,6 +327,8 @@
   "focusKeepGoing": "להמשיך",
   "focusLogWin": "לרשום ניצחון",
   "focusWinLogged": "הניצחון נרשם. פיפ ראה.",
+  "focusWinTitle": "מה הספקת?",
+  "focusWinHint": "טיוטה של פרק 2",
   "focusTaskDone": "המשימה בוצעה. פיפ גאה בך.",
   "focusSessionOverToast": "הזמן נגמר! הסבב הסתיים, אפשר לנשום.",
   "focusBreakOverToast": "ההפסקה נגמרה. מוכנים כשנוח לך.",

@@ -79,6 +79,120 @@ void main() {
     expect(s.remaining(clock.now()), const Duration(minutes: 15));
   });
 
+  test('pause and resume are written to the session', () async {
+    final (c, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 10));
+    await ctrl.pause();
+    var stored = (await sessions.getActive())!;
+    expect(stored.pausedAt, t0.add(const Duration(minutes: 10)));
+    expect(stored.isPaused, isTrue);
+
+    clock.advance(const Duration(minutes: 7));
+    await ctrl.resume();
+    stored = (await sessions.getActive())!;
+    expect(stored.pausedAt, isNull);
+    expect(stored.pausedMs, const Duration(minutes: 7).inMilliseconds);
+
+    clock.advance(const Duration(minutes: 1));
+    await ctrl.pause();
+    clock.advance(const Duration(minutes: 2));
+    await ctrl.resume();
+    expect(
+      (await sessions.getActive())!.pausedMs,
+      const Duration(minutes: 9).inMilliseconds,
+    );
+    expect(stateOf(c).pausedTotal, const Duration(minutes: 9));
+  });
+
+  test('a restart while paused restores the pause', () async {
+    var (c, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 5));
+    await ctrl.pause();
+    clock.advance(const Duration(minutes: 3));
+    await ctrl.resume();
+    clock.advance(const Duration(minutes: 5));
+    await ctrl.pause();
+    c.dispose();
+
+    // An hour later the app starts again; the session is still paused.
+    clock.advance(const Duration(hours: 1));
+    (c, ctrl) = await ready();
+    var s = stateOf(c);
+    expect(s.phase, FocusPhase.paused);
+    expect(s.pausedTotal, const Duration(minutes: 3));
+    expect(s.focused(clock.now()), const Duration(minutes: 10));
+    expect(s.remaining(clock.now()), const Duration(minutes: 15));
+
+    await ctrl.resume();
+    clock.advance(const Duration(minutes: 15));
+    expect(await ctrl.tick(), FocusTick.sessionOver);
+    s = stateOf(c);
+    expect(s.outcome!.focusedMinutes, 25);
+    expect((await tasks.getById('thesis'))!.actualMinutes, 25);
+    final stored = (await sessions.getBetween(t0, clock.now())).single;
+    expect(stored.completed, isTrue);
+    expect(stored.pausedMs, const Duration(minutes: 63).inMilliseconds);
+  });
+
+  test('a restart while running keeps earlier pauses out of focus', () async {
+    var (c, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 5));
+    await ctrl.pause();
+    clock.advance(const Duration(minutes: 20));
+    await ctrl.resume();
+    c.dispose();
+
+    clock.advance(const Duration(minutes: 5));
+    (c, ctrl) = await ready();
+    final s = stateOf(c);
+    expect(s.phase, FocusPhase.focusing);
+    expect(s.focused(clock.now()), const Duration(minutes: 10));
+    expect(s.remaining(clock.now()), const Duration(minutes: 15));
+  });
+
+  test('ending while paused stores the open pause and no pausedAt', () async {
+    final (_, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 8));
+    await ctrl.pause();
+    clock.advance(const Duration(minutes: 5));
+    await ctrl.end();
+    final stored = (await sessions.getBetween(t0, clock.now())).single;
+    expect(stored.pausedAt, isNull);
+    expect(stored.pausedMs, const Duration(minutes: 5).inMilliseconds);
+  });
+
+  test('saveWin stores the line on the ended session', () async {
+    final (c, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 25));
+    await ctrl.tick();
+    final id = stateOf(c).outcome!.sessionId;
+    await ctrl.saveWin(id, '  Drafted section 2 ');
+    final stored = (await sessions.getBetween(t0, clock.now())).single;
+    expect(stored.win, 'Drafted section 2');
+    expect(stored.completed, isTrue);
+    await ctrl.saveWin('someone-else', 'nope');
+    expect(
+      (await sessions.getBetween(t0, clock.now())).single.win,
+      'Drafted section 2',
+    );
+  });
+
+  test('breaks are not stored as sessions', () async {
+    final (c, ctrl) = await ready();
+    await ctrl.start(taskId: 'thesis');
+    clock.advance(const Duration(minutes: 25));
+    await ctrl.tick();
+    expect(stateOf(c).phase, FocusPhase.onBreak);
+    final all = await sessions.getBetween(t0, clock.now().add(const Duration(hours: 1)));
+    expect(all, hasLength(1));
+    expect(all.single.kind, FocusSessionKind.focus);
+  });
+
   test('+5 min extends the session and is persisted', () async {
     final (c, ctrl) = await ready();
     await ctrl.start(taskId: 'thesis');

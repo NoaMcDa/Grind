@@ -2060,6 +2060,18 @@ abstract class AppLocalizations {
   /// **'Win logged. Pip saw that.'**
   String get focusWinLogged;
 
+  /// Title of the sheet that saves a one-line win for a focus session
+  ///
+  /// In en, this message translates to:
+  /// **'What got done?'**
+  String get focusWinTitle;
+
+  /// Example text in the win field
+  ///
+  /// In en, this message translates to:
+  /// **'Drafted section 2'**
+  String get focusWinHint;
+
   /// Toast
   ///
   /// In en, this message translates to:

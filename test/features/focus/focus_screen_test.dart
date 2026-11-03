@@ -108,9 +108,15 @@ void main() {
     expect(find.text('FOCUS 2 OF 4'), findsOneWidget);
   });
 
-  testWidgets('Log a win shows a toast', (tester) async {
+  testWidgets('Log a win saves the line on the session', (tester) async {
     final clock = FixedClock(testNow);
-    await pumpGrindApp(tester, initialLocation: '/focus', clock: clock);
+    final sessions = InMemoryFocusSessionRepository();
+    await pumpGrindApp(
+      tester,
+      initialLocation: '/focus',
+      clock: clock,
+      overrides: [focusSessionRepositoryProvider.overrideWithValue(sessions)],
+    );
     await tester.tap(find.bySemanticsLabel('Start focus'));
     await tester.pump();
     clock.advance(const Duration(minutes: 5));
@@ -118,7 +124,48 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel(en.focusLogWin));
     await tester.pumpAndSettle();
+    expect(find.text(en.focusWinTitle), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('focus-win-field')),
+      'Drafted the intro',
+    );
+    await tester.tap(find.byKey(const ValueKey('focus-win-save')));
+    await tester.pumpAndSettle();
     expect(find.text(en.focusWinLogged), findsOneWidget);
+    final stored = (await sessions.getBetween(
+      testNow.toUtc().subtract(const Duration(days: 1)),
+      clock.now().toUtc().add(const Duration(days: 1)),
+    )).single;
+    expect(stored.win, 'Drafted the intro');
+  });
+
+  testWidgets('a session paused before a restart opens paused', (
+    tester,
+  ) async {
+    final clock = FixedClock(testNow);
+    final start = clock.now().toUtc().subtract(const Duration(minutes: 30));
+    await pumpGrindApp(
+      tester,
+      initialLocation: '/focus',
+      clock: clock,
+      overrides: [
+        focusSessionRepositoryProvider.overrideWithValue(
+          InMemoryFocusSessionRepository([
+            FocusSession(
+              id: 'paused',
+              plannedMinutes: 25,
+              startedAt: start,
+              // Focused 10 min, then paused for the last 20.
+              pausedAt: start.add(const Duration(minutes: 10)),
+              createdAt: start,
+              updatedAt: start,
+            ),
+          ]),
+        ),
+      ],
+    );
+    expect(remaining(tester), '15:00');
+    expect(find.bySemanticsLabel('Resume'), findsOneWidget);
   });
 
   testWidgets('a running session is picked up when the screen opens', (
