@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../app/logging.dart';
 import '../../core/core.dart';
+import '../../l10n/app_localizations.dart';
 import '../companion/celebration_bus.dart';
+import 'live_activity/live_activity.dart';
 import 'providers.dart';
 
 /// Interval lengths. Defaults are the classic 25/5 with a longer break after
@@ -195,6 +200,11 @@ const _unset = Object();
 /// Breaks are not stored: only focus sessions (kind
 /// [FocusSessionKind.focus]) are written. A break lives in memory, so a
 /// restart during a break lands on the idle screen, which is harmless.
+///
+/// The Live Activity (#20, [liveActivityServiceProvider]) mirrors the
+/// session: shown on start and on restore, updated on pause, resume and
+/// +5 min, removed when the session ends. Breaks have none. The calls are
+/// queued in order and never block or fail the timer.
 class FocusController extends AsyncNotifier<FocusState> {
   FocusSessionRepository get _repo => ref.read(focusSessionRepositoryProvider);
   TaskRepository get _tasks => ref.read(taskRepositoryProvider);
@@ -226,6 +236,12 @@ class FocusController extends AsyncNotifier<FocusState> {
         pausedAt: active.pausedAt,
       );
       s = (await _advance(s, now)).$1;
+    }
+    // Re-show after a restart, or clear one left over from a killed app.
+    if (s.hasSession) {
+      _liveShow(s);
+    } else {
+      _live((live) => live.end());
     }
     return s;
   }
@@ -271,20 +287,20 @@ class FocusController extends AsyncNotifier<FocusState> {
       updatedAt: now,
     );
     await _repo.start(session);
-    _set(
-      s.copyWith(
-        phase: FocusPhase.focusing,
-        session: session,
-        pausedTotal: Duration.zero,
-        pausedAt: null,
-        breakEndsAt: null,
-        breakLength: Duration.zero,
-        completedInCycle: s.completedInCycle >= s.settings.sessionsPerCycle
-            ? 0
-            : s.completedInCycle,
-        outcome: null,
-      ),
+    final next = s.copyWith(
+      phase: FocusPhase.focusing,
+      session: session,
+      pausedTotal: Duration.zero,
+      pausedAt: null,
+      breakEndsAt: null,
+      breakLength: Duration.zero,
+      completedInCycle: s.completedInCycle >= s.settings.sessionsPerCycle
+          ? 0
+          : s.completedInCycle,
+      outcome: null,
     );
+    _set(next);
+    _liveShow(next);
   }
 
   /// Freeze the timer. The pause start is stored on the session, so a
@@ -294,7 +310,13 @@ class FocusController extends AsyncNotifier<FocusState> {
     if (s == null || s.phase != FocusPhase.focusing) return;
     final now = _now();
     final session = s.session!.copyWith(pausedAt: now, updatedAt: now);
-    _set(s.copyWith(phase: FocusPhase.paused, session: session, pausedAt: now));
+    final next = s.copyWith(
+      phase: FocusPhase.paused,
+      session: session,
+      pausedAt: now,
+    );
+    _set(next);
+    _liveUpdate(next);
     await _repo.update(session);
   }
 
@@ -309,14 +331,14 @@ class FocusController extends AsyncNotifier<FocusState> {
       pausedAt: null,
       updatedAt: now,
     );
-    _set(
-      s.copyWith(
-        phase: FocusPhase.focusing,
-        session: session,
-        pausedTotal: total,
-        pausedAt: null,
-      ),
+    final next = s.copyWith(
+      phase: FocusPhase.focusing,
+      session: session,
+      pausedTotal: total,
+      pausedAt: null,
     );
+    _set(next);
+    _liveUpdate(next);
     await _repo.update(session);
   }
 
@@ -341,7 +363,9 @@ class FocusController extends AsyncNotifier<FocusState> {
       updatedAt: _now(),
     );
     await _repo.update(updated);
-    _set(s.copyWith(session: updated));
+    final next = s.copyWith(session: updated);
+    _set(next);
+    _liveUpdate(next);
   }
 
   /// End the session now. [completed] marks it as a full session (counts
@@ -392,6 +416,74 @@ class FocusController extends AsyncNotifier<FocusState> {
 
   // ------------------------------------------------------------ internals
 
+  /// Live Activity calls, chained so they reach iOS in order even though
+  /// [_liveShow] first reads the task and preferences.
+  Future<void> _liveChain = Future<void>.value();
+
+  /// Completes when every Live Activity call queued so far has run.
+  @visibleForTesting
+  Future<void> get liveActivitySettled => _liveChain;
+
+  void _live(Future<void> Function(LiveActivityService live) call) {
+    final live = ref.read(liveActivityServiceProvider);
+    _liveChain = _liveChain.then((_) => call(live)).catchError((
+      Object e,
+      StackTrace st,
+    ) {
+      log('live activity call failed', error: e, stackTrace: st);
+    });
+  }
+
+  /// Start (or replace) the activity for the session in [s].
+  void _liveShow(FocusState s) {
+    final session = s.session;
+    final endsAt = s.endsAt;
+    if (session == null || endsAt == null) return;
+    if (ref.read(liveActivityServiceProvider) is NoopLiveActivityService) {
+      return; // Skip the lookups below off iOS.
+    }
+    final pausedAt = s.phase == FocusPhase.paused ? s.pausedAt : null;
+    final prefsRepo = ref.read(preferencesRepositoryProvider);
+    final tasks = _tasks;
+    _live((live) async {
+      final prefs = await prefsRepo.get();
+      final l = _l10n(prefs.localeCode);
+      final taskId = session.taskId;
+      final task = taskId == null ? null : await tasks.getById(taskId);
+      await live.start(
+        taskTitle: task?.title ?? l.focusFree,
+        endDate: endsAt,
+        accessory: prefs.pipAccessory,
+        pausedAt: pausedAt,
+        focusingLabel: l.focusing,
+        pausedLabel: l.paused,
+      );
+    });
+  }
+
+  /// Pause, resume or +5 min on the running session in [s].
+  void _liveUpdate(FocusState s) {
+    final endsAt = s.endsAt;
+    if (endsAt == null) return;
+    final paused = s.phase == FocusPhase.paused;
+    final pausedAt = s.pausedAt;
+    _live(
+      (live) => live.update(
+        paused: paused,
+        endDate: endsAt,
+        pausedAt: paused ? pausedAt : null,
+      ),
+    );
+  }
+
+  static AppLocalizations _l10n(String code) {
+    try {
+      return lookupAppLocalizations(Locale(code));
+    } on Object {
+      return lookupAppLocalizations(const Locale('en'));
+    }
+  }
+
   /// The session the current outcome is about, for [saveWin].
   FocusSession? _lastEnded;
 
@@ -426,6 +518,7 @@ class FocusController extends AsyncNotifier<FocusState> {
     required bool completed,
   }) async {
     final session = s.session!;
+    _live((live) => live.end());
     final focused = s.focused(at);
     final minutes = (focused.inSeconds / 60).round();
     // Ending while paused: the open pause counts as paused, up to [at].

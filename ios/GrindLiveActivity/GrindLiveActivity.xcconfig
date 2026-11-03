@@ -1,0 +1,13 @@
+// Base configuration for the GrindLiveActivity widget extension target
+// (Debug, Release and Profile). See docs/adr/0007-live-activity.md.
+//
+// Generated.xcconfig supplies FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER, so
+// the extension's version always matches the app's (App Store requirement).
+// Do NOT include Flutter/Debug.xcconfig or Release.xcconfig here: they pull in
+// the CocoaPods settings of the Runner target.
+#include "../Flutter/Generated.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.noa.grind.grind.LiveActivity
+IPHONEOS_DEPLOYMENT_TARGET = 16.2
+SWIFT_VERSION = 5.0
+SKIP_INSTALL = YES

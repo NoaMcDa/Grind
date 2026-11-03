@@ -30,6 +30,12 @@ import flutter_local_notifications
     if let registrar = registrar(forPlugin: "AppleCalendarPlugin") {
       AppleCalendarPlugin.register(with: registrar)
     }
+
+    // Focus timer on the Lock Screen and in the Dynamic Island (#20). Main
+    // isolate only; a no-op below iOS 16.2. See docs/adr/0007-live-activity.md.
+    if let registrar = registrar(forPlugin: "LiveActivityPlugin") {
+      LiveActivityPlugin.register(with: registrar)
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
