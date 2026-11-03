@@ -82,11 +82,35 @@ void main() {
   });
 
   testWidgets('tapping an unlock changes what Pip wears', (tester) async {
-    await _pump(tester, const []);
+    await _pump(tester, [for (var i = 0; i < 25; i++) _done('t$i', _now)]);
     expect(find.text('wearing: Scarf'), findsOneWidget);
-    await tester.tap(find.text('Sunglasses'));
+    await tester.tap(find.text('Party hat'));
     await tester.pumpAndSettle();
-    expect(find.text('wearing: Sunglasses'), findsOneWidget);
+    expect(find.text('wearing: Party hat'), findsOneWidget);
+  });
+
+  testWidgets('unlock states: worn, locked with hint, progress, unequip', (
+    tester,
+  ) async {
+    final tasks = [for (var i = 0; i < 25; i++) _done('t$i', _now)];
+    await _pump(tester, tasks);
+    expect(find.text('Wearing'), findsOneWidget); // scarf
+    expect(find.text('Tap to wear'), findsNWidgets(1)); // party hat
+    expect(find.text('Finish a goal'), findsOneWidget); // crown locked
+    expect(find.text('10 more sessions'), findsOneWidget); // no sessions: lock
+    // Party hat is unlocked by 25 tasks and can be worn.
+    await tester.tap(find.text('Party hat'));
+    await tester.pumpAndSettle();
+    expect(find.text('wearing: Party hat'), findsOneWidget);
+    // Tapping the worn one takes it off.
+    await tester.tap(find.text('Party hat'));
+    await tester.pumpAndSettle();
+    expect(find.text('no accessory'), findsOneWidget);
+    // A locked one does nothing.
+    await tester.tap(find.text('Crown'));
+    await tester.pumpAndSettle();
+    expect(find.text('no accessory'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNWidgets(1)); // boots
   });
 
   testWidgets('RTL at 390x844 has no overflow', (tester) async {

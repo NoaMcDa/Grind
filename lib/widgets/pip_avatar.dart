@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 
-enum PipAccessory { none, scarf, sunglasses }
+enum PipAccessory { none, scarf, sunglasses, partyHat, rainBoots, crown }
 
 /// Pip, the companion: a sun-yellow blob with an ink outline, oval eyes
 /// with glints, pink cheeks and a mint leaf. Drawn in a 100×100 box.
@@ -157,6 +157,66 @@ class _PipPainter extends CustomPainter {
         const Offset(47, 95),
         stroke(2, Colors.white),
       );
+    }
+
+    if (accessory == PipAccessory.partyHat) {
+      final hat = Path()
+        ..moveTo(26, 38)
+        ..lineTo(37, 6)
+        ..lineTo(52, 30)
+        ..close();
+      canvas.drawPath(hat, fill(AppColors.pink));
+      canvas.drawPath(hat, stroke(3));
+      canvas.drawLine(
+        const Offset(31, 25),
+        const Offset(44, 25),
+        stroke(2.5, AppColors.violet),
+      );
+      canvas.drawCircle(const Offset(37, 6), 4, fill(AppColors.sun));
+      canvas.drawCircle(const Offset(37, 6), 4, stroke(2.5));
+    }
+
+    if (accessory == PipAccessory.crown) {
+      final crown = Path()
+        ..moveTo(32, 34)
+        ..lineTo(30, 14)
+        ..lineTo(41, 23)
+        ..lineTo(50, 10)
+        ..lineTo(59, 23)
+        ..lineTo(70, 14)
+        ..lineTo(68, 34)
+        ..close();
+      canvas.drawPath(crown, fill(AppColors.violet));
+      canvas.drawPath(crown, stroke(3));
+      for (final c in const [Offset(30, 13), Offset(50, 9), Offset(70, 13)]) {
+        canvas.drawCircle(c, 3.2, fill(AppColors.sun));
+        canvas.drawCircle(c, 3.2, stroke(2));
+      }
+      canvas.drawLine(
+        const Offset(38, 30),
+        const Offset(62, 30),
+        stroke(2, Colors.white),
+      );
+    }
+
+    if (accessory == PipAccessory.rainBoots) {
+      for (final x in [30.0, 56.0]) {
+        final boot = Path()
+          ..moveTo(x, 90)
+          ..lineTo(x + 14, 90)
+          ..lineTo(x + 14, 98)
+          ..lineTo(x + 18, 98)
+          ..quadraticBezierTo(x + 20, 105, x + 12, 105)
+          ..lineTo(x, 105)
+          ..close();
+        canvas.drawPath(boot, fill(AppColors.sky));
+        canvas.drawPath(boot, stroke(3));
+        canvas.drawLine(
+          Offset(x, 93),
+          Offset(x + 14, 93),
+          stroke(2.5, AppColors.mint),
+        );
+      }
     }
   }
 

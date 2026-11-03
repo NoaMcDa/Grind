@@ -1076,6 +1076,42 @@ class AppLocalizationsHe extends AppLocalizations {
   String get pipFirstWin => 'הניצחון הראשון שלך יופיע כאן.';
 
   @override
+  String get accCrown => 'כתר';
+
+  @override
+  String pipMoreTasks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count משימות נוספות',
+      one: 'משימה אחת נוספת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pipMoreDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ימים נוספים',
+      one: 'יום אחד נוסף',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pipFinishGoal => 'להשלים יעד';
+
+  @override
+  String pipUnlockedToast(String item) {
+    return 'חדש אצל פיפ: $item. אפשר ללבוש במלתחה של פיפ.';
+  }
+
+  @override
+  String get pipToggleWear => 'הקשה ללבוש או להסיר';
+
+  @override
   String pipMoreSessions(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

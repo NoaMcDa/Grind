@@ -7,6 +7,7 @@ import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../companion/mood.dart';
 import '../companion/pip_providers.dart';
+import '../companion/unlocks.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
@@ -45,6 +46,7 @@ class PipScreen extends ConsumerWidget {
       for (var i = 0; i < 7; i++)
         _dayShort(l, now.subtract(Duration(days: 6 - i)).weekday),
     ];
+    final progress = ref.watch(unlockProgressProvider);
     void wear(PipAccessory a) =>
         ref.read(companionPrefsProvider.notifier).wear(a.name);
 
@@ -90,7 +92,7 @@ class PipScreen extends ConsumerWidget {
                         Pill(
                           label: equipped == PipAccessory.none
                               ? l.pipNoAccessory
-                              : l.pipWearing(_accessoryName(l, equipped)),
+                              : l.pipWearing(accessoryName(l, equipped)),
                           height: 22,
                           fontSize: 12,
                         ),
@@ -254,96 +256,23 @@ class PipScreen extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _unlock(
-                l,
-                l.accScarf,
-                PipAccessory.scarf,
-                equipped,
-                wear,
-                const Icon(Icons.checkroom_outlined, color: AppColors.violet),
-              ),
-            ),
-            Expanded(
-              child: _unlock(
-                l,
-                l.accSunglasses,
-                PipAccessory.sunglasses,
-                equipped,
-                wear,
-                const Icon(Icons.visibility_outlined, color: AppColors.ink),
-              ),
-            ),
-            Expanded(
-              child: _UnlockSlot(
-                label: l.accPartyHat,
-                caption: l.pipMoreSessions(3),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox.square(
-                      dimension: 52,
-                      child: CircularProgressIndicator(
-                        value: 0.29,
-                        strokeWidth: 5,
-                        color: AppColors.violet,
-                        backgroundColor: const Color(0xFFE4DFF7),
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.celebration_outlined,
-                      color: AppColors.pink,
-                    ),
-                  ],
+            for (final p in progress)
+              Expanded(
+                child: _UnlockItem(
+                  progress: p,
+                  worn: equipped == p.accessory,
+                  onTap: p.unlocked
+                      ? () => wear(
+                          equipped == p.accessory
+                              ? PipAccessory.none
+                              : p.accessory,
+                        )
+                      : null,
                 ),
               ),
-            ),
-            Expanded(
-              child: _UnlockSlot(
-                label: l.accRainBoots,
-                caption: l.comingSoon,
-                locked: true,
-                child: const Icon(Icons.lock_outline, color: AppColors.muted),
-              ),
-            ),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _unlock(
-    AppLocalizations l,
-    String label,
-    PipAccessory a,
-    PipAccessory equipped,
-    void Function(PipAccessory) wear,
-    Widget icon,
-  ) {
-    final on = equipped == a;
-    return _UnlockSlot(
-      label: label,
-      caption: on ? l.wearing : l.tapToWear,
-      captionColor: on ? AppColors.violet : AppColors.muted,
-      onTap: () => wear(a),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: on ? AppColors.sun : AppColors.card,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.ink, width: AppStroke.border),
-          boxShadow: AppShadows.hard(3),
-        ),
-        foregroundDecoration: on
-            ? BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.violet, width: 3),
-              )
-            : null,
-        child: icon,
-      ),
     );
   }
 }
@@ -422,63 +351,115 @@ class _Win extends StatelessWidget {
   }
 }
 
-class _UnlockSlot extends StatelessWidget {
-  const _UnlockSlot({
-    required this.label,
-    required this.caption,
-    required this.child,
-    this.captionColor = AppColors.muted,
-    this.locked = false,
-    this.onTap,
+/// One accessory: locked (lock), in progress (ring), unlocked or worn.
+class _UnlockItem extends StatelessWidget {
+  const _UnlockItem({
+    required this.progress,
+    required this.worn,
+    required this.onTap,
   });
 
-  final String label, caption;
-  final Widget child;
-  final Color captionColor;
-  final bool locked;
+  final UnlockProgress progress;
+  final bool worn;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final token = locked
-        ? Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFECE8F8),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.muted,
-                width: AppStroke.border,
-                style: BorderStyle.solid,
+    final l = context.l10n;
+    final a = progress.accessory;
+    final name = accessoryName(l, a);
+    final String caption;
+    if (progress.unlocked) {
+      caption = worn ? l.wearing : l.tapToWear;
+    } else {
+      caption = unlockHint(l, progress);
+    }
+    final Widget token;
+    if (progress.unlocked) {
+      token = Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: worn ? AppColors.sun : AppColors.card,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.ink, width: AppStroke.border),
+          boxShadow: AppShadows.hard(3),
+        ),
+        foregroundDecoration: worn
+            ? BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.violet, width: 3),
+              )
+            : null,
+        child: Center(
+          child: PipAvatar(size: 40, accessory: a, semanticLabel: name),
+        ),
+      );
+    } else if (progress.untouched) {
+      token = Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: const Color(0xFFECE8F8),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.muted, width: AppStroke.border),
+        ),
+        child: const Icon(Icons.lock_outline, color: AppColors.muted),
+      );
+    } else {
+      token = SizedBox.square(
+        dimension: 56,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox.square(
+              dimension: 52,
+              child: CircularProgressIndicator(
+                value: progress.fraction,
+                strokeWidth: 5,
+                color: AppColors.violet,
+                backgroundColor: const Color(0xFFE4DFF7),
+                strokeCap: StrokeCap.round,
               ),
             ),
-            child: child,
-          )
-        : SizedBox(width: 56, height: 56, child: Center(child: child));
-    return Semantics(
-      button: onTap != null,
-      label: '$label, $caption',
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          children: [
-            token,
-            const SizedBox(height: 5),
-            Text(label, style: AppText.bold(size: 11, height: 1.2)),
-            Text(
-              caption,
-              textAlign: TextAlign.center,
-              style: AppText.body(
-                size: 11,
-                weight: captionColor == AppColors.violet
-                    ? FontWeight.w700
-                    : FontWeight.w500,
-                color: captionColor,
-                height: 1.2,
-              ),
+            Opacity(
+              opacity: 0.5,
+              child: PipAvatar(size: 32, accessory: a, semanticLabel: name),
             ),
           ],
+        ),
+      );
+    }
+    return Semantics(
+      button: onTap != null,
+      label: '$name, $caption',
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: Column(
+            children: [
+              token,
+              const SizedBox(height: 5),
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                style: AppText.bold(size: 11, height: 1.2),
+              ),
+              Text(
+                caption,
+                textAlign: TextAlign.center,
+                style: AppText.body(
+                  size: 11,
+                  weight: worn ? FontWeight.w700 : FontWeight.w500,
+                  color: worn ? AppColors.violet : AppColors.muted,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -555,9 +536,3 @@ String _dayShort(AppLocalizations l, int weekday) => [
   l.commonWeekdayShortSat,
   l.commonWeekdayShortSun,
 ][weekday - 1];
-
-String _accessoryName(AppLocalizations l, PipAccessory a) => switch (a) {
-  PipAccessory.scarf => l.accScarf,
-  PipAccessory.sunglasses => l.accSunglasses,
-  PipAccessory.none => l.pipNoAccessory,
-};
