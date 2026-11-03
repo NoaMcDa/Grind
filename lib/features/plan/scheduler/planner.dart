@@ -29,6 +29,15 @@ import 'time_math.dart';
 ///
 /// Time zone: pass local [DateTime]s. `Preferences` clock ranges are read on
 /// the local calendar day of each slot; conversion is the caller's job.
+///
+/// Minimal-change bias: [prevPlacements] maps a task id to the slots it held
+/// in a previous plan. When every one of a task's previous slots still fits
+/// the free time (not overlapped by a new event, not past `now`, not after
+/// its `dueAt`, within the deep-block cap for deep tasks) and together they
+/// cover the task's current adjusted minutes, the task is kept at those
+/// slots verbatim. Any mismatch (a shifted meeting, a changed estimate, a
+/// new pin) falls through to the normal earliest-fit search. Empty by
+/// default; `prevPlacementsFromPlan` in `replan.dart` derives it.
 Plan plan({
   required List<Task> tasks,
   required Map<String, Goal> goals,
@@ -38,6 +47,7 @@ Plan plan({
   UserStats stats = const UserStats(),
   SchedulerWeights weights = const SchedulerWeights(),
   DateTime? horizonEnd,
+  Map<String, List<Slot>> prevPlacements = const {},
 }) {
   final start = now.toLocal();
   final end = (horizonEnd ?? defaultHorizonEnd(start, prefs)).toLocal();
@@ -128,6 +138,34 @@ Plan plan({
     final chunks = <Slot>[];
     final chunkNotes = <_Option>[];
     var remaining = need;
+    // Minimal-change bias: keep the task at its previous slots when they all
+    // still fit. See the [plan] docstring.
+    final prev = prevPlacements[task.id];
+    if (prev != null &&
+        _tryKeepAtPrev(
+          task: task,
+          prev: prev,
+          slots: slots,
+          notBefore: start,
+          deadline: deadline,
+          deep: deep,
+          deepUsed: deepUsed,
+          maxDeep: prefs.maxDeepBlocksPerDay,
+          need: need,
+        )) {
+      for (final s in prev) {
+        chunks.add(s);
+        chunkNotes.add(_optionFor(s, prefs));
+        slots = subtractSlots(slots, [
+          s,
+        ]).where((x) => x.minutes >= minSlotMinutes).toList();
+        if (deep) {
+          final day = startOfDay(s.start);
+          deepUsed[day] = (deepUsed[day] ?? 0) + 1;
+        }
+      }
+      remaining = 0;
+    }
     while (remaining > 0) {
       final minLen = task.splittable
           ? math.min(task.minChunkMinutes, remaining)
@@ -504,4 +542,62 @@ int _cmpChain(List<int> results) {
     if (r != 0) return r;
   }
   return 0;
+}
+
+/// Can every slot in [prev] be kept exactly, together totalling [need]
+/// minutes? Used by the minimal-change bias in [plan].
+bool _tryKeepAtPrev({
+  required Task task,
+  required List<Slot> prev,
+  required List<Slot> slots,
+  required DateTime notBefore,
+  required DateTime deadline,
+  required bool deep,
+  required Map<DateTime, int> deepUsed,
+  required int maxDeep,
+  required int need,
+}) {
+  if (prev.isEmpty) return false;
+  if (!task.splittable && prev.length > 1) return false;
+  var total = 0;
+  for (final p in prev) {
+    if (p.isEmpty) return false;
+    if (p.start.isBefore(notBefore)) return false;
+    if (p.end.isAfter(deadline)) return false;
+    if (!slots.any((s) => s.contains(p))) return false;
+    total += p.minutes;
+  }
+  if (total != need) return false;
+  if (task.splittable && prev.any((p) => p.minutes < task.minChunkMinutes)) {
+    // Allow a final remainder shorter than minChunk (matches the normal
+    // placement rule). Everything else must meet the min chunk.
+    final under = prev.where((p) => p.minutes < task.minChunkMinutes).toList();
+    if (under.length > 1) return false;
+  }
+  if (deep) {
+    final added = <DateTime, int>{};
+    for (final p in prev) {
+      final day = startOfDay(p.start);
+      added[day] = (added[day] ?? 0) + 1;
+    }
+    for (final e in added.entries) {
+      if ((deepUsed[e.key] ?? 0) + e.value > maxDeep) return false;
+    }
+  }
+  return true;
+}
+
+/// An `_Option` for [s] with its deep-window flags read from [prefs].
+_Option _optionFor(Slot s, Preferences prefs) {
+  final day = startOfDay(s.start);
+  var touches = false;
+  var inside = false;
+  for (final r in prefs.deepWindows) {
+    final w = rangeOn(day, r);
+    final i = intersect(s, w);
+    if (i == null) continue;
+    touches = true;
+    if (i == s) inside = true;
+  }
+  return _Option(s, inDeep: inside, touchesDeep: touches);
 }
