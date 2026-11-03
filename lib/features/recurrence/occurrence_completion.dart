@@ -162,3 +162,58 @@ Task completeOccurrence({
   timeZoneName: timeZoneName,
   now: now,
 ).task;
+
+/// Completes [occurrenceAt] of a recurring task and stores the result the
+/// way `TaskActions.completeRecurring` does: the rule first (so
+/// `lastCompletedAt` is on disk before the task change re-plans the
+/// notifications), then the task, its plan slot cleared while the series
+/// goes on. Shared by the notification Done action and the evening review.
+Future<SeriesProgress> storeSeriesCompletion({
+  required TaskRepository tasks,
+  required ReminderRepository rules,
+  required Task task,
+  required ReminderRule rule,
+  required DateTime occurrenceAt,
+  required String timeZoneName,
+  required DateTime now,
+}) async {
+  final progress = completeSeriesOccurrence(
+    task: task,
+    rule: rule,
+    occurrenceAt: occurrenceAt,
+    timeZoneName: timeZoneName,
+    now: now,
+  );
+  final remindAt = progress.task.remindAt;
+  var next = remindAt == null
+      ? progress.task
+      : progress.task.copyWith(remindAt: _plainUtc(remindAt));
+  if (!next.isDone) {
+    next = next.copyWith(
+      scheduledStart: null,
+      scheduledEnd: null,
+      lockedStart: false,
+    );
+  }
+  await rules.upsert(progress.rule);
+  await tasks.upsert(next);
+  return (task: next, rule: progress.rule);
+}
+
+/// The occurrence a task reminder with [notificationId] was scheduled for:
+/// the fire time in its `task:<taskId>:<epoch minutes>` id plus the rule's
+/// lead. Null when the id is not a task reminder of [taskId].
+DateTime? occurrenceOfNotification(
+  String notificationId,
+  String taskId,
+  ReminderRule rule,
+) {
+  final prefix = 'task:$taskId:';
+  if (!notificationId.startsWith(prefix)) return null;
+  final minutes = int.tryParse(notificationId.substring(prefix.length));
+  if (minutes == null) return null;
+  return DateTime.fromMillisecondsSinceEpoch(
+    minutes * 60000,
+    isUtc: true,
+  ).add(Duration(minutes: rule.leadMinutes));
+}

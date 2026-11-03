@@ -133,6 +133,67 @@ void main() {
     expect(c!.dueAt!.toLocal(), DateTime(2026, 11, 4, 23, 59));
   });
 
+  testWidgets('a recurring task completes its occurrence and stores the rule', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    final occurrence = DateTime.utc(2026, 11, 3, 9);
+    final t0 = DateTime.utc(2026, 11, 1);
+    final tasks = InMemoryTaskRepository([
+      Task(
+        id: 'r',
+        title: 'Stretch',
+        remindAt: occurrence,
+        createdAt: t0,
+        updatedAt: t0,
+      ),
+    ]);
+    final rules = InMemoryReminderRepository([
+      ReminderRule(
+        id: 'rule-r',
+        taskId: 'r',
+        rrule: 'FREQ=DAILY',
+        createdAt: t0,
+        updatedAt: t0,
+      ),
+    ]);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clockProvider.overrideWithValue(
+            FixedClock(DateTime.utc(2026, 11, 3, 21)),
+          ),
+          taskRepositoryProvider.overrideWithValue(tasks),
+          reminderRepositoryProvider.overrideWithValue(rules),
+          preferencesRepositoryProvider.overrideWithValue(
+            InMemoryPreferencesRepository(
+              const Preferences(timeZoneName: 'UTC'),
+            ),
+          ),
+          reviewRepositoryProvider.overrideWithValue(
+            InMemoryReviewRepository(),
+          ),
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          localizationsDelegates: localizationsDelegates,
+          supportedLocales: supportedLocales,
+          home: EveningReviewFlow(onFinished: () {}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tap(tester, const ValueKey('review-done-r'));
+    await tap(tester, primary('Continue'));
+    final rule = (await rules.getForTask('r'))!;
+    expect(rule.lastCompletedAt, occurrence);
+    final r = (await tasks.getById('r'))!;
+    expect(r.status, TaskStatus.open);
+    expect(r.remindAt, DateTime.utc(2026, 11, 4, 9));
+  });
+
   testWidgets('lays out in RTL at 390x844', (tester) async {
     final he = lookupAppLocalizations(const Locale('he'));
     await pump(

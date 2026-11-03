@@ -24,8 +24,13 @@ the rule into occurrences (`occurrence_expander.dart`), completes them
 - `completeSeriesOccurrence` sets `lastCompletedAt` to the occurrence (it never
   moves backwards), pins DTSTART, and moves `remindAt` to the next occurrence
   after it, or marks the task done when none is left. Store both the task and
-  the rule. `completeOccurrence` is its task half, for callers that cannot
-  write the rule yet.
+  the rule. `storeSeriesCompletion` does that (rule first, then the task
+  with its plan slot cleared); the notification Done action and the evening
+  review use it, so `lastCompletedAt` always advances. `completeOccurrence`
+  is its task half, for callers that cannot write the rule yet.
+- A notification Done completes the occurrence its id names
+  (`occurrenceOfNotification`: fire time plus the lead), never one before
+  `remindAt`; without a readable id, `remindAt`.
 - `uncompleteSeriesOccurrence` sets `lastCompletedAt` back to the occurrence
   before the one being un-checked (null for the first), reopens the task and
   sets `remindAt` to the first occurrence after the new `lastCompletedAt`.

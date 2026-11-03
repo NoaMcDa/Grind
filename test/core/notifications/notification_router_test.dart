@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/notifications.dart';
+import 'package:grind/features/recurrence/recurrence_notifications.dart';
 
 import 'helpers.dart';
 
@@ -166,6 +167,23 @@ void main() {
     });
   });
 
+  test('openLocation: the weekly recap opens the highlights', () async {
+    const recap = NotificationResponse(
+      notificationId: 'recap:weekly:2026-11-07',
+      taskId: '',
+    );
+    expect(NotificationRouter.openLocation(recap), '/highlights');
+    expect(NotificationScheduler.isPrompt(recap.notificationId), isTrue);
+    // An action on it (none is offered) is ignored.
+    await router.handle(
+      const NotificationResponse(
+        notificationId: 'recap:weekly:2026-11-07',
+        taskId: '',
+        action: NotificationAction.done,
+      ),
+    );
+  });
+
   test('openLocation: evening prompt opens the review, morning stays', () {
     expect(
       NotificationRouter.openLocation(
@@ -240,12 +258,97 @@ void main() {
 
     tearDown(() => recurring.dispose());
 
+    NotificationResponse doneOn(DateTime fire) => NotificationResponse(
+      notificationId: NotificationScheduler.taskNotificationId('daily', fire),
+      taskId: 'daily',
+      action: NotificationAction.done,
+    );
+
     test('done completes the occurrence, not the series', () async {
-      await recurring.handle(r('daily', NotificationAction.done));
+      await recurring.handle(doneOn(DateTime.utc(2026, 11, 3, 7)));
       final t = (await repo.getById('daily'))!;
       expect(t.status, TaskStatus.open);
       expect(t.completedAt, isNull);
       expect(t.remindAt, DateTime.utc(2026, 11, 4, 7));
+      final rule = (await rules.getForTask('daily'))!;
+      expect(rule.lastCompletedAt, DateTime.utc(2026, 11, 3, 7));
+      // The series start is pinned, so COUNT/until keep counting from it.
+      expect(rule.rrule, contains('DTSTART'));
+    });
+
+    test('done without a readable id completes the pending one', () async {
+      await recurring.handle(r('daily', NotificationAction.done));
+      final rule = (await rules.getForTask('daily'))!;
+      expect(rule.lastCompletedAt, anchor);
+      expect(
+        (await repo.getById('daily'))!.remindAt,
+        DateTime.utc(2026, 11, 2, 7),
+      );
+    });
+
+    test('done on an occurrence already done changes nothing', () async {
+      await recurring.handle(doneOn(DateTime.utc(2026, 11, 3, 7)));
+      final before = (await repo.getById('daily'))!;
+      await recurring.handle(doneOn(DateTime.utc(2026, 11, 2, 7)));
+      final after = (await repo.getById('daily'))!;
+      expect(after.remindAt, before.remindAt);
+      expect(
+        (await rules.getForTask('daily'))!.lastCompletedAt,
+        DateTime.utc(2026, 11, 3, 7),
+      );
+    });
+
+    test('a Done tap moves the pending notification on', () async {
+      // 06:30, before today's 07:00 occurrence fires; anchor today.
+      final early = FixedClock(DateTime.utc(2026, 11, 3, 6, 30));
+      final today = DateTime.utc(2026, 11, 3, 7);
+      await repo.upsert(task('daily', remindAt: today));
+      final service = FakeNotificationService();
+      final sync = NotificationSync(
+        tasks: repo,
+        preferences: InMemoryPreferencesRepository(utcPrefs),
+        reminders: rules,
+        service: service,
+        clock: early,
+        prompts: const PromptSettings(
+          morningEnabled: false,
+          eveningEnabled: false,
+        ),
+        extra: recurrenceExtraNotifications(
+          rules,
+          horizonDays: 7,
+          clock: early,
+        ),
+      );
+      final router = NotificationRouter(
+        tasks: repo,
+        clock: early,
+        reminders: rules,
+        preferences: InMemoryPreferencesRepository(utcPrefs),
+      );
+      addTearDown(sync.dispose);
+      addTearDown(router.dispose);
+
+      await sync.refresh();
+      final dailyIds = service.pending
+          .where((n) => n.taskId == 'daily')
+          .map((n) => n.id);
+      expect(
+        dailyIds.first,
+        NotificationScheduler.taskNotificationId('daily', today),
+      );
+
+      await router.handle(doneOn(today));
+      await sync.refresh(reload: true);
+      final next = service.pending.where((n) => n.taskId == 'daily').toList();
+      expect(
+        next.map((n) => n.id),
+        isNot(
+          contains(NotificationScheduler.taskNotificationId('daily', today)),
+        ),
+      );
+      expect(next.first.fireAt, DateTime.utc(2026, 11, 4, 7));
+      expect((await rules.getForTask('daily'))!.lastCompletedAt, today);
     });
 
     test('snooze and moves leave the series anchor alone', () async {
