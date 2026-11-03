@@ -16,7 +16,5 @@ export 'web_voice_input_service.dart';
 /// once they land. Keeping the selection in one place means the
 /// composer never imports a platform-specific class directly.
 final voiceInputServiceProvider = Provider<VoiceInputService>(
-  (_) => kIsWeb
-      ? const WebVoiceInputService()
-      : const StubVoiceInputService(),
+  (_) => kIsWeb ? const WebVoiceInputService() : const StubVoiceInputService(),
 );

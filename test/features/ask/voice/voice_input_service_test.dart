@@ -50,16 +50,18 @@ void main() {
       );
     });
 
-    test('start errors with a wiring-pending reason when the API is present',
-        () async {
-      // The real recognizer lands in a later slice; until then the web
-      // service refuses rather than returning a silent stream.
-      const web = WebVoiceInputService(supportsSpeechApi: true);
-      await expectLater(
-        web.start(locale: 'en-US'),
-        emitsError(isA<VoiceInputUnavailable>()),
-      );
-    });
+    test(
+      'start errors with a wiring-pending reason when the API is present',
+      () async {
+        // The real recognizer lands in a later slice; until then the web
+        // service refuses rather than returning a silent stream.
+        const web = WebVoiceInputService(supportsSpeechApi: true);
+        await expectLater(
+          web.start(locale: 'en-US'),
+          emitsError(isA<VoiceInputUnavailable>()),
+        );
+      },
+    );
   });
 
   group('VoiceTranscript', () {
@@ -84,7 +86,10 @@ void main() {
     });
 
     test('toString names the kind and the text', () {
-      expect(const VoiceTranscript.partial('run').toString(), contains('partial'));
+      expect(
+        const VoiceTranscript.partial('run').toString(),
+        contains('partial'),
+      );
       expect(const VoiceTranscript.partial('run').toString(), contains('run'));
       expect(
         const VoiceTranscript.finalResult('run').toString(),
@@ -97,17 +102,11 @@ void main() {
     const tags = ['en-US', 'he-IL', 'en-GB'];
 
     test('returns null when nothing is supported', () {
-      expect(
-        negotiateLocale(appLocale: 'en', supported: const []),
-        isNull,
-      );
+      expect(negotiateLocale(appLocale: 'en', supported: const []), isNull);
     });
 
     test('prefers an exact tag match', () {
-      expect(
-        negotiateLocale(appLocale: 'en-GB', supported: tags),
-        'en-GB',
-      );
+      expect(negotiateLocale(appLocale: 'en-GB', supported: tags), 'en-GB');
     });
 
     test('falls back to a base-language match for the shorthand', () {
@@ -122,10 +121,7 @@ void main() {
     });
 
     test('returns null when the language is not offered', () {
-      expect(
-        negotiateLocale(appLocale: 'fr-FR', supported: tags),
-        isNull,
-      );
+      expect(negotiateLocale(appLocale: 'fr-FR', supported: tags), isNull);
     });
 
     test('exact match wins over an earlier base-language match', () {
@@ -154,12 +150,18 @@ void main() {
     });
 
     test('permissionFor picks the language from the locale tag', () {
-      expect(VoicePermissionCopy.permissionFor('he'), VoicePermissionCopy.permissionHe);
+      expect(
+        VoicePermissionCopy.permissionFor('he'),
+        VoicePermissionCopy.permissionHe,
+      );
       expect(
         VoicePermissionCopy.permissionFor('he-IL'),
         VoicePermissionCopy.permissionHe,
       );
-      expect(VoicePermissionCopy.permissionFor('en'), VoicePermissionCopy.permissionEn);
+      expect(
+        VoicePermissionCopy.permissionFor('en'),
+        VoicePermissionCopy.permissionEn,
+      );
       expect(
         VoicePermissionCopy.permissionFor('en-US'),
         VoicePermissionCopy.permissionEn,
@@ -178,7 +180,10 @@ void main() {
     });
 
     test('unknown locales fall back to English', () {
-      expect(VoicePermissionCopy.permissionFor(''), VoicePermissionCopy.permissionEn);
+      expect(
+        VoicePermissionCopy.permissionFor(''),
+        VoicePermissionCopy.permissionEn,
+      );
       expect(
         VoicePermissionCopy.privacyNoteFor('fr-FR'),
         VoicePermissionCopy.privacyNoteEn,
@@ -193,10 +198,7 @@ void main() {
         contains('device'),
       );
       // Hebrew text contains the word "device" (מכשיר).
-      expect(
-        VoicePermissionCopy.privacyNoteHe,
-        contains('מכשיר'),
-      );
+      expect(VoicePermissionCopy.privacyNoteHe, contains('מכשיר'));
     });
   });
 }
