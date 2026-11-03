@@ -637,7 +637,11 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
             onPressed: _connected ? _disconnect : _connect,
           ),
         ),
-        if (_connected) _SyncStatusPill(status: ref.watch(widget.statusOf)),
+        if (_connected)
+          _SyncStatusPill(
+            source: _provider.source,
+            status: ref.watch(widget.statusOf),
+          ),
         if (_failed)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
@@ -676,7 +680,9 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
 
 /// Idle / syncing / last synced hh:mm / error, for one calendar provider.
 class _SyncStatusPill extends StatelessWidget {
-  const _SyncStatusPill({required this.status});
+  const _SyncStatusPill({required this.source, required this.status});
+
+  final CalendarSource source;
 
   final AsyncValue<SyncStatus> status;
 
@@ -705,7 +711,7 @@ class _SyncStatusPill extends StatelessWidget {
       child: Align(
         alignment: AlignmentDirectional.centerStart,
         child: Pill(
-          key: const ValueKey('sync-status'),
+          key: ValueKey('sync-status-${source.name}'),
           height: 28,
           label: label(s),
           color: s.isError ? AppColors.card : AppColors.lilac,

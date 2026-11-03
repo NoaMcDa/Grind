@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,7 @@ Future<void> _pump(
   TextDirection direction = TextDirection.ltr,
   int Function()? pick,
   DeviceTimeZone? device,
+  FakeCalendarProvider? apple,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -37,6 +39,7 @@ Future<void> _pump(
           calendarRepositoryProvider.overrideWithValue(calendars),
         if (clock != null) clockProvider.overrideWithValue(clock),
         if (device != null) deviceTimeZoneProvider.overrideWithValue(device),
+        if (apple != null) appleCalendarProvider.overrideWithValue(apple),
       ],
       child: MaterialApp(
         theme: buildAppTheme(),
@@ -207,6 +210,69 @@ void main() {
     expect(google.connected, isFalse);
   });
 
+  testWidgets('calendar checkboxes read and write Preferences', (tester) async {
+    final prefs = InMemoryPreferencesRepository(
+      const Preferences(
+        selectedCalendarIds: {
+          CalendarSource.google: ['work'],
+        },
+      ),
+    );
+    final google = _TwoCalendars()..connected = true;
+    // No store override: the app's PreferencesSettingsStore is used.
+    await _pump(tester, prefs: prefs, google: google);
+
+    final primary = find.byKey(const ValueKey('cal-Google Calendar-primary'));
+    final work = find.byKey(const ValueKey('cal-Google Calendar-work'));
+    expect(tester.widget<CheckboxListTile>(primary).value, isFalse);
+    expect(tester.widget<CheckboxListTile>(work).value, isTrue);
+
+    await tester.tap(primary);
+    await tester.pumpAndSettle();
+    expect(
+      (await prefs.get()).selectedCalendarIds[CalendarSource.google]!.toSet(),
+      {'work', 'primary'},
+    );
+    await tester.tap(work);
+    await tester.pumpAndSettle();
+    expect((await prefs.get()).selectedCalendarIds[CalendarSource.google], [
+      'primary',
+    ]);
+  });
+
+  testWidgets('on iOS the Apple sync pill shows next to the Google one', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      final google = FakeCalendarProvider(CalendarSource.google)
+        ..connected = true;
+      final apple = FakeCalendarProvider(CalendarSource.apple)
+        ..connected = true;
+      final prefs = InMemoryPreferencesRepository();
+      await _pump(
+        tester,
+        prefs: prefs,
+        google: google,
+        apple: apple,
+        clock: FixedClock(DateTime.utc(2026, 11, 3, 8)),
+      );
+      expect(find.text('Apple Calendar'), findsOneWidget);
+      expect(find.byKey(const ValueKey('sync-status-google')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sync-status-apple')), findsOneWidget);
+      final apples = find.byKey(const ValueKey('cal-Apple Calendar-primary'));
+      expect(apples, findsOneWidget);
+      await tester.tap(apples);
+      await tester.pumpAndSettle();
+      expect(
+        (await prefs.get()).selectedCalendarIds[CalendarSource.apple],
+        isEmpty,
+      );
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
   testWidgets('prompt times persist in the settings store', (tester) async {
     final prefs = InMemoryPreferencesRepository();
     final store = InMemorySettingsStore();
@@ -292,7 +358,7 @@ void main() {
       calendars: calendars,
       clock: FixedClock(now),
     );
-    expect(find.byKey(const ValueKey('sync-status')), findsNothing);
+    expect(find.byKey(const ValueKey('sync-status-google')), findsNothing);
 
     await tester.tap(find.text('Connect'));
     await tester.pumpAndSettle();
@@ -302,7 +368,7 @@ void main() {
       DateTime.utc(2026, 12),
     );
     expect(stored.map((e) => e.title), ['Standup']);
-    final pill = find.byKey(const ValueKey('sync-status'));
+    final pill = find.byKey(const ValueKey('sync-status-google'));
     final t = now.toLocal();
     String two(int v) => v.toString().padLeft(2, '0');
     expect(
@@ -326,7 +392,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('sync-status')),
+        of: find.byKey(const ValueKey('sync-status-google')),
         matching: find.textContaining("Pip couldn't reach your calendar"),
       ),
       findsOneWidget,
@@ -358,4 +424,14 @@ class _BrokenFetch extends FakeCalendarProvider {
     required DateTime from,
     required DateTime to,
   }) async => throw StateError('network');
+}
+
+class _TwoCalendars extends FakeCalendarProvider {
+  _TwoCalendars() : super(CalendarSource.google);
+
+  @override
+  Future<List<ExternalCalendar>> listCalendars() async => const [
+    ExternalCalendar(id: 'primary', name: 'Me', isPrimary: true),
+    ExternalCalendar(id: 'work', name: 'Work'),
+  ];
 }
