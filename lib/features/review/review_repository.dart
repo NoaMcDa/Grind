@@ -14,8 +14,9 @@ class ReviewEntry {
   final int movedCount;
 }
 
-/// Storage for reviews. In-memory for now; see the proposed `review_entries`
-/// table in the PR description.
+/// Storage for reviews. [InMemoryReviewRepository] is the default (tests,
+/// demo); `DriftReviewRepository` (`drift_review_repository.dart`) keeps
+/// them in the `review_entries` / `review_handled_days` tables.
 abstract interface class ReviewRepository {
   Future<void> save(ReviewEntry entry);
   Future<List<ReviewEntry>> all();
