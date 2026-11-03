@@ -7,6 +7,7 @@ import 'core/data/data.dart';
 import 'core/notifications/notifications.dart';
 import 'features/calendar/apple/providers.dart';
 import 'features/calendar/google/providers.dart';
+import 'features/focus/providers.dart';
 import 'features/recurrence/providers.dart';
 
 Future<void> main() async {
@@ -22,6 +23,7 @@ Future<void> main() async {
     GrindApp(
       overrides: [
         ...dataProvidersOverrides(db),
+        focusRepositoryOverride(db),
         ...notificationOverrides(),
         // Recurring reminders feed their occurrences into the scheduler.
         notificationExtraProvider.overrideWith(

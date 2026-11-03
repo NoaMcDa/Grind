@@ -10,7 +10,7 @@ void main() {
   const tabs = {
     '/today': 'Good morning!',
     '/plan': 'Your day, drafted',
-    '/focus': 'FOCUS 2 OF 4',
+    '/focus': 'FOCUS 1 OF 4',
     '/pip': null,
     '/ask': 'Ask Pip',
   };
@@ -39,7 +39,7 @@ void main() {
 
   testWidgets('/focus?taskId= opens the Focus tab', (tester) async {
     await pumpGrindApp(tester, initialLocation: '/focus?taskId=lab');
-    expect(find.text('FOCUS 2 OF 4'), findsOneWidget);
+    expect(find.text('FOCUS 1 OF 4'), findsOneWidget);
   });
 
   testWidgets('deep link /task/:id opens the task detail', (tester) async {
