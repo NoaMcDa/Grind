@@ -1,7 +1,9 @@
+import 'dart:ui' show Locale;
+
 import 'package:googleapis/calendar/v3.dart' as gcal;
 
 import '../../../core/core.dart';
-import '../sync/calendar_sync_strings.dart';
+import '../../../l10n/l10n.dart';
 
 /// Google Calendar `Event` <-> Grind domain.
 ///
@@ -13,6 +15,10 @@ abstract final class GoogleEventMapper {
   /// Private extended property carrying the Grind task id of a write-back.
   static const taskIdKey = 'grindTaskId';
 
+  static final AppLocalizations _english = lookupAppLocalizations(
+    const Locale('en'),
+  );
+
   /// Domain id for a Google event (stable across syncs).
   static String domainId(String eventId) => 'google:$eventId';
 
@@ -21,6 +27,7 @@ abstract final class GoogleEventMapper {
     gcal.Event e, {
     required String calendarId,
     required DateTime now,
+    AppLocalizations? l10n,
   }) {
     final id = e.id;
     if (id == null || e.status == 'cancelled') return null;
@@ -52,7 +59,7 @@ abstract final class GoogleEventMapper {
       source: CalendarSource.google,
       externalId: id,
       calendarId: calendarId,
-      title: title.isEmpty ? CalendarSyncStrings.untitledEvent : title,
+      title: title.isEmpty ? (l10n ?? _english).calendarUntitledEvent : title,
       start: from,
       end: to.isAfter(from) ? to : from.add(const Duration(minutes: 1)),
       isAllDay: allDay,
@@ -67,13 +74,13 @@ abstract final class GoogleEventMapper {
   /// The event body Grind writes for a scheduled [task]. Times are sent as
   /// UTC instants; Google shows them in each viewer's zone. Default reminders
   /// are off because Grind sends its own.
-  static gcal.Event fromTask(Task task) {
+  static gcal.Event fromTask(Task task, {AppLocalizations? l10n}) {
     final notes = task.notes?.trim();
     return gcal.Event(
       summary: task.title,
       description: [
         if (notes != null && notes.isNotEmpty) notes,
-        CalendarSyncStrings.writtenByGrind,
+        (l10n ?? _english).calendarWrittenByGrind,
       ].join('\n\n'),
       start: gcal.EventDateTime(dateTime: task.scheduledStart!.toUtc()),
       end: gcal.EventDateTime(dateTime: task.scheduledEnd!.toUtc()),

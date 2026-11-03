@@ -115,7 +115,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   }
 
   /// The last sync error shown, so each error toasts once.
-  String? _shownSyncError;
+  SyncErrorKind? _shownSyncError;
 
   void _onSyncStatus(SyncStatus? status) {
     if (status == null) return;
@@ -123,11 +123,18 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
       if (status.phase == SyncPhase.idle) _shownSyncError = null;
       return;
     }
-    final message = status.message ?? '';
-    if (message.isEmpty || message == _shownSyncError) return;
-    _shownSyncError = message;
+    final kind = status.error;
+    if (kind == null || kind == _shownSyncError) return;
+    _shownSyncError = kind;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) showPipToast(context, message);
+      if (!mounted) return;
+      final l = context.l10n;
+      showPipToast(
+        context,
+        kind == SyncErrorKind.reconnect
+            ? l.calendarSyncReconnect
+            : l.calendarSyncGenericError,
+      );
     });
   }
 

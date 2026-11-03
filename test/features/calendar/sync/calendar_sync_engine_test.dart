@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/calendar/sync/calendar_sync_engine.dart';
 import 'package:grind/features/calendar/sync/calendar_sync_errors.dart';
-import 'package:grind/features/calendar/sync/calendar_sync_strings.dart';
 import 'package:grind/features/calendar/sync/sync_status.dart';
 
 /// [FakeCalendarProvider] that behaves like a real calendar: written-back
@@ -491,13 +490,13 @@ void main() {
       provider.failWith = StateError('boom');
       await engine.sync();
       expect(engine.status.phase, SyncPhase.error);
-      expect(engine.status.message, CalendarSyncStrings.genericError);
+      expect(engine.status.error, SyncErrorKind.generic);
     });
 
     test('an auth error asks to reconnect', () async {
       provider.failWith = const CalendarAuthException('revoked');
       await engine.sync();
-      expect(engine.status.message, CalendarSyncStrings.reconnect);
+      expect(engine.status.error, SyncErrorKind.reconnect);
     });
 
     test('concurrent calls share one run', () async {

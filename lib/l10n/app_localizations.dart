@@ -3721,6 +3721,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent from Grind'**
   String get recapShareFooter;
+
+  /// Calendar sync status
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing...'**
+  String get settingsSyncing;
+
+  /// Calendar sync status
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get settingsSyncIdle;
+
+  /// Calendar sync status
+  ///
+  /// In en, this message translates to:
+  /// **'Pip could not reach your calendar just now.'**
+  String get settingsSyncError;
+
+  /// Calendar sync status
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {time}'**
+  String settingsLastSynced(String time);
+
+  /// Settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get settingsTimeZone;
+
+  /// Time zone search hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search, e.g. London'**
+  String get settingsTimeZoneSearch;
+
+  /// Time zone search empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No zone by that name. Try a city.'**
+  String get settingsTimeZoneNoMatch;
+
+  /// Time zone picker shortcut
+  ///
+  /// In en, this message translates to:
+  /// **'Use this device: {zone}'**
+  String settingsUseDeviceZone(String zone);
+
+  /// Export backup subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Includes calendar events Pip mirrored, such as meeting titles.'**
+  String get settingsExportHint;
+
+  /// Settings privacy paragraph
+  ///
+  /// In en, this message translates to:
+  /// **'Your plans stay on this device. No account, no analytics. If you connect a calendar, Pip reads its events to plan around them and writes back only the tasks you schedule. Disconnect any time.'**
+  String get settingsPrivacyBody;
+
+  /// Calendar sync error
+  ///
+  /// In en, this message translates to:
+  /// **'Pip couldn\'t reach your calendar just now. Another try is coming soon.'**
+  String get calendarSyncGenericError;
+
+  /// Calendar sync error: authorization ended
+  ///
+  /// In en, this message translates to:
+  /// **'Pip is waiting for a fresh hello from your calendar. Reconnect it in Settings.'**
+  String get calendarSyncReconnect;
+
+  /// Title for a calendar event without one
+  ///
+  /// In en, this message translates to:
+  /// **'(No title)'**
+  String get calendarUntitledEvent;
+
+  /// Footer written into calendar events Grind creates
+  ///
+  /// In en, this message translates to:
+  /// **'Planned with Grind.'**
+  String get calendarWrittenByGrind;
+
+  /// Analytics screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Your numbers'**
+  String get analyticsTitle;
+
+  /// Analytics subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Just what happened. No grades.'**
+  String get analyticsSubtitle;
+
+  /// Analytics empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to chart yet'**
+  String get analyticsEmptyTitle;
+
+  /// Analytics empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Finish a task or a focus session and your numbers show up here.'**
+  String get analyticsEmptyBody;
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Focus minutes'**
+  String get analyticsFocusTitle;
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Last 14 days'**
+  String get analyticsFocusSub;
+
+  /// Analytics legend
+  ///
+  /// In en, this message translates to:
+  /// **'Pale bars are rest days. Rest counts too.'**
+  String get analyticsRestLegend;
+
+  /// Analytics focus total with zero minutes
+  ///
+  /// In en, this message translates to:
+  /// **'A quiet stretch. Pip is patient.'**
+  String get analyticsFocusTotalNone;
+
+  /// Analytics focus total under an hour
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min of focus in two weeks'**
+  String analyticsFocusTotalMinutes(int minutes);
+
+  /// Analytics focus total, whole hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h of focus in two weeks'**
+  String analyticsFocusTotalHours(int hours);
+
+  /// Analytics focus total, hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min of focus in two weeks'**
+  String analyticsFocusTotalHoursMinutes(int hours, int minutes);
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Completion rate'**
+  String get analyticsCompletionTitle;
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Last 8 weeks'**
+  String get analyticsCompletionSub;
+
+  /// Analytics note
+  ///
+  /// In en, this message translates to:
+  /// **'Share of each week\'s tasks you finished. A dash means nothing was planned.'**
+  String get analyticsCompletionNote;
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate accuracy'**
+  String get analyticsAccuracyTitle;
+
+  /// Analytics card
+  ///
+  /// In en, this message translates to:
+  /// **'Planned time vs real time'**
+  String get analyticsAccuracySub;
+
+  /// Analytics card empty
+  ///
+  /// In en, this message translates to:
+  /// **'A few more tasks and Pip will know.'**
+  String get analyticsAccuracyWaiting;
+
+  /// Analytics note
+  ///
+  /// In en, this message translates to:
+  /// **'Pip uses this to plan with a little more room where it helps.'**
+  String get analyticsAccuracyHow;
+
+  /// Estimate accuracy line
+  ///
+  /// In en, this message translates to:
+  /// **'{category} tasks usually run {ratio}× longer'**
+  String analyticsAccuracyLonger(String category, String ratio);
+
+  /// Estimate accuracy line
+  ///
+  /// In en, this message translates to:
+  /// **'{category} tasks usually take {ratio}× the time'**
+  String analyticsAccuracyShorter(String category, String ratio);
+
+  /// Estimate accuracy line
+  ///
+  /// In en, this message translates to:
+  /// **'{category} tasks usually land right on the estimate'**
+  String analyticsAccuracyOnTarget(String category);
+
+  /// Sample size beside an accuracy line
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 task} other{{n} tasks}}'**
+  String analyticsSamples(int n);
+
+  /// Screen reader label
+  ///
+  /// In en, this message translates to:
+  /// **'Focus minutes, last 14 days: {minutes} in total, {restDays} rest days'**
+  String analyticsSemanticsFocus(int minutes, int restDays);
+
+  /// Screen reader label
+  ///
+  /// In en, this message translates to:
+  /// **'Completion rate, last 8 weeks: {done} of {planned} tasks finished'**
+  String analyticsSemanticsCompletion(int done, int planned);
 }
 
 class _AppLocalizationsDelegate

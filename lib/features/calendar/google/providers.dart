@@ -1,6 +1,9 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/core.dart';
+import '../../../l10n/l10n.dart';
 import 'google_auth.dart';
 import 'google_calendar_provider.dart';
 import 'google_config.dart';
@@ -25,5 +28,8 @@ Override googleCalendarOverride({
     store: store ?? platformKeyValueStore(),
     config: config,
     clock: ref.watch(clockProvider),
+    l10n: () => lookupAppLocalizations(
+      Locale(ref.read(preferencesProvider).value?.localeCode ?? 'en'),
+    ),
   ),
 );

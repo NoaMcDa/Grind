@@ -3044,5 +3044,227 @@
   "recapShareFooter": "Sent from Grind",
   "@recapShareFooter": {
     "description": "Shared recap: last line"
+  },
+  "settingsSyncing": "Syncing...",
+  "@settingsSyncing": {
+    "description": "Calendar sync status"
+  },
+  "settingsSyncIdle": "Up to date",
+  "@settingsSyncIdle": {
+    "description": "Calendar sync status"
+  },
+  "settingsSyncError": "Pip could not reach your calendar just now.",
+  "@settingsSyncError": {
+    "description": "Calendar sync status"
+  },
+  "settingsLastSynced": "Last synced {time}",
+  "@settingsLastSynced": {
+    "description": "Calendar sync status",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTimeZone": "Time zone",
+  "@settingsTimeZone": {
+    "description": "Settings row"
+  },
+  "settingsTimeZoneSearch": "Search, e.g. London",
+  "@settingsTimeZoneSearch": {
+    "description": "Time zone search hint"
+  },
+  "settingsTimeZoneNoMatch": "No zone by that name. Try a city.",
+  "@settingsTimeZoneNoMatch": {
+    "description": "Time zone search empty state"
+  },
+  "settingsUseDeviceZone": "Use this device: {zone}",
+  "@settingsUseDeviceZone": {
+    "description": "Time zone picker shortcut",
+    "placeholders": {
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExportHint": "Includes calendar events Pip mirrored, such as meeting titles.",
+  "@settingsExportHint": {
+    "description": "Export backup subtitle"
+  },
+  "settingsPrivacyBody": "Your plans stay on this device. No account, no analytics. If you connect a calendar, Pip reads its events to plan around them and writes back only the tasks you schedule. Disconnect any time.",
+  "@settingsPrivacyBody": {
+    "description": "Settings privacy paragraph"
+  },
+  "calendarSyncGenericError": "Pip couldn't reach your calendar just now. Another try is coming soon.",
+  "@calendarSyncGenericError": {
+    "description": "Calendar sync error"
+  },
+  "calendarSyncReconnect": "Pip is waiting for a fresh hello from your calendar. Reconnect it in Settings.",
+  "@calendarSyncReconnect": {
+    "description": "Calendar sync error: authorization ended"
+  },
+  "calendarUntitledEvent": "(No title)",
+  "@calendarUntitledEvent": {
+    "description": "Title for a calendar event without one"
+  },
+  "calendarWrittenByGrind": "Planned with Grind.",
+  "@calendarWrittenByGrind": {
+    "description": "Footer written into calendar events Grind creates"
+  },
+  "analyticsTitle": "Your numbers",
+  "@analyticsTitle": {
+    "description": "Analytics screen title"
+  },
+  "analyticsSubtitle": "Just what happened. No grades.",
+  "@analyticsSubtitle": {
+    "description": "Analytics subtitle"
+  },
+  "analyticsEmptyTitle": "Nothing to chart yet",
+  "@analyticsEmptyTitle": {
+    "description": "Analytics empty state"
+  },
+  "analyticsEmptyBody": "Finish a task or a focus session and your numbers show up here.",
+  "@analyticsEmptyBody": {
+    "description": "Analytics empty state"
+  },
+  "analyticsFocusTitle": "Focus minutes",
+  "@analyticsFocusTitle": {
+    "description": "Analytics card"
+  },
+  "analyticsFocusSub": "Last 14 days",
+  "@analyticsFocusSub": {
+    "description": "Analytics card"
+  },
+  "analyticsRestLegend": "Pale bars are rest days. Rest counts too.",
+  "@analyticsRestLegend": {
+    "description": "Analytics legend"
+  },
+  "analyticsFocusTotalNone": "A quiet stretch. Pip is patient.",
+  "@analyticsFocusTotalNone": {
+    "description": "Analytics focus total with zero minutes"
+  },
+  "analyticsFocusTotalMinutes": "{minutes} min of focus in two weeks",
+  "@analyticsFocusTotalMinutes": {
+    "description": "Analytics focus total under an hour",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFocusTotalHours": "{hours} h of focus in two weeks",
+  "@analyticsFocusTotalHours": {
+    "description": "Analytics focus total, whole hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsFocusTotalHoursMinutes": "{hours} h {minutes} min of focus in two weeks",
+  "@analyticsFocusTotalHoursMinutes": {
+    "description": "Analytics focus total, hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsCompletionTitle": "Completion rate",
+  "@analyticsCompletionTitle": {
+    "description": "Analytics card"
+  },
+  "analyticsCompletionSub": "Last 8 weeks",
+  "@analyticsCompletionSub": {
+    "description": "Analytics card"
+  },
+  "analyticsCompletionNote": "Share of each week's tasks you finished. A dash means nothing was planned.",
+  "@analyticsCompletionNote": {
+    "description": "Analytics note"
+  },
+  "analyticsAccuracyTitle": "Estimate accuracy",
+  "@analyticsAccuracyTitle": {
+    "description": "Analytics card"
+  },
+  "analyticsAccuracySub": "Planned time vs real time",
+  "@analyticsAccuracySub": {
+    "description": "Analytics card"
+  },
+  "analyticsAccuracyWaiting": "A few more tasks and Pip will know.",
+  "@analyticsAccuracyWaiting": {
+    "description": "Analytics card empty"
+  },
+  "analyticsAccuracyHow": "Pip uses this to plan with a little more room where it helps.",
+  "@analyticsAccuracyHow": {
+    "description": "Analytics note"
+  },
+  "analyticsAccuracyLonger": "{category} tasks usually run {ratio}× longer",
+  "@analyticsAccuracyLonger": {
+    "description": "Estimate accuracy line",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "ratio": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsAccuracyShorter": "{category} tasks usually take {ratio}× the time",
+  "@analyticsAccuracyShorter": {
+    "description": "Estimate accuracy line",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "ratio": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsAccuracyOnTarget": "{category} tasks usually land right on the estimate",
+  "@analyticsAccuracyOnTarget": {
+    "description": "Estimate accuracy line",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSamples": "{n, plural, =1{1 task} other{{n} tasks}}",
+  "@analyticsSamples": {
+    "description": "Sample size beside an accuracy line",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsSemanticsFocus": "Focus minutes, last 14 days: {minutes} in total, {restDays} rest days",
+  "@analyticsSemanticsFocus": {
+    "description": "Screen reader label",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "restDays": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsSemanticsCompletion": "Completion rate, last 8 weeks: {done} of {planned} tasks finished",
+  "@analyticsSemanticsCompletion": {
+    "description": "Screen reader label",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "planned": {
+        "type": "int"
+      }
+    }
   }
 }

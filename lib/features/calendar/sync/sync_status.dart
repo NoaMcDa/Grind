@@ -1,8 +1,12 @@
+import 'calendar_sync_errors.dart' show SyncErrorKind;
+
+export 'calendar_sync_errors.dart' show SyncErrorKind;
+
 /// What the calendar sync is doing right now, for a small status line.
 enum SyncPhase { idle, syncing, error }
 
 class SyncStatus {
-  const SyncStatus._(this.phase, {this.message, this.lastSyncedAt});
+  const SyncStatus._(this.phase, {this.error, this.lastSyncedAt});
 
   const SyncStatus.idle({DateTime? lastSyncedAt})
     : this._(SyncPhase.idle, lastSyncedAt: lastSyncedAt);
@@ -10,14 +14,14 @@ class SyncStatus {
   const SyncStatus.syncing({DateTime? lastSyncedAt})
     : this._(SyncPhase.syncing, lastSyncedAt: lastSyncedAt);
 
-  /// [message] is user-facing copy (Pip's tone).
-  const SyncStatus.error(String message, {DateTime? lastSyncedAt})
-    : this._(SyncPhase.error, message: message, lastSyncedAt: lastSyncedAt);
+  /// [error] picks the user-facing copy (Pip's tone), localized by the UI.
+  const SyncStatus.error(SyncErrorKind error, {DateTime? lastSyncedAt})
+    : this._(SyncPhase.error, error: error, lastSyncedAt: lastSyncedAt);
 
   final SyncPhase phase;
 
-  /// User-facing copy, set for [SyncPhase.error].
-  final String? message;
+  /// Which message to show, set for [SyncPhase.error].
+  final SyncErrorKind? error;
 
   /// UTC time of the last successful sync, if any.
   final DateTime? lastSyncedAt;
@@ -29,12 +33,12 @@ class SyncStatus {
   bool operator ==(Object other) =>
       other is SyncStatus &&
       other.phase == phase &&
-      other.message == message &&
+      other.error == error &&
       other.lastSyncedAt == lastSyncedAt;
 
   @override
-  int get hashCode => Object.hash(phase, message, lastSyncedAt);
+  int get hashCode => Object.hash(phase, error, lastSyncedAt);
 
   @override
-  String toString() => 'SyncStatus($phase, $message, $lastSyncedAt)';
+  String toString() => 'SyncStatus($phase, $error, $lastSyncedAt)';
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../../../core/core.dart';
 import 'calendar_sync_errors.dart';
-import 'calendar_sync_strings.dart';
 import 'sync_status.dart';
 
 /// Result of one [CalendarSyncEngine.pull].
@@ -133,13 +132,11 @@ class CalendarSyncEngine {
     try {
       await pushPending();
     } on CalendarSyncException catch (e) {
-      _setStatus(
-        SyncStatus.error(e.userMessage, lastSyncedAt: _status.lastSyncedAt),
-      );
+      _setStatus(SyncStatus.error(e.kind, lastSyncedAt: _status.lastSyncedAt));
     } catch (_) {
       _setStatus(
         SyncStatus.error(
-          CalendarSyncStrings.genericError,
+          SyncErrorKind.generic,
           lastSyncedAt: _status.lastSyncedAt,
         ),
       );
@@ -162,11 +159,9 @@ class CalendarSyncEngine {
       if (writeBack) await pushPending();
       _setStatus(SyncStatus.idle(lastSyncedAt: _now()));
     } on CalendarSyncException catch (e) {
-      _setStatus(SyncStatus.error(e.userMessage, lastSyncedAt: last));
+      _setStatus(SyncStatus.error(e.kind, lastSyncedAt: last));
     } catch (_) {
-      _setStatus(
-        SyncStatus.error(CalendarSyncStrings.genericError, lastSyncedAt: last),
-      );
+      _setStatus(SyncStatus.error(SyncErrorKind.generic, lastSyncedAt: last));
     }
   }
 

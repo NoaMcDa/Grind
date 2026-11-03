@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:googleapis/calendar/v3.dart' as gcal;
 
 import '../../../core/core.dart';
+import '../../../l10n/l10n.dart';
 import '../sync/calendar_sync_errors.dart';
 import 'google_auth.dart';
 import 'google_calendar_gateway.dart';
@@ -77,6 +78,7 @@ class GoogleCalendarProvider implements CalendarProvider {
     bool? web,
     this.clock = const SystemClock(),
     this.windowSlack = const Duration(days: 7),
+    this.l10n,
   }) : web = web ?? kIsWeb;
 
   final GoogleAuth auth;
@@ -84,6 +86,10 @@ class GoogleCalendarProvider implements CalendarProvider {
   final GoogleCalendarConfig config;
   final bool web;
   final Clock clock;
+
+  /// Copy for events Grind writes or mirrors (untitled events, the "Planned
+  /// with Grind." footer), in the language the user picked. English when null.
+  final AppLocalizations Function()? l10n;
 
   /// Extra days fetched past the requested window, so the rolling window
   /// stays covered (and incremental) for about a week.
@@ -239,6 +245,7 @@ class GoogleCalendarProvider implements CalendarProvider {
           item,
           calendarId: calendarId,
           now: now,
+          l10n: l10n?.call(),
         );
         if (e != null) state.events[e.externalId] = e;
       }
@@ -271,6 +278,7 @@ class GoogleCalendarProvider implements CalendarProvider {
           item,
           calendarId: calendarId,
           now: now,
+          l10n: l10n?.call(),
         );
         changes[id] = e != null && state.overlaps(e) ? e : null;
       }
@@ -311,6 +319,7 @@ class GoogleCalendarProvider implements CalendarProvider {
       created,
       calendarId: calendarId,
       now: clock.now().toUtc(),
+      l10n: l10n?.call(),
     );
     if (e == null || !state.overlaps(e)) {
       state.events.remove(created.id);
@@ -328,7 +337,7 @@ class GoogleCalendarProvider implements CalendarProvider {
     final g = await _gateway();
     final created = await g.insertEvent(
       calendarId,
-      GoogleEventMapper.fromTask(task),
+      GoogleEventMapper.fromTask(task, l10n: l10n?.call()),
     );
     final id = created.id;
     if (id == null) {
@@ -348,7 +357,7 @@ class GoogleCalendarProvider implements CalendarProvider {
     final updated = await g.patchEvent(
       calendarId,
       externalId,
-      GoogleEventMapper.fromTask(task),
+      GoogleEventMapper.fromTask(task, l10n: l10n?.call()),
     );
     await _remember(calendarId, updated);
   }

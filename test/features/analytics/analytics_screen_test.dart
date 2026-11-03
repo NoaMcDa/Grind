@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/analytics/analytics_screen.dart';
 import 'package:grind/features/focus/providers.dart';
+import 'package:grind/l10n/l10n.dart';
 
 import '../../test_fonts.dart';
 
@@ -27,6 +28,7 @@ Future<void> _pump(
   List<Task> tasks,
   List<FocusSession> sessions, {
   TextDirection dir = TextDirection.ltr,
+  Locale? locale,
 }) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
@@ -41,6 +43,9 @@ Future<void> _pump(
         ),
       ],
       child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        supportedLocales: supportedLocales,
         home: Directionality(
           textDirection: dir,
           child: const AnalyticsScreen(),
@@ -91,8 +96,20 @@ void main() {
 
   testWidgets('RTL at 390x844 has no overflow', (tester) async {
     final tasks = [for (var i = 0; i < 5; i++) _done('t$i', 'study', 42, 2)];
-    await _pump(tester, tasks, const [], dir: TextDirection.rtl);
+    final he = lookupAppLocalizations(const Locale('he'));
+    await _pump(
+      tester,
+      tasks,
+      const [],
+      dir: TextDirection.rtl,
+      locale: const Locale('he'),
+    );
     expect(tester.takeException(), isNull);
+    expect(find.text(he.analyticsTitle), findsOneWidget);
+    expect(
+      find.text(he.analyticsAccuracyLonger('study', '1.4')),
+      findsOneWidget,
+    );
     await tester.drag(find.byType(ListView), const Offset(0, -600));
     await tester.pump();
     expect(tester.takeException(), isNull);
