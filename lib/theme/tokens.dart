@@ -13,6 +13,9 @@ abstract final class AppColors {
   static const pink = Color(0xFFFF7AB0);
   static const sky = Color(0xFF7FC8FF);
 
+  /// Error text/border: dark red, 6.5:1 on white (see ADR 0004).
+  static const error = Color(0xFFB3261E);
+
   /// Tint used for "done" cards and the active tab background.
   static const lilac = Color(0xFFEDE9FF);
 

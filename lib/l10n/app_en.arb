@@ -1,0 +1,360 @@
+{
+  "@@locale": "en",
+  "tabToday": "Today",
+  "@tabToday": {
+    "description": "Bottom tab label"
+  },
+  "tabPlan": "Plan",
+  "@tabPlan": {
+    "description": "Bottom tab label"
+  },
+  "tabFocus": "Focus",
+  "@tabFocus": {
+    "description": "Bottom tab label"
+  },
+  "tabPip": "Pip",
+  "@tabPip": {
+    "description": "Bottom tab label"
+  },
+  "tabAsk": "Ask",
+  "@tabAsk": {
+    "description": "Bottom tab label"
+  },
+  "askTitle": "Ask Pip",
+  "@askTitle": {
+    "description": "Ask screen title"
+  },
+  "cloudAssistant": "Cloud assistant",
+  "@cloudAssistant": {
+    "description": "Pill shown when the cloud assistant is on"
+  },
+  "askGotIt": "Got it! Here's the task:",
+  "@askGotIt": {
+    "description": "Pip reply introducing a parsed task"
+  },
+  "addedToDay": "Added to {day}",
+  "@addedToDay": {
+    "description": "Confirmation that a task was added",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Button"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Button"
+  },
+  "yesPlanIt": "Yes, plan it",
+  "@yesPlanIt": {
+    "description": "Button accepting Pip's suggestion"
+  },
+  "justOneBlock": "Just one block",
+  "@justOneBlock": {
+    "description": "Button for a smaller suggestion"
+  },
+  "quickPlanMyDay": "Plan my day",
+  "@quickPlanMyDay": {
+    "description": "Quick prompt chip"
+  },
+  "quickMoveGym": "Move gym to evening",
+  "@quickMoveGym": {
+    "description": "Quick prompt chip"
+  },
+  "composerHint": "Type or speak a task…",
+  "@composerHint": {
+    "description": "Composer placeholder"
+  },
+  "speakATask": "Speak a task",
+  "@speakATask": {
+    "description": "Tooltip of the microphone button"
+  },
+  "sendMessage": "Send message",
+  "@sendMessage": {
+    "description": "Send button semantics"
+  },
+  "focusProgress": "Focus {current} of {total}",
+  "@focusProgress": {
+    "description": "Focus screen header",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "hardModeOn": "Hard mode on · {count, plural, =1{1 app shielded} other{{count} apps shielded}}",
+  "@hardModeOn": {
+    "description": "Hard mode pill",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paused": "Paused",
+  "@paused": {
+    "description": "Timer state"
+  },
+  "focusing": "Focusing",
+  "@focusing": {
+    "description": "Timer state"
+  },
+  "plusMinutes": "+{minutes} min",
+  "@plusMinutes": {
+    "description": "Button adding minutes to the timer",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "pause": "Pause",
+  "@pause": {
+    "description": "Button"
+  },
+  "resume": "Resume",
+  "@resume": {
+    "description": "Button"
+  },
+  "end": "End",
+  "@end": {
+    "description": "Button"
+  },
+  "sessionsDone": "{done} of {total} sessions done",
+  "@sessionsDone": {
+    "description": "Session dots semantics",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenPreview": "Lock screen preview",
+  "@lockScreenPreview": {
+    "description": "Section label"
+  },
+  "liveActivity": "Live Activity",
+  "@liveActivity": {
+    "description": "Preview caption"
+  },
+  "pipSays": "Pip:",
+  "@pipSays": {
+    "description": "Prefix before Pip's line"
+  },
+  "pipCheeringSquad": "Your cheering squad of one",
+  "@pipCheeringSquad": {
+    "description": "Pip screen subtitle"
+  },
+  "pipGlowing": "Pip is glowing",
+  "@pipGlowing": {
+    "description": "Hero caption"
+  },
+  "sectionMomentum": "Momentum",
+  "@sectionMomentum": {
+    "description": "Section label"
+  },
+  "momentumStrong": "Strong",
+  "@momentumStrong": {
+    "description": "Momentum level"
+  },
+  "sectionThisWeek": "This week",
+  "@sectionThisWeek": {
+    "description": "Section label"
+  },
+  "weeklyChartSemantics": "Focus minutes per day this week. Wednesday was a rest day.",
+  "@weeklyChartSemantics": {
+    "description": "Chart semantics"
+  },
+  "focusMinutesPerDay": "Focus minutes per day",
+  "@focusMinutesPerDay": {
+    "description": "Chart caption"
+  },
+  "sectionWins": "Wins you logged",
+  "@sectionWins": {
+    "description": "Section label"
+  },
+  "sectionUnlocks": "Unlocks",
+  "@sectionUnlocks": {
+    "description": "Section label"
+  },
+  "accScarf": "Scarf",
+  "@accScarf": {
+    "description": "Cosmetic"
+  },
+  "accSunglasses": "Sunglasses",
+  "@accSunglasses": {
+    "description": "Cosmetic"
+  },
+  "accPartyHat": "Party hat",
+  "@accPartyHat": {
+    "description": "Cosmetic"
+  },
+  "accRainBoots": "Rain boots",
+  "@accRainBoots": {
+    "description": "Cosmetic"
+  },
+  "comingSoon": "Coming soon",
+  "@comingSoon": {
+    "description": "Caption"
+  },
+  "wearing": "Wearing",
+  "@wearing": {
+    "description": "Caption"
+  },
+  "tapToWear": "Tap to wear",
+  "@tapToWear": {
+    "description": "Caption"
+  },
+  "pipWearing": "wearing: {item}",
+  "@pipWearing": {
+    "description": "Pip avatar semantics",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionEnergy": "Energy",
+  "@sectionEnergy": {
+    "description": "Section label"
+  },
+  "energyDeep": "Deep focus",
+  "@energyDeep": {
+    "description": "Energy tag"
+  },
+  "energyLight": "Light",
+  "@energyLight": {
+    "description": "Energy tag"
+  },
+  "doneOfTotal": "{done} of {total} done",
+  "@doneOfTotal": {
+    "description": "Plan header pill",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planDrafted": "Your day, drafted",
+  "@planDrafted": {
+    "description": "Plan card title"
+  },
+  "planArranged": "Pip arranged {tasks} tasks around {classes} classes. Drag to tweak.",
+  "@planArranged": {
+    "description": "Plan card body",
+    "placeholders": {
+      "tasks": {
+        "type": "int"
+      },
+      "classes": {
+        "type": "int"
+      }
+    }
+  },
+  "rePlanWithPip": "Re-plan with Pip",
+  "@rePlanWithPip": {
+    "description": "Button"
+  },
+  "addTask": "Add task",
+  "@addTask": {
+    "description": "Button"
+  },
+  "fromCalendar": "From calendar",
+  "@fromCalendar": {
+    "description": "Label on calendar events"
+  },
+  "startFocus": "Start focus",
+  "@startFocus": {
+    "description": "Button"
+  },
+  "goodMorning": "Good morning!",
+  "@goodMorning": {
+    "description": "Today greeting"
+  },
+  "upNext": "Up next",
+  "@upNext": {
+    "description": "Section label"
+  },
+  "addATask": "Add a task",
+  "@addATask": {
+    "description": "Button"
+  },
+  "reminderNow": "Reminder · now",
+  "@reminderNow": {
+    "description": "Reminder card label"
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Button"
+  },
+  "snooze15": "Snooze 15",
+  "@snooze15": {
+    "description": "Button"
+  },
+  "niceStart": "Nice start!",
+  "@niceStart": {
+    "description": "Toast title"
+  },
+  "pipHappyDance": "Pip is doing a little happy dance.",
+  "@pipHappyDance": {
+    "description": "Toast body"
+  },
+  "seeYouAt": "See you at {time}",
+  "@seeYouAt": {
+    "description": "Snooze toast title",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "snoozeAgainHint": "Snooze again and Pip will offer to move it instead.",
+  "@snoozeAgainHint": {
+    "description": "Snooze toast body"
+  },
+  "undo": "Undo",
+  "@undo": {
+    "description": "Button"
+  },
+  "pipSemanticLabel": "Pip, your companion",
+  "@pipSemanticLabel": {
+    "description": "Pip avatar semantics"
+  },
+  "momentumSemantic": "Momentum",
+  "@momentumSemantic": {
+    "description": "Meter semantics"
+  },
+  "loading": "Loading",
+  "@loading": {
+    "description": "Skeleton semantics"
+  },
+  "dragHandle": "Drag handle",
+  "@dragHandle": {
+    "description": "Bottom sheet handle semantics"
+  },
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Toast dismiss"
+  },
+  "emptyDefaultTitle": "Nothing here yet",
+  "@emptyDefaultTitle": {
+    "description": "Empty state title"
+  },
+  "emptyDefaultBody": "Whenever you're ready, Pip is here.",
+  "@emptyDefaultBody": {
+    "description": "Empty state body"
+  }
+}
