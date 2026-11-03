@@ -131,5 +131,9 @@ List<Override> demoOverrides({Clock clock = const SystemClock()}) {
     calendarRepositoryProvider.overrideWithValue(
       InMemoryCalendarRepository(demoEvents(day)),
     ),
+    // The demo user has already been through onboarding.
+    preferencesRepositoryProvider.overrideWithValue(
+      InMemoryPreferencesRepository(const Preferences(onboardingDone: true)),
+    ),
   ];
 }

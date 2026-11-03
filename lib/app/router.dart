@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../features/ask/ask_screen.dart';
 import '../features/focus/focus_screen.dart';
+import '../features/onboarding/onboarding_flow.dart';
 import '../features/pip/pip_screen.dart';
 import '../features/plan/plan_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/today/today_screen.dart';
 import '../theme/tokens.dart';
 import 'tab_bar.dart';
@@ -16,11 +18,40 @@ import 'task_placeholder.dart';
 /// - `/today`, `/plan`, `/focus`, `/pip`, `/ask`: the tabs
 /// - `/focus?taskId=abc`: Focus tab for a task
 /// - `/task/:id`: task detail (placeholder until the tasks feature lands)
-GoRouter createRouter({String initialLocation = '/today'}) {
+/// - `/onboarding`: first-run flow; `/settings`
+///
+/// [onboardingDone] returns null while unknown, false to force `/onboarding`.
+/// [onOnboardingFinished] runs after the flow completes (e.g. to refresh
+/// the provider the gate reads).
+GoRouter createRouter({
+  String initialLocation = '/today',
+  bool? Function()? onboardingDone,
+  void Function()? onOnboardingFinished,
+}) {
   return GoRouter(
     initialLocation: initialLocation,
+    redirect: (context, state) {
+      final done = onboardingDone?.call();
+      final atOnboarding = state.matchedLocation == '/onboarding';
+      if (done == false && !atOnboarding) return '/onboarding';
+      if (done == true && atOnboarding) return '/today';
+      return null;
+    },
     routes: [
       GoRoute(path: '/', redirect: (_, _) => '/today'),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => OnboardingFlow(
+          onFinished: () {
+            onOnboardingFinished?.call();
+            context.go('/today');
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
       GoRoute(
         path: '/task/:id',
         builder: (context, state) =>

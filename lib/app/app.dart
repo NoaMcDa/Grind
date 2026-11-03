@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/onboarding/onboarding_providers.dart';
 import '../theme/app_theme.dart';
 import 'router.dart';
 
@@ -28,18 +29,20 @@ class GrindApp extends StatelessWidget {
   }
 }
 
-class _RouterApp extends StatefulWidget {
+class _RouterApp extends ConsumerStatefulWidget {
   const _RouterApp({required this.initialLocation});
 
   final String initialLocation;
 
   @override
-  State<_RouterApp> createState() => _RouterAppState();
+  ConsumerState<_RouterApp> createState() => _RouterAppState();
 }
 
-class _RouterAppState extends State<_RouterApp> {
+class _RouterAppState extends ConsumerState<_RouterApp> {
   late final GoRouter _router = createRouter(
     initialLocation: widget.initialLocation,
+    onboardingDone: () => ref.read(onboardingDoneProvider).valueOrNull,
+    onOnboardingFinished: () => ref.invalidate(onboardingDoneProvider),
   );
 
   @override
@@ -50,6 +53,8 @@ class _RouterAppState extends State<_RouterApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Re-run the redirect once the onboarding flag is known or changes.
+    ref.listen(onboardingDoneProvider, (_, _) => _router.refresh());
     return MaterialApp.router(
       title: 'Grind',
       debugShowCheckedModeBanner: false,
