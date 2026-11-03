@@ -49,6 +49,15 @@ store; tests use `InMemoryKeyValueStore`. Disconnect revokes the grant
 (`disconnect()`), deletes every `grind.google.*` key, and the next sync clears
 Google events from the local mirror.
 
+"Delete all data" and backup import call the same disconnect for every
+calendar provider through `DataResetService` (`lib/features/settings`), clear
+the mirrored events and the stored calendar choice, and reset the sync
+engines' in-memory state, so the next sync starts clean
+(review 2026-11-03, H4). Connecting triggers an immediate pull
+(`SyncScheduler.runNow`), and Settings shows the sync status. The web build
+ships a Content-Security-Policy meta tag (`web/index.html`); see
+`docs/privacy.md` for the user-facing description.
+
 ### 3. Sync
 
 - Window: the past 7 days to the next 30 days (whole UTC days).

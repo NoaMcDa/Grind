@@ -34,7 +34,7 @@ class ChoicePills<T> extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: Container(
                 constraints: const BoxConstraints(minHeight: 44, minWidth: 56),
-                alignment: Alignment.center,
+                // No `alignment`: it would stretch each chip to the Wrap's width.
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
                   color: e.key == selected ? AppColors.violet : AppColors.card,
@@ -44,12 +44,15 @@ class ChoicePills<T> extends StatelessWidget {
                     width: AppStroke.border,
                   ),
                 ),
-                child: Text(
-                  e.value,
-                  style: AppText.bold(
-                    size: 14,
-                    height: 1,
-                    color: e.key == selected ? Colors.white : AppColors.ink,
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    e.value,
+                    style: AppText.bold(
+                      size: 14,
+                      height: 1,
+                      color: e.key == selected ? Colors.white : AppColors.ink,
+                    ),
                   ),
                 ),
               ),

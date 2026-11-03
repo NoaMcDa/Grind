@@ -14,6 +14,11 @@ abstract final class SettingsStrings {
   static const connectFailed =
       'That did not work this time. You can try again whenever you like.';
 
+  static const syncing = 'Syncing...';
+  static const syncIdle = 'Up to date';
+  static const syncError = 'Pip could not reach your calendar just now.';
+  static String lastSynced(String hhmm) => 'Last synced $hhmm';
+
   static const notifications = 'Notifications';
   static const notifPermission = 'Allow notifications';
   static const notifPermissionOn = 'On';
@@ -41,6 +46,8 @@ abstract final class SettingsStrings {
 
   static const data = 'Data';
   static const exportBackup = 'Export backup';
+  static const exportHint =
+      'Includes calendar events Pip mirrored, such as meeting titles.';
   static const importBackup = 'Import backup';
   static const deleteAll = 'Delete all data';
   static const exportDone = 'Backup saved.';
@@ -60,7 +67,10 @@ abstract final class SettingsStrings {
   static const licences = 'Licences';
   static const privacy = 'Privacy';
   static const privacyCopy =
-      'Everything stays on this device. No account, no sign-in.';
+      'Your plans stay on this device. No account, no analytics. '
+      'If you connect a calendar, Pip reads its events to plan around them '
+      'and writes back only the tasks you schedule. '
+      'Disconnect any time.';
 
   static String minutesBefore(int m) => m == 0 ? leadAtTime : '$m min';
 }

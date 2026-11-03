@@ -102,6 +102,15 @@ class CalendarSyncEngine {
 
   DateTime _now() => clock.now().toUtc();
 
+  /// Forget everything held in memory (pending moves, last status), after
+  /// the provider was disconnected or all local data was replaced. Queued
+  /// behind any sync in flight, so a running sync cannot repopulate it.
+  Future<void> reset() => _serial(() async {
+    _pendingMoves.clear();
+    _pendingVanished.clear();
+    _setStatus(const SyncStatus.idle());
+  });
+
   /// The sync window: [pastDays] back to [futureDays] ahead, whole UTC days.
   ({DateTime from, DateTime to}) window() {
     final now = _now();

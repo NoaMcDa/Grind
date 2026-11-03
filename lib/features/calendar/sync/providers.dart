@@ -41,6 +41,11 @@ final syncStatusProvider = StreamProvider<SyncStatus>(
   (ref) => ref.watch(calendarSyncEngineProvider).watchStatus(),
 );
 
+/// Live Apple Calendar sync status.
+final appleSyncStatusProvider = StreamProvider<SyncStatus>(
+  (ref) => ref.watch(appleCalendarSyncEngineProvider).watchStatus(),
+);
+
 /// Runs both engines on start, on foreground and every 15 minutes.
 final calendarSyncSchedulerProvider = Provider<SyncScheduler>((ref) {
   final scheduler = SyncScheduler([

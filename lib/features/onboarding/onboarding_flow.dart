@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
+import '../calendar/sync/providers.dart';
 import 'choice_pills.dart';
 import 'onboarding_providers.dart';
 import 'onboarding_strings.dart';
@@ -379,6 +382,8 @@ class _CalendarRowState extends ConsumerState<_CalendarRow> {
         _connected = ok;
         _failed = !ok;
       });
+      // Events should show up now, not at the next 15 minute tick.
+      if (ok) unawaited(ref.read(calendarSyncSchedulerProvider).runNow());
     } catch (_) {
       if (mounted) setState(() => _failed = true);
     }
