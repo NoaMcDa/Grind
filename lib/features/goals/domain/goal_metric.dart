@@ -2,9 +2,10 @@ import 'package:flutter/foundation.dart';
 
 /// How a goal is measured (HANDOFF.md §2.3).
 ///
-/// Only [FiniteMetric] exists today (#26). The recurring weekly quota
-/// ("3 of 4 workouts this week", #27) becomes a second subclass here, so
-/// every `switch` over a metric has to handle it.
+/// [FiniteMetric] ("8 of 12 lessons", #26) has a known end;
+/// [RecurringMetric] ("3 of 4 workouts this week", #27) is a quota per
+/// period that starts fresh every period. Every `switch` over a metric
+/// handles both.
 @immutable
 sealed class GoalMetric {
   const GoalMetric();
@@ -16,6 +17,7 @@ sealed class GoalMetric {
     final j = json.cast<String, Object?>();
     return switch (j['kind']) {
       'finite' => FiniteMetric.fromJson(j),
+      'recurring' => RecurringMetric.fromJson(j),
       _ => null,
     };
   }
@@ -90,4 +92,62 @@ class FiniteMetric extends GoalMetric {
 
   @override
   int get hashCode => Object.hash(target, unit, current, source);
+}
+
+/// The span a [RecurringMetric] counts over.
+enum MetricPeriod { week, month }
+
+/// "3 of 4 workouts this week": a [quota] per [period].
+///
+/// Nothing is stored per period: a period's count is the number of the
+/// goal's tasks completed inside it (linked tasks plus the hidden
+/// `metric-tick` tasks a +1 creates, see `metric_ticks.dart`). So a new
+/// period starts at 0 by itself, and past periods are never overwritten.
+@immutable
+class RecurringMetric extends GoalMetric {
+  const RecurringMetric({
+    required this.quota,
+    required this.unit,
+    this.period = MetricPeriod.week,
+  }) : assert(quota > 0);
+
+  final int quota;
+
+  /// Plural unit label: "workouts", "days".
+  final String unit;
+  final MetricPeriod period;
+
+  RecurringMetric copyWith({int? quota, String? unit, MetricPeriod? period}) =>
+      RecurringMetric(
+        quota: quota ?? this.quota,
+        unit: unit ?? this.unit,
+        period: period ?? this.period,
+      );
+
+  @override
+  Map<String, Object?> toJson() => {
+    'kind': 'recurring',
+    'target': quota,
+    'unit': unit,
+    'period': period.name,
+  };
+
+  factory RecurringMetric.fromJson(Map<String, Object?> j) => RecurringMetric(
+    quota: (j['target'] as num).toInt(),
+    unit: j['unit'] as String? ?? '',
+    period: MetricPeriod.values.firstWhere(
+      (p) => p.name == j['period'],
+      orElse: () => MetricPeriod.week,
+    ),
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is RecurringMetric &&
+      other.quota == quota &&
+      other.unit == unit &&
+      other.period == period;
+
+  @override
+  int get hashCode => Object.hash(quota, unit, period);
 }

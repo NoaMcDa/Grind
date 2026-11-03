@@ -1997,4 +1997,214 @@ class AppLocalizationsHe extends AppLocalizations {
   String planReasonNoSlot(int minutes, String by) {
     return 'אין חלון פנוי של $minutes דקות $by';
   }
+
+  @override
+  String get goalsMetricKindLabel => 'איך זה נספר';
+
+  @override
+  String get goalsMetricNone => 'בלי ספירה';
+
+  @override
+  String get goalsMetricFinite => 'סך הכול';
+
+  @override
+  String get goalsMetricPerWeek => 'בשבוע';
+
+  @override
+  String get goalsMetricPerMonth => 'בחודש';
+
+  @override
+  String get goalsQuotaLabel => 'כמה';
+
+  @override
+  String get goalsRecurringHintWeek =>
+      'מתחיל מחדש כל שבוע. גם +1 וגם משימות מקושרות נספרים.';
+
+  @override
+  String get goalsRecurringHintMonth =>
+      'מתחיל מחדש כל חודש. גם +1 וגם משימות מקושרות נספרים.';
+
+  @override
+  String get goalsDefaultRecurringUnit => 'פעמים';
+
+  @override
+  String goalsThisWeek(int current, int target, String unit) {
+    return '$current מתוך $target $unit השבוע';
+  }
+
+  @override
+  String goalsThisMonth(int current, int target, String unit) {
+    return '$current מתוך $target $unit החודש';
+  }
+
+  @override
+  String get goalsQuotaHitWeek => 'סגור לשבוע הזה';
+
+  @override
+  String get goalsQuotaHitMonth => 'סגור לחודש הזה';
+
+  @override
+  String get goalsUndoTick => 'להוריד אחד';
+
+  @override
+  String get goalsTickUndone => 'ירד אחד.';
+
+  @override
+  String get goalsRecurringCountHint => 'גם משימות מקושרות שסומנו נספרות כאן.';
+
+  @override
+  String get goalsTrendWeeks => '8 השבועות האחרונים';
+
+  @override
+  String get goalsTrendMonths => '8 החודשים האחרונים';
+
+  @override
+  String goalsTrendSummary(int hit, int tracked) {
+    return 'המכסה הושגה ב-$hit מתוך $tracked.';
+  }
+
+  @override
+  String get goalsTrendQuietNote =>
+      'תקופות שקטות הן רק מידע. שום דבר לא מתאפס.';
+
+  @override
+  String get goalsTrendBefore => 'לפני היעד';
+
+  @override
+  String goalsMilestoneMetricHit(String title) {
+    return '\"$title\": המכסה הושגה. זה הקצב.';
+  }
+
+  @override
+  String get highlightsTitle => 'הדגשים';
+
+  @override
+  String get highlightsSubtitle => 'כל היעדים במבט אחד.';
+
+  @override
+  String get highlightsGroupCompleted => 'הושלמו';
+
+  @override
+  String get highlightsGroupCloseToDone => 'כמעט שם';
+
+  @override
+  String get highlightsGroupOnTrack => 'בדרך';
+
+  @override
+  String get highlightsGroupStalled => 'מחכים לך';
+
+  @override
+  String highlightsStalledNote(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'שקט $days ימים',
+      one: 'שקט יום אחד',
+    );
+    return '$_temp0. צעד קטן אחד יעיר אותו.';
+  }
+
+  @override
+  String get highlightsEmptyTitle => 'עדיין אין מה להדגיש';
+
+  @override
+  String get highlightsEmptyBody => 'מוסיפים יעד ופיפ ישמור על לוח התוצאות.';
+
+  @override
+  String get recapTitleThisWeek => 'השבוע שלך עם פיפ';
+
+  @override
+  String get recapTitleLastWeek => 'השבוע שעבר עם פיפ';
+
+  @override
+  String recapRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String recapLeadGoalCompleted(String title) {
+    return 'סיימת את \"$title\". זה גדול.';
+  }
+
+  @override
+  String recapLeadMetricHit(String title, int count, int quota, String unit) {
+    return '\"$title\": $count מתוך $quota $unit. בדיוק בקצב.';
+  }
+
+  @override
+  String recapLeadWin(String win) {
+    return 'הרגע הכי טוב: $win';
+  }
+
+  @override
+  String recapLeadTasksDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count דברים הושלמו',
+      one: 'דבר אחד הושלם',
+    );
+    return '$_temp0. זה מצטבר.';
+  }
+
+  @override
+  String get recapLeadQuiet => 'שבוע שקט. גם מנוחה נחשבת.';
+
+  @override
+  String get recapStatDone => 'משימות הושלמו';
+
+  @override
+  String get recapStatMoved => 'יעדים שזזו';
+
+  @override
+  String get recapStatHit => 'מכסות שהושגו';
+
+  @override
+  String get recapStatRolled => 'עברו הלאה';
+
+  @override
+  String get recapWins => 'ניצחונות שרשמת';
+
+  @override
+  String recapRolledOverLine(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count משימות עברו ליום אחר. זה תכנון, וגם זה נחשב.',
+      one: 'משימה אחת עברה ליום אחר. זה תכנון, וגם זה נחשב.',
+      zero: 'הכול נשאר ביום שלו.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recapShare => 'לשתף';
+
+  @override
+  String recapShareHeader(String range) {
+    return 'השבוע שלי עם פיפ ($range)';
+  }
+
+  @override
+  String recapShareWins(String list) {
+    return 'ניצחונות: $list';
+  }
+
+  @override
+  String recapShareHits(String list) {
+    return 'מכסות שהושגו: $list';
+  }
+
+  @override
+  String recapShareMoved(String list) {
+    return 'יעדים שזזו: $list';
+  }
+
+  @override
+  String recapShareDone(int count) {
+    return 'משימות שהושלמו: $count';
+  }
+
+  @override
+  String get recapShareFooter => 'נשלח מ-Grind';
 }

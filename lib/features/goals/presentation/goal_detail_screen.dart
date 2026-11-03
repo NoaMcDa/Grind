@@ -7,6 +7,7 @@ import '../../../core/core.dart';
 import '../../../theme/app_text.dart';
 import '../../../theme/tokens.dart';
 import '../../../widgets/widgets.dart';
+import '../../companion/celebration_bus.dart' show CelebrationHost;
 import '../domain/goal_area.dart';
 import '../domain/goal_metric.dart';
 import '../domain/goal_progress.dart';
@@ -16,6 +17,7 @@ import '../../../l10n/l10n.dart';
 import 'goal_l10n.dart';
 import 'goal_form.dart';
 import 'goal_widgets.dart';
+import 'metric_trend.dart';
 
 /// One goal: metric ring with +1 / edit count, details, linked tasks.
 /// Routed as `/goals/:id`.
@@ -39,6 +41,13 @@ class GoalDetailScreen extends ConsumerWidget {
 
   void _cheer(BuildContext context, GoalRecord goal, GoalMilestone? m) {
     if (!context.mounted) return;
+    // In the app the CelebrationHost cheers for a quota hit or a completed
+    // goal (confetti + praise line, via goalMilestoneEventsProvider); a
+    // second toast would queue behind it.
+    if ((m == GoalMilestone.metricHit || m == GoalMilestone.completed) &&
+        CelebrationHost.isPresent(context)) {
+      return;
+    }
     showPipToast(
       context,
       m == null
@@ -140,84 +149,89 @@ class GoalDetailScreen extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 16),
-        StickerCard(
-          child: metric == null
-              ? Text(
-                  context.l10n.goalsNoMetric,
-                  style: AppText.body(color: AppColors.muted),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        GoalProgressRing(
-                          fraction: progress.fraction,
-                          centerLabel: '${progress.percent}%',
-                          color: color,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${progress.current} / ${progress.target}',
-                                style: AppText.display(size: 28),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                progress.unit,
-                                style: AppText.bold(color: AppColors.muted),
-                              ),
-                              if (!manual) ...[
-                                const SizedBox(height: 6),
-                                Text(
-                                  context.l10n.goalsLinkedCountHint,
-                                  style: AppText.body(
-                                    size: 13,
-                                    color: AppColors.muted,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (manual) ...[
-                      const SizedBox(height: 14),
+        if (goal.recurring case final rec?)
+          ..._recurring(context, ref, goal, rec, progress, color)
+        else
+          StickerCard(
+            child: metric == null
+                ? Text(
+                    context.l10n.goalsNoMetric,
+                    style: AppText.body(color: AppColors.muted),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                       Row(
                         children: [
-                          Expanded(
-                            child: Semantics(
-                              label: context.l10n.goalAddOne(progress.unit),
-                              child: PillButton(
-                                label: '+1',
-                                icon: const Icon(Icons.add),
-                                color: AppColors.mint,
-                                display: true,
-                                fontSize: 16,
-                                onPressed: () async {
-                                  final m = await actions.increment(goal);
-                                  if (context.mounted) _cheer(context, goal, m);
-                                },
-                              ),
-                            ),
+                          GoalProgressRing(
+                            fraction: progress.fraction,
+                            centerLabel: '${progress.percent}%',
+                            color: color,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 16),
                           Expanded(
-                            child: PillButton(
-                              label: context.l10n.goalsEditCount,
-                              onPressed: () => _editCount(context, ref, goal),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${progress.current} / ${progress.target}',
+                                  style: AppText.display(size: 28),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  progress.unit,
+                                  style: AppText.bold(color: AppColors.muted),
+                                ),
+                                if (!manual) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    context.l10n.goalsLinkedCountHint,
+                                    style: AppText.body(
+                                      size: 13,
+                                      color: AppColors.muted,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         ],
                       ),
+                      if (manual) ...[
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                label: context.l10n.goalAddOne(progress.unit),
+                                child: PillButton(
+                                  label: '+1',
+                                  icon: const Icon(Icons.add),
+                                  color: AppColors.mint,
+                                  display: true,
+                                  fontSize: 16,
+                                  onPressed: () async {
+                                    final m = await actions.increment(goal);
+                                    if (context.mounted) {
+                                      _cheer(context, goal, m);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: PillButton(
+                                label: context.l10n.goalsEditCount,
+                                onPressed: () => _editCount(context, ref, goal),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-        ),
+                  ),
+          ),
         const SizedBox(height: 12),
         StickerCard(
           shadow: 0,
@@ -325,6 +339,116 @@ class GoalDetailScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  List<Widget> _recurring(
+    BuildContext context,
+    WidgetRef ref,
+    GoalRecord goal,
+    RecurringMetric metric,
+    GoalProgress progress,
+    Color color,
+  ) {
+    final l = context.l10n;
+    final actions = ref.read(goalActionsProvider);
+    final history = ref.watch(goalHistoryProvider(goal.id));
+    final tracked = history.where((p) => p.tracked).length;
+    final hit = history.where((p) => p.hit).length;
+    return [
+      StickerCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                GoalProgressRing(
+                  fraction: progress.fraction,
+                  centerLabel: '${progress.current}/${progress.target}',
+                  color: color,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.goalPeriodLine(
+                          progress.current,
+                          progress.target,
+                          progress.unit,
+                          metric.period,
+                        ),
+                        style: AppText.display(size: 20, height: 1.15),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l.goalsRecurringCountHint,
+                        style: AppText.body(size: 13, color: AppColors.muted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    label: l.goalAddOne(progress.unit),
+                    child: PillButton(
+                      label: '+1',
+                      icon: const Icon(Icons.add),
+                      color: AppColors.mint,
+                      display: true,
+                      fontSize: 16,
+                      onPressed: () async {
+                        final m = await actions.increment(goal);
+                        if (context.mounted) _cheer(context, goal, m);
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: PillButton(
+                    label: l.goalsUndoTick,
+                    onPressed: () async {
+                      final ok = await actions.undoTick(goal);
+                      if (ok && context.mounted) {
+                        showPipToast(context, context.l10n.goalsTickUndone);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 12),
+      StickerCard(
+        shadow: 0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionLabel(l.goalTrendTitle(metric.period)),
+            const SizedBox(height: 10),
+            MetricTrend(history: history),
+            const SizedBox(height: 10),
+            Text(
+              l.goalsTrendSummary(hit, tracked),
+              style: AppText.bold(size: 14),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              l.goalsTrendQuietNote,
+              style: AppText.body(size: 13, color: AppColors.muted),
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   Widget _field(String label, String value) => Column(

@@ -77,6 +77,12 @@ Goal goalRecordToCore(GoalRecord goal) {
       metricCurrent: m.current,
       metricSource: m.source.name,
     ),
+    final RecurringMetric m => core.copyWith(
+      metricKind: 'recurring',
+      metricTarget: m.quota,
+      metricUnit: m.unit,
+      metricPeriod: m.period.name,
+    ),
   };
 }
 

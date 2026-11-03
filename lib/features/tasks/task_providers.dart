@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rrule/rrule.dart';
 
 import '../../core/core.dart';
+import '../goals/domain/metric_ticks.dart';
 import '../recurrence/occurrence_completion.dart';
 import '../recurrence/occurrence_expander.dart';
 import '../recurrence/providers.dart';
@@ -29,7 +30,9 @@ int _byWhen(Task a, Task b) {
 /// Open tasks, soonest first; tasks without a time go last.
 final openTasksProvider = Provider<List<Task>>((ref) {
   final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
-  return all.where((t) => !t.isDone && t.deletedAt == null).toList()
+  return all
+      .where((t) => !t.isDone && t.deletedAt == null && !isMetricTick(t))
+      .toList()
     ..sort(_byWhen);
 });
 
@@ -142,7 +145,10 @@ bool _expandable(ReminderRule rule) {
 /// [clockProvider]; see [itemsOnDay].
 final todayTasksProvider = Provider.autoDispose<List<TodayItem>>((ref) {
   final day = ref.watch(todayBoundsProvider);
-  final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+  // Goal metric "+1" ticks are tasks under the hood; they are not rows.
+  final all = (ref.watch(tasksProvider).valueOrNull ?? const <Task>[])
+      .where((t) => !isMetricTick(t))
+      .toList();
   final rules =
       ref.watch(reminderRulesProvider).valueOrNull ?? const <ReminderRule>[];
   return itemsOnDay(

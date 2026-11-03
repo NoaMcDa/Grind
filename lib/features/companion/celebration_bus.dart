@@ -165,6 +165,11 @@ class CelebrationHost extends ConsumerStatefulWidget {
 
   final Widget child;
 
+  /// Whether a host is above [context] (screens with their own cheer line
+  /// can then leave the toast to it).
+  static bool isPresent(BuildContext context) =>
+      context.findAncestorWidgetOfExactType<CelebrationHost>() != null;
+
   @override
   ConsumerState<CelebrationHost> createState() => _CelebrationHostState();
 }

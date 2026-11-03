@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart';
 
+import '../../tasks/day_bounds.dart' show utcOf;
+
 import '../../../core/core.dart';
 import 'goal_metric.dart';
 import 'goal_record.dart';
+import 'metric_period.dart';
+import 'metric_ticks.dart';
 
 /// Fraction at which a goal reads "close to done" (#26).
 const closeToDoneThreshold = 0.8;
@@ -10,9 +14,12 @@ const closeToDoneThreshold = 0.8;
 enum GoalProgressStatus { notStarted, inProgress, closeToDone, completed }
 
 /// A crossing the cheering layer celebrates (#26, Pip / Highlights #28).
-enum GoalMilestone { closeToDone, completed }
+/// [metricHit]: a recurring quota was reached for the current period.
+enum GoalMilestone { closeToDone, completed, metricHit }
 
-/// Where a goal stands: "8 of 12 lessons · 67%".
+/// Where a goal stands: "8 of 12 lessons · 67%", or for a recurring
+/// metric "3 of 4 workouts this week" ([period] set, [current] is the
+/// current period's count and [target] the quota).
 @immutable
 class GoalProgress {
   const GoalProgress({
@@ -21,6 +28,8 @@ class GoalProgress {
     required this.unit,
     required this.status,
     this.hasMetric = true,
+    this.period,
+    this.periodStart,
   });
 
   /// A goal with no metric: only its status says anything.
@@ -29,6 +38,8 @@ class GoalProgress {
       target = 1,
       unit = '',
       hasMetric = false,
+      period = null,
+      periodStart = null,
       status = done
           ? GoalProgressStatus.completed
           : GoalProgressStatus.notStarted;
@@ -38,6 +49,14 @@ class GoalProgress {
   final String unit;
   final GoalProgressStatus status;
   final bool hasMetric;
+
+  /// Week or month for a recurring metric; null for finite / none.
+  final MetricPeriod? period;
+
+  /// Start of the period [current] counts (recurring only).
+  final DateTime? periodStart;
+
+  bool get isRecurring => period != null;
 
   /// 0..1.
   double get fraction => target <= 0 ? 0 : (current / target).clamp(0.0, 1.0);
@@ -53,10 +72,13 @@ class GoalProgress {
   bool get isCloseToDone => status == GoalProgressStatus.closeToDone;
 
   /// Progress of [goal]; [linkedTasks] are the tasks whose `goalId` is the
-  /// goal's id (only a [MetricSource.linkedTasks] metric reads them).
+  /// goal's id (a [MetricSource.linkedTasks] metric and a recurring metric
+  /// read them). A recurring metric counts the period holding
+  /// [period]`.now` (UTC, Sunday week, now when omitted).
   factory GoalProgress.of(
     GoalRecord goal, {
     List<Task> linkedTasks = const [],
+    PeriodContext? period,
   }) {
     final done = goal.status == GoalStatus.done;
     final metric = goal.metric;
@@ -69,7 +91,7 @@ class GoalProgress {
           MetricSource.linkedTasks =>
             linkedTasks
                 .where((t) => t.deletedAt == null && t.goalId == goal.id)
-                .where((t) => t.isDone)
+                .where((t) => t.isDone && !isMetricTick(t))
                 .length,
         };
         return GoalProgress(
@@ -77,6 +99,18 @@ class GoalProgress {
           target: metric.target,
           unit: metric.unit,
           status: statusFor(current, metric.target, done: done),
+        );
+      case RecurringMetric():
+        final ctx = period ?? PeriodContext.utc(DateTime.now().toUtc());
+        final bounds = periodOf(metric.period, ctx);
+        final current = countInPeriod(linkedTasks, goal.id, bounds);
+        return GoalProgress(
+          current: current,
+          target: metric.quota,
+          unit: metric.unit,
+          status: statusFor(current, metric.quota, done: done),
+          period: metric.period,
+          periodStart: utcOf(bounds.start),
         );
     }
   }
@@ -100,11 +134,25 @@ class GoalProgress {
   }
 
   /// The milestone crossed going from [before] to [after], if any. Going
-  /// down never produces one (misses never reset or scold).
+  /// down never produces one (misses never reset or scold). A recurring
+  /// metric only has [GoalMilestone.metricHit], and only within one period
+  /// (a new period starting is not a crossing).
   static GoalMilestone? milestoneBetween(
     GoalProgress before,
     GoalProgress after,
   ) {
+    if (after.isRecurring) {
+      final samePeriod =
+          before.isRecurring &&
+          before.periodStart == after.periodStart &&
+          before.period == after.period;
+      if (samePeriod &&
+          before.current < before.target &&
+          after.current >= after.target) {
+        return GoalMilestone.metricHit;
+      }
+      return null;
+    }
     if (!before.isCompleted && after.isCompleted) {
       return GoalMilestone.completed;
     }
@@ -122,8 +170,18 @@ class GoalProgress {
       other.target == target &&
       other.unit == unit &&
       other.status == status &&
-      other.hasMetric == hasMetric;
+      other.hasMetric == hasMetric &&
+      other.period == period &&
+      other.periodStart == periodStart;
 
   @override
-  int get hashCode => Object.hash(current, target, unit, status, hasMetric);
+  int get hashCode => Object.hash(
+    current,
+    target,
+    unit,
+    status,
+    hasMetric,
+    period,
+    periodStart,
+  );
 }

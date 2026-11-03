@@ -2729,5 +2729,320 @@
         "type": "String"
       }
     }
+  },
+  "goalsMetricKindLabel": "How it counts",
+  "@goalsMetricKindLabel": {
+    "description": "Goal form: metric kind"
+  },
+  "goalsMetricNone": "No count",
+  "@goalsMetricNone": {
+    "description": "Goal form: no metric"
+  },
+  "goalsMetricFinite": "Total",
+  "@goalsMetricFinite": {
+    "description": "Goal form: finite metric (X of Y overall)"
+  },
+  "goalsMetricPerWeek": "Per week",
+  "@goalsMetricPerWeek": {
+    "description": "Goal form: weekly quota"
+  },
+  "goalsMetricPerMonth": "Per month",
+  "@goalsMetricPerMonth": {
+    "description": "Goal form: monthly quota"
+  },
+  "goalsQuotaLabel": "How many",
+  "@goalsQuotaLabel": {
+    "description": "Goal form: quota field"
+  },
+  "goalsRecurringHintWeek": "Starts fresh every week. Your +1 taps and linked tasks both count.",
+  "@goalsRecurringHintWeek": {
+    "description": "Goal form: weekly quota explanation"
+  },
+  "goalsRecurringHintMonth": "Starts fresh every month. Your +1 taps and linked tasks both count.",
+  "@goalsRecurringHintMonth": {
+    "description": "Goal form: monthly quota explanation"
+  },
+  "goalsDefaultRecurringUnit": "times",
+  "@goalsDefaultRecurringUnit": {
+    "description": "Default unit of a recurring quota"
+  },
+  "goalsThisWeek": "{current} of {target} {unit} this week",
+  "@goalsThisWeek": {
+    "description": "Recurring metric progress, weekly",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsThisMonth": "{current} of {target} {unit} this month",
+  "@goalsThisMonth": {
+    "description": "Recurring metric progress, monthly",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsQuotaHitWeek": "Done for the week",
+  "@goalsQuotaHitWeek": {
+    "description": "Pill: weekly quota reached"
+  },
+  "goalsQuotaHitMonth": "Done for the month",
+  "@goalsQuotaHitMonth": {
+    "description": "Pill: monthly quota reached"
+  },
+  "goalsUndoTick": "Take one back",
+  "@goalsUndoTick": {
+    "description": "Removes the latest +1 of this period"
+  },
+  "goalsTickUndone": "Took one back.",
+  "@goalsTickUndone": {
+    "description": "Toast after taking back a +1"
+  },
+  "goalsRecurringCountHint": "Ticked linked tasks count here too.",
+  "@goalsRecurringCountHint": {
+    "description": "Recurring metric card hint"
+  },
+  "goalsTrendWeeks": "Last 8 weeks",
+  "@goalsTrendWeeks": {
+    "description": "Trend card title, weekly"
+  },
+  "goalsTrendMonths": "Last 8 months",
+  "@goalsTrendMonths": {
+    "description": "Trend card title, monthly"
+  },
+  "goalsTrendSummary": "Reached the quota in {hit} of {tracked}.",
+  "@goalsTrendSummary": {
+    "description": "Trend summary",
+    "placeholders": {
+      "hit": {
+        "type": "int"
+      },
+      "tracked": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsTrendQuietNote": "Quiet stretches are just data. Nothing resets.",
+  "@goalsTrendQuietNote": {
+    "description": "Trend note: misses are not failures"
+  },
+  "goalsTrendBefore": "Before this goal",
+  "@goalsTrendBefore": {
+    "description": "Trend bar for a period before the goal existed"
+  },
+  "goalsMilestoneMetricHit": "\"{title}\": quota reached. That's the rhythm.",
+  "@goalsMilestoneMetricHit": {
+    "description": "Toast when a recurring quota is reached",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "highlightsTitle": "Highlights",
+  "@highlightsTitle": {
+    "description": "Highlights screen title and link"
+  },
+  "highlightsSubtitle": "Every goal at a glance.",
+  "@highlightsSubtitle": {
+    "description": "Highlights subtitle"
+  },
+  "highlightsGroupCompleted": "Completed",
+  "@highlightsGroupCompleted": {
+    "description": "Highlights group"
+  },
+  "highlightsGroupCloseToDone": "Close to done",
+  "@highlightsGroupCloseToDone": {
+    "description": "Highlights group"
+  },
+  "highlightsGroupOnTrack": "On track",
+  "@highlightsGroupOnTrack": {
+    "description": "Highlights group"
+  },
+  "highlightsGroupStalled": "Waiting for you",
+  "@highlightsGroupStalled": {
+    "description": "Highlights group: goals with no recent progress"
+  },
+  "highlightsStalledNote": "{days, plural, =1{Quiet for a day} other{Quiet for {days} days}}. One small step wakes it up.",
+  "@highlightsStalledNote": {
+    "description": "Stalled goal note",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "highlightsEmptyTitle": "Nothing to highlight yet",
+  "@highlightsEmptyTitle": {
+    "description": "Highlights empty state"
+  },
+  "highlightsEmptyBody": "Add a goal and Pip will keep the scoreboard.",
+  "@highlightsEmptyBody": {
+    "description": "Highlights empty state"
+  },
+  "recapTitleThisWeek": "Your week with Pip",
+  "@recapTitleThisWeek": {
+    "description": "Recap card title on the week's last day"
+  },
+  "recapTitleLastWeek": "Last week with Pip",
+  "@recapTitleLastWeek": {
+    "description": "Recap card title for the previous week"
+  },
+  "recapRange": "{start} – {end}",
+  "@recapRange": {
+    "description": "Recap date range",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "recapLeadGoalCompleted": "You finished \"{title}\". That's a big one.",
+  "@recapLeadGoalCompleted": {
+    "description": "Recap headline: a goal completed",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recapLeadMetricHit": "\"{title}\": {count} of {quota} {unit}. Right on rhythm.",
+  "@recapLeadMetricHit": {
+    "description": "Recap headline: quota reached",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "quota": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "recapLeadWin": "Best moment: {win}",
+  "@recapLeadWin": {
+    "description": "Recap headline: a logged win",
+    "placeholders": {
+      "win": {
+        "type": "String"
+      }
+    }
+  },
+  "recapLeadTasksDone": "{count, plural, =1{One thing done} other{{count} things done}}. It adds up.",
+  "@recapLeadTasksDone": {
+    "description": "Recap headline: tasks done",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapLeadQuiet": "A quiet week. Rest counts too.",
+  "@recapLeadQuiet": {
+    "description": "Recap headline: nothing logged"
+  },
+  "recapStatDone": "Tasks done",
+  "@recapStatDone": {
+    "description": "Recap stat"
+  },
+  "recapStatMoved": "Goals moved",
+  "@recapStatMoved": {
+    "description": "Recap stat"
+  },
+  "recapStatHit": "Quotas hit",
+  "@recapStatHit": {
+    "description": "Recap stat"
+  },
+  "recapStatRolled": "Moved on",
+  "@recapStatRolled": {
+    "description": "Recap stat: tasks rolled over to another day"
+  },
+  "recapWins": "Wins you logged",
+  "@recapWins": {
+    "description": "Recap wins label"
+  },
+  "recapRolledOverLine": "{count, plural, =0{Everything stayed on its day.} =1{One task moved to another day. That's planning, and it counts.} other{{count} tasks moved to another day. That's planning, and it counts.}}",
+  "@recapRolledOverLine": {
+    "description": "Recap rolled-over line, never guilt",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapShare": "Share",
+  "@recapShare": {
+    "description": "Recap share button"
+  },
+  "recapShareHeader": "My week with Pip ({range})",
+  "@recapShareHeader": {
+    "description": "Shared recap: first line",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "recapShareWins": "Wins: {list}",
+  "@recapShareWins": {
+    "description": "Shared recap line",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "recapShareHits": "Quotas hit: {list}",
+  "@recapShareHits": {
+    "description": "Shared recap line",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "recapShareMoved": "Goals that moved: {list}",
+  "@recapShareMoved": {
+    "description": "Shared recap line",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "recapShareDone": "Tasks done: {count}",
+  "@recapShareDone": {
+    "description": "Shared recap line",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recapShareFooter": "Sent from Grind",
+  "@recapShareFooter": {
+    "description": "Shared recap: last line"
   }
 }

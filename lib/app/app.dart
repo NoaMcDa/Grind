@@ -9,6 +9,8 @@ import '../core/notifications/notifications.dart';
 import '../features/calendar/apple/providers.dart';
 import '../features/calendar/sync/providers.dart';
 import '../features/companion/celebration_bus.dart';
+import '../features/goals/domain/goal_progress.dart';
+import '../features/goals/goal_providers.dart';
 import '../features/onboarding/onboarding_providers.dart';
 import '../features/settings/time_zone/device_time_zone.dart';
 import '../l10n/l10n.dart';
@@ -119,6 +121,16 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
   Widget build(BuildContext context) {
     // Re-run the redirect once the onboarding flag is known or changes.
     ref.listen(onboardingDoneProvider, (_, _) => _router.refresh());
+    // A goal metric reached its quota or a goal was completed, from any
+    // screen (goal detail, a tick on Today, an import): Pip cheers.
+    ref.listen(goalMilestoneEventsProvider, (_, next) {
+      final m = next.valueOrNull?.milestone;
+      if (m == GoalMilestone.metricHit) {
+        celebrate(ref, const CelebrationEvent.metricReached());
+      } else if (m == GoalMilestone.completed) {
+        celebrate(ref, const CelebrationEvent.goalCompleted());
+      }
+    });
     if (widget.startServices) {
       // Apple Calendar changed outside the app: pull again (debounced).
       ref.listen(

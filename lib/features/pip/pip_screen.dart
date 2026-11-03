@@ -8,6 +8,7 @@ import '../../theme/app_text.dart';
 import '../companion/mood.dart';
 import '../companion/pip_providers.dart';
 import '../companion/unlocks.dart';
+import '../goals/presentation/highlights_screen.dart' show HighlightsLinkCard;
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
@@ -118,6 +119,9 @@ class PipScreen extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        // This week's goal highlights and the recap (#28).
+        const HighlightsLinkCard(),
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

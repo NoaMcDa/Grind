@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../goals/domain/metric_ticks.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart';
 
@@ -55,6 +56,7 @@ List<Task> tasksOnDay(
   return tasks
       .where(
         (t) =>
+            !isMetricTick(t) &&
             t.isScheduled &&
             t.scheduledStart!.isBefore(to) &&
             t.scheduledEnd!.isAfter(from),

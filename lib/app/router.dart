@@ -75,6 +75,10 @@ GoRouter createRouter({
         ],
       ),
       GoRoute(
+        path: '/highlights',
+        builder: (context, state) => const HighlightsScreen(),
+      ),
+      GoRoute(
         path: '/analytics',
         builder: (context, state) => const AnalyticsScreen(),
       ),

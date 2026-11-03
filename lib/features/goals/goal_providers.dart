@@ -1,11 +1,21 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/core.dart';
+import '../review/review_providers.dart';
+import '../review/review_repository.dart';
+import '../tasks/day_bounds.dart' show zoneLocationProvider;
 import 'domain/goal_metric.dart';
 import 'domain/goal_progress.dart';
 import 'domain/goal_record.dart';
 import 'domain/goal_repository.dart';
+import 'domain/highlights.dart';
+import 'domain/metric_period.dart';
+import 'domain/metric_ticks.dart';
+import 'domain/weekly_recap.dart';
 
 /// The goal store. In memory by default; `main.dart` overrides it with
 /// `DriftGoalRepository(db, clock: ...)` (see the PR for the override).
@@ -24,14 +34,45 @@ final goalByIdProvider = Provider.family<GoalRecord?, String>((ref, id) {
   return findGoal(all, id);
 });
 
-/// Non-deleted tasks whose `goalId` is [goalId]: open ones first.
+/// The user's week start (`Preferences.weekStart`).
+final goalWeekStartProvider = Provider<int>(
+  (ref) => ref.watch(
+    preferencesProvider.select(
+      (p) => p.valueOrNull?.weekStart ?? const Preferences().weekStart,
+    ),
+  ),
+);
+
+/// Period math "now": the clock, the user's zone and week start. Read
+/// fresh by every provider that recomputes (on any goal or task change),
+/// so a long-lived listener never counts a stale period.
+PeriodContext periodContextOf(Ref ref) => PeriodContext(
+  now: ref.watch(clockProvider).now().toUtc(),
+  location: ref.watch(zoneLocationProvider),
+  weekStart: ref.watch(goalWeekStartProvider),
+);
+
+/// Every non-deleted task of [goalId], +1 ticks included (the counts read
+/// these; lists use [goalLinkedTasksProvider]).
+final goalTasksProvider = Provider.autoDispose.family<List<Task>, String>((
+  ref,
+  goalId,
+) {
+  final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+  return all.where((t) => t.deletedAt == null && t.goalId == goalId).toList();
+});
+
+/// Non-deleted tasks whose `goalId` is [goalId], without the hidden
+/// `metric-tick` tasks: open ones first.
 final goalLinkedTasksProvider = Provider.family<List<Task>, String>((
   ref,
   goalId,
 ) {
   final all = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
   final linked = all
-      .where((t) => t.deletedAt == null && t.goalId == goalId)
+      .where(
+        (t) => t.deletedAt == null && t.goalId == goalId && !isMetricTick(t),
+      )
       .toList();
   linked.sort((a, b) {
     if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
@@ -40,9 +81,10 @@ final goalLinkedTasksProvider = Provider.family<List<Task>, String>((
   return linked;
 });
 
-/// Progress of the goal [goalId]: the stored count, or done linked tasks
-/// for a [MetricSource.linkedTasks] metric.
-final goalProgressProvider = Provider.family<GoalProgress, String>((
+/// Progress of the goal [goalId]: the stored count, done linked tasks for
+/// a [MetricSource.linkedTasks] metric, or this period's count for a
+/// recurring one.
+final goalProgressProvider = Provider.autoDispose.family<GoalProgress, String>((
   ref,
   goalId,
 ) {
@@ -50,7 +92,131 @@ final goalProgressProvider = Provider.family<GoalProgress, String>((
   if (goal == null) return const GoalProgress.none(done: false);
   return GoalProgress.of(
     goal,
-    linkedTasks: ref.watch(goalLinkedTasksProvider(goalId)),
+    linkedTasks: ref.watch(goalTasksProvider(goalId)),
+    period: periodContextOf(ref),
+  );
+});
+
+/// The last 8 periods of a recurring goal, oldest first (current last);
+/// empty for other goals.
+final goalHistoryProvider = Provider.autoDispose
+    .family<List<PeriodCount>, String>((ref, goalId) {
+      final goal = ref.watch(goalByIdProvider(goalId));
+      final m = goal?.recurring;
+      if (goal == null || m == null) return const [];
+      return recurringHistory(
+        goalId: goalId,
+        metric: m,
+        tasks: ref.watch(goalTasksProvider(goalId)),
+        ctx: periodContextOf(ref),
+        since: goal.createdAt,
+      );
+    });
+
+List<Task> _tasksOf(List<Task> tasks, String goalId) => [
+  for (final t in tasks)
+    if (t.deletedAt == null && t.goalId == goalId) t,
+];
+
+/// Progress of every goal by id; null until goals and tasks have loaded
+/// (so a late task list never looks like a sudden jump).
+final allGoalProgressProvider =
+    Provider.autoDispose<Map<String, GoalProgress>?>((ref) {
+      final goals = ref.watch(goalsProvider).valueOrNull;
+      final tasks = ref.watch(tasksProvider).valueOrNull;
+      if (goals == null || tasks == null) return null;
+      final ctx = periodContextOf(ref);
+      return {
+        for (final g in goals)
+          g.id: GoalProgress.of(
+            g,
+            linkedTasks: _tasksOf(tasks, g.id),
+            period: ctx,
+          ),
+      };
+    });
+
+/// A milestone a goal just crossed, wherever the change came from (the
+/// goal screens, a task ticked on Today, an import).
+@immutable
+class GoalMilestoneEvent {
+  const GoalMilestoneEvent({
+    required this.goalId,
+    required this.title,
+    required this.milestone,
+    required this.progress,
+  });
+
+  final String goalId;
+  final String title;
+  final GoalMilestone milestone;
+  final GoalProgress progress;
+
+  @override
+  String toString() => 'GoalMilestoneEvent($goalId, $milestone)';
+}
+
+/// Live milestones: `closeToDone` / `completed` for finite metrics and
+/// `metricHit` when a recurring quota is reached in the current period.
+/// The companion listens: `ref.listen(goalMilestoneEventsProvider, ...)`.
+/// Nothing fires for the first snapshot or for a new period starting.
+final goalMilestoneEventsProvider =
+    StreamProvider.autoDispose<GoalMilestoneEvent>((ref) {
+      final controller = StreamController<GoalMilestoneEvent>();
+      ref.onDispose(controller.close);
+      ref.listen<Map<String, GoalProgress>?>(allGoalProgressProvider, (
+        before,
+        after,
+      ) {
+        if (before == null || after == null) return;
+        final goals = ref.read(goalsProvider).valueOrNull ?? const [];
+        for (final e in after.entries) {
+          final prev = before[e.key];
+          if (prev == null) continue;
+          final m = GoalProgress.milestoneBetween(prev, e.value);
+          if (m == null) continue;
+          controller.add(
+            GoalMilestoneEvent(
+              goalId: e.key,
+              title: findGoal(goals, e.key)?.title ?? '',
+              milestone: m,
+              progress: e.value,
+            ),
+          );
+        }
+      });
+      return controller.stream;
+    });
+
+/// Goals grouped for the Highlights screen (#28).
+final highlightsProvider =
+    Provider.autoDispose<Map<HighlightGroup, List<GoalHighlight>>>((ref) {
+      final goals = ref.watch(goalsProvider).valueOrNull ?? const [];
+      final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+      final ctx = periodContextOf(ref);
+      return groupHighlights(
+        goals: goals,
+        tasks: tasks,
+        progressOf: (g) =>
+            GoalProgress.of(g, linkedTasks: _tasksOf(tasks, g.id), period: ctx),
+        now: ctx.now,
+      );
+    });
+
+/// Saved evening reviews (wins and rolled-over counts) for the recap.
+final recapReviewsProvider = FutureProvider.autoDispose<List<ReviewEntry>>(
+  (ref) => ref.watch(reviewRepositoryProvider).all(),
+);
+
+/// The weekly recap: this week on its last day, otherwise last week.
+final weeklyRecapProvider = Provider.autoDispose<WeeklyRecap>((ref) {
+  final w = recapWeek(periodContextOf(ref));
+  return buildWeeklyRecap(
+    week: w.week,
+    isCurrentWeek: w.isCurrent,
+    goals: ref.watch(goalsProvider).valueOrNull ?? const [],
+    tasks: ref.watch(tasksProvider).valueOrNull ?? const <Task>[],
+    reviews: ref.watch(recapReviewsProvider).valueOrNull ?? const [],
   );
 });
 
@@ -82,19 +248,34 @@ final goalActionsProvider = Provider<GoalActions>(
     ref.watch(goalRepositoryProvider),
     ref.watch(taskRepositoryProvider),
     ref.watch(clockProvider),
+    periodContext: () => PeriodContext(
+      now: ref.read(clockProvider).now().toUtc(),
+      location: ref.read(zoneLocationProvider),
+      weekStart: ref.read(goalWeekStartProvider),
+    ),
   ),
 );
 
 /// Writes for the goals screens. Methods that change progress return the
-/// milestone they crossed, for the cheering layer to celebrate.
+/// milestone they crossed, for the screen's toast. (The cheering layer
+/// listens to [goalMilestoneEventsProvider] instead, which also sees
+/// changes made outside the goal screens.)
 class GoalActions {
-  GoalActions(this._goals, this._tasks, this._clock);
+  GoalActions(
+    this._goals,
+    this._tasks,
+    this._clock, {
+    PeriodContext Function()? periodContext,
+  }) : _periodContext = periodContext;
 
   final GoalRepository _goals;
   final TaskRepository _tasks;
   final Clock _clock;
+  final PeriodContext Function()? _periodContext;
 
   DateTime get _now => _clock.now().toUtc();
+
+  PeriodContext get _ctx => _periodContext?.call() ?? PeriodContext.utc(_now);
 
   /// A new goal with a fresh id and timestamps.
   GoalRecord draft({
@@ -124,14 +305,18 @@ class GoalActions {
   Future<void> save(GoalRecord goal) =>
       _goals.upsert(goal.copyWith(updatedAt: _now));
 
-  /// Soft-deletes the goal and unlinks its tasks.
+  /// Soft-deletes the goal and unlinks its tasks (its +1 ticks go too).
   Future<void> delete(GoalRecord goal) async {
     await _goals.delete(goal.id);
     final tasks = await _tasks.getAll();
     final now = _now;
+    final mine = tasks.where((t) => t.goalId == goal.id).toList();
+    for (final t in mine.where(isMetricTick)) {
+      await _tasks.delete(t.id);
+    }
     await _tasks.upsertAll([
-      for (final t in tasks)
-        if (t.goalId == goal.id) t.copyWith(goalId: null, updatedAt: now),
+      for (final t in mine)
+        if (!isMetricTick(t)) t.copyWith(goalId: null, updatedAt: now),
     ]);
   }
 
@@ -150,11 +335,51 @@ class GoalActions {
     );
   }
 
-  /// +1 on a manual finite metric.
+  /// +1 on a manual finite metric, or one occurrence on a recurring one
+  /// (a hidden `metric-tick` task completed now; returns
+  /// [GoalMilestone.metricHit] when that reaches this period's quota).
   Future<GoalMilestone?> increment(GoalRecord goal, {int by = 1}) async {
+    if (goal.recurring != null) return _tick(goal, by);
     final m = goal.finite;
     if (m == null) return null;
     return setCount(goal, m.current + by);
+  }
+
+  /// Takes back the latest +1 of the current period on a recurring goal.
+  /// Linked tasks are untouched (untick them instead). False when there is
+  /// no +1 this period.
+  Future<bool> undoTick(GoalRecord goal) async {
+    final m = goal.recurring;
+    if (m == null) return false;
+    final bounds = periodOf(m.period, _ctx);
+    final ticks = ticksInPeriod(await _tasks.getAll(), goal.id, bounds);
+    if (ticks.isEmpty) return false;
+    await _tasks.delete(ticks.first.id);
+    return true;
+  }
+
+  Future<GoalMilestone?> _tick(GoalRecord goal, int by) async {
+    if (by <= 0) return null;
+    final ctx = _ctx;
+    final now = _now;
+    final before = (await _tasks.getAll())
+        .where((t) => t.goalId == goal.id)
+        .toList();
+    final ticks = [
+      for (var i = 0; i < by; i++)
+        metricTick(
+          id: const Uuid().v4(),
+          goalId: goal.id,
+          title: goal.title,
+          at: now,
+        ),
+    ];
+    await _tasks.upsertAll(ticks);
+    await save(goal.copyWith(lastProgressAt: now));
+    return GoalProgress.milestoneBetween(
+      GoalProgress.of(goal, linkedTasks: before, period: ctx),
+      GoalProgress.of(goal, linkedTasks: [...before, ...ticks], period: ctx),
+    );
   }
 
   Future<void> setStatus(GoalRecord goal, GoalStatus status) =>
@@ -163,8 +388,8 @@ class GoalActions {
   Future<void> linkTask(Task task, String? goalId) =>
       _tasks.upsert(task.copyWith(goalId: goalId, updatedAt: _now));
 
-  /// Ticks a linked task on or off. On a linked-tasks metric this moves
-  /// the count, so the crossing is returned like [increment].
+  /// Ticks a linked task on or off. On a linked-tasks or recurring metric
+  /// this moves the count, so the crossing is returned like [increment].
   Future<GoalMilestone?> toggleTask(
     GoalRecord goal,
     Task task,
@@ -178,13 +403,27 @@ class GoalActions {
       updatedAt: now,
     );
     await _tasks.upsert(next);
-    final m = goal.finite;
-    if (m == null || m.source != MetricSource.linkedTasks) return null;
+    final recurring = goal.recurring != null;
+    if (!recurring && goal.finite?.source != MetricSource.linkedTasks) {
+      return null;
+    }
     if (done) await save(goal.copyWith(lastProgressAt: now));
-    final after = [for (final t in linkedBefore) t.id == task.id ? next : t];
+    // A recurring count also reads this period's +1 ticks.
+    final all = recurring
+        ? (await _tasks.getAll()).where((t) => t.goalId == goal.id).toList()
+        : linkedBefore;
+    final ctx = _ctx;
     return GoalProgress.milestoneBetween(
-      GoalProgress.of(goal, linkedTasks: linkedBefore),
-      GoalProgress.of(goal, linkedTasks: after),
+      GoalProgress.of(
+        goal,
+        linkedTasks: [for (final t in all) t.id == task.id ? task : t],
+        period: ctx,
+      ),
+      GoalProgress.of(
+        goal,
+        linkedTasks: [for (final t in all) t.id == task.id ? next : t],
+        period: ctx,
+      ),
     );
   }
 }
