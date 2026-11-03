@@ -177,6 +177,21 @@ void main() {
       expect((await mirrored()).single.title, 'Sync (moved room)');
     });
 
+    test('keeps the provider htmlLink and backfills it later', () async {
+      provider.events.add(meeting('a', 4, 10));
+      await engine.pull();
+      expect((await mirrored()).single.htmlLink, isNull);
+      provider.events[0] = provider.events[0].copyWith(
+        htmlLink: 'https://www.google.com/calendar/event?eid=a',
+      );
+      final again = await engine.pull();
+      expect(again.upserted, hasLength(1));
+      expect(
+        (await mirrored()).single.htmlLink,
+        'https://www.google.com/calendar/event?eid=a',
+      );
+    });
+
     test('unchanged events are not rewritten', () async {
       provider.events.add(meeting('a', 4, 10));
       await engine.pull();

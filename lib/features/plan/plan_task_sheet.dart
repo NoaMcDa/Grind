@@ -161,12 +161,16 @@ final planUrlLauncherProvider = Provider<Future<bool> Function(Uri)>(
   },
 );
 
-/// Where "Open in calendar" goes: the provider's web calendar on the
-/// event's day in [location] (the device zone without one). `CalendarEvent`
-/// has no per-event link yet (use `CalendarEvent.htmlLink` first once it
-/// lands), and Apple Calendar has no web URL, so Apple and Grind-only
-/// events get none.
+/// Where "Open in calendar" goes: the event itself when the provider gave a
+/// link ([CalendarEvent.htmlLink], https only), else the provider's web
+/// calendar on the event's day in [location] (the device zone without one).
+/// Apple Calendar has no web URL, so Apple and Grind-only events without a
+/// link get none.
 Uri? calendarDayUrl(CalendarEvent e, [tz.Location? location]) {
+  final link = e.htmlLink == null ? null : Uri.tryParse(e.htmlLink!);
+  if (link != null && link.scheme == 'https' && link.host.isNotEmpty) {
+    return link;
+  }
   if (e.source != CalendarSource.google) return null;
   final d = location == null ? e.start.toLocal() : zoneWall(e.start, location);
   return Uri.parse(
