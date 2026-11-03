@@ -1,30 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grind/core/core.dart';
 
 import '../../theme/app_text.dart';
+import '../companion/mood.dart';
+import '../companion/pip_providers.dart';
 import '../../theme/tokens.dart';
-import '../../widgets/momentum_meter.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
 
 /// Cheering layer: Pip's mood, momentum, the week, wins and cosmetic unlocks.
-class PipScreen extends ConsumerStatefulWidget {
+class PipScreen extends ConsumerWidget {
   const PipScreen({super.key});
 
-  @override
-  ConsumerState<PipScreen> createState() => _PipScreenState();
-}
-
-class _PipScreenState extends ConsumerState<PipScreen> {
-  PipAccessory _equipped = PipAccessory.scarf;
-
-  static const _week = <double>[62, 48, 14, 72, 54, 36, 44];
-  static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final top = MediaQuery.paddingOf(context).top;
+    final score = ref.watch(effortScoreProvider);
+    final mood = ref.watch(pipMoodProvider);
+    final momentum = ref.watch(momentumProvider);
+    final worn = ref.watch(companionPrefsProvider).accessory;
+    final equipped = PipAccessory.values.firstWhere(
+      (a) => a.name == worn,
+      orElse: () => PipAccessory.none,
+    );
+    final now = ref.watch(clockProvider).now();
+    final tasks = ref.watch(tasksProvider).value ?? const <Task>[];
+    final wins =
+        tasks
+            .where((t) => t.status == TaskStatus.done && t.deletedAt == null)
+            .toList()
+          ..sort(
+            (a, b) => (b.completedAt ?? b.updatedAt).compareTo(
+              a.completedAt ?? a.updatedAt,
+            ),
+          );
+    final counts = score.dayCounts;
+    final maxCount = counts.fold<int>(1, (m, c) => c > m ? c : m);
+    final dayLabels = [
+      for (var i = 0; i < 7; i++)
+        _dayNames[now.subtract(Duration(days: 6 - i)).weekday - 1],
+    ];
+    void wear(PipAccessory a) =>
+        ref.read(companionPrefsProvider.notifier).wear(a.name);
+
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 14 + top, 20, 16),
       children: [
@@ -33,12 +55,15 @@ class _PipScreenState extends ConsumerState<PipScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Pip', style: AppText.display(height: 1.2)),
-            Text(
-              'Your cheering squad of one',
-              style: AppText.body(
-                size: 13,
-                weight: FontWeight.w500,
-                color: AppColors.muted,
+            Flexible(
+              child: Text(
+                'Your cheering squad of one',
+                textAlign: TextAlign.end,
+                style: AppText.body(
+                  size: 13,
+                  weight: FontWeight.w500,
+                  color: AppColors.muted,
+                ),
               ),
             ),
           ],
@@ -55,25 +80,27 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               ),
               Row(
                 children: [
-                  PipAvatar(size: 150, accessory: _equipped),
+                  PipAvatar(size: 150, accessory: equipped),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Pill(
-                          label: 'wearing: ${_equipped.name}',
+                          label: equipped == PipAccessory.none
+                              ? 'no accessory'
+                              : 'wearing: ${equipped.name}',
                           height: 22,
                           fontSize: 12,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Pip is glowing',
+                          MoodCopy.title(mood),
                           style: AppText.display(size: 24, height: 1.1),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          "You showed up 5 of the last 7 days. That's real momentum.",
+                          MoodCopy.line(mood, score.showedUpDays),
                           style: AppText.body(
                             size: 14,
                             weight: FontWeight.w500,
@@ -89,12 +116,12 @@ class _PipScreenState extends ConsumerState<PipScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SectionLabel('Momentum'),
+            const SectionLabel('Momentum'),
             Pill(
-              label: 'Strong',
+              label: MoodCopy.momentumLabel(momentum.level),
               color: AppColors.violet,
               textColor: Colors.white,
               height: 24,
@@ -104,12 +131,7 @@ class _PipScreenState extends ConsumerState<PipScreen> {
           ],
         ),
         const SizedBox(height: 6),
-        const MomentumMeter(
-          value: 0.72,
-          height: 24,
-          shadow: 3,
-          segments: [AppColors.violet, AppColors.pink],
-        ),
+        _TwoToneMeter(recent: momentum.recent, carry: momentum.carry),
         const SizedBox(height: 6),
         Text(
           "Momentum fades slowly, one quiet day won't reset it.",
@@ -124,7 +146,7 @@ class _PipScreenState extends ConsumerState<PipScreen> {
             children: [
               Semantics(
                 label:
-                    'Focus minutes per day this week. Wednesday was a rest day.',
+                    'Things finished per day this week. Days with none are rest days.',
                 child: SizedBox(
                   height: 84,
                   child: Row(
@@ -135,32 +157,30 @@ class _PipScreenState extends ConsumerState<PipScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              if (i == 2) ...[
+                              if (counts[i] == 0)
                                 Text(
                                   'rest day',
+                                  textAlign: TextAlign.center,
                                   style: AppText.body(
-                                    size: 11,
+                                    size: 10,
                                     weight: FontWeight.w500,
                                     color: AppColors.muted,
                                     height: 1,
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                              ],
-                              Container(
-                                width: 26,
-                                height: _week[i],
-                                decoration: BoxDecoration(
-                                  color: AppColors.mint,
-                                  borderRadius: BorderRadius.circular(
-                                    i == 2 ? 7 : 9,
-                                  ),
-                                  border: Border.all(
-                                    color: AppColors.ink,
-                                    width: AppStroke.border,
+                                )
+                              else
+                                Container(
+                                  width: 26,
+                                  height: 14 + 58 * counts[i] / maxCount,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.mint,
+                                    borderRadius: BorderRadius.circular(9),
+                                    border: Border.all(
+                                      color: AppColors.ink,
+                                      width: AppStroke.border,
+                                    ),
                                   ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -171,7 +191,7 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  for (final d in _days)
+                  for (final d in dayLabels)
                     Expanded(
                       child: Text(
                         d,
@@ -183,7 +203,7 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Focus minutes per day',
+                'Tasks and sessions finished per day',
                 style: AppText.body(size: 12, color: AppColors.muted),
               ),
             ],
@@ -192,18 +212,28 @@ class _PipScreenState extends ConsumerState<PipScreen> {
         const SizedBox(height: 12),
         const SectionLabel('Wins you logged'),
         const SizedBox(height: 6),
-        const IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _Win('Sent the thesis outline', AppColors.mint)),
-              SizedBox(width: 10),
-              Expanded(child: _Win('Finished DL lab 3', AppColors.sky)),
-              SizedBox(width: 10),
-              Expanded(child: _Win('Went to the gym twice', AppColors.pink)),
-            ],
+        if (wins.isEmpty)
+          Text(
+            'Your first win will land here.',
+            style: AppText.body(size: 13, color: AppColors.muted),
+          )
+        else
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < wins.length && i < 3; i++) ...[
+                  if (i > 0) const SizedBox(width: 10),
+                  Expanded(
+                    child: _Win(
+                      wins[i].title,
+                      const [AppColors.mint, AppColors.sky, AppColors.pink][i],
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 12),
         const SectionLabel('Unlocks'),
         const SizedBox(height: 6),
@@ -214,6 +244,8 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               child: _unlock(
                 'Scarf',
                 PipAccessory.scarf,
+                equipped,
+                wear,
                 const Icon(Icons.checkroom_outlined, color: AppColors.violet),
               ),
             ),
@@ -221,6 +253,8 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               child: _unlock(
                 'Sunglasses',
                 PipAccessory.sunglasses,
+                equipped,
+                wear,
                 const Icon(Icons.visibility_outlined, color: AppColors.ink),
               ),
             ),
@@ -263,13 +297,19 @@ class _PipScreenState extends ConsumerState<PipScreen> {
     );
   }
 
-  Widget _unlock(String label, PipAccessory a, Widget icon) {
-    final on = _equipped == a;
+  Widget _unlock(
+    String label,
+    PipAccessory a,
+    PipAccessory equipped,
+    void Function(PipAccessory) wear,
+    Widget icon,
+  ) {
+    final on = equipped == a;
     return _UnlockSlot(
       label: label,
       caption: on ? 'Wearing' : 'Tap to wear',
       captionColor: on ? AppColors.violet : AppColors.muted,
-      onTap: () => setState(() => _equipped = a),
+      onTap: () => wear(a),
       child: Container(
         width: 56,
         height: 56,
@@ -286,6 +326,48 @@ class _PipScreenState extends ConsumerState<PipScreen> {
               )
             : null,
         child: icon,
+      ),
+    );
+  }
+}
+
+/// Momentum meter with the real split: violet is recent effort, pink is
+/// decayed carry-over. An empty meter is just an empty track, never red.
+class _TwoToneMeter extends StatelessWidget {
+  const _TwoToneMeter({required this.recent, required this.carry});
+  final double recent, carry;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = recent.clamp(0.0, 1.0);
+    final c = carry.clamp(0.0, 1.0 - r);
+    final pct = ((r + c) * 100).round();
+    return Semantics(
+      label: 'Momentum',
+      value: '$pct%',
+      child: Container(
+        height: 24,
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          border: Border.all(color: AppColors.ink, width: AppStroke.border),
+          boxShadow: AppShadows.hard(3),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+          child: LayoutBuilder(
+            builder: (context, box) => Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: box.maxWidth * r, color: AppColors.violet),
+                  Container(width: box.maxWidth * c, color: AppColors.pink),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
