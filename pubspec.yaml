@@ -54,3 +54,11 @@ flutter:
           weight: 600
         - asset: assets/fonts/BricolageGrotesque-800.ttf
           weight: 800
+    - family: Heebo
+      fonts:
+        - asset: assets/fonts/Heebo-400.ttf
+          weight: 400
+        - asset: assets/fonts/Heebo-500.ttf
+          weight: 500
+        - asset: assets/fonts/Heebo-700.ttf
+          weight: 700

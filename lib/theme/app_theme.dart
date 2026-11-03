@@ -7,6 +7,7 @@ ThemeData buildAppTheme() {
   final base = ThemeData(
     useMaterial3: true,
     fontFamily: AppText.bodyFamily,
+    fontFamilyFallback: AppText.fallback,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.violet,
       primary: AppColors.violet,
@@ -18,6 +19,7 @@ ThemeData buildAppTheme() {
   );
   const display = TextStyle(
     fontFamily: AppText.displayFamily,
+    fontFamilyFallback: AppText.fallback,
     fontWeight: FontWeight.w800,
   );
   final text = base.textTheme.apply(

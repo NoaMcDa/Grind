@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
-/// Typography: Bricolage Grotesque for display, DM Sans for everything else.
-/// Both are bundled in assets/fonts (SIL Open Font License).
+/// Typography: Bricolage Grotesque for display, DM Sans for everything else,
+/// Heebo as the Hebrew fallback (neither Latin face has Hebrew glyphs).
+/// All three are bundled in assets/fonts (SIL Open Font License).
 abstract final class AppText {
   static const displayFamily = 'Bricolage Grotesque';
   static const bodyFamily = 'DM Sans';
+  static const hebrewFamily = 'Heebo';
+  static const fallback = [hebrewFamily];
 
   static TextStyle display({
     double size = 30,
@@ -16,6 +19,7 @@ abstract final class AppText {
     double letterSpacing = 0,
   }) => TextStyle(
     fontFamily: displayFamily,
+    fontFamilyFallback: fallback,
     fontSize: size,
     fontWeight: weight,
     color: color,
@@ -30,6 +34,7 @@ abstract final class AppText {
     double height = 1.4,
   }) => TextStyle(
     fontFamily: bodyFamily,
+    fontFamilyFallback: fallback,
     fontSize: size,
     fontWeight: weight,
     color: color,
@@ -46,6 +51,7 @@ abstract final class AppText {
   static TextStyle label({double size = 13, Color color = AppColors.muted}) =>
       TextStyle(
         fontFamily: bodyFamily,
+        fontFamilyFallback: fallback,
         fontSize: size,
         fontWeight: FontWeight.w700,
         color: color,
