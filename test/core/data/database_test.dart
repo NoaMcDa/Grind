@@ -10,13 +10,13 @@ void main() {
   setUp(() => db = openInMemoryDatabase());
   tearDown(() => db.close());
 
-  test('schema version is 1', () async {
+  test('schema version is 2', () async {
     // Changing the schema means bumping this and writing a migration step
     // (see AppDatabase.migration and docs/adr/0001-local-database.md).
-    expect(AppDatabase.currentSchemaVersion, 1);
-    expect(db.schemaVersion, 1);
+    expect(AppDatabase.currentSchemaVersion, 2);
+    expect(db.schemaVersion, 2);
     final v = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(v.read<int>('user_version'), 1);
+    expect(v.read<int>('user_version'), 2);
   });
 
   test('tables', () {

@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/core.dart';
 
-/// Settings that `Preferences` has no field for yet. The integrator should
-/// either add these fields to `Preferences` or back this with the database.
+/// Prompt times and selected calendars. Backed by [Preferences] through
+/// [PreferencesSettingsStore]; [InMemorySettingsStore] is for tests.
 abstract interface class SettingsStore {
   /// Selected calendar ids per provider; null when the user never chose.
   Future<Set<String>?> selectedCalendarIds(CalendarSource source);
@@ -46,6 +46,46 @@ class InMemorySettingsStore implements SettingsStore {
       _evening = minutes;
 }
 
+/// Reads and writes the matching [Preferences] fields.
+class PreferencesSettingsStore implements SettingsStore {
+  PreferencesSettingsStore(this._prefs);
+
+  final PreferencesRepository _prefs;
+
+  Future<void> _update(Preferences Function(Preferences) change) async =>
+      _prefs.save(change(await _prefs.get()));
+
+  @override
+  Future<Set<String>?> selectedCalendarIds(CalendarSource source) async {
+    final ids = (await _prefs.get()).selectedCalendarIds[source];
+    return ids == null ? null : Set.of(ids);
+  }
+
+  @override
+  Future<void> setSelectedCalendarIds(CalendarSource source, Set<String> ids) =>
+      _update(
+        (p) => p.copyWith(
+          selectedCalendarIds: {...p.selectedCalendarIds, source: ids.toList()},
+        ),
+      );
+
+  @override
+  Future<int?> morningPromptMinutes() async =>
+      (await _prefs.get()).morningPromptMinutes;
+
+  @override
+  Future<void> setMorningPromptMinutes(int? minutes) =>
+      _update((p) => p.copyWith(morningPromptMinutes: minutes));
+
+  @override
+  Future<int?> eveningPromptMinutes() async =>
+      (await _prefs.get()).eveningPromptMinutes;
+
+  @override
+  Future<void> setEveningPromptMinutes(int? minutes) =>
+      _update((p) => p.copyWith(eveningPromptMinutes: minutes));
+}
+
 final settingsStoreProvider = Provider<SettingsStore>(
-  (_) => InMemorySettingsStore(),
+  (ref) => PreferencesSettingsStore(ref.watch(preferencesRepositoryProvider)),
 );

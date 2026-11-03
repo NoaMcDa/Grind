@@ -134,6 +134,29 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _notBeforeMeta = const VerificationMeta(
+    'notBefore',
+  );
+  @override
+  late final GeneratedColumn<int> notBefore = GeneratedColumn<int>(
+    'not_before',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _minutesDoneMeta = const VerificationMeta(
+    'minutesDone',
+  );
+  @override
+  late final GeneratedColumn<int> minutesDone = GeneratedColumn<int>(
+    'minutes_done',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _estimatedMinutesMeta = const VerificationMeta(
     'estimatedMinutes',
   );
@@ -286,6 +309,8 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
     scheduledStart,
     scheduledEnd,
     lockedStart,
+    notBefore,
+    minutesDone,
     estimatedMinutes,
     energy,
     firstAction,
@@ -394,6 +419,21 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
         lockedStart.isAcceptableOrUnknown(
           data['locked_start']!,
           _lockedStartMeta,
+        ),
+      );
+    }
+    if (data.containsKey('not_before')) {
+      context.handle(
+        _notBeforeMeta,
+        notBefore.isAcceptableOrUnknown(data['not_before']!, _notBeforeMeta),
+      );
+    }
+    if (data.containsKey('minutes_done')) {
+      context.handle(
+        _minutesDoneMeta,
+        minutesDone.isAcceptableOrUnknown(
+          data['minutes_done']!,
+          _minutesDoneMeta,
         ),
       );
     }
@@ -535,6 +575,14 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}locked_start'],
       )!,
+      notBefore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}not_before'],
+      ),
+      minutesDone: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}minutes_done'],
+      )!,
       estimatedMinutes: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}estimated_minutes'],
@@ -614,6 +662,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
   final int? scheduledStart;
   final int? scheduledEnd;
   final bool lockedStart;
+  final int? notBefore;
+  final int minutesDone;
   final int estimatedMinutes;
   final Energy energy;
   final String? firstAction;
@@ -639,6 +689,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
     this.scheduledStart,
     this.scheduledEnd,
     required this.lockedStart,
+    this.notBefore,
+    required this.minutesDone,
     required this.estimatedMinutes,
     required this.energy,
     this.firstAction,
@@ -681,6 +733,10 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
       map['scheduled_end'] = Variable<int>(scheduledEnd);
     }
     map['locked_start'] = Variable<bool>(lockedStart);
+    if (!nullToAbsent || notBefore != null) {
+      map['not_before'] = Variable<int>(notBefore);
+    }
+    map['minutes_done'] = Variable<int>(minutesDone);
     map['estimated_minutes'] = Variable<int>(estimatedMinutes);
     {
       map['energy'] = Variable<String>(
@@ -742,6 +798,10 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
           ? const Value.absent()
           : Value(scheduledEnd),
       lockedStart: Value(lockedStart),
+      notBefore: notBefore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notBefore),
+      minutesDone: Value(minutesDone),
       estimatedMinutes: Value(estimatedMinutes),
       energy: Value(energy),
       firstAction: firstAction == null && nullToAbsent
@@ -785,6 +845,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
       scheduledStart: serializer.fromJson<int?>(json['scheduledStart']),
       scheduledEnd: serializer.fromJson<int?>(json['scheduledEnd']),
       lockedStart: serializer.fromJson<bool>(json['lockedStart']),
+      notBefore: serializer.fromJson<int?>(json['notBefore']),
+      minutesDone: serializer.fromJson<int>(json['minutesDone']),
       estimatedMinutes: serializer.fromJson<int>(json['estimatedMinutes']),
       energy: $TasksTable.$converterenergy.fromJson(
         serializer.fromJson<String>(json['energy']),
@@ -819,6 +881,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
       'scheduledStart': serializer.toJson<int?>(scheduledStart),
       'scheduledEnd': serializer.toJson<int?>(scheduledEnd),
       'lockedStart': serializer.toJson<bool>(lockedStart),
+      'notBefore': serializer.toJson<int?>(notBefore),
+      'minutesDone': serializer.toJson<int>(minutesDone),
       'estimatedMinutes': serializer.toJson<int>(estimatedMinutes),
       'energy': serializer.toJson<String>(
         $TasksTable.$converterenergy.toJson(energy),
@@ -851,6 +915,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
     Value<int?> scheduledStart = const Value.absent(),
     Value<int?> scheduledEnd = const Value.absent(),
     bool? lockedStart,
+    Value<int?> notBefore = const Value.absent(),
+    int? minutesDone,
     int? estimatedMinutes,
     Energy? energy,
     Value<String?> firstAction = const Value.absent(),
@@ -878,6 +944,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
         : this.scheduledStart,
     scheduledEnd: scheduledEnd.present ? scheduledEnd.value : this.scheduledEnd,
     lockedStart: lockedStart ?? this.lockedStart,
+    notBefore: notBefore.present ? notBefore.value : this.notBefore,
+    minutesDone: minutesDone ?? this.minutesDone,
     estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
     energy: energy ?? this.energy,
     firstAction: firstAction.present ? firstAction.value : this.firstAction,
@@ -915,6 +983,10 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
       lockedStart: data.lockedStart.present
           ? data.lockedStart.value
           : this.lockedStart,
+      notBefore: data.notBefore.present ? data.notBefore.value : this.notBefore,
+      minutesDone: data.minutesDone.present
+          ? data.minutesDone.value
+          : this.minutesDone,
       estimatedMinutes: data.estimatedMinutes.present
           ? data.estimatedMinutes.value
           : this.estimatedMinutes,
@@ -961,6 +1033,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
           ..write('scheduledStart: $scheduledStart, ')
           ..write('scheduledEnd: $scheduledEnd, ')
           ..write('lockedStart: $lockedStart, ')
+          ..write('notBefore: $notBefore, ')
+          ..write('minutesDone: $minutesDone, ')
           ..write('estimatedMinutes: $estimatedMinutes, ')
           ..write('energy: $energy, ')
           ..write('firstAction: $firstAction, ')
@@ -991,6 +1065,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
     scheduledStart,
     scheduledEnd,
     lockedStart,
+    notBefore,
+    minutesDone,
     estimatedMinutes,
     energy,
     firstAction,
@@ -1020,6 +1096,8 @@ class TaskRow extends DataClass implements Insertable<TaskRow> {
           other.scheduledStart == this.scheduledStart &&
           other.scheduledEnd == this.scheduledEnd &&
           other.lockedStart == this.lockedStart &&
+          other.notBefore == this.notBefore &&
+          other.minutesDone == this.minutesDone &&
           other.estimatedMinutes == this.estimatedMinutes &&
           other.energy == this.energy &&
           other.firstAction == this.firstAction &&
@@ -1047,6 +1125,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
   final Value<int?> scheduledStart;
   final Value<int?> scheduledEnd;
   final Value<bool> lockedStart;
+  final Value<int?> notBefore;
+  final Value<int> minutesDone;
   final Value<int> estimatedMinutes;
   final Value<Energy> energy;
   final Value<String?> firstAction;
@@ -1073,6 +1153,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
     this.scheduledStart = const Value.absent(),
     this.scheduledEnd = const Value.absent(),
     this.lockedStart = const Value.absent(),
+    this.notBefore = const Value.absent(),
+    this.minutesDone = const Value.absent(),
     this.estimatedMinutes = const Value.absent(),
     this.energy = const Value.absent(),
     this.firstAction = const Value.absent(),
@@ -1100,6 +1182,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
     this.scheduledStart = const Value.absent(),
     this.scheduledEnd = const Value.absent(),
     this.lockedStart = const Value.absent(),
+    this.notBefore = const Value.absent(),
+    this.minutesDone = const Value.absent(),
     this.estimatedMinutes = const Value.absent(),
     this.energy = const Value.absent(),
     this.firstAction = const Value.absent(),
@@ -1130,6 +1214,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
     Expression<int>? scheduledStart,
     Expression<int>? scheduledEnd,
     Expression<bool>? lockedStart,
+    Expression<int>? notBefore,
+    Expression<int>? minutesDone,
     Expression<int>? estimatedMinutes,
     Expression<String>? energy,
     Expression<String>? firstAction,
@@ -1157,6 +1243,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
       if (scheduledStart != null) 'scheduled_start': scheduledStart,
       if (scheduledEnd != null) 'scheduled_end': scheduledEnd,
       if (lockedStart != null) 'locked_start': lockedStart,
+      if (notBefore != null) 'not_before': notBefore,
+      if (minutesDone != null) 'minutes_done': minutesDone,
       if (estimatedMinutes != null) 'estimated_minutes': estimatedMinutes,
       if (energy != null) 'energy': energy,
       if (firstAction != null) 'first_action': firstAction,
@@ -1186,6 +1274,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
     Value<int?>? scheduledStart,
     Value<int?>? scheduledEnd,
     Value<bool>? lockedStart,
+    Value<int?>? notBefore,
+    Value<int>? minutesDone,
     Value<int>? estimatedMinutes,
     Value<Energy>? energy,
     Value<String?>? firstAction,
@@ -1213,6 +1303,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
       scheduledStart: scheduledStart ?? this.scheduledStart,
       scheduledEnd: scheduledEnd ?? this.scheduledEnd,
       lockedStart: lockedStart ?? this.lockedStart,
+      notBefore: notBefore ?? this.notBefore,
+      minutesDone: minutesDone ?? this.minutesDone,
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
       energy: energy ?? this.energy,
       firstAction: firstAction ?? this.firstAction,
@@ -1267,6 +1359,12 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
     }
     if (lockedStart.present) {
       map['locked_start'] = Variable<bool>(lockedStart.value);
+    }
+    if (notBefore.present) {
+      map['not_before'] = Variable<int>(notBefore.value);
+    }
+    if (minutesDone.present) {
+      map['minutes_done'] = Variable<int>(minutesDone.value);
     }
     if (estimatedMinutes.present) {
       map['estimated_minutes'] = Variable<int>(estimatedMinutes.value);
@@ -1329,6 +1427,8 @@ class TasksCompanion extends UpdateCompanion<TaskRow> {
           ..write('scheduledStart: $scheduledStart, ')
           ..write('scheduledEnd: $scheduledEnd, ')
           ..write('lockedStart: $lockedStart, ')
+          ..write('notBefore: $notBefore, ')
+          ..write('minutesDone: $minutesDone, ')
           ..write('estimatedMinutes: $estimatedMinutes, ')
           ..write('energy: $energy, ')
           ..write('firstAction: $firstAction, ')
@@ -3996,6 +4096,53 @@ class $PreferencesTableTable extends PreferencesTable
       'CHECK ("onboarding_done" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _morningPromptMinutesMeta =
+      const VerificationMeta('morningPromptMinutes');
+  @override
+  late final GeneratedColumn<int> morningPromptMinutes = GeneratedColumn<int>(
+    'morning_prompt_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _eveningPromptMinutesMeta =
+      const VerificationMeta('eveningPromptMinutes');
+  @override
+  late final GeneratedColumn<int> eveningPromptMinutes = GeneratedColumn<int>(
+    'evening_prompt_minutes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _selectedCalendarIdsMeta =
+      const VerificationMeta('selectedCalendarIds');
+  @override
+  late final GeneratedColumn<String> selectedCalendarIds =
+      GeneratedColumn<String>(
+        'selected_calendar_ids',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('{}'),
+      );
+  static const VerificationMeta _backupHintShownMeta = const VerificationMeta(
+    'backupHintShown',
+  );
+  @override
+  late final GeneratedColumn<bool> backupHintShown = GeneratedColumn<bool>(
+    'backup_hint_shown',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("backup_hint_shown" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4015,6 +4162,10 @@ class $PreferencesTableTable extends PreferencesTable
     timeZoneName,
     localeCode,
     onboardingDone,
+    morningPromptMinutes,
+    eveningPromptMinutes,
+    selectedCalendarIds,
+    backupHintShown,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4184,6 +4335,42 @@ class $PreferencesTableTable extends PreferencesTable
     } else if (isInserting) {
       context.missing(_onboardingDoneMeta);
     }
+    if (data.containsKey('morning_prompt_minutes')) {
+      context.handle(
+        _morningPromptMinutesMeta,
+        morningPromptMinutes.isAcceptableOrUnknown(
+          data['morning_prompt_minutes']!,
+          _morningPromptMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('evening_prompt_minutes')) {
+      context.handle(
+        _eveningPromptMinutesMeta,
+        eveningPromptMinutes.isAcceptableOrUnknown(
+          data['evening_prompt_minutes']!,
+          _eveningPromptMinutesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('selected_calendar_ids')) {
+      context.handle(
+        _selectedCalendarIdsMeta,
+        selectedCalendarIds.isAcceptableOrUnknown(
+          data['selected_calendar_ids']!,
+          _selectedCalendarIdsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('backup_hint_shown')) {
+      context.handle(
+        _backupHintShownMeta,
+        backupHintShown.isAcceptableOrUnknown(
+          data['backup_hint_shown']!,
+          _backupHintShownMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4261,6 +4448,22 @@ class $PreferencesTableTable extends PreferencesTable
         DriftSqlType.bool,
         data['${effectivePrefix}onboarding_done'],
       )!,
+      morningPromptMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}morning_prompt_minutes'],
+      ),
+      eveningPromptMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}evening_prompt_minutes'],
+      ),
+      selectedCalendarIds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}selected_calendar_ids'],
+      )!,
+      backupHintShown: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}backup_hint_shown'],
+      )!,
     );
   }
 
@@ -4294,6 +4497,12 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
   final String timeZoneName;
   final String localeCode;
   final bool onboardingDone;
+  final int? morningPromptMinutes;
+  final int? eveningPromptMinutes;
+
+  /// JSON: `{"google": ["id", ...], "apple": [...]}`.
+  final String selectedCalendarIds;
+  final bool backupHintShown;
   const PreferencesRow({
     required this.id,
     required this.createdAt,
@@ -4312,6 +4521,10 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     required this.timeZoneName,
     required this.localeCode,
     required this.onboardingDone,
+    this.morningPromptMinutes,
+    this.eveningPromptMinutes,
+    required this.selectedCalendarIds,
+    required this.backupHintShown,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4341,6 +4554,14 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     map['time_zone_name'] = Variable<String>(timeZoneName);
     map['locale_code'] = Variable<String>(localeCode);
     map['onboarding_done'] = Variable<bool>(onboardingDone);
+    if (!nullToAbsent || morningPromptMinutes != null) {
+      map['morning_prompt_minutes'] = Variable<int>(morningPromptMinutes);
+    }
+    if (!nullToAbsent || eveningPromptMinutes != null) {
+      map['evening_prompt_minutes'] = Variable<int>(eveningPromptMinutes);
+    }
+    map['selected_calendar_ids'] = Variable<String>(selectedCalendarIds);
+    map['backup_hint_shown'] = Variable<bool>(backupHintShown);
     return map;
   }
 
@@ -4367,6 +4588,14 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       timeZoneName: Value(timeZoneName),
       localeCode: Value(localeCode),
       onboardingDone: Value(onboardingDone),
+      morningPromptMinutes: morningPromptMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(morningPromptMinutes),
+      eveningPromptMinutes: eveningPromptMinutes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eveningPromptMinutes),
+      selectedCalendarIds: Value(selectedCalendarIds),
+      backupHintShown: Value(backupHintShown),
     );
   }
 
@@ -4401,6 +4630,16 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       timeZoneName: serializer.fromJson<String>(json['timeZoneName']),
       localeCode: serializer.fromJson<String>(json['localeCode']),
       onboardingDone: serializer.fromJson<bool>(json['onboardingDone']),
+      morningPromptMinutes: serializer.fromJson<int?>(
+        json['morningPromptMinutes'],
+      ),
+      eveningPromptMinutes: serializer.fromJson<int?>(
+        json['eveningPromptMinutes'],
+      ),
+      selectedCalendarIds: serializer.fromJson<String>(
+        json['selectedCalendarIds'],
+      ),
+      backupHintShown: serializer.fromJson<bool>(json['backupHintShown']),
     );
   }
   @override
@@ -4428,6 +4667,10 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       'timeZoneName': serializer.toJson<String>(timeZoneName),
       'localeCode': serializer.toJson<String>(localeCode),
       'onboardingDone': serializer.toJson<bool>(onboardingDone),
+      'morningPromptMinutes': serializer.toJson<int?>(morningPromptMinutes),
+      'eveningPromptMinutes': serializer.toJson<int?>(eveningPromptMinutes),
+      'selectedCalendarIds': serializer.toJson<String>(selectedCalendarIds),
+      'backupHintShown': serializer.toJson<bool>(backupHintShown),
     };
   }
 
@@ -4449,6 +4692,10 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     String? timeZoneName,
     String? localeCode,
     bool? onboardingDone,
+    Value<int?> morningPromptMinutes = const Value.absent(),
+    Value<int?> eveningPromptMinutes = const Value.absent(),
+    String? selectedCalendarIds,
+    bool? backupHintShown,
   }) => PreferencesRow(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -4469,6 +4716,14 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     timeZoneName: timeZoneName ?? this.timeZoneName,
     localeCode: localeCode ?? this.localeCode,
     onboardingDone: onboardingDone ?? this.onboardingDone,
+    morningPromptMinutes: morningPromptMinutes.present
+        ? morningPromptMinutes.value
+        : this.morningPromptMinutes,
+    eveningPromptMinutes: eveningPromptMinutes.present
+        ? eveningPromptMinutes.value
+        : this.eveningPromptMinutes,
+    selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
+    backupHintShown: backupHintShown ?? this.backupHintShown,
   );
   PreferencesRow copyWithCompanion(PreferencesTableCompanion data) {
     return PreferencesRow(
@@ -4511,6 +4766,18 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
       onboardingDone: data.onboardingDone.present
           ? data.onboardingDone.value
           : this.onboardingDone,
+      morningPromptMinutes: data.morningPromptMinutes.present
+          ? data.morningPromptMinutes.value
+          : this.morningPromptMinutes,
+      eveningPromptMinutes: data.eveningPromptMinutes.present
+          ? data.eveningPromptMinutes.value
+          : this.eveningPromptMinutes,
+      selectedCalendarIds: data.selectedCalendarIds.present
+          ? data.selectedCalendarIds.value
+          : this.selectedCalendarIds,
+      backupHintShown: data.backupHintShown.present
+          ? data.backupHintShown.value
+          : this.backupHintShown,
     );
   }
 
@@ -4533,13 +4800,17 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
           ..write('quietHours: $quietHours, ')
           ..write('timeZoneName: $timeZoneName, ')
           ..write('localeCode: $localeCode, ')
-          ..write('onboardingDone: $onboardingDone')
+          ..write('onboardingDone: $onboardingDone, ')
+          ..write('morningPromptMinutes: $morningPromptMinutes, ')
+          ..write('eveningPromptMinutes: $eveningPromptMinutes, ')
+          ..write('selectedCalendarIds: $selectedCalendarIds, ')
+          ..write('backupHintShown: $backupHintShown')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     createdAt,
     updatedAt,
@@ -4557,7 +4828,11 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
     timeZoneName,
     localeCode,
     onboardingDone,
-  );
+    morningPromptMinutes,
+    eveningPromptMinutes,
+    selectedCalendarIds,
+    backupHintShown,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4578,7 +4853,11 @@ class PreferencesRow extends DataClass implements Insertable<PreferencesRow> {
           other.quietHours == this.quietHours &&
           other.timeZoneName == this.timeZoneName &&
           other.localeCode == this.localeCode &&
-          other.onboardingDone == this.onboardingDone);
+          other.onboardingDone == this.onboardingDone &&
+          other.morningPromptMinutes == this.morningPromptMinutes &&
+          other.eveningPromptMinutes == this.eveningPromptMinutes &&
+          other.selectedCalendarIds == this.selectedCalendarIds &&
+          other.backupHintShown == this.backupHintShown);
 }
 
 class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
@@ -4599,6 +4878,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
   final Value<String> timeZoneName;
   final Value<String> localeCode;
   final Value<bool> onboardingDone;
+  final Value<int?> morningPromptMinutes;
+  final Value<int?> eveningPromptMinutes;
+  final Value<String> selectedCalendarIds;
+  final Value<bool> backupHintShown;
   final Value<int> rowid;
   const PreferencesTableCompanion({
     this.id = const Value.absent(),
@@ -4618,6 +4901,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     this.timeZoneName = const Value.absent(),
     this.localeCode = const Value.absent(),
     this.onboardingDone = const Value.absent(),
+    this.morningPromptMinutes = const Value.absent(),
+    this.eveningPromptMinutes = const Value.absent(),
+    this.selectedCalendarIds = const Value.absent(),
+    this.backupHintShown = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PreferencesTableCompanion.insert({
@@ -4638,6 +4925,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     required String timeZoneName,
     required String localeCode,
     required bool onboardingDone,
+    this.morningPromptMinutes = const Value.absent(),
+    this.eveningPromptMinutes = const Value.absent(),
+    this.selectedCalendarIds = const Value.absent(),
+    this.backupHintShown = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -4672,6 +4963,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     Expression<String>? timeZoneName,
     Expression<String>? localeCode,
     Expression<bool>? onboardingDone,
+    Expression<int>? morningPromptMinutes,
+    Expression<int>? eveningPromptMinutes,
+    Expression<String>? selectedCalendarIds,
+    Expression<bool>? backupHintShown,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4696,6 +4991,13 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
       if (timeZoneName != null) 'time_zone_name': timeZoneName,
       if (localeCode != null) 'locale_code': localeCode,
       if (onboardingDone != null) 'onboarding_done': onboardingDone,
+      if (morningPromptMinutes != null)
+        'morning_prompt_minutes': morningPromptMinutes,
+      if (eveningPromptMinutes != null)
+        'evening_prompt_minutes': eveningPromptMinutes,
+      if (selectedCalendarIds != null)
+        'selected_calendar_ids': selectedCalendarIds,
+      if (backupHintShown != null) 'backup_hint_shown': backupHintShown,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4718,6 +5020,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     Value<String>? timeZoneName,
     Value<String>? localeCode,
     Value<bool>? onboardingDone,
+    Value<int?>? morningPromptMinutes,
+    Value<int?>? eveningPromptMinutes,
+    Value<String>? selectedCalendarIds,
+    Value<bool>? backupHintShown,
     Value<int>? rowid,
   }) {
     return PreferencesTableCompanion(
@@ -4740,6 +5046,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
       timeZoneName: timeZoneName ?? this.timeZoneName,
       localeCode: localeCode ?? this.localeCode,
       onboardingDone: onboardingDone ?? this.onboardingDone,
+      morningPromptMinutes: morningPromptMinutes ?? this.morningPromptMinutes,
+      eveningPromptMinutes: eveningPromptMinutes ?? this.eveningPromptMinutes,
+      selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
+      backupHintShown: backupHintShown ?? this.backupHintShown,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4802,6 +5112,20 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
     if (onboardingDone.present) {
       map['onboarding_done'] = Variable<bool>(onboardingDone.value);
     }
+    if (morningPromptMinutes.present) {
+      map['morning_prompt_minutes'] = Variable<int>(morningPromptMinutes.value);
+    }
+    if (eveningPromptMinutes.present) {
+      map['evening_prompt_minutes'] = Variable<int>(eveningPromptMinutes.value);
+    }
+    if (selectedCalendarIds.present) {
+      map['selected_calendar_ids'] = Variable<String>(
+        selectedCalendarIds.value,
+      );
+    }
+    if (backupHintShown.present) {
+      map['backup_hint_shown'] = Variable<bool>(backupHintShown.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4828,6 +5152,10 @@ class PreferencesTableCompanion extends UpdateCompanion<PreferencesRow> {
           ..write('timeZoneName: $timeZoneName, ')
           ..write('localeCode: $localeCode, ')
           ..write('onboardingDone: $onboardingDone, ')
+          ..write('morningPromptMinutes: $morningPromptMinutes, ')
+          ..write('eveningPromptMinutes: $eveningPromptMinutes, ')
+          ..write('selectedCalendarIds: $selectedCalendarIds, ')
+          ..write('backupHintShown: $backupHintShown, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4915,6 +5243,8 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<int?> scheduledStart,
       Value<int?> scheduledEnd,
       Value<bool> lockedStart,
+      Value<int?> notBefore,
+      Value<int> minutesDone,
       Value<int> estimatedMinutes,
       Value<Energy> energy,
       Value<String?> firstAction,
@@ -4943,6 +5273,8 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<int?> scheduledStart,
       Value<int?> scheduledEnd,
       Value<bool> lockedStart,
+      Value<int?> notBefore,
+      Value<int> minutesDone,
       Value<int> estimatedMinutes,
       Value<Energy> energy,
       Value<String?> firstAction,
@@ -5064,6 +5396,16 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<bool> get lockedStart => $composableBuilder(
     column: $table.lockedStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get notBefore => $composableBuilder(
+    column: $table.notBefore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutesDone => $composableBuilder(
+    column: $table.minutesDone,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5249,6 +5591,16 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get notBefore => $composableBuilder(
+    column: $table.notBefore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutesDone => $composableBuilder(
+    column: $table.minutesDone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get estimatedMinutes => $composableBuilder(
     column: $table.estimatedMinutes,
     builder: (column) => ColumnOrderings(column),
@@ -5358,6 +5710,14 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<bool> get lockedStart => $composableBuilder(
     column: $table.lockedStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get notBefore =>
+      $composableBuilder(column: $table.notBefore, builder: (column) => column);
+
+  GeneratedColumn<int> get minutesDone => $composableBuilder(
+    column: $table.minutesDone,
     builder: (column) => column,
   );
 
@@ -5507,6 +5867,8 @@ class $$TasksTableTableManager
                 Value<int?> scheduledStart = const Value.absent(),
                 Value<int?> scheduledEnd = const Value.absent(),
                 Value<bool> lockedStart = const Value.absent(),
+                Value<int?> notBefore = const Value.absent(),
+                Value<int> minutesDone = const Value.absent(),
                 Value<int> estimatedMinutes = const Value.absent(),
                 Value<Energy> energy = const Value.absent(),
                 Value<String?> firstAction = const Value.absent(),
@@ -5533,6 +5895,8 @@ class $$TasksTableTableManager
                 scheduledStart: scheduledStart,
                 scheduledEnd: scheduledEnd,
                 lockedStart: lockedStart,
+                notBefore: notBefore,
+                minutesDone: minutesDone,
                 estimatedMinutes: estimatedMinutes,
                 energy: energy,
                 firstAction: firstAction,
@@ -5561,6 +5925,8 @@ class $$TasksTableTableManager
                 Value<int?> scheduledStart = const Value.absent(),
                 Value<int?> scheduledEnd = const Value.absent(),
                 Value<bool> lockedStart = const Value.absent(),
+                Value<int?> notBefore = const Value.absent(),
+                Value<int> minutesDone = const Value.absent(),
                 Value<int> estimatedMinutes = const Value.absent(),
                 Value<Energy> energy = const Value.absent(),
                 Value<String?> firstAction = const Value.absent(),
@@ -5587,6 +5953,8 @@ class $$TasksTableTableManager
                 scheduledStart: scheduledStart,
                 scheduledEnd: scheduledEnd,
                 lockedStart: lockedStart,
+                notBefore: notBefore,
+                minutesDone: minutesDone,
                 estimatedMinutes: estimatedMinutes,
                 energy: energy,
                 firstAction: firstAction,
@@ -7140,6 +7508,10 @@ typedef $$PreferencesTableTableCreateCompanionBuilder =
       required String timeZoneName,
       required String localeCode,
       required bool onboardingDone,
+      Value<int?> morningPromptMinutes,
+      Value<int?> eveningPromptMinutes,
+      Value<String> selectedCalendarIds,
+      Value<bool> backupHintShown,
       Value<int> rowid,
     });
 typedef $$PreferencesTableTableUpdateCompanionBuilder =
@@ -7161,6 +7533,10 @@ typedef $$PreferencesTableTableUpdateCompanionBuilder =
       Value<String> timeZoneName,
       Value<String> localeCode,
       Value<bool> onboardingDone,
+      Value<int?> morningPromptMinutes,
+      Value<int?> eveningPromptMinutes,
+      Value<String> selectedCalendarIds,
+      Value<bool> backupHintShown,
       Value<int> rowid,
     });
 
@@ -7255,6 +7631,26 @@ class $$PreferencesTableTableFilterComposer
 
   ColumnFilters<bool> get onboardingDone => $composableBuilder(
     column: $table.onboardingDone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get morningPromptMinutes => $composableBuilder(
+    column: $table.morningPromptMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get eveningPromptMinutes => $composableBuilder(
+    column: $table.eveningPromptMinutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get selectedCalendarIds => $composableBuilder(
+    column: $table.selectedCalendarIds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get backupHintShown => $composableBuilder(
+    column: $table.backupHintShown,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7352,6 +7748,26 @@ class $$PreferencesTableTableOrderingComposer
     column: $table.onboardingDone,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get morningPromptMinutes => $composableBuilder(
+    column: $table.morningPromptMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get eveningPromptMinutes => $composableBuilder(
+    column: $table.eveningPromptMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get selectedCalendarIds => $composableBuilder(
+    column: $table.selectedCalendarIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get backupHintShown => $composableBuilder(
+    column: $table.backupHintShown,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PreferencesTableTableAnnotationComposer
@@ -7435,6 +7851,26 @@ class $$PreferencesTableTableAnnotationComposer
     column: $table.onboardingDone,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get morningPromptMinutes => $composableBuilder(
+    column: $table.morningPromptMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get eveningPromptMinutes => $composableBuilder(
+    column: $table.eveningPromptMinutes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get selectedCalendarIds => $composableBuilder(
+    column: $table.selectedCalendarIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get backupHintShown => $composableBuilder(
+    column: $table.backupHintShown,
+    builder: (column) => column,
+  );
 }
 
 class $$PreferencesTableTableTableManager
@@ -7491,6 +7927,10 @@ class $$PreferencesTableTableTableManager
                 Value<String> timeZoneName = const Value.absent(),
                 Value<String> localeCode = const Value.absent(),
                 Value<bool> onboardingDone = const Value.absent(),
+                Value<int?> morningPromptMinutes = const Value.absent(),
+                Value<int?> eveningPromptMinutes = const Value.absent(),
+                Value<String> selectedCalendarIds = const Value.absent(),
+                Value<bool> backupHintShown = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PreferencesTableCompanion(
                 id: id,
@@ -7510,6 +7950,10 @@ class $$PreferencesTableTableTableManager
                 timeZoneName: timeZoneName,
                 localeCode: localeCode,
                 onboardingDone: onboardingDone,
+                morningPromptMinutes: morningPromptMinutes,
+                eveningPromptMinutes: eveningPromptMinutes,
+                selectedCalendarIds: selectedCalendarIds,
+                backupHintShown: backupHintShown,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7531,6 +7975,10 @@ class $$PreferencesTableTableTableManager
                 required String timeZoneName,
                 required String localeCode,
                 required bool onboardingDone,
+                Value<int?> morningPromptMinutes = const Value.absent(),
+                Value<int?> eveningPromptMinutes = const Value.absent(),
+                Value<String> selectedCalendarIds = const Value.absent(),
+                Value<bool> backupHintShown = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PreferencesTableCompanion.insert(
                 id: id,
@@ -7550,6 +7998,10 @@ class $$PreferencesTableTableTableManager
                 timeZoneName: timeZoneName,
                 localeCode: localeCode,
                 onboardingDone: onboardingDone,
+                morningPromptMinutes: morningPromptMinutes,
+                eveningPromptMinutes: eveningPromptMinutes,
+                selectedCalendarIds: selectedCalendarIds,
+                backupHintShown: backupHintShown,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

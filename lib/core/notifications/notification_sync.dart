@@ -106,7 +106,7 @@ class NotificationSync {
       clock: _clock,
       horizonDays: horizonDays,
       cap: cap,
-      prompts: prompts,
+      prompts: prompts.withPreferences(prefs),
       extra: await extra?.call(tasks, prefs) ?? const [],
     );
     final signature = plan

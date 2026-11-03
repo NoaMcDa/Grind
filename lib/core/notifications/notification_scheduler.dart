@@ -30,6 +30,19 @@ class PromptSettings {
   final String morningBody;
   final String eveningTitle;
   final String eveningBody;
+
+  /// Times and on/off from [Preferences] (null minutes = prompt off),
+  /// keeping this instance's copy.
+  PromptSettings withPreferences(Preferences prefs) => PromptSettings(
+    morningEnabled: prefs.morningPromptMinutes != null,
+    morningMinutes: prefs.morningPromptMinutes ?? morningMinutes,
+    eveningEnabled: prefs.eveningPromptMinutes != null,
+    eveningMinutes: prefs.eveningPromptMinutes ?? eveningMinutes,
+    morningTitle: morningTitle,
+    morningBody: morningBody,
+    eveningTitle: eveningTitle,
+    eveningBody: eveningBody,
+  );
 }
 
 /// Pure planning of the pending notification set. No plugin, no I/O: given

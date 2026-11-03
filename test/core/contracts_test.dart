@@ -60,6 +60,24 @@ void main() {
     expect(p.deepWindows.single.durationMinutes, 180);
   });
 
+  test('contracts v2 fields round-trip through copyWith', () {
+    final t = task('a').copyWith(notBefore: now, minutesDone: 20);
+    expect(t.notBefore, now);
+    expect(t.minutesDone, 20);
+    expect(t.copyWith(notBefore: null).notBefore, isNull);
+    const p = Preferences();
+    expect(p.morningPromptMinutes, 8 * 60);
+    final off = p.copyWith(morningPromptMinutes: null);
+    expect(off.morningPromptMinutes, isNull);
+    final sel = p.copyWith(
+      selectedCalendarIds: {
+        CalendarSource.google: ['a', 'b'],
+      },
+    );
+    expect(sel.selectedCalendarIds[CalendarSource.google], ['a', 'b']);
+    expect(p.backupHintShown, isFalse);
+  });
+
   test('FixedClock advances', () {
     final c = FixedClock(now);
     c.advance(const Duration(hours: 1));

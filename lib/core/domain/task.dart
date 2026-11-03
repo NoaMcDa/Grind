@@ -17,6 +17,8 @@ class Task {
     this.scheduledStart,
     this.scheduledEnd,
     this.lockedStart = false,
+    this.notBefore,
+    this.minutesDone = 0,
     this.estimatedMinutes = 30,
     this.energy = Energy.light,
     this.firstAction,
@@ -51,6 +53,12 @@ class Task {
 
   /// True when the user placed it by hand; the scheduler never moves it.
   final bool lockedStart;
+
+  /// Earliest allowed start for the scheduler (null = now).
+  final DateTime? notBefore;
+
+  /// Minutes already spent, so the scheduler plans only the remainder.
+  final int minutesDone;
 
   final int estimatedMinutes;
   final Energy energy;
@@ -90,6 +98,8 @@ class Task {
     Object? scheduledStart = _unset,
     Object? scheduledEnd = _unset,
     bool? lockedStart,
+    Object? notBefore = _unset,
+    int? minutesDone,
     int? estimatedMinutes,
     Energy? energy,
     Object? firstAction = _unset,
@@ -118,6 +128,8 @@ class Task {
         ? this.scheduledEnd
         : scheduledEnd as DateTime?,
     lockedStart: lockedStart ?? this.lockedStart,
+    notBefore: notBefore == _unset ? this.notBefore : notBefore as DateTime?,
+    minutesDone: minutesDone ?? this.minutesDone,
     estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
     energy: energy ?? this.energy,
     firstAction: firstAction == _unset

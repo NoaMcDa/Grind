@@ -30,6 +30,8 @@ class Tasks extends Table with _Row {
   IntColumn get scheduledStart => integer().nullable()();
   IntColumn get scheduledEnd => integer().nullable()();
   BoolColumn get lockedStart => boolean().withDefault(const Constant(false))();
+  IntColumn get notBefore => integer().nullable()();
+  IntColumn get minutesDone => integer().withDefault(const Constant(0))();
   IntColumn get estimatedMinutes => integer().withDefault(const Constant(30))();
   TextColumn get energy =>
       textEnum<Energy>().withDefault(Constant(Energy.light.name))();
@@ -119,6 +121,14 @@ class PreferencesTable extends Table with _Row {
   TextColumn get timeZoneName => text()();
   TextColumn get localeCode => text()();
   BoolColumn get onboardingDone => boolean()();
+  IntColumn get morningPromptMinutes => integer().nullable()();
+  IntColumn get eveningPromptMinutes => integer().nullable()();
+
+  /// JSON: `{"google": ["id", ...], "apple": [...]}`.
+  TextColumn get selectedCalendarIds =>
+      text().withDefault(const Constant('{}'))();
+  BoolColumn get backupHintShown =>
+      boolean().withDefault(const Constant(false))();
 }
 
 abstract final class PreferencesRows {
@@ -143,7 +153,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// Bump on every schema change and add a step in [migration].
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 2;
 
   @override
   int get schemaVersion => currentSchemaVersion;
@@ -152,8 +162,24 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     onUpgrade: (m, from, to) async {
-      // Future versions: add `if (from < 2) { ... }` steps here, in order,
-      // and cover each with a migration test (drift_dev schema dump).
+      // One `if (from < N)` block per version, in order.
+      if (from < 2) {
+        await m.addColumn(tasks, tasks.notBefore);
+        await m.addColumn(tasks, tasks.minutesDone);
+        await m.addColumn(
+          preferencesTable,
+          preferencesTable.morningPromptMinutes,
+        );
+        await m.addColumn(
+          preferencesTable,
+          preferencesTable.eveningPromptMinutes,
+        );
+        await m.addColumn(
+          preferencesTable,
+          preferencesTable.selectedCalendarIds,
+        );
+        await m.addColumn(preferencesTable, preferencesTable.backupHintShown);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

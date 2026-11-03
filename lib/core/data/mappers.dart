@@ -47,6 +47,8 @@ extension TaskRowMapper on TaskRow {
     scheduledStart: fromMillisOrNull(scheduledStart),
     scheduledEnd: fromMillisOrNull(scheduledEnd),
     lockedStart: lockedStart,
+    notBefore: fromMillisOrNull(notBefore),
+    minutesDone: minutesDone,
     estimatedMinutes: estimatedMinutes,
     energy: energy,
     firstAction: firstAction,
@@ -76,6 +78,8 @@ extension TaskMapper on Task {
     scheduledStart: Value(toMillisOrNull(scheduledStart)),
     scheduledEnd: Value(toMillisOrNull(scheduledEnd)),
     lockedStart: Value(lockedStart),
+    notBefore: Value(toMillisOrNull(notBefore)),
+    minutesDone: Value(minutesDone),
     estimatedMinutes: Value(estimatedMinutes),
     energy: Value(energy),
     firstAction: Value(firstAction),
@@ -103,6 +107,8 @@ extension TaskMapper on Task {
     'scheduledStart': _isoOrNull(scheduledStart),
     'scheduledEnd': _isoOrNull(scheduledEnd),
     'lockedStart': lockedStart,
+    'notBefore': notBefore?.toUtc().toIso8601String(),
+    'minutesDone': minutesDone,
     'estimatedMinutes': estimatedMinutes,
     'energy': energy.name,
     'firstAction': firstAction,
@@ -131,6 +137,10 @@ Task taskFromJson(Map<String, Object?> j) => Task(
   scheduledStart: _parseOrNull(j['scheduledStart']),
   scheduledEnd: _parseOrNull(j['scheduledEnd']),
   lockedStart: j['lockedStart'] as bool? ?? false,
+  notBefore: j['notBefore'] == null
+      ? null
+      : DateTime.parse(j['notBefore'] as String),
+  minutesDone: j['minutesDone'] as int? ?? 0,
   estimatedMinutes: j['estimatedMinutes'] as int? ?? 30,
   energy: _enum(Energy.values, j['energy'] ?? Energy.light.name),
   firstAction: j['firstAction'] as String?,
@@ -415,6 +425,10 @@ extension PreferencesRowMapper on PreferencesRow {
     timeZoneName: timeZoneName,
     localeCode: localeCode,
     onboardingDone: onboardingDone,
+    morningPromptMinutes: morningPromptMinutes,
+    eveningPromptMinutes: eveningPromptMinutes,
+    selectedCalendarIds: _calendarIdsFromJson(jsonDecode(selectedCalendarIds)),
+    backupHintShown: backupHintShown,
   );
 }
 
@@ -439,6 +453,12 @@ extension PreferencesMapper on Preferences {
     timeZoneName: timeZoneName,
     localeCode: localeCode,
     onboardingDone: onboardingDone,
+    morningPromptMinutes: Value(morningPromptMinutes),
+    eveningPromptMinutes: Value(eveningPromptMinutes),
+    selectedCalendarIds: Value(
+      jsonEncode(_calendarIdsToJson(selectedCalendarIds)),
+    ),
+    backupHintShown: Value(backupHintShown),
     createdAt: toMillis(createdAt),
     updatedAt: toMillis(updatedAt),
   );
@@ -457,6 +477,10 @@ extension PreferencesMapper on Preferences {
     'timeZoneName': timeZoneName,
     'localeCode': localeCode,
     'onboardingDone': onboardingDone,
+    'morningPromptMinutes': morningPromptMinutes,
+    'eveningPromptMinutes': eveningPromptMinutes,
+    'selectedCalendarIds': _calendarIdsToJson(selectedCalendarIds),
+    'backupHintShown': backupHintShown,
   };
 }
 
@@ -488,5 +512,26 @@ Preferences preferencesFromJson(Map<String, Object?> j) {
     timeZoneName: j['timeZoneName'] as String? ?? d.timeZoneName,
     localeCode: j['localeCode'] as String? ?? d.localeCode,
     onboardingDone: j['onboardingDone'] as bool? ?? d.onboardingDone,
+    morningPromptMinutes: j.containsKey('morningPromptMinutes')
+        ? j['morningPromptMinutes'] as int?
+        : d.morningPromptMinutes,
+    eveningPromptMinutes: j.containsKey('eveningPromptMinutes')
+        ? j['eveningPromptMinutes'] as int?
+        : d.eveningPromptMinutes,
+    selectedCalendarIds: j.containsKey('selectedCalendarIds')
+        ? _calendarIdsFromJson(j['selectedCalendarIds'])
+        : d.selectedCalendarIds,
+    backupHintShown: j['backupHintShown'] as bool? ?? d.backupHintShown,
   );
 }
+
+Map<String, Object?> _calendarIdsToJson(
+  Map<CalendarSource, List<String>> ids,
+) => {for (final e in ids.entries) e.key.name: e.value};
+
+Map<CalendarSource, List<String>> _calendarIdsFromJson(Object? json) => {
+  for (final e in _map(json).entries)
+    CalendarSource.values.byName(e.key): [
+      for (final id in e.value as List) id as String,
+    ],
+};

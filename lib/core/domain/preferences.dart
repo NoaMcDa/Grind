@@ -1,3 +1,4 @@
+import 'calendar_event.dart';
 import 'time_range.dart';
 
 /// User preferences the planner and notifications depend on. One row.
@@ -26,6 +27,10 @@ class Preferences {
     this.timeZoneName = 'Asia/Jerusalem',
     this.localeCode = 'en',
     this.onboardingDone = false,
+    this.morningPromptMinutes = 8 * 60,
+    this.eveningPromptMinutes = 20 * 60 + 30,
+    this.selectedCalendarIds = const {},
+    this.backupHintShown = false,
   });
 
   /// Keyed by [DateTime.monday] … [DateTime.sunday]. Missing day = day off.
@@ -47,6 +52,17 @@ class Preferences {
   final String localeCode;
   final bool onboardingDone;
 
+  /// Local minutes after midnight for the daily prompts; null = off.
+  final int? morningPromptMinutes;
+  final int? eveningPromptMinutes;
+
+  /// Calendars the user chose to read per provider. A missing source means
+  /// "never chose" (sync code then takes the primary calendar).
+  final Map<CalendarSource, List<String>> selectedCalendarIds;
+
+  /// Whether the one-time "export a backup" hint was shown (web durability).
+  final bool backupHintShown;
+
   Preferences copyWith({
     Map<int, List<TimeRange>>? workingHours,
     List<TimeRange>? deepWindows,
@@ -61,6 +77,10 @@ class Preferences {
     String? timeZoneName,
     String? localeCode,
     bool? onboardingDone,
+    Object? morningPromptMinutes = _unset,
+    Object? eveningPromptMinutes = _unset,
+    Map<CalendarSource, List<String>>? selectedCalendarIds,
+    bool? backupHintShown,
   }) => Preferences(
     workingHours: workingHours ?? this.workingHours,
     deepWindows: deepWindows ?? this.deepWindows,
@@ -79,6 +99,14 @@ class Preferences {
     timeZoneName: timeZoneName ?? this.timeZoneName,
     localeCode: localeCode ?? this.localeCode,
     onboardingDone: onboardingDone ?? this.onboardingDone,
+    morningPromptMinutes: morningPromptMinutes == _unset
+        ? this.morningPromptMinutes
+        : morningPromptMinutes as int?,
+    eveningPromptMinutes: eveningPromptMinutes == _unset
+        ? this.eveningPromptMinutes
+        : eveningPromptMinutes as int?,
+    selectedCalendarIds: selectedCalendarIds ?? this.selectedCalendarIds,
+    backupHintShown: backupHintShown ?? this.backupHintShown,
   );
 }
 
