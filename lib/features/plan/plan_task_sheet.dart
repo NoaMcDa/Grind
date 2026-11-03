@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/core.dart';
@@ -9,12 +10,15 @@ import '../../widgets/pill.dart';
 import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_bottom_sheet.dart';
 import '../../widgets/sticker_card.dart';
+import '../tasks/day_bounds.dart';
+import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../today/today_providers.dart' show formatClock;
 import 'plan_replan_sheet.dart';
 import 'plan_strings.dart';
 
-String _range(DateTime s, DateTime e) => '${formatClock(s)}–${formatClock(e)}';
+String _range(DateTime s, DateTime e, tz.Location location) =>
+    '${formatClock(s, location)}–${formatClock(e, location)}';
 
 /// Lightweight task detail opened from the Plan timeline: done, schedule,
 /// unschedule, and a link to the full [TaskDetailScreen].
@@ -37,6 +41,7 @@ class PlanTaskDetailPage extends ConsumerWidget {
         .firstOrNull;
     final repo = ref.read(taskRepositoryProvider);
     final now = ref.read(clockProvider).now().toUtc();
+    final location = ref.watch(zoneLocationProvider);
 
     return Scaffold(
       backgroundColor: AppColors.ground,
@@ -66,7 +71,11 @@ class PlanTaskDetailPage extends ConsumerWidget {
                       const SizedBox(height: 6),
                       if (task.isScheduled)
                         Text(
-                          _range(task.scheduledStart!, task.scheduledEnd!),
+                          _range(
+                            task.scheduledStart!,
+                            task.scheduledEnd!,
+                            location,
+                          ),
                           style: AppText.body(color: AppColors.muted),
                         ),
                       const SizedBox(height: 18),
@@ -80,15 +89,10 @@ class PlanTaskDetailPage extends ConsumerWidget {
                                 : PlanStrings.markDone,
                             color: AppColors.mint,
                             icon: const Icon(Icons.check),
-                            onPressed: () => repo.upsert(
-                              task.copyWith(
-                                status: task.isDone
-                                    ? TaskStatus.open
-                                    : TaskStatus.done,
-                                completedAt: task.isDone ? null : now,
-                                updatedAt: now,
-                              ),
-                            ),
+                            // Series-aware, as on Today.
+                            onPressed: () => ref
+                                .read(taskActionsProvider)
+                                .toggle(context, task),
                           ),
                           if (!task.isDone)
                             PillButton(
@@ -158,11 +162,13 @@ final planUrlLauncherProvider = Provider<Future<bool> Function(Uri)>(
 );
 
 /// Where "Open in calendar" goes: the provider's web calendar on the
-/// event's local day. `CalendarEvent` has no per-event link yet, and Apple
-/// Calendar has no web URL, so Apple and Grind-only events get none.
-Uri? calendarDayUrl(CalendarEvent e) {
+/// event's day in [location] (the device zone without one). `CalendarEvent`
+/// has no per-event link yet (use `CalendarEvent.htmlLink` first once it
+/// lands), and Apple Calendar has no web URL, so Apple and Grind-only
+/// events get none.
+Uri? calendarDayUrl(CalendarEvent e, [tz.Location? location]) {
   if (e.source != CalendarSource.google) return null;
-  final d = e.start.toLocal();
+  final d = location == null ? e.start.toLocal() : zoneWall(e.start, location);
   return Uri.parse(
     'https://calendar.google.com/calendar/r/day/${d.year}/${d.month}/${d.day}',
   );
@@ -170,7 +176,11 @@ Uri? calendarDayUrl(CalendarEvent e) {
 
 /// Read-only sheet for a calendar event.
 Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
-  final url = calendarDayUrl(e);
+  final location = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(zoneLocationProvider);
+  final url = calendarDayUrl(e, location);
   return showStickerSheet<void>(
     context,
     (ctx) => Padding(
@@ -184,7 +194,7 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
           Text(e.title, style: AppText.display(size: 24)),
           const SizedBox(height: 6),
           Text(
-            e.isAllDay ? PlanStrings.allDay : _range(e.start, e.end),
+            e.isAllDay ? PlanStrings.allDay : _range(e.start, e.end, location),
             style: AppText.body(color: AppColors.muted),
           ),
           const SizedBox(height: 4),

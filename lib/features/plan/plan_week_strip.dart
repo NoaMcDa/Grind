@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/core.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
-import 'plan_layout.dart';
 import 'plan_providers.dart';
 import 'plan_strings.dart';
 
@@ -17,7 +15,7 @@ class PlanWeekStrip extends ConsumerWidget {
     final week = ref.watch(planWeekProvider);
     final load = ref.watch(planWeekLoadProvider);
     final selected = ref.watch(selectedDayProvider);
-    final today = dateOnly(ref.watch(clockProvider).now());
+    final today = ref.watch(planTodayProvider);
 
     return Row(
       key: const Key('plan-week-strip'),

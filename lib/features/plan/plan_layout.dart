@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:timezone/timezone.dart' as tz;
+
 import '../../core/core.dart';
+import '../tasks/day_bounds.dart';
 
 /// Pure layout maths for the Plan timeline. Easy to unit-test.
 
@@ -11,17 +14,42 @@ const planSnapMinutes = 15;
 int snapMinutes(double minutes) =>
     (minutes / planSnapMinutes).round() * planSnapMinutes;
 
+/// Plan's days are floating dates (`DateTime(y, m, d)`) in the user's zone
+/// (`Preferences.timeZoneName`); instants are placed on them through
+/// [zoneWall]. Functions that take a `location` do that conversion; without
+/// one they read instants in the device zone.
+
 /// Local midnight of [d].
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
 /// Local midnight of the day after [d] (DST safe).
 DateTime nextDay(DateTime d) => DateTime(d.year, d.month, d.day + 1);
 
-/// Minutes from [dayStart] (local midnight) to [t], converting UTC to local
-/// first, clamped to the day (0..1440).
-int minutesIntoDay(DateTime t, DateTime dayStart) {
-  final m = t.toLocal().difference(dayStart).inMinutes;
-  return m.clamp(0, 24 * 60);
+/// Minutes from [dayStart] (midnight of a Plan day) to the instant [t], on
+/// the wall clock of [location] (the device zone without one), clamped to
+/// the day (0..1440).
+int minutesIntoDay(DateTime t, DateTime dayStart, [tz.Location? location]) {
+  if (location == null) {
+    return t.toLocal().difference(dayStart).inMinutes.clamp(0, 24 * 60);
+  }
+  final w = zoneWall(t, location);
+  final m = DateTime.utc(
+    w.year,
+    w.month,
+    w.day,
+    w.hour,
+    w.minute,
+  ).difference(DateTime.utc(dayStart.year, dayStart.month, dayStart.day));
+  return m.inMinutes.clamp(0, 24 * 60);
+}
+
+/// The instants of the Plan day [day] in [location]: `[start, end)` as UTC.
+({DateTime start, DateTime end}) planDayUtc(
+  DateTime day,
+  tz.Location location,
+) {
+  final b = dayBoundsOf(day, location);
+  return (start: utcOf(b.start), end: utcOf(b.end));
 }
 
 /// An item placed in a column inside a group of overlapping items.
@@ -103,31 +131,33 @@ List<Placed<T>> packColumns<T>(
   return (start: lo, end: hi.clamp(lo + 1, 24));
 }
 
-int _overlap(DateTime s, DateTime e, DateTime dayStart) {
-  final a = s.toLocal();
-  final b = e.toLocal();
+int _overlap(DateTime s, DateTime e, DateTime dayStart, tz.Location? loc) {
+  final a = loc == null ? s.toLocal() : zoneWall(s, loc);
+  final b = loc == null ? e.toLocal() : zoneWall(e, loc);
   final from = a.isBefore(dayStart) ? dayStart : a;
   final dayEnd = nextDay(dayStart);
   final to = b.isAfter(dayEnd) ? dayEnd : b;
   return to.isAfter(from) ? to.difference(from).inMinutes : 0;
 }
 
-/// Booked share of the day's working time, 0..1 (capped).
+/// Booked share of the day's working time, 0..1 (capped). Instants are
+/// read in [location] (the device zone without one).
 double dayLoad({
   required DateTime day,
   required Iterable<Task> tasks,
   required Iterable<CalendarEvent> events,
   required Preferences prefs,
+  tz.Location? location,
 }) {
   final start = dateOnly(day);
   var booked = 0;
   for (final t in tasks) {
     if (!t.isScheduled) continue;
-    booked += _overlap(t.scheduledStart!, t.scheduledEnd!, start);
+    booked += _overlap(t.scheduledStart!, t.scheduledEnd!, start, location);
   }
   for (final e in events) {
     if (e.isAllDay || !e.isBusy) continue;
-    booked += _overlap(e.start, e.end, start);
+    booked += _overlap(e.start, e.end, start, location);
   }
   final cap = (prefs.workingHours[start.weekday] ?? const <TimeRange>[]).fold(
     0,

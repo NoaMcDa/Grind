@@ -1,15 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../tasks/day_bounds.dart';
 import 'plan_layout.dart';
 import 'plan_strings.dart';
 
-/// The local date the Plan tab shows. Defaults to today per the app clock.
+/// The date the Plan tab shows (a floating `DateTime(y, m, d)` in the
+/// user's zone). Defaults to today there, per the app clock.
 class SelectedDay extends Notifier<DateTime> {
   @override
-  DateTime build() => dateOnly(ref.read(clockProvider).now());
+  DateTime build() => localDayBoundsIn(
+    ref.read(clockProvider).now(),
+    ref.read(zoneLocationProvider),
+  ).date;
 
   void select(DateTime day) => state = dateOnly(day);
   void shift(int days) =>
@@ -18,6 +24,11 @@ class SelectedDay extends Notifier<DateTime> {
 
 final selectedDayProvider = NotifierProvider<SelectedDay, DateTime>(
   SelectedDay.new,
+);
+
+/// Today's date in the user's zone, as a Plan day.
+final planTodayProvider = Provider.autoDispose<DateTime>(
+  (ref) => ref.watch(todayBoundsProvider).date,
 );
 
 /// "Thu, Oct 29".
@@ -41,9 +52,16 @@ final planPrefsProvider = Provider<Preferences>(
   (ref) => ref.watch(preferencesProvider).valueOrNull ?? const Preferences(),
 );
 
-List<Task> tasksOnDay(Iterable<Task> tasks, DateTime day) {
-  final from = dateOnly(day);
-  final to = nextDay(day);
+/// Tasks scheduled on the Plan day [day] in [location] (the device zone
+/// without one), by start.
+List<Task> tasksOnDay(
+  Iterable<Task> tasks,
+  DateTime day, [
+  tz.Location? location,
+]) {
+  final b = location == null ? null : planDayUtc(day, location);
+  final from = b?.start ?? dateOnly(day);
+  final to = b?.end ?? nextDay(day);
   return tasks
       .where(
         (t) =>
@@ -60,17 +78,18 @@ List<Task> tasksOnDay(Iterable<Task> tasks, DateTime day) {
 final planTasksProvider = Provider.autoDispose<List<Task>>((ref) {
   final day = ref.watch(selectedDayProvider);
   final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
-  return tasksOnDay(tasks, day);
+  return tasksOnDay(tasks, day, ref.watch(zoneLocationProvider));
 });
 
 /// Calendar events on the selected day, live.
 final planEventsProvider = StreamProvider.autoDispose<List<CalendarEvent>>((
   ref,
 ) {
-  final day = ref.watch(selectedDayProvider);
-  return ref
-      .watch(calendarRepositoryProvider)
-      .watchBetween(dateOnly(day).toUtc(), nextDay(day).toUtc());
+  final day = planDayUtc(
+    ref.watch(selectedDayProvider),
+    ref.watch(zoneLocationProvider),
+  );
+  return ref.watch(calendarRepositoryProvider).watchBetween(day.start, day.end);
 });
 
 /// The 7 days of the selected day's week, from `Preferences.weekStart`.
@@ -84,9 +103,13 @@ final planWeekEventsProvider = StreamProvider.autoDispose<List<CalendarEvent>>((
   ref,
 ) {
   final week = ref.watch(planWeekProvider);
+  final location = ref.watch(zoneLocationProvider);
   return ref
       .watch(calendarRepositoryProvider)
-      .watchBetween(week.first.toUtc(), nextDay(week.last).toUtc());
+      .watchBetween(
+        planDayUtc(week.first, location).start,
+        planDayUtc(week.last, location).end,
+      );
 });
 
 /// Booked share (0..1) per day of the shown week.
@@ -96,15 +119,20 @@ final planWeekLoadProvider = Provider.autoDispose<Map<DateTime, double>>((ref) {
   final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
   final events =
       ref.watch(planWeekEventsProvider).valueOrNull ?? const <CalendarEvent>[];
+  final location = ref.watch(zoneLocationProvider);
   return {
     for (final d in week)
-      d: dayLoad(
-        day: d,
-        tasks: tasksOnDay(tasks, d),
-        events: events.where(
-          (e) => e.start.isBefore(nextDay(d)) && e.end.isAfter(dateOnly(d)),
-        ),
-        prefs: prefs,
-      ),
+      d: () {
+        final b = planDayUtc(d, location);
+        return dayLoad(
+          day: d,
+          tasks: tasksOnDay(tasks, d, location),
+          events: events.where(
+            (e) => e.start.isBefore(b.end) && e.end.isAfter(b.start),
+          ),
+          prefs: prefs,
+          location: location,
+        );
+      }(),
   };
 });

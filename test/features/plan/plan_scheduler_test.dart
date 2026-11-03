@@ -1,9 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/core/notifications/time_zones.dart';
 import 'package:grind/features/plan/plan_providers.dart';
 import 'package:grind/features/plan/plan_scheduler.dart';
 import 'package:grind/features/plan/plan_strings.dart';
+import 'package:timezone/timezone.dart' as tz;
+
+import '../tasks/zone_test_support.dart';
 
 /// Thursday 2026-10-29 09:00 local; the week (Sunday start) is Oct 25–31.
 final _now = DateTime(2026, 10, 29, 9);
@@ -71,9 +75,7 @@ ProviderContainer _container({List<Task>? tasks, DateTime? now}) {
       calendarRepositoryProvider.overrideWithValue(
         InMemoryCalendarRepository(_events()),
       ),
-      preferencesRepositoryProvider.overrideWithValue(
-        InMemoryPreferencesRepository(const Preferences(onboardingDone: true)),
-      ),
+      devicePrefsOverride(),
     ],
   );
   addTearDown(c.dispose);
@@ -278,5 +280,87 @@ void main() {
       PlanStrings.capacityLine(freeMinutes: 21 * 60, plannedMinutes: 0),
       '21 h free · nothing planned yet',
     );
+  });
+
+  group('day bounds follow Preferences.timeZoneName, not the device', () {
+    ProviderContainer zoned(DateTime nowUtc, String zone, List<Task> tasks) {
+      final c = ProviderContainer(
+        overrides: [
+          clockProvider.overrideWithValue(FixedClock(nowUtc)),
+          taskRepositoryProvider.overrideWithValue(
+            InMemoryTaskRepository(tasks),
+          ),
+          calendarRepositoryProvider.overrideWithValue(
+            InMemoryCalendarRepository(),
+          ),
+          preferencesRepositoryProvider.overrideWithValue(
+            InMemoryPreferencesRepository(
+              Preferences(onboardingDone: true, timeZoneName: zone),
+            ),
+          ),
+        ],
+      );
+      addTearDown(c.dispose);
+      return c;
+    }
+
+    tz.TZDateTime inZone(DateTime t, String zone) =>
+        tz.TZDateTime.from(t, tz.getLocation(zone));
+
+    setUpAll(ensureTimeZones);
+
+    test('Sat 23:30 UTC is Sunday in Jerusalem: the capacity line and the '
+        'Re-plan sheet both plan the new week', () async {
+      final now = DateTime.utc(2026, 11, 7, 23, 30); // Sun Nov 8, 01:30 there
+      final c = zoned(now, 'Asia/Jerusalem', [_task('t', minutes: 30)]);
+      await c.read(preferencesProvider.future);
+      final sub = c.listen(planWeekCapacityProvider, (_, _) {});
+      addTearDown(sub.close);
+      await c.read(tasksProvider.future);
+      await c.read(planWeekEventsProvider.future);
+
+      final day = c.read(selectedDayProvider);
+      expect(day, DateTime(2026, 11, 8));
+      expect(c.read(planWeekProvider).first, DateTime(2026, 11, 8));
+      final cap = c.read(planWeekCapacityProvider);
+      // Mon–Thu 9–18 and Fri 9–14, less lunch and cushion: plenty.
+      expect(cap.freeMinutes, greaterThan(20 * 60));
+
+      final draft = await c.read(planSchedulerProvider).proposeWeek(day);
+      expect(draft.weekStart, DateTime(2026, 11, 8));
+      expect(draft.plan.capacity.freeMinutes, cap.freeMinutes);
+      expect(draft.changes.single.start, DateTime(2026, 11, 9, 9));
+      await c.read(planSchedulerProvider).apply(draft);
+      final placed = (await c.read(taskRepositoryProvider).getById('t'))!;
+      final start = inZone(placed.scheduledStart!, 'Asia/Jerusalem');
+      // Monday 09:00 in Jerusalem, never before "today" there.
+      expect([start.month, start.day, start.hour], [11, 9, 9]);
+      expect(placed.scheduledStart!.isBefore(now), isFalse);
+    });
+
+    test('Schedule it for me: Tokyo is a day ahead of a UTC device', () async {
+      // Tue Nov 3 20:00 UTC = Wed Nov 4 05:00 in Tokyo.
+      final now = DateTime.utc(2026, 11, 3, 20);
+      final c = zoned(now, 'Asia/Tokyo', [_task('t', minutes: 30)]);
+      final r = await c.read(planSchedulerProvider).scheduleOne('t');
+      expect(r.isPlaced, isTrue);
+      final t = (await c.read(taskRepositoryProvider).getById('t'))!;
+      final start = inZone(t.scheduledStart!, 'Asia/Tokyo');
+      // The start of Wednesday's working hours there, not 09:00 UTC (18:00).
+      expect([start.month, start.day, start.hour], [11, 4, 9]);
+      expect(t.scheduledStart, DateTime.utc(2026, 11, 4));
+    });
+
+    test('Schedule it for me: New York is still on the previous day', () async {
+      // Wed Nov 4 02:00 UTC = Tue Nov 3 21:00 in New York.
+      final now = DateTime.utc(2026, 11, 4, 2);
+      final c = zoned(now, 'America/New_York', [_task('t', minutes: 30)]);
+      await c.read(planSchedulerProvider).scheduleOne('t');
+      final t = (await c.read(taskRepositoryProvider).getById('t'))!;
+      final start = inZone(t.scheduledStart!, 'America/New_York');
+      expect([start.month, start.day, start.hour], [11, 4, 9]);
+      expect(t.scheduledStart, DateTime.utc(2026, 11, 4, 14));
+      expect(t.scheduledStart!.isBefore(now), isFalse);
+    });
   });
 }
