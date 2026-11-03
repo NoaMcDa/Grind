@@ -12,6 +12,7 @@ import 'features/focus/providers.dart';
 import 'features/goals/data/drift_goal_repository.dart';
 import 'features/goals/goals.dart';
 import 'features/recurrence/providers.dart';
+import 'features/review/drift_review_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ Future<void> main() async {
       overrides: [
         ...dataProvidersOverrides(db),
         focusRepositoryOverride(db),
+        reviewRepositoryOverride(db),
         goalRepositoryProvider.overrideWith(
           (ref) => DriftGoalRepository(db, clock: ref.watch(clockProvider)),
         ),

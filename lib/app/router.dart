@@ -6,10 +6,12 @@ import '../features/focus/focus_screen.dart';
 import '../features/onboarding/onboarding_flow.dart';
 import '../features/pip/pip_screen.dart';
 import '../features/plan/plan_screen.dart';
+import '../features/analytics/analytics_screen.dart';
 import '../features/goals/goals.dart';
 import '../features/review/review.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/tasks/task_detail_screen.dart';
+import '../features/tasks/task_form.dart';
 import '../features/today/today_screen.dart';
 import '../theme/tokens.dart';
 import 'tab_bar.dart';
@@ -64,10 +66,16 @@ GoRouter createRouter({
         routes: [
           GoRoute(
             path: ':id',
-            builder: (context, state) =>
-                GoalDetailScreen(goalId: state.pathParameters['id']!),
+            builder: (context, state) => GoalDetailScreen(
+              goalId: state.pathParameters['id']!,
+              onAddTask: taskSheetForGoal,
+            ),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
       ),
       GoRoute(
         path: '/task/:id',

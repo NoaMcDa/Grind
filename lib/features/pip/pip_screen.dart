@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grind/core/core.dart';
 
 import '../../l10n/l10n.dart';
@@ -204,6 +205,20 @@ class PipScreen extends ConsumerWidget {
               Text(
                 l.pipWeekCaption,
                 style: AppText.body(size: 12, color: AppColors.muted),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: PillButton(
+                  key: const Key('pip-your-numbers'),
+                  label: 'Your numbers',
+                  height: 36,
+                  shadow: 0,
+                  fontSize: 13,
+                  icon: const Icon(Icons.bar_chart_outlined),
+                  onPressed: () =>
+                      GoRouter.maybeOf(context)?.push('/analytics'),
+                ),
               ),
             ],
           ),

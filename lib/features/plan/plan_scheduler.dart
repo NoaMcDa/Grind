@@ -3,6 +3,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../core/notifications/time_zones.dart';
+import '../analytics/analytics_providers.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart' show dateOnly, nextDay, weekOf;
 import 'plan_providers.dart';
@@ -114,6 +115,7 @@ class PlanScheduler {
             goals: const {},
             events: [for (final e in events) _toLocalEvent(e, loc)],
             prefs: prefs,
+            stats: _ref.read(userStatsProvider),
             now: from,
             horizonEnd: end,
           )
@@ -199,6 +201,7 @@ class PlanScheduler {
       goals: const {},
       events: [for (final e in events) _toLocalEvent(e, loc)],
       prefs: prefs,
+      stats: _ref.read(userStatsProvider),
       now: now,
       horizonEnd: horizonEnd,
     );
@@ -287,6 +290,7 @@ final planWeekCapacityProvider = Provider.autoDispose<scheduler.WeekCapacity>((
     from: start,
     to: end,
     prefs: prefs,
+    stats: ref.watch(userStatsProvider),
     events: [for (final e in events) _toLocalEvent(e, loc)],
     tasks: planned,
   );

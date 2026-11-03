@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/core.dart';
 import '../core/notifications/notifications.dart';
+import '../features/calendar/apple/providers.dart';
 import '../features/calendar/sync/providers.dart';
 import '../features/onboarding/onboarding_providers.dart';
 import '../l10n/l10n.dart';
@@ -91,8 +92,19 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
     }
   }
 
+  Timer? _appleSyncDebounce;
+
+  /// EventKit also fires for Grind's own writes, so coalesce bursts.
+  void _onAppleCalendarChanged() {
+    _appleSyncDebounce?.cancel();
+    _appleSyncDebounce = Timer(const Duration(seconds: 3), () {
+      unawaited(ref.read(appleCalendarSyncEngineProvider).sync());
+    });
+  }
+
   @override
   void dispose() {
+    _appleSyncDebounce?.cancel();
     _focusSub?.cancel();
     _openedSub?.cancel();
     _router.dispose();
@@ -103,6 +115,13 @@ class _RouterAppState extends ConsumerState<_RouterApp> {
   Widget build(BuildContext context) {
     // Re-run the redirect once the onboarding flag is known or changes.
     ref.listen(onboardingDoneProvider, (_, _) => _router.refresh());
+    if (widget.startServices) {
+      // Apple Calendar changed outside the app: pull again (debounced).
+      ref.listen(
+        appleCalendarChangesProvider,
+        (_, _) => _onAppleCalendarChanged(),
+      );
+    }
     final localeCode = ref.watch(preferencesProvider).valueOrNull?.localeCode;
     return MaterialApp.router(
       title: 'Grind',
