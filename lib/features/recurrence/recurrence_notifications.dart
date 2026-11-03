@@ -4,11 +4,13 @@ import 'package:grind/core/notifications/notification_sync.dart';
 import 'package:grind/core/notifications/time_zones.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import 'occurrence_completion.dart';
 import 'occurrence_expander.dart';
 
 /// The [ExtraNotifications] hook for `NotificationSync(extra: ...)`: for
 /// every open task with a recurrence rule, expands the next [horizonDays]
-/// days into [ScheduledNotification]s.
+/// days into [ScheduledNotification]s. Occurrences at or before the rule's
+/// `lastCompletedAt` are done and are not scheduled.
 ///
 /// Ids come from [NotificationScheduler.taskNotificationId], so the same
 /// occurrence always has the same id and the scheduler's own entry for
@@ -47,6 +49,7 @@ ExtraNotifications recurrenceExtraNotifications(
         // if-then time in the body is the occurrence, not the lead-shifted
         // fire time.
         final occurrence = fire.add(Duration(minutes: rule.leadMinutes));
+        if (isOccurrenceDone(rule, occurrence)) continue;
         final copy = NotificationScheduler.copyFor(
           task,
           prefs,
