@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../domain/domain.dart';
+import '../../domain/milestone.dart';
 import '../../services/clock.dart';
 import '../database.dart';
 import '../mappers.dart';
@@ -27,6 +28,7 @@ class BackupSummary {
     required this.goals,
     required this.hasPreferences,
     this.reviewEntries = 0,
+    this.milestones = 0,
   });
 
   final int tasks;
@@ -36,6 +38,7 @@ class BackupSummary {
   final int goals;
   final bool hasPreferences;
   final int reviewEntries;
+  final int milestones;
 }
 
 /// Platform side of backups: where the JSON goes and where it comes from.
@@ -54,11 +57,12 @@ abstract interface class BackupFileGateway {
 /// Format (version [format]):
 /// ```json
 /// {
-///   "app": "grind", "format": 2, "schemaVersion": 3,
+///   "app": "grind", "format": 3, "schemaVersion": 4,
 ///   "exportedAt": "2026-11-03T08:00:00.000Z",
 ///   "tasks": [...], "reminderRules": [...], "calendarEvents": [...],
 ///   "focusSessions": [...], "goals": [...], "preferences": {...} | null,
-///   "reviewEntries": [...], "reviewHandledDays": ["2026-11-02", ...]
+///   "reviewEntries": [...], "reviewHandledDays": ["2026-11-02", ...],
+///   "milestones": [...], "milestoneTasks": [...]
 /// }
 /// ```
 /// Times are ISO-8601 UTC strings, enums their names. Soft-deleted rows
@@ -66,7 +70,9 @@ abstract interface class BackupFileGateway {
 ///
 /// History: format 1 (schema v1-v2) had no review lists and none of the v3
 /// fields; it still imports, with every missing field at its default.
-/// Format 2 (schema v3) adds them. Every row is validated before anything
+/// Format 2 (schema v3) adds them. Format 3 (schema v4) adds goal
+/// milestones and their task links (#25); older formats import with none.
+/// Every row is validated before anything
 /// is written: a wrong type, an unknown enum name, a time range outside one
 /// day, a duplicate id or a reference to a task that is not in the file is
 /// a [BackupFormatException] naming the row and field.
@@ -75,7 +81,7 @@ class BackupService {
 
   /// Bump when the JSON shape changes incompatibly; teach [importJson] to
   /// read the older versions.
-  static const format = 2;
+  static const format = 3;
 
   final AppDatabase _db;
   final Clock _clock;
@@ -100,6 +106,10 @@ class BackupService {
     final handled = await (_db.select(
       _db.reviewHandledDays,
     )..orderBy([(r) => OrderingTerm(expression: r.date)])).get();
+    final milestones = await _db.select(_db.milestones).get();
+    final milestoneTasks = await (_db.select(
+      _db.milestoneTasks,
+    )..orderBy([(r) => OrderingTerm(expression: r.taskId)])).get();
     return {
       'app': 'grind',
       'format': format,
@@ -113,6 +123,8 @@ class BackupService {
       'preferences': prefs?.toDomain().toJson(),
       'reviewEntries': [for (final r in reviews) r.toBackupJson()],
       'reviewHandledDays': [for (final r in handled) r.date],
+      'milestones': [for (final r in milestones) r.toDomain().toJson()],
+      'milestoneTasks': [for (final r in milestoneTasks) r.toDomain().toJson()],
     };
   });
 
@@ -144,6 +156,12 @@ class BackupService {
           ]);
           b.insertAll(_db.focusSessions, [
             for (final s in parsed.sessions) s.toCompanion(),
+          ]);
+          b.insertAll(_db.milestones, [
+            for (final m in parsed.milestones) m.toCompanion(),
+          ]);
+          b.insertAll(_db.milestoneTasks, [
+            for (final l in parsed.milestoneTasks) l.toCompanion(),
           ]);
           b.insertAll(_db.reviewEntries, parsed.reviewEntries);
           b.insertAll(_db.reviewHandledDays, [
@@ -244,6 +262,8 @@ class BackupService {
         for (final (i, d) in raw('reviewHandledDays').indexed)
           _guard('reviewHandledDays[$i]', () => reviewHandledDayFromJson(d)),
       ],
+      milestones: list('milestones', milestoneFromJson),
+      milestoneTasks: list('milestoneTasks', milestoneTaskLinkFromJson),
     );
     _checkReferences(parsed);
     return parsed;
@@ -270,6 +290,8 @@ class BackupService {
     unique('goals', p.goals.map((g) => g.id));
     unique('reviewEntries', p.reviewEntries.map((r) => r.date.value));
     unique('reviewHandledDays', p.handledDays);
+    unique('milestones', p.milestones.map((m) => m.id));
+    unique('milestoneTasks', p.milestoneTasks.map((l) => l.taskId));
 
     final taskIds = {for (final t in p.tasks) t.id};
     void refers(String key, Iterable<String?> ids) {
@@ -284,6 +306,29 @@ class BackupService {
 
     refers('reminderRules', p.rules.map((r) => r.taskId));
     refers('focusSessions', p.sessions.map((s) => s.taskId));
+    refers('milestoneTasks', p.milestoneTasks.map((l) => l.taskId));
+
+    void refersTo(
+      String key,
+      String what,
+      Set<String> known,
+      Iterable<String> ids,
+    ) {
+      for (final (i, id) in ids.indexed) {
+        if (!known.contains(id)) {
+          throw BackupFormatException(
+            'Could not read $key[$i]: its $what "$id" is not in the backup.',
+          );
+        }
+      }
+    }
+
+    refersTo('milestones', 'goal', {
+      for (final g in p.goals) g.id,
+    }, p.milestones.map((m) => m.goalId));
+    refersTo('milestoneTasks', 'milestone', {
+      for (final m in p.milestones) m.id,
+    }, p.milestoneTasks.map((l) => l.milestoneId));
   }
 
   T _guard<T>(String where, T Function() read) {
@@ -307,6 +352,8 @@ class _ParsedBackup {
     required this.preferences,
     required this.reviewEntries,
     required this.handledDays,
+    required this.milestones,
+    required this.milestoneTasks,
   });
 
   final List<Task> tasks;
@@ -317,6 +364,8 @@ class _ParsedBackup {
   final Preferences? preferences;
   final List<ReviewEntriesCompanion> reviewEntries;
   final List<String> handledDays;
+  final List<Milestone> milestones;
+  final List<MilestoneTaskLink> milestoneTasks;
 
   BackupSummary get summary => BackupSummary(
     tasks: tasks.length,
@@ -326,5 +375,6 @@ class _ParsedBackup {
     goals: goals.length,
     hasPreferences: preferences != null,
     reviewEntries: reviewEntries.length,
+    milestones: milestones.length,
   );
 }

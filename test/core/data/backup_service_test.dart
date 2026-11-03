@@ -169,7 +169,7 @@ void main() {
     await fill(source);
     final exported = await BackupService(source, clock: clock).exportJson();
     final map = jsonDecode(exported) as Map<String, Object?>;
-    expect(map['format'], 2);
+    expect(map['format'], BackupService.format);
     expect(map['app'], 'grind');
     expect(map['schemaVersion'], AppDatabase.currentSchemaVersion);
     expect(map['exportedAt'], now.toIso8601String());
@@ -379,7 +379,7 @@ void main() {
     test('no format', () => expectRejected('{"tasks": []}'));
     test(
       'newer format',
-      () => expectRejected('{"format": 3, "tasks": []}', saying: 'newer'),
+      () => expectRejected('{"format": 99, "tasks": []}', saying: 'newer'),
     );
     final garbage = <String, (Map<String, Object?>, String)>{
       'a row that is not an object': (

@@ -146,13 +146,13 @@ void main() {
   setUp(() => db = _openV2());
   tearDown(() => db.close());
 
-  test('v2 -> v3: user_version is bumped', () async {
+  test('v2 -> current: user_version is bumped', () async {
     // Any query opens the database and runs the migration.
     final v = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(v.read<int>('user_version'), 3);
+    expect(v.read<int>('user_version'), AppDatabase.currentSchemaVersion);
   });
 
-  test('v2 -> v3: the migrated schema equals a fresh v3 schema', () async {
+  test('v2 -> current: the migrated schema equals a fresh one', () async {
     final fresh = openInMemoryDatabase();
     addTearDown(fresh.close);
     expect(await _columns(db), await _columns(fresh));

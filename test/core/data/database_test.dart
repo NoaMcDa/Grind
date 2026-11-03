@@ -10,13 +10,13 @@ void main() {
   setUp(() => db = openInMemoryDatabase());
   tearDown(() => db.close());
 
-  test('schema version is 3', () async {
+  test('schema version is 4', () async {
     // Changing the schema means bumping this and writing a migration step
     // (see AppDatabase.migration and docs/adr/0001-local-database.md).
-    expect(AppDatabase.currentSchemaVersion, 3);
-    expect(db.schemaVersion, 3);
+    expect(AppDatabase.currentSchemaVersion, 4);
+    expect(db.schemaVersion, 4);
     final v = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(v.read<int>('user_version'), 3);
+    expect(v.read<int>('user_version'), 4);
   });
 
   test('tables', () {
@@ -29,9 +29,16 @@ void main() {
       'preferences',
       'review_entries',
       'review_handled_days',
+      'milestones',
+      'milestone_tasks',
     });
-    // Review tables are keyed by day, not by id (see database.dart).
-    final keyedByDay = {'review_entries', 'review_handled_days'};
+    // Review tables are keyed by day and milestone links by task, not by
+    // id (see database.dart).
+    final keyedByDay = {
+      'review_entries',
+      'review_handled_days',
+      'milestone_tasks',
+    };
     for (final t in db.allTables) {
       if (keyedByDay.contains(t.actualTableName)) continue;
       final cols = t.$columns.map((c) => c.name).toSet();
