@@ -1115,7 +1115,7 @@ abstract class AppLocalizations {
   /// Encouraging second line of a reminder notification (pool of 20, rotated per task and day)
   ///
   /// In en, this message translates to:
-  /// **'Open it and see how it feels.'**
+  /// **'Just opening it counts.'**
   String get remindersLine11;
 
   /// Encouraging second line of a reminder notification (pool of 20, rotated per task and day)
@@ -1139,7 +1139,7 @@ abstract class AppLocalizations {
   /// Encouraging second line of a reminder notification (pool of 20, rotated per task and day)
   ///
   /// In en, this message translates to:
-  /// **'Begin small, keep it light.'**
+  /// **'Small and light is plenty.'**
   String get remindersLine15;
 
   /// Encouraging second line of a reminder notification (pool of 20, rotated per task and day)
@@ -3721,6 +3721,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sent from Grind'**
   String get recapShareFooter;
+
+  /// Morning prompt notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get promptMorningTitle;
+
+  /// Morning prompt body when nothing is planned yet
+  ///
+  /// In en, this message translates to:
+  /// **'Want to plan the day together?'**
+  String get promptMorningBody;
+
+  /// Morning prompt body naming the day's first task
+  ///
+  /// In en, this message translates to:
+  /// **'Want to plan the day together? First up: {task}'**
+  String promptMorningBodyFirst(String task);
+
+  /// Evening prompt notification title
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get promptEveningTitle;
+
+  /// Evening prompt body on a day with nothing logged yet
+  ///
+  /// In en, this message translates to:
+  /// **'One minute to look back on today?'**
+  String get promptEveningBody;
+
+  /// Evening prompt body leading with the win saved that day
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s win: {win}. One minute to look back?'**
+  String promptEveningBodyWin(String win);
+
+  /// Evening prompt body leading with the one task done that day
+  ///
+  /// In en, this message translates to:
+  /// **'You finished \"{task}\" today. One minute to look back?'**
+  String promptEveningBodyDone(String task);
+
+  /// Evening prompt body leading with the tasks done that day (count is 2 or more)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} things done today, \"{task}\" among them. One minute to look back?'**
+  String promptEveningBodyDoneMany(int count, String task);
+
+  /// Weekly recap notification title; the body is the recap headline
+  ///
+  /// In en, this message translates to:
+  /// **'Your week with Pip'**
+  String get recapNotificationTitle;
 }
 
 class _AppLocalizationsDelegate

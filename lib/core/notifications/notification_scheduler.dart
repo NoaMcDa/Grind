@@ -1,22 +1,24 @@
 import 'package:grind/core/core.dart';
+import 'package:grind/features/reminders/prompt_copy.dart';
 import 'package:grind/features/reminders/reminder_copy.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import 'time_zones.dart';
 
-/// Times and placeholder copy for the two daily prompts. Invitations, never
-/// commands (RESEARCH.md Part 2B, "Notification tone"). The phase 1 epics own
-/// the final copy and the settings UI.
+/// Times of the two daily prompts, and optional fixed copy. Without fixed
+/// copy the scheduler writes Pip's per-day copy ([PromptCopy], #37) in the
+/// app language: the morning invitation names the day's first task, the
+/// evening one leads with the day's win.
 class PromptSettings {
   const PromptSettings({
     this.morningEnabled = true,
     this.morningMinutes = 8 * 60,
     this.eveningEnabled = true,
     this.eveningMinutes = 20 * 60 + 30,
-    this.morningTitle = 'Good morning',
-    this.morningBody = 'Want to plan the day together?',
-    this.eveningTitle = 'Evening check-in',
-    this.eveningBody = 'One minute to look back on today?',
+    this.morningTitle,
+    this.morningBody,
+    this.eveningTitle,
+    this.eveningBody,
   });
 
   final bool morningEnabled;
@@ -27,44 +29,25 @@ class PromptSettings {
 
   /// Local minutes after midnight (default 20:30).
   final int eveningMinutes;
-  final String morningTitle;
-  final String morningBody;
-  final String eveningTitle;
-  final String eveningBody;
 
-  /// Hebrew copy for the same prompts, gender-neutral (infinitive and
-  /// plural-free forms), used when the app language is Hebrew.
-  static const hebrewMorningTitle = 'בוקר טוב';
-  static const hebrewMorningBody = 'מתאים לתכנן את היום ביחד?';
-  static const hebrewEveningTitle = 'רגע של ערב';
-  static const hebrewEveningBody = 'דקה אחת להציץ אחורה על היום?';
+  /// Fixed copy; null (the default) means Pip's per-day copy.
+  final String? morningTitle;
+  final String? morningBody;
+  final String? eveningTitle;
+  final String? eveningBody;
 
-  /// Times and on/off from [Preferences] (null minutes = prompt off). The
-  /// copy is this instance's, except that the English defaults become the
-  /// Hebrew copy when `prefs.localeCode` is Hebrew.
-  PromptSettings withPreferences(Preferences prefs) {
-    final he = prefs.localeCode.toLowerCase().startsWith('he');
-    const defaults = PromptSettings();
-    bool isDefault(String own, String fallback) => own == fallback;
-    return PromptSettings(
-      morningEnabled: prefs.morningPromptMinutes != null,
-      morningMinutes: prefs.morningPromptMinutes ?? morningMinutes,
-      eveningEnabled: prefs.eveningPromptMinutes != null,
-      eveningMinutes: prefs.eveningPromptMinutes ?? eveningMinutes,
-      morningTitle: he && isDefault(morningTitle, defaults.morningTitle)
-          ? hebrewMorningTitle
-          : morningTitle,
-      morningBody: he && isDefault(morningBody, defaults.morningBody)
-          ? hebrewMorningBody
-          : morningBody,
-      eveningTitle: he && isDefault(eveningTitle, defaults.eveningTitle)
-          ? hebrewEveningTitle
-          : eveningTitle,
-      eveningBody: he && isDefault(eveningBody, defaults.eveningBody)
-          ? hebrewEveningBody
-          : eveningBody,
-    );
-  }
+  /// Times and on/off from [Preferences] (null minutes = prompt off); the
+  /// fixed copy, if any, stays.
+  PromptSettings withPreferences(Preferences prefs) => PromptSettings(
+    morningEnabled: prefs.morningPromptMinutes != null,
+    morningMinutes: prefs.morningPromptMinutes ?? morningMinutes,
+    eveningEnabled: prefs.eveningPromptMinutes != null,
+    eveningMinutes: prefs.eveningPromptMinutes ?? eveningMinutes,
+    morningTitle: morningTitle,
+    morningBody: morningBody,
+    eveningTitle: eveningTitle,
+    eveningBody: eveningBody,
+  );
 }
 
 /// Pure planning of the pending notification set. No plugin, no I/O: given
@@ -77,6 +60,10 @@ abstract final class NotificationScheduler {
   static const taskPrefix = 'task:';
   static const morningPrefix = 'prompt:morning:';
   static const eveningPrefix = 'prompt:evening:';
+
+  /// The weekly recap (#28): `recap:weekly:<last day of the week>`. No
+  /// task and no actions; a tap opens `/highlights`.
+  static const recapPrefix = 'recap:weekly:';
 
   /// `task:<taskId>:<fireAt epoch minutes>`.
   static String taskNotificationId(String taskId, DateTime fireAt) =>
@@ -137,13 +124,22 @@ abstract final class NotificationScheduler {
     );
   }
 
-  /// True for the daily planning / evening review prompts (no task).
+  /// True for the daily planning / evening review prompts and the weekly
+  /// recap (no task).
   static bool isPrompt(String notificationId) =>
       notificationId.startsWith(morningPrefix) ||
-      notificationId.startsWith(eveningPrefix);
+      notificationId.startsWith(eveningPrefix) ||
+      notificationId.startsWith(recapPrefix);
+
+  /// Local day key `yyyy-MM-dd` of [utc] in [location], as used by prompt
+  /// ids and the evening review.
+  static String dayKeyIn(DateTime utc, tz.Location location) =>
+      _date(tz.TZDateTime.from(utc.toUtc(), location));
 
   /// [taskIdsWithRules]: tasks with a [ReminderRule]; their `remindAt` is
   /// skipped because the rule's occurrences arrive in [extra].
+  /// [winsByDay]: the evening review's win per local day (`yyyy-MM-dd`),
+  /// which the evening prompt of that day leads with.
   static List<ScheduledNotification> plan({
     required List<Task> tasks,
     required Preferences prefs,
@@ -153,6 +149,7 @@ abstract final class NotificationScheduler {
     List<ScheduledNotification> extra = const [],
     PromptSettings prompts = const PromptSettings(),
     Set<String> taskIdsWithRules = const {},
+    Map<String, String> winsByDay = const {},
   }) {
     final location = locationFor(prefs.timeZoneName);
     final now = clock.now().toUtc();
@@ -215,12 +212,12 @@ abstract final class NotificationScheduler {
         today.day + d,
       );
       final date = _date(day);
+      final dayEnd = tz.TZDateTime(location, day.year, day.month, day.day + 1);
       void prompt(
         bool on,
         int minutes,
         String prefix,
-        String title,
-        String body,
+        PromptText Function(tz.TZDateTime fireAt) copy,
       ) {
         if (!on) return;
         final at = tz.TZDateTime(
@@ -232,32 +229,45 @@ abstract final class NotificationScheduler {
           minutes % 60,
         ).toUtc();
         if (!inWindow(at)) return;
+        final fireAt = _outOfQuietHours(at, prefs, location);
+        final text = copy(tz.TZDateTime.from(fireAt, location));
         add(
           ScheduledNotification(
             id: '$prefix$date',
             taskId: '',
-            fireAt: _outOfQuietHours(at, prefs, location),
-            title: title,
-            body: body,
+            fireAt: fireAt,
+            title: text.title,
+            body: text.body,
             actions: const [],
           ),
         );
       }
 
-      prompt(
-        prompts.morningEnabled,
-        prompts.morningMinutes,
-        morningPrefix,
-        prompts.morningTitle,
-        prompts.morningBody,
-      );
-      prompt(
-        prompts.eveningEnabled,
-        prompts.eveningMinutes,
-        eveningPrefix,
-        prompts.eveningTitle,
-        prompts.eveningBody,
-      );
+      prompt(prompts.morningEnabled, prompts.morningMinutes, morningPrefix, (
+        fireAt,
+      ) {
+        final pip = PromptCopy.morning(
+          languageCode: prefs.localeCode,
+          firstTask: PromptCopy.firstTaskTitle(tasks, fireAt, dayEnd),
+        );
+        return (
+          title: prompts.morningTitle ?? pip.title,
+          body: prompts.morningBody ?? pip.body,
+        );
+      });
+      prompt(prompts.eveningEnabled, prompts.eveningMinutes, eveningPrefix, (
+        _,
+      ) {
+        final pip = PromptCopy.evening(
+          languageCode: prefs.localeCode,
+          win: winsByDay[date],
+          doneTitles: PromptCopy.doneTitles(tasks, day, dayEnd),
+        );
+        return (
+          title: prompts.eveningTitle ?? pip.title,
+          body: prompts.eveningBody ?? pip.body,
+        );
+      });
     }
 
     out.sort((a, b) {
@@ -267,7 +277,6 @@ abstract final class NotificationScheduler {
     return out.length <= cap ? out : out.sublist(0, cap);
   }
 
-  /// Moves [utc] to the end of the quiet hours when it falls inside them.
   /// Moves [utc] to the end of the quiet hours when it falls inside them.
   /// A range across midnight (22:00–07:00) ends on the next day when the
   /// time is in its evening part, on the same day when in its morning part.

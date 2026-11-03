@@ -762,7 +762,7 @@
   "@remindersLine10": {
     "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
   },
-  "remindersLine11": "Open it and see how it feels.",
+  "remindersLine11": "Just opening it counts.",
   "@remindersLine11": {
     "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
   },
@@ -778,7 +778,7 @@
   "@remindersLine14": {
     "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
   },
-  "remindersLine15": "Begin small, keep it light.",
+  "remindersLine15": "Small and light is plenty.",
   "@remindersLine15": {
     "description": "Encouraging second line of a reminder notification (pool of 20, rotated per task and day)"
   },
@@ -3044,5 +3044,64 @@
   "recapShareFooter": "Sent from Grind",
   "@recapShareFooter": {
     "description": "Shared recap: last line"
+  },
+  "promptMorningTitle": "Good morning",
+  "@promptMorningTitle": {
+    "description": "Morning prompt notification title"
+  },
+  "promptMorningBody": "Want to plan the day together?",
+  "@promptMorningBody": {
+    "description": "Morning prompt body when nothing is planned yet"
+  },
+  "promptMorningBodyFirst": "Want to plan the day together? First up: {task}",
+  "@promptMorningBodyFirst": {
+    "description": "Morning prompt body naming the day's first task",
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "promptEveningTitle": "Good evening",
+  "@promptEveningTitle": {
+    "description": "Evening prompt notification title"
+  },
+  "promptEveningBody": "One minute to look back on today?",
+  "@promptEveningBody": {
+    "description": "Evening prompt body on a day with nothing logged yet"
+  },
+  "promptEveningBodyWin": "Today's win: {win}. One minute to look back?",
+  "@promptEveningBodyWin": {
+    "description": "Evening prompt body leading with the win saved that day",
+    "placeholders": {
+      "win": {
+        "type": "String"
+      }
+    }
+  },
+  "promptEveningBodyDone": "You finished \"{task}\" today. One minute to look back?",
+  "@promptEveningBodyDone": {
+    "description": "Evening prompt body leading with the one task done that day",
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "promptEveningBodyDoneMany": "{count} things done today, \"{task}\" among them. One minute to look back?",
+  "@promptEveningBodyDoneMany": {
+    "description": "Evening prompt body leading with the tasks done that day (count is 2 or more)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "recapNotificationTitle": "Your week with Pip",
+  "@recapNotificationTitle": {
+    "description": "Weekly recap notification title; the body is the recap headline"
   }
 }

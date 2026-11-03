@@ -13,6 +13,31 @@ typedef ExtraNotifications =
       Preferences prefs,
     );
 
+/// Several [ExtraNotifications] hooks as one, e.g. recurrence occurrences
+/// (#11) and the weekly recap (#28). A hook that throws is left out, so one
+/// broken feature never empties the plan.
+ExtraNotifications combineExtras(Iterable<ExtraNotifications?> hooks) {
+  final all = [
+    for (final h in hooks)
+      if (h != null) h,
+  ];
+  return (tasks, prefs) async {
+    final out = <ScheduledNotification>[];
+    for (final h in all) {
+      try {
+        out.addAll(await h(tasks, prefs));
+      } on Object {
+        // Best effort: the other hooks still count.
+      }
+    }
+    return out;
+  };
+}
+
+/// The evening review's win per local day (`yyyy-MM-dd`), for the evening
+/// prompt's copy (#37).
+typedef DayWins = FutureOr<Map<String, String>> Function();
+
 /// Keeps the OS pending set equal to [NotificationScheduler.plan] of the
 /// current tasks and preferences.
 ///
@@ -31,6 +56,7 @@ class NotificationSync {
     this.cap = 50,
     this.prompts = const PromptSettings(),
     this.extra,
+    this.wins,
   }) : _tasks = tasks,
        _prefs = preferences,
        _service = service,
@@ -50,6 +76,7 @@ class NotificationSync {
   final int cap;
   final PromptSettings prompts;
   final ExtraNotifications? extra;
+  final DayWins? wins;
 
   final List<StreamSubscription<Object?>> _subs = [];
   List<Task>? _latestTasks;
@@ -135,6 +162,7 @@ class NotificationSync {
       cap: cap,
       prompts: prompts.withPreferences(prefs),
       extra: await extra?.call(tasks, prefs) ?? const [],
+      winsByDay: await _wins(),
       taskIdsWithRules: {
         for (final r in rules)
           if (r.deletedAt == null) r.taskId,
@@ -155,6 +183,14 @@ class NotificationSync {
     _lastSignature = null;
     await _service.replaceAll(plan);
     _lastSignature = signature;
+  }
+
+  Future<Map<String, String>> _wins() async {
+    try {
+      return await wins?.call() ?? const {};
+    } on Object {
+      return const {};
+    }
   }
 
   Future<void> dispose() async {
