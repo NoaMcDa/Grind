@@ -1,10 +1,13 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/time_zones.dart';
 import 'package:grind/features/plan/plan_providers.dart';
 import 'package:grind/features/plan/plan_scheduler.dart';
-import 'package:grind/features/plan/plan_strings.dart';
+import 'package:grind/features/plan/plan_l10n.dart';
+import 'package:grind/l10n/l10n.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../tasks/zone_test_support.dart';
@@ -84,6 +87,8 @@ ProviderContainer _container({List<Task>? tasks, DateTime? now}) {
 
 bool _overlaps(DateTime s, DateTime e, DateTime s2, DateTime e2) =>
     s.isBefore(e2) && s2.isBefore(e);
+
+final _en = lookupAppLocalizations(const Locale('en'));
 
 void main() {
   test('same inputs give the same placements, each with a reason', () async {
@@ -254,30 +259,27 @@ void main() {
     final draft = await c.read(planSchedulerProvider).proposeWeek(_now);
     expect(cap.freeMinutes, draft.plan.capacity.freeMinutes);
     expect(cap.freeMinutes, greaterThan(5 * 60));
-    expect(
-      c.read(planCapacityLineProvider),
-      PlanStrings.capacityLine(
-        freeMinutes: cap.freeMinutes,
-        plannedMinutes: 60,
-      ),
-    );
+    expect(c.read(planCapacityMinutesProvider), (
+      free: cap.freeMinutes,
+      planned: 60,
+    ));
   });
 
   test('capacity line copy', () {
     expect(
-      PlanStrings.capacityLine(freeMinutes: 14 * 60, plannedMinutes: 9 * 60),
+      planCapacityLine(_en, freeMinutes: 14 * 60, plannedMinutes: 9 * 60),
       '14 h free · 9 h planned',
     );
     expect(
-      PlanStrings.capacityLine(freeMinutes: 90, plannedMinutes: 45),
+      planCapacityLine(_en, freeMinutes: 90, plannedMinutes: 45),
       '1.5 h free · 45 min planned',
     );
     expect(
-      PlanStrings.capacityLine(freeMinutes: 10 * 60, plannedMinutes: 12 * 60),
+      planCapacityLine(_en, freeMinutes: 10 * 60, plannedMinutes: 12 * 60),
       'A full week: over by 2 h. Pip can help trim it.',
     );
     expect(
-      PlanStrings.capacityLine(freeMinutes: 21 * 60, plannedMinutes: 0),
+      planCapacityLine(_en, freeMinutes: 21 * 60, plannedMinutes: 0),
       '21 h free · nothing planned yet',
     );
   });

@@ -2743,6 +2743,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Counted. Nice step.'**
   String get goalsCounted;
+
+  /// Greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon!'**
+  String get goodAfternoon;
+
+  /// Greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening!'**
+  String get goodEvening;
+
+  /// Task checkbox semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Mark {title} as open'**
+  String todayMarkOpen(String title);
+
+  /// Task checkbox semantics
+  ///
+  /// In en, this message translates to:
+  /// **'Complete {title}'**
+  String todayComplete(String title);
+
+  /// Replan sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Pip\'s draft for the week'**
+  String get planReplanTitle;
+
+  /// Replan sheet section (shown uppercase)
+  ///
+  /// In en, this message translates to:
+  /// **'Where things go'**
+  String get planReplanPlacedLabel;
+
+  /// Replan sheet section (shown uppercase)
+  ///
+  /// In en, this message translates to:
+  /// **'What didn\'t fit'**
+  String get planReplanUnplacedLabel;
+
+  /// Replan sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to move. Your week already looks settled.'**
+  String get planReplanNothing;
+
+  /// Replan sheet
+  ///
+  /// In en, this message translates to:
+  /// **'This week has passed. Pick today or later.'**
+  String get planReplanPast;
+
+  /// Replan sheet
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One thing you placed yourself stays put.} other{{n} things you placed yourself stay put.}}'**
+  String planReplanKept(int n);
+
+  /// Replan sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get planApply;
+
+  /// Replan sheet button
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get planNotNow;
+
+  /// Toast after applying a plan
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =0{All set, nothing needed moving.} =1{Done. One thing has a spot now.} other{Done. {n} things have a spot now.}}'**
+  String planApplied(int n);
+
+  /// Toast after scheduling one task
+  ///
+  /// In en, this message translates to:
+  /// **'{when} · {reason}'**
+  String planScheduledAt(String when, String reason);
+
+  /// Toast when a task did not fit
+  ///
+  /// In en, this message translates to:
+  /// **'No spot yet: {reason}'**
+  String planNotScheduled(String reason);
+
+  /// Reason, lowercase fragment
+  ///
+  /// In en, this message translates to:
+  /// **'this one is already done'**
+  String get planNothingToSchedule;
+
+  /// Reason, lowercase fragment
+  ///
+  /// In en, this message translates to:
+  /// **'no free gap before the end of the week'**
+  String get planNoRoomThisWeek;
+
+  /// Short duration in hours; hours is a number such as 1.5
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String planHoursShort(String hours);
+
+  /// Plan header capacity line
+  ///
+  /// In en, this message translates to:
+  /// **'A full week: over by {amount}. Pip can help trim it.'**
+  String planCapacityFull(String amount);
+
+  /// Plan header capacity line
+  ///
+  /// In en, this message translates to:
+  /// **'{free} free · nothing planned yet'**
+  String planCapacityNothing(String free);
+
+  /// Plan header capacity line
+  ///
+  /// In en, this message translates to:
+  /// **'{free} free · {planned} planned'**
+  String planCapacityLine(String free, String planned);
+
+  /// Long duration
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 hour} other{{n} hours}}'**
+  String planDurationHours(int n);
+
+  /// Long duration
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 minute} other{{n} minutes}}'**
+  String planDurationMinutes(int n);
+
+  /// Replan sheet summary opening
+  ///
+  /// In en, this message translates to:
+  /// **'You have {free} free and {demand} of plans.'**
+  String planSummaryHead(String free, String demand);
+
+  /// Replan sheet summary
+  ///
+  /// In en, this message translates to:
+  /// **'{head} It fits, with room to breathe.'**
+  String planSummaryFits(String head);
+
+  /// Replan sheet summary
+  ///
+  /// In en, this message translates to:
+  /// **'{head} A lighter week might help.'**
+  String planSummaryLighter(String head);
+
+  /// Replan sheet summary
+  ///
+  /// In en, this message translates to:
+  /// **'{head} {n, plural, =1{One thing} other{{n} things}} could move to next week.'**
+  String planSummaryDefer(String head, int n);
+
+  /// Day word in a reason
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get planWordToday;
+
+  /// Day word in a reason
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow'**
+  String get planWordTomorrow;
+
+  /// Deadline phrase in a reason
+  ///
+  /// In en, this message translates to:
+  /// **'today\'s deadline'**
+  String get planDeadlineToday;
+
+  /// Deadline phrase in a reason
+  ///
+  /// In en, this message translates to:
+  /// **'tomorrow\'s deadline'**
+  String get planDeadlineTomorrow;
+
+  /// Deadline phrase in a reason
+  ///
+  /// In en, this message translates to:
+  /// **'the {day} deadline'**
+  String planDeadlineOn(String day);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'you placed this here'**
+  String get planReasonPlacedByYou;
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'due {when}'**
+  String planReasonDue(String when);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'part of {title}'**
+  String planReasonPartOf(String title);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'your focus window'**
+  String get planReasonFocusWindow;
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'first {minutes} of {total} min'**
+  String planReasonChunkFirst(int minutes, int total);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'next {minutes} of {total} min'**
+  String planReasonChunkNext(int minutes, int total);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'last {minutes} of {total} min'**
+  String planReasonChunkLast(int minutes, int total);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'earliest free {minutes}-minute gap'**
+  String planReasonEarliestGap(int minutes);
+
+  /// Placement reason
+  ///
+  /// In en, this message translates to:
+  /// **'earliest free {minutes}-minute gap before {deadline}'**
+  String planReasonEarliestGapBefore(int minutes, String deadline);
+
+  /// Unplaced reason
+  ///
+  /// In en, this message translates to:
+  /// **'the due date has passed, want to pick a new one?'**
+  String get planReasonDatePassed;
+
+  /// Reason fragment
+  ///
+  /// In en, this message translates to:
+  /// **'this week'**
+  String get planByThisWeek;
+
+  /// Reason fragment
+  ///
+  /// In en, this message translates to:
+  /// **'before {when}'**
+  String planByBefore(String when);
+
+  /// Unplaced reason
+  ///
+  /// In en, this message translates to:
+  /// **'focus blocks are full {by}'**
+  String planReasonFocusFull(String by);
+
+  /// Unplaced reason
+  ///
+  /// In en, this message translates to:
+  /// **'only {fit} of {need} min fit {by}'**
+  String planReasonOnlyFit(int fit, int need, String by);
+
+  /// Unplaced reason
+  ///
+  /// In en, this message translates to:
+  /// **'no free {minutes}-minute slot {by}'**
+  String planReasonNoSlot(int minutes, String by);
 }
 
 class _AppLocalizationsDelegate

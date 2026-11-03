@@ -7,7 +7,6 @@ import '../analytics/analytics_providers.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart' show dateOnly, nextDay, weekOf;
 import 'plan_providers.dart';
-import 'plan_strings.dart';
 import 'scheduler/scheduler.dart' as scheduler;
 import 'scheduler/scheduler.dart' show Plan, Placement, UnplacedTask;
 
@@ -166,11 +165,7 @@ class PlanScheduler {
     final now = zoneWall(_nowUtc, loc);
     if (task == null || !_isOpen(task)) {
       return SingleSchedule.unplaced(
-        UnplacedTask(
-          taskId: taskId,
-          reason: PlanStrings.nothingToSchedule,
-          minutes: 0,
-        ),
+        UnplacedTask(taskId: taskId, reason: _nothingToSchedule, minutes: 0),
       );
     }
     final defaultEnd = scheduler.defaultHorizonEnd(now, prefs);
@@ -212,7 +207,7 @@ class PlanScheduler {
         miss ??
             UnplacedTask(
               taskId: taskId,
-              reason: PlanStrings.noRoomThisWeek,
+              reason: _noRoomThisWeek,
               minutes: task.estimatedMinutes,
             ),
       );
@@ -296,10 +291,15 @@ final planWeekCapacityProvider = Provider.autoDispose<scheduler.WeekCapacity>((
   );
 });
 
-/// "14 h free · 9 h planned", or "Overbooked by 2 h · Pip can help".
-final planCapacityLineProvider = Provider.autoDispose<String>(
-  (ref) => PlanStrings.capacityLine(
-    freeMinutes: ref.watch(planWeekCapacityProvider).freeMinutes,
-    plannedMinutes: ref.watch(planWeekCapacityProvider).demandMinutes,
-  ),
-);
+/// Free and planned minutes for the Plan header line; the screen words it
+/// with `planCapacityLine` in the app language.
+final planCapacityMinutesProvider =
+    Provider.autoDispose<({int free, int planned})>((ref) {
+      final c = ref.watch(planWeekCapacityProvider);
+      return (free: c.freeMinutes, planned: c.demandMinutes);
+    });
+
+// Reasons for the pure scheduler core; English, mapped to the app language
+// by `localizePlanReason` where they are shown.
+const _nothingToSchedule = 'this one is already done';
+const _noRoomThisWeek = 'no free gap before the end of the week';

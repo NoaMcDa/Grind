@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../l10n/l10n.dart';
+import '../plan/plan_l10n.dart';
 import '../reminders/reminder_now_card.dart';
 import '../review/review.dart';
 import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
-import '../tasks/tasks_strings.dart';
 import 'today_providers.dart';
 
 import '../../theme/app_text.dart';
@@ -65,6 +66,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     final location = ref.watch(zoneLocationProvider);
     final doneCount = tasks.where((t) => t.isDone).length;
     final top = MediaQuery.paddingOf(context).top;
+    final l = context.l10n;
     return Stack(
       children: [
         ListView(
@@ -77,10 +79,13 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SectionLabel(ref.watch(todayLabelProvider)),
+                      SectionLabel(
+                        formatTodayLabel(l, ref.watch(todayDateProvider)),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         greetingFor(
+                          l,
                           ref.watch(clockProvider).now(),
                           ref.watch(zoneLocationProvider),
                         ),
@@ -92,7 +97,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 const SizedBox(width: 6),
                 Semantics(
                   button: true,
-                  label: 'Goals',
+                  label: l.goalsTitle,
                   excludeSemantics: true,
                   onTap: _openGoals,
                   child: GestureDetector(
@@ -112,7 +117,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 ),
                 Semantics(
                   button: true,
-                  label: 'Settings',
+                  label: l.settingsTitle,
                   excludeSemantics: true,
                   onTap: _openSettings,
                   child: GestureDetector(
@@ -149,9 +154,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SectionLabel('Momentum'),
+                      SectionLabel(l.sectionMomentum),
                       Text(
-                        TasksStrings.doneOf(doneCount, tasks.length),
+                        l.tasksDoneOfToday(doneCount, tasks.length),
                         style: AppText.display(size: 16),
                       ),
                     ],
@@ -164,13 +169,13 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            const SectionLabel('Up next'),
+            SectionLabel(l.upNext),
             const SizedBox(height: 10),
             if (tasks.isEmpty)
               EmptyState(
-                title: TasksStrings.emptyTitle,
-                body: TasksStrings.emptyBody,
-                actionLabel: TasksStrings.emptyAction,
+                title: l.tasksEmptyTitle,
+                body: l.tasksEmptyBody,
+                actionLabel: l.addATask,
                 onAction: _add,
                 pipSize: 72,
               ),
@@ -185,7 +190,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
           bottom: 20,
           child: Semantics(
             button: true,
-            label: 'Add a task',
+            label: l.addATask,
             child: GestureDetector(
               onTap: _add,
               child: Container(
@@ -210,6 +215,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   }
 
   Widget _taskRow(TodayItem item, tz.Location location) {
+    final l = context.l10n;
     final t = item.task;
     final done = t.isDone;
     final at = item.at;
@@ -268,8 +274,8 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 Semantics(
                   button: true,
                   label: done
-                      ? 'Mark ${t.title} as open'
-                      : 'Complete ${t.title}',
+                      ? l.todayMarkOpen(t.title)
+                      : l.todayComplete(t.title),
                   excludeSemantics: true,
                   onTap: toggle,
                   child: GestureDetector(
@@ -361,11 +367,11 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
 
 /// "Good morning!" before noon, then afternoon, then evening, by the clock
 /// in [location] (device-local without one).
-String greetingFor(DateTime now, [tz.Location? location]) {
+String greetingFor(AppLocalizations l, DateTime now, [tz.Location? location]) {
   final h = location == null
       ? now.toLocal().hour
       : tz.TZDateTime.from(now, location).hour;
-  if (h >= 5 && h < 12) return 'Good morning!';
-  if (h >= 12 && h < 18) return 'Good afternoon!';
-  return 'Good evening!';
+  if (h >= 5 && h < 12) return l.goodMorning;
+  if (h >= 12 && h < 18) return l.goodAfternoon;
+  return l.goodEvening;
 }

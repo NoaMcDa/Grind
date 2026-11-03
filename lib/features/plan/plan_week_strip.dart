@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import 'plan_providers.dart';
-import 'plan_strings.dart';
+import '../../l10n/l10n.dart';
+import 'plan_l10n.dart';
 
 /// Seven day tiles with a tiny load bar; tap to select the day.
 class PlanWeekStrip extends ConsumerWidget {
@@ -60,11 +61,12 @@ class _DayTile extends StatelessWidget {
         : today
         ? AppColors.sun
         : AppColors.card;
-    final name = PlanStrings.weekdayShort[day.weekday - 1];
+    final l = context.l10n;
+    final name = weekdayShortL(l, day.weekday);
     return Semantics(
       button: true,
       selected: selected,
-      label: PlanStrings.dayLoad(formatPlanDay(day), (load * 100).round()),
+      label: l.planDayLoad(formatPlanDay(l, day), (load * 100).round()),
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/core.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/empty_state.dart';
@@ -15,10 +16,10 @@ import '../calendar/sync/sync_status.dart';
 import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_form.dart';
+import 'plan_l10n.dart';
 import 'plan_providers.dart';
 import 'plan_replan_sheet.dart';
 import 'plan_scheduler.dart';
-import 'plan_strings.dart';
 import 'plan_task_sheet.dart';
 import 'plan_timeline.dart';
 import 'plan_week_strip.dart';
@@ -150,6 +151,8 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
         ? (ref.watch(planNowProvider).valueOrNull ?? clock.now())
         : null;
     final doneCount = tasks.where((t) => t.isDone).length;
+    final l = context.l10n;
+    final capacity = ref.watch(planCapacityMinutesProvider);
     final top = MediaQuery.paddingOf(context).top;
     final rtl = Directionality.of(context) == TextDirection.rtl;
 
@@ -157,7 +160,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
       final left = previous != rtl;
       return Semantics(
         button: true,
-        label: previous ? PlanStrings.previousDay : PlanStrings.nextDay,
+        label: previous ? l.planPreviousDay : l.planNextDay,
         excludeSemantics: true,
         onTap: () => _shift(previous ? -1 : 1),
         child: GestureDetector(
@@ -188,13 +191,13 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                 Flexible(
                   child: Semantics(
                     button: true,
-                    label: PlanStrings.pickDay,
+                    label: l.planPickDay,
                     child: GestureDetector(
                       key: const Key('plan-date-pill'),
                       onTap: _pickDay,
                       behavior: HitTestBehavior.opaque,
                       child: Pill(
-                        label: ref.watch(planDayLabelProvider),
+                        label: formatPlanDay(l, day),
                         height: 30,
                         fontSize: 13,
                         border: AppStroke.border,
@@ -215,14 +218,12 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isToday
-                            ? PlanStrings.titleToday
-                            : PlanStrings.titleOtherDay,
+                        isToday ? l.planDrafted : l.planYourDay,
                         style: AppText.display(letterSpacing: -0.3),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        PlanStrings.subtitle(tasks.length, events.length),
+                        l.planSubtitle(tasks.length, events.length),
                         style: AppText.body(
                           size: 13,
                           color: AppColors.muted,
@@ -231,7 +232,11 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        ref.watch(planCapacityLineProvider),
+                        planCapacityLine(
+                          l,
+                          freeMinutes: capacity.free,
+                          plannedMinutes: capacity.planned,
+                        ),
                         key: const Key('plan-capacity'),
                         style: AppText.bold(size: 13, color: AppColors.ink),
                       ),
@@ -250,22 +255,22 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
               runSpacing: 6,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const SectionLabel('Energy'),
-                const Pill(
-                  label: 'Deep focus',
+                SectionLabel(l.sectionEnergy),
+                Pill(
+                  label: l.energyDeep,
                   color: AppColors.violet,
                   textColor: Colors.white,
                   height: 24,
-                  icon: Icon(Icons.bolt),
-                ),
-                const Pill(
-                  label: 'Light',
-                  color: AppColors.sky,
-                  height: 24,
-                  icon: Icon(Icons.cloud_outlined),
+                  icon: const Icon(Icons.bolt),
                 ),
                 Pill(
-                  label: PlanStrings.doneCount(doneCount, tasks.length),
+                  label: l.energyLight,
+                  color: AppColors.sky,
+                  height: 24,
+                  icon: const Icon(Icons.cloud_outlined),
+                ),
+                Pill(
+                  label: l.doneOfTotal(doneCount, tasks.length),
                   color: AppColors.mint,
                   height: 24,
                   fontSize: 12,
@@ -276,11 +281,11 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
             ),
             const SizedBox(height: 14),
             if (tasks.isEmpty && events.isEmpty)
-              const SizedBox(
+              SizedBox(
                 height: 320,
                 child: EmptyState(
-                  title: PlanStrings.emptyTitle,
-                  body: PlanStrings.emptyBody,
+                  title: l.planEmptyTitle,
+                  body: l.planEmptyBody,
                   pipSize: 80,
                 ),
               )
@@ -299,10 +304,9 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                 onStartFocus: _startFocus,
                 onMove: _move,
                 onSwipe: _shift,
-                onRejectedDrop: () =>
-                    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                      const SnackBar(content: Text(PlanStrings.cantDropHere)),
-                    ),
+                onRejectedDrop: () => ScaffoldMessenger.maybeOf(
+                  context,
+                )?.showSnackBar(SnackBar(content: Text(l.planCantDropHere))),
               ),
           ],
         ),
@@ -325,7 +329,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                 Expanded(
                   child: PillButton(
                     key: const Key('plan-replan'),
-                    label: PlanStrings.replan,
+                    label: l.rePlanWithPip,
                     color: AppColors.violet,
                     textColor: Colors.white,
                     height: 52,
@@ -338,7 +342,7 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
                 ),
                 const SizedBox(width: 10),
                 PillButton(
-                  label: 'Add task',
+                  label: l.addTask,
                   color: AppColors.sun,
                   height: 52,
                   shadow: 4,

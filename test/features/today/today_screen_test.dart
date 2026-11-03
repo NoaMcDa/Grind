@@ -185,5 +185,9 @@ void main() {
       Directionality.of(tester.element(find.byType(Scaffold).first)),
       TextDirection.rtl,
     );
+    expect(find.text('מומנטום'), findsOneWidget);
+    expect(find.text('הבא בתור'), findsOneWidget);
+    expect(find.text('Up next'), findsNothing);
+    expect(find.textContaining('מתוך'), findsWidgets);
   });
 }

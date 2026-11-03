@@ -5,7 +5,6 @@ import 'package:grind/app/demo_seed.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/plan/plan_screen.dart';
-import 'package:grind/features/plan/plan_strings.dart';
 
 import '../../test_fonts.dart';
 import '../tasks/zone_test_support.dart';
@@ -80,7 +79,7 @@ void main() {
     }
     expect(find.text('Call mom'), findsNothing); // not scheduled
     expect(find.byType(PlanScreen), findsOneWidget);
-    expect(find.text(PlanStrings.doneCount(2, 5)), findsOneWidget);
+    expect(find.text('2 of 5 done'), findsOneWidget);
     expect(find.byKey(const Key('plan-now-line')), findsOneWidget);
     expect(find.text('Re-plan with Pip'), findsOneWidget);
     expect(find.text('Add task'), findsOneWidget);
@@ -92,7 +91,7 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('Lecture: Computer Vision'), findsNothing);
     expect(find.text('Gym'), findsNothing);
-    expect(find.text(PlanStrings.emptyTitle), findsOneWidget);
+    expect(find.text('Nothing planned yet'), findsOneWidget);
     expect(find.text('Fri, Oct 30'), findsOneWidget);
   });
 
@@ -173,7 +172,7 @@ void main() {
       ],
     );
     expect(find.text('Public holiday'), findsOneWidget);
-    expect(find.text(PlanStrings.allDay), findsOneWidget);
+    expect(find.text('All day'), findsOneWidget);
   });
 
   testWidgets('overlapping events sit side by side', (t) async {
@@ -218,7 +217,7 @@ void main() {
     await _pump(t);
     await t.tap(find.byKey(const Key('plan-event-seminar')));
     await t.pumpAndSettle();
-    expect(find.text(PlanStrings.openInCalendar), findsOneWidget);
+    expect(find.text('Open in calendar'), findsOneWidget);
     expect(find.text('14:00–15:30'), findsWidgets);
   });
 
@@ -226,36 +225,54 @@ void main() {
     final c = await _pump(t);
     await t.tap(find.byKey(const Key('plan-task-lab')));
     await t.pumpAndSettle();
-    expect(find.text(PlanStrings.markDone), findsOneWidget);
-    await t.tap(find.text(PlanStrings.unschedule));
+    expect(find.text('Mark done'), findsOneWidget);
+    await t.tap(find.text('Unschedule'));
     await t.pumpAndSettle();
     final lab = (await c.read(taskRepositoryProvider).getById('lab'))!;
     expect(lab.isScheduled, isFalse);
     expect(find.text('Deep learning lab 4'), findsNothing);
   });
 
-  testWidgets('RTL at 390x844 has no overflow', (t) async {
-    t.view.physicalSize = const Size(390, 844);
-    t.view.devicePixelRatio = 1;
-    addTearDown(t.view.resetPhysicalSize);
-    await t.pumpWidget(
-      ProviderScope(
-        overrides: [
-          ...demoOverrides(clock: FixedClock(testNow)),
-          devicePrefsOverride(),
-        ],
-        child: MaterialApp(
-          builder: (c, w) =>
-              Directionality(textDirection: TextDirection.rtl, child: w!),
-          home: const Scaffold(body: PlanScreen()),
+  testWidgets('Hebrew RTL at 390x844: copy, no overflow, replan sheet', (
+    t,
+  ) async {
+    await pumpGrindApp(
+      t,
+      initialLocation: '/plan',
+      overrides: [
+        preferencesRepositoryProvider.overrideWithValue(
+          InMemoryPreferencesRepository(
+            devicePrefs(
+              const Preferences(onboardingDone: true, localeCode: 'he'),
+            ),
+          ),
         ),
-      ),
+        calendarRepositoryProvider.overrideWithValue(
+          InMemoryCalendarRepository(demoEvents(_day)),
+        ),
+        taskRepositoryProvider.overrideWithValue(
+          InMemoryTaskRepository(demoTasks(_day)),
+        ),
+      ],
     );
+    expect(
+      Directionality.of(t.element(find.byType(PlanScreen))),
+      TextDirection.rtl,
+    );
+    expect(t.takeException(), isNull);
+    expect(find.text('היום שלך, בטיוטה'), findsOneWidget);
+    expect(find.text('תכנון מחדש עם פיפ'), findsOneWidget);
+    expect(find.text('2 מתוך 5 הושלמו'), findsOneWidget);
+    expect(find.text('Re-plan with Pip'), findsNothing);
+    await t.tap(find.byKey(const Key('plan-replan')));
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
-    expect(find.text('Gym'), findsOneWidget);
+    expect(find.text('הטיוטה של פיפ לשבוע'), findsOneWidget);
+    await t.tap(find.text('לא עכשיו'));
+    await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('plan-next-day')));
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
+    expect(find.text('עוד לא תוכנן כלום'), findsOneWidget);
   });
 }

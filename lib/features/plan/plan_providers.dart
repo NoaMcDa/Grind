@@ -6,7 +6,6 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../core/core.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart';
-import 'plan_strings.dart';
 
 /// The date the Plan tab shows (a floating `DateTime(y, m, d)` in the
 /// user's zone). Defaults to today there, per the app clock.
@@ -30,15 +29,6 @@ final selectedDayProvider = NotifierProvider<SelectedDay, DateTime>(
 final planTodayProvider = Provider.autoDispose<DateTime>(
   (ref) => ref.watch(todayBoundsProvider).date,
 );
-
-/// "Thu, Oct 29".
-final planDayLabelProvider = Provider<String>(
-  (ref) => formatPlanDay(ref.watch(selectedDayProvider)),
-);
-
-String formatPlanDay(DateTime d) =>
-    '${PlanStrings.weekdayShort[d.weekday - 1]}, '
-    '${PlanStrings.monthShort[d.month - 1]} ${d.day}';
 
 /// Current time, refreshed every minute (drives the "now" line).
 final planNowProvider = StreamProvider.autoDispose<DateTime>((ref) async* {
