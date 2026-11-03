@@ -11,6 +11,7 @@ import 'features/calendar/apple/providers.dart';
 import 'features/calendar/google/providers.dart';
 import 'features/focus/providers.dart';
 import 'features/goals/data/drift_goal_repository.dart';
+import 'features/goals/data/drift_milestone_repository.dart';
 import 'features/goals/goals.dart';
 import 'features/recurrence/providers.dart';
 import 'features/reminders/weekly_recap_notification.dart';
@@ -34,6 +35,10 @@ Future<void> main() async {
         reviewRepositoryOverride(db),
         goalRepositoryProvider.overrideWith(
           (ref) => DriftGoalRepository(db, clock: ref.watch(clockProvider)),
+        ),
+        milestoneRepositoryProvider.overrideWith(
+          (ref) =>
+              DriftMilestoneRepository(db, clock: ref.watch(clockProvider)),
         ),
         ...notificationOverrides(),
         // Recurring reminders feed their occurrences into the scheduler, and
