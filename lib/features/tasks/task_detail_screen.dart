@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../theme/app_text.dart';
@@ -11,6 +12,7 @@ import '../plan/plan_strings.dart';
 import '../recurrence/providers.dart';
 import '../recurrence/recurrence.dart';
 import '../recurrence/recurrence_picker.dart';
+import 'day_bounds.dart';
 import 'task_actions.dart';
 import 'task_form.dart';
 import 'task_providers.dart';
@@ -88,7 +90,11 @@ class TaskDetailScreen extends ConsumerWidget {
     Recurrence? current,
   ) async {
     final now = ref.read(clockProvider).now();
-    final anchor = (task.remindAt ?? _defaultAnchor(task, now)).toLocal();
+    final location = ref.read(zoneLocationProvider);
+    final anchor = zoneWall(
+      task.remindAt ?? _defaultAnchor(task, now, location),
+      location,
+    );
     final pick = await showRecurrencePicker(context, current, anchor: anchor);
     if (pick == null) return;
     final rules = ref.read(reminderRepositoryProvider);
@@ -113,15 +119,22 @@ class TaskDetailScreen extends ConsumerWidget {
     if (task.remindAt == null) {
       await ref
           .read(taskActionsProvider)
-          .save(task.copyWith(remindAt: anchor.toUtc()));
+          .save(task.copyWith(remindAt: fromZoneWall(anchor, location)));
     }
   }
 
-  static DateTime _defaultAnchor(Task task, DateTime now) {
-    final due = task.dueAt?.toLocal();
-    if (due != null && !(due.hour == 23 && due.minute == 59)) return due;
-    final d = due ?? now.toLocal();
-    return DateTime(d.year, d.month, d.day, 9);
+  /// The due time, else 09:00 on the due day (or today), in [location].
+  static DateTime _defaultAnchor(
+    Task task,
+    DateTime now,
+    tz.Location location,
+  ) {
+    final due = task.dueAt == null ? null : zoneWall(task.dueAt!, location);
+    if (due != null && !(due.hour == 23 && due.minute == 59)) {
+      return task.dueAt!;
+    }
+    final d = due ?? zoneWall(now, location);
+    return fromZoneWall(DateTime(d.year, d.month, d.day, 9), location);
   }
 
   @override
@@ -193,9 +206,11 @@ class TaskDetailScreen extends ConsumerWidget {
     Task task,
     TaskActions actions,
   ) {
-    final due = task.dueAt?.toLocal();
+    final location = ref.watch(zoneLocationProvider);
+    DateTime? wall(DateTime? t) => t == null ? null : zoneWall(t, location);
+    final due = wall(task.dueAt);
     final dueHasTime = due != null && !(due.hour == 23 && due.minute == 59);
-    final remind = task.remindAt?.toLocal();
+    final remind = wall(task.remindAt);
     final done = task.isDone;
     final rule = ref.watch(ruleForTaskProvider(task.id)).valueOrNull;
     Recurrence? recurrence;
@@ -255,8 +270,8 @@ class TaskDetailScreen extends ConsumerWidget {
                 TasksStrings.scheduledLabel,
                 task.isScheduled
                     ? PlanStrings.slot(
-                        task.scheduledStart!.toLocal(),
-                        task.scheduledEnd!.toLocal(),
+                        wall(task.scheduledStart)!,
+                        wall(task.scheduledEnd)!,
                       )
                     : TasksStrings.notScheduled,
               ),
@@ -331,9 +346,9 @@ class TaskDetailScreen extends ConsumerWidget {
   );
 }
 
-/// "07:00" in local time.
+/// "07:00" for wall-clock fields (convert instants with `zoneWall`).
 String formatTime(DateTime t) {
-  final l = t.toLocal();
+  final l = t;
   return '${l.hour.toString().padLeft(2, '0')}:'
       '${l.minute.toString().padLeft(2, '0')}';
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../reminders/reminder_now_card.dart';
 import '../review/review.dart';
+import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
@@ -58,8 +60,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   Widget build(BuildContext context) {
     final tasks = ref
         .watch(todayTasksProvider)
-        .where((t) => !_hidden.contains(t.id))
+        .where((i) => !_hidden.contains(i.task.id))
         .toList();
+    final location = ref.watch(zoneLocationProvider);
     final doneCount = tasks.where((t) => t.isDone).length;
     final top = MediaQuery.paddingOf(context).top;
     return Stack(
@@ -77,7 +80,10 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       SectionLabel(ref.watch(todayLabelProvider)),
                       const SizedBox(height: 4),
                       Text(
-                        greetingFor(ref.watch(clockProvider).now()),
+                        greetingFor(
+                          ref.watch(clockProvider).now(),
+                          ref.watch(zoneLocationProvider),
+                        ),
                         style: AppText.display(height: 1.05),
                       ),
                     ],
@@ -168,7 +174,10 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 onAction: _add,
                 pipSize: 72,
               ),
-            for (final t in tasks) ...[_taskRow(t), const SizedBox(height: 10)],
+            for (final i in tasks) ...[
+              _taskRow(i, location),
+              const SizedBox(height: 10),
+            ],
           ],
         ),
         Positioned(
@@ -200,13 +209,18 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     );
   }
 
-  Widget _taskRow(Task t) {
+  Widget _taskRow(TodayItem item, tz.Location location) {
+    final t = item.task;
     final done = t.isDone;
+    final at = item.at;
     final tag = taskTagColor(t);
     final onViolet = tag == AppColors.violet;
     final actions = ref.read(taskActionsProvider);
+    // A series row completes its own occurrence; the series continues.
+    Future<void> toggle() =>
+        actions.toggle(context, t, occurrenceAt: item.occurrence ? at : null);
     return Dismissible(
-      key: ValueKey('task-${t.id}'),
+      key: ValueKey('task-${item.key}'),
       background: _swipeBackground(
         AppColors.mint,
         Icons.check,
@@ -219,7 +233,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
       ),
       confirmDismiss: (dir) async {
         if (dir == DismissDirection.startToEnd) {
-          await actions.toggle(context, t);
+          await toggle();
           return false;
         }
         return true;
@@ -257,9 +271,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       ? 'Mark ${t.title} as open'
                       : 'Complete ${t.title}',
                   excludeSemantics: true,
-                  onTap: () => actions.toggle(context, t),
+                  onTap: toggle,
                   child: GestureDetector(
-                    onTap: () => actions.toggle(context, t),
+                    onTap: toggle,
                     behavior: HitTestBehavior.opaque,
                     child: SizedBox(
                       width: 44,
@@ -316,9 +330,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                if (t.remindAt != null)
+                if (at != null)
                   Pill(
-                    label: formatClock(t.remindAt!),
+                    label: formatClock(at, location),
                     color: tag,
                     textColor: onViolet ? Colors.white : AppColors.ink,
                     fontSize: 13,
@@ -345,9 +359,12 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   }
 }
 
-/// "Good morning!" before noon, then afternoon, then evening.
-String greetingFor(DateTime now) {
-  final h = now.toLocal().hour;
+/// "Good morning!" before noon, then afternoon, then evening, by the clock
+/// in [location] (device-local without one).
+String greetingFor(DateTime now, [tz.Location? location]) {
+  final h = location == null
+      ? now.toLocal().hour
+      : tz.TZDateTime.from(now, location).hour;
   if (h >= 5 && h < 12) return 'Good morning!';
   if (h >= 12 && h < 18) return 'Good afternoon!';
   return 'Good evening!';

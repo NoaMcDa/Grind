@@ -5,6 +5,8 @@ import 'package:uuid/uuid.dart';
 import '../../core/core.dart';
 import '../../widgets/pip_toast.dart';
 import '../recurrence/occurrence_completion.dart';
+import '../recurrence/occurrence_expander.dart';
+import 'day_bounds.dart';
 import 'tasks_strings.dart';
 
 /// Create, complete and delete, shared by Today and the detail screen.
@@ -25,6 +27,7 @@ class TaskActions {
     Energy energy = Energy.light,
     String? firstAction,
     String? notes,
+    String? goalId,
   }) {
     final now = _now;
     return Task(
@@ -36,6 +39,7 @@ class TaskActions {
       energy: energy,
       firstAction: firstAction,
       notes: notes,
+      goalId: goalId,
       createdAt: now,
       updatedAt: now,
     );
@@ -54,21 +58,35 @@ class TaskActions {
     );
   }
 
-  /// Completes the current occurrence of a recurring task: the series moves
-  /// on to its next occurrence (and loses this occurrence's slot), or is
-  /// done when none is left. Null when [t] does not repeat.
-  Future<Task?> completeRecurring(Task t) async {
+  /// Completes one occurrence of a recurring task: the series moves on to
+  /// its next occurrence (and loses this occurrence's slot), or is done when
+  /// none is left. Null when [t] does not repeat.
+  ///
+  /// [occurrenceAt] is the occurrence being completed (a Today row passes
+  /// its own). Without it, the current one: the latest occurrence at or
+  /// before now, or the anchor when the series has not started yet.
+  ///
+  /// Once `ReminderRule.lastCompletedAt` exists, write [occurrenceAt] there
+  /// too, so COUNT survives and Today can keep the row as done.
+  Future<Task?> completeRecurring(Task t, {DateTime? occurrenceAt}) async {
     final anchor = t.remindAt;
     if (anchor == null) return null;
     final rule = await _ref.read(reminderRepositoryProvider).getForTask(t.id);
     if (rule == null) return null;
     final prefs = await _ref.read(preferencesRepositoryProvider).get();
-    var next = completeOccurrence(
-      task: t,
-      rule: rule,
-      occurrenceAt: anchor,
-      timeZoneName: prefs.timeZoneName,
-      now: _now,
+    final now = _now;
+    final at =
+        occurrenceAt ??
+        _currentOccurrence(rule, anchor, now, prefs.timeZoneName) ??
+        anchor;
+    var next = _plainRemindAt(
+      completeOccurrence(
+        task: t,
+        rule: rule,
+        occurrenceAt: at,
+        timeZoneName: prefs.timeZoneName,
+        now: now,
+      ),
     );
     if (!next.isDone) {
       next = next.copyWith(
@@ -81,12 +99,38 @@ class TaskActions {
     return next;
   }
 
+  static DateTime? _currentOccurrence(
+    ReminderRule rule,
+    DateTime anchor,
+    DateTime now,
+    String zone,
+  ) {
+    if (anchor.isAfter(now)) return null;
+    final past = expandOccurrences(
+      rule: rule.copyWith(leadMinutes: 0),
+      anchor: anchor,
+      from: anchor,
+      to: now.add(const Duration(minutes: 1)),
+      timeZoneName: zone,
+    );
+    return past.isEmpty ? null : utcOf(past.last);
+  }
+
+  /// The expander hands back `TZDateTime`s; store a plain UTC value.
+  static Task _plainRemindAt(Task t) =>
+      t.remindAt == null ? t : t.copyWith(remindAt: utcOf(t.remindAt!));
+
   /// Toggle done; completing shows an undo toast. On a recurring task,
-  /// "done" completes this occurrence only.
-  Future<void> toggle(BuildContext context, Task t) async {
+  /// "done" completes one occurrence only ([occurrenceAt], see
+  /// [completeRecurring]) and the series continues.
+  Future<void> toggle(
+    BuildContext context,
+    Task t, {
+    DateTime? occurrenceAt,
+  }) async {
     final done = !t.isDone;
     if (done) {
-      final next = await completeRecurring(t);
+      final next = await completeRecurring(t, occurrenceAt: occurrenceAt);
       if (next != null) {
         if (!context.mounted) return;
         showPipToast(
@@ -109,13 +153,17 @@ class TaskActions {
     }
   }
 
-  /// Soft-delete with an undo toast that restores the task.
+  /// Soft-delete with an undo toast that restores the task. A recurrence
+  /// rule goes with the task and comes back with the undo.
   Future<void> deleteWithUndo(
     BuildContext context,
     Task t, {
     VoidCallback? onUndo,
   }) async {
+    final rules = _ref.read(reminderRepositoryProvider);
+    final rule = await rules.getForTask(t.id);
     await _repo.delete(t.id);
+    if (rule != null) await rules.delete(rule.id);
     if (!context.mounted) return;
     showPipToast(
       context,
@@ -123,6 +171,7 @@ class TaskActions {
       actionLabel: TasksStrings.undo,
       onAction: () {
         _repo.upsert(t);
+        if (rule != null) rules.upsert(rule);
         onUndo?.call();
       },
     );

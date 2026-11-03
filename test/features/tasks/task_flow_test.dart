@@ -6,6 +6,7 @@ import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
 
 import '../../test_fonts.dart';
+import 'zone_test_support.dart';
 
 List<Override> get _hebrew => [
   preferencesRepositoryProvider.overrideWithValue(
@@ -21,7 +22,10 @@ void main() {
   testWidgets('creating a task from the sheet adds it to Up next', (
     tester,
   ) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     await tester.tap(find.bySemanticsLabel('Add a task'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Write abstract');
@@ -42,7 +46,7 @@ void main() {
   testWidgets('Enter saves, empty title shows an error, Esc closes', (
     tester,
   ) async {
-    await pumpGrindApp(tester);
+    await pumpGrindApp(tester, overrides: [devicePrefsOverride()]);
     await tester.tap(find.bySemanticsLabel('Add a task'));
     await tester.pumpAndSettle();
 
@@ -66,7 +70,10 @@ void main() {
   testWidgets('reminder follows the due time; estimate and energy save', (
     tester,
   ) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     await tester.tap(find.bySemanticsLabel('Add a task'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Pack bag');
@@ -94,7 +101,10 @@ void main() {
   testWidgets('detail screen edits, completes, and deletes with undo', (
     tester,
   ) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     final repo = container.read(taskRepositoryProvider);
 
     await tester.tap(find.text('Gym'));

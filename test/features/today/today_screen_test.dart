@@ -1,17 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/core/notifications/time_zones.dart';
 
 import '../../test_fonts.dart';
+import '../tasks/zone_test_support.dart';
+
+final _c = DateTime.utc(2026, 10, 1);
+
+/// Every Tuesday at 07:00 in Jerusalem, anchored a week before the test day
+/// (Tue Nov 3 2026, 12:00 UTC = 14:00 there).
+Task _weekly() => Task(
+  id: 'w',
+  title: 'Weekly review',
+  remindAt: DateTime.utc(2026, 10, 27, 5),
+  createdAt: _c,
+  updatedAt: _c,
+);
+
+Future<ProviderContainer> _pumpWeekly(WidgetTester tester) => pumpGrindApp(
+  tester,
+  clock: FixedClock(DateTime.utc(2026, 11, 3, 12)),
+  overrides: [
+    taskRepositoryProvider.overrideWithValue(
+      InMemoryTaskRepository([_weekly()]),
+    ),
+    reminderRepositoryProvider.overrideWithValue(
+      InMemoryReminderRepository([
+        ReminderRule(
+          id: 'rule-w',
+          taskId: 'w',
+          rrule: 'FREQ=WEEKLY;BYDAY=TU',
+          createdAt: _c,
+          updatedAt: _c,
+        ),
+      ]),
+    ),
+    preferencesRepositoryProvider.overrideWithValue(
+      InMemoryPreferencesRepository(
+        const Preferences(onboardingDone: true, timeZoneName: 'Asia/Jerusalem'),
+      ),
+    ),
+  ],
+);
 
 void main() {
-  setUpAll(loadAppFonts);
+  setUpAll(() async {
+    ensureTimeZones();
+    await loadAppFonts();
+  });
+
+  testWidgets('a weekly task shows on its day at the occurrence time; the '
+      'checkbox completes this occurrence only', (tester) async {
+    final c = await _pumpWeekly(tester);
+    final repo = c.read(taskRepositoryProvider);
+    expect(find.text('Weekly review'), findsOneWidget);
+    expect(find.text('07:00'), findsOneWidget); // 07:00 Jerusalem, not UTC
+    expect(find.text('0 of 1 today'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Complete Weekly review'));
+    await tester.pumpAndSettle();
+    final after = (await repo.getById('w'))!;
+    expect(after.isDone, isFalse);
+    expect(after.remindAt, DateTime.utc(2026, 11, 10, 5));
+    expect(await c.read(reminderRepositoryProvider).getForTask('w'), isNotNull);
+    expect(find.text('Nicely done. The next one is lined up.'), findsOneWidget);
+    expect(find.text('Weekly review'), findsNothing);
+
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect((await repo.getById('w'))!.remindAt, DateTime.utc(2026, 10, 27, 5));
+    expect(find.text('Weekly review'), findsOneWidget);
+  });
+
+  testWidgets('swipe right on a weekly task completes this occurrence only', (
+    tester,
+  ) async {
+    final c = await _pumpWeekly(tester);
+    await tester.drag(find.text('Weekly review'), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    final after = (await c.read(taskRepositoryProvider).getById('w'))!;
+    expect(after.isDone, isFalse);
+    expect(after.remindAt, DateTime.utc(2026, 11, 10, 5));
+  });
+
+  testWidgets(
+    'deleting a weekly task takes its rule along; undo restores both',
+    (tester) async {
+      final c = await _pumpWeekly(tester);
+      final rules = c.read(reminderRepositoryProvider);
+      await tester.drag(find.text('Weekly review'), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(await rules.getForTask('w'), isNull);
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(await rules.getForTask('w'), isNotNull);
+      expect(find.text('Weekly review'), findsOneWidget);
+    },
+  );
 
   testWidgets('Up next shows today, done items sink, momentum is real', (
     tester,
   ) async {
-    await pumpGrindApp(tester);
+    await pumpGrindApp(tester, overrides: [devicePrefsOverride()]);
     expect(find.text('UP NEXT'), findsOneWidget);
     expect(find.text('1 of 4 today'), findsOneWidget);
     // Open tasks first by reminder time, the done one last.
@@ -23,7 +116,10 @@ void main() {
   });
 
   testWidgets('empty state renders when nothing is due', (tester) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     final repo = container.read(taskRepositoryProvider);
     for (final t in await repo.getAll()) {
       await repo.delete(t.id);
@@ -36,7 +132,10 @@ void main() {
   testWidgets('swipe right completes, swipe left deletes and undo restores', (
     tester,
   ) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     final repo = container.read(taskRepositoryProvider);
 
     await tester.drag(find.text('Gym'), const Offset(300, 0));
@@ -57,7 +156,10 @@ void main() {
   });
 
   testWidgets('checkbox toggles done and undo reopens', (tester) async {
-    final container = await pumpGrindApp(tester);
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
     final repo = container.read(taskRepositoryProvider);
     await tester.tap(find.bySemanticsLabel('Complete Gym'));
     await tester.pumpAndSettle();
