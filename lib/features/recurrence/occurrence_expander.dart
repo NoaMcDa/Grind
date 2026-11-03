@@ -122,6 +122,9 @@ List<tz.TZDateTime> expandOccurrences({
   final before = wallClock(
     tz.TZDateTime.from(toUtc.add(lead), location),
   ).add(const Duration(days: 1));
+  // The series starts after the window (the `rrule` package asserts
+  // `before >= start`).
+  if (before.isBefore(anchorWall)) return const [];
 
   final untilUtc = rule.until?.toUtc();
   final out = <tz.TZDateTime>[];
