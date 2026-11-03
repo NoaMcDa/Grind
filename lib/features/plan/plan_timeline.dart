@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/sticker_card.dart';
 import '../today/today_providers.dart' show formatClock;
 import 'plan_layout.dart';
-import 'plan_strings.dart';
 
 const planHourHeight = 48.0;
 const _gutter = 44.0;
@@ -293,7 +293,7 @@ class _PlanTimelineState extends State<PlanTimeline> {
       height: 8,
       child: IgnorePointer(
         child: Semantics(
-          label: PlanStrings.nowLabel,
+          label: context.l10n.planNowLabel,
           child: Row(
             key: widget.nowKey,
             children: [
@@ -353,7 +353,7 @@ class _PlanTimelineState extends State<PlanTimeline> {
               ),
               const SizedBox(width: 8),
               Text(
-                PlanStrings.allDay,
+                context.l10n.planAllDay,
                 style: AppText.body(size: 12, color: AppColors.muted),
               ),
             ],
@@ -413,7 +413,7 @@ class _PlanTimelineState extends State<PlanTimeline> {
                 children: [
                   if (roomy)
                     Text(
-                      PlanStrings.fromCalendar,
+                      context.l10n.fromCalendar.toUpperCase(),
                       style: AppText.label(size: 11),
                     ),
                   Text(
@@ -612,7 +612,7 @@ class _PlanTimelineState extends State<PlanTimeline> {
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: 8),
                 child: PillButton(
-                  label: 'Start focus',
+                  label: context.l10n.startFocus,
                   color: AppColors.sun,
                   shadow: 3,
                   fontSize: 13,

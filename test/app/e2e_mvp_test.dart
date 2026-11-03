@@ -7,7 +7,8 @@ import 'package:grind/app/tab_bar.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/time_zones.dart';
-import 'package:grind/features/plan/plan_strings.dart';
+import 'package:grind/features/plan/plan_l10n.dart';
+import 'package:grind/l10n/l10n.dart';
 
 import '../features/tasks/zone_test_support.dart';
 import '../test_fonts.dart';
@@ -74,7 +75,11 @@ void main() {
       expect(placed.isScheduled, isTrue);
       expect(placed.lockedStart, isFalse);
       final start = placed.scheduledStart!.toLocal();
-      final slot = PlanStrings.slot(start, placed.scheduledEnd!.toLocal());
+      final slot = formatPlanSlot(
+        lookupAppLocalizations(const Locale('en')),
+        start,
+        placed.scheduledEnd!.toLocal(),
+      );
       // 09:00 is free (the lecture starts at 10:00), so that is the spot.
       expect(start, DateTime(2026, 10, 29, 9));
       expect(find.text(slot), findsOneWidget); // "On the plan" field
@@ -157,7 +162,7 @@ void main() {
 
       await t.tap(find.byKey(const Key('plan-replan')));
       await t.pumpAndSettle();
-      expect(find.text(PlanStrings.replanTitle), findsOneWidget);
+      expect(find.text("Pip's draft for the week"), findsOneWidget);
       final row = find.byKey(const Key('replan-placed-abstract'));
       expect(row, findsOneWidget);
       // Each placement shows its reasons.
@@ -177,7 +182,7 @@ void main() {
 
       await t.tap(find.byKey(const Key('replan-apply')));
       await t.pumpAndSettle();
-      expect(find.text(PlanStrings.replanTitle), findsNothing);
+      expect(find.text("Pip's draft for the week"), findsNothing);
       final abstract = (await repo.getById('abstract'))!;
       expect(abstract.isScheduled, isTrue);
       expect(abstract.scheduledStart!.isUtc, isTrue);
@@ -208,8 +213,11 @@ void main() {
       await t.tap(find.byKey(const Key('plan-replan')));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('replan-placed-abstract')), findsNothing);
-      expect(find.text(PlanStrings.replanKept(1)), findsOneWidget);
-      await t.tap(find.text(PlanStrings.notNow));
+      expect(
+        find.text('One thing you placed yourself stays put.'),
+        findsOneWidget,
+      );
+      await t.tap(find.text('Not now'));
       await t.pumpAndSettle();
       expect(
         (await repo.getById('abstract'))!.scheduledStart,

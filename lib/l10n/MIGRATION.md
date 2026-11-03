@@ -152,6 +152,12 @@ now. `ReminderCopy._fallbackTitle` ('Grind') is the app name and stays in Dart.
 
 ## Plan (`plan_strings.dart`)
 
+Migrated in part 2 (Today and Plan). Scheduler `reasons` are mapped by
+`localizePlanReason` in `plan_reasons_l10n.dart`; date and capacity helpers
+live in `plan_l10n.dart`. `plan_strings.dart` keeps only the members still
+read by `plan_task_sheet.dart` and `tasks/task_detail_screen.dart`; delete it
+when those switch to `context.l10n`.
+
 | Constant / helper | ARB key |
 |---|---|
 | `titleToday` | `planDrafted` (existing) |

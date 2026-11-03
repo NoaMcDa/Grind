@@ -2308,5 +2308,366 @@
   "capacityWeightsReset": "Reset to defaults",
   "@capacityWeightsReset": {
     "description": "Advanced scoring weights (priorities tab)"
+  },
+  "goodAfternoon": "Good afternoon!",
+  "@goodAfternoon": {
+    "description": "Greeting"
+  },
+  "goodEvening": "Good evening!",
+  "@goodEvening": {
+    "description": "Greeting"
+  },
+  "todayMarkOpen": "Mark {title} as open",
+  "@todayMarkOpen": {
+    "description": "Task checkbox semantics",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todayComplete": "Complete {title}",
+  "@todayComplete": {
+    "description": "Task checkbox semantics",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planReplanTitle": "Pip's draft for the week",
+  "@planReplanTitle": {
+    "description": "Replan sheet title"
+  },
+  "planReplanPlacedLabel": "Where things go",
+  "@planReplanPlacedLabel": {
+    "description": "Replan sheet section (shown uppercase)"
+  },
+  "planReplanUnplacedLabel": "What didn't fit",
+  "@planReplanUnplacedLabel": {
+    "description": "Replan sheet section (shown uppercase)"
+  },
+  "planReplanNothing": "Nothing to move. Your week already looks settled.",
+  "@planReplanNothing": {
+    "description": "Replan sheet"
+  },
+  "planReplanPast": "This week has passed. Pick today or later.",
+  "@planReplanPast": {
+    "description": "Replan sheet"
+  },
+  "planReplanKept": "{n, plural, =1{One thing you placed yourself stays put.} other{{n} things you placed yourself stay put.}}",
+  "@planReplanKept": {
+    "description": "Replan sheet",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planApply": "Apply",
+  "@planApply": {
+    "description": "Replan sheet button"
+  },
+  "planNotNow": "Not now",
+  "@planNotNow": {
+    "description": "Replan sheet button"
+  },
+  "planApplied": "{n, plural, =0{All set, nothing needed moving.} =1{Done. One thing has a spot now.} other{Done. {n} things have a spot now.}}",
+  "@planApplied": {
+    "description": "Toast after applying a plan",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planScheduledAt": "{when} · {reason}",
+  "@planScheduledAt": {
+    "description": "Toast after scheduling one task",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "planNotScheduled": "No spot yet: {reason}",
+  "@planNotScheduled": {
+    "description": "Toast when a task did not fit",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "planNothingToSchedule": "this one is already done",
+  "@planNothingToSchedule": {
+    "description": "Reason, lowercase fragment"
+  },
+  "planNoRoomThisWeek": "no free gap before the end of the week",
+  "@planNoRoomThisWeek": {
+    "description": "Reason, lowercase fragment"
+  },
+  "planHoursShort": "{hours} h",
+  "@planHoursShort": {
+    "description": "Short duration in hours; hours is a number such as 1.5",
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "planCapacityFull": "A full week: over by {amount}. Pip can help trim it.",
+  "@planCapacityFull": {
+    "description": "Plan header capacity line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "planCapacityNothing": "{free} free · nothing planned yet",
+  "@planCapacityNothing": {
+    "description": "Plan header capacity line",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      }
+    }
+  },
+  "planCapacityLine": "{free} free · {planned} planned",
+  "@planCapacityLine": {
+    "description": "Plan header capacity line",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "planDurationHours": "{n, plural, =1{1 hour} other{{n} hours}}",
+  "@planDurationHours": {
+    "description": "Long duration",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planDurationMinutes": "{n, plural, =1{1 minute} other{{n} minutes}}",
+  "@planDurationMinutes": {
+    "description": "Long duration",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planSummaryHead": "You have {free} free and {demand} of plans.",
+  "@planSummaryHead": {
+    "description": "Replan sheet summary opening",
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "demand": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryFits": "{head} It fits, with room to breathe.",
+  "@planSummaryFits": {
+    "description": "Replan sheet summary",
+    "placeholders": {
+      "head": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryLighter": "{head} A lighter week might help.",
+  "@planSummaryLighter": {
+    "description": "Replan sheet summary",
+    "placeholders": {
+      "head": {
+        "type": "String"
+      }
+    }
+  },
+  "planSummaryDefer": "{head} {n, plural, =1{One thing} other{{n} things}} could move to next week.",
+  "@planSummaryDefer": {
+    "description": "Replan sheet summary",
+    "placeholders": {
+      "head": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planWordToday": "today",
+  "@planWordToday": {
+    "description": "Day word in a reason"
+  },
+  "planWordTomorrow": "tomorrow",
+  "@planWordTomorrow": {
+    "description": "Day word in a reason"
+  },
+  "planDeadlineToday": "today's deadline",
+  "@planDeadlineToday": {
+    "description": "Deadline phrase in a reason"
+  },
+  "planDeadlineTomorrow": "tomorrow's deadline",
+  "@planDeadlineTomorrow": {
+    "description": "Deadline phrase in a reason"
+  },
+  "planDeadlineOn": "the {day} deadline",
+  "@planDeadlineOn": {
+    "description": "Deadline phrase in a reason",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonPlacedByYou": "you placed this here",
+  "@planReasonPlacedByYou": {
+    "description": "Placement reason"
+  },
+  "planReasonDue": "due {when}",
+  "@planReasonDue": {
+    "description": "Placement reason",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonPartOf": "part of {title}",
+  "@planReasonPartOf": {
+    "description": "Placement reason",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonFocusWindow": "your focus window",
+  "@planReasonFocusWindow": {
+    "description": "Placement reason"
+  },
+  "planReasonChunkFirst": "first {minutes} of {total} min",
+  "@planReasonChunkFirst": {
+    "description": "Placement reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planReasonChunkNext": "next {minutes} of {total} min",
+  "@planReasonChunkNext": {
+    "description": "Placement reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planReasonChunkLast": "last {minutes} of {total} min",
+  "@planReasonChunkLast": {
+    "description": "Placement reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "planReasonEarliestGap": "earliest free {minutes}-minute gap",
+  "@planReasonEarliestGap": {
+    "description": "Placement reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planReasonEarliestGapBefore": "earliest free {minutes}-minute gap before {deadline}",
+  "@planReasonEarliestGapBefore": {
+    "description": "Placement reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "deadline": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonDatePassed": "the due date has passed, want to pick a new one?",
+  "@planReasonDatePassed": {
+    "description": "Unplaced reason"
+  },
+  "planByThisWeek": "this week",
+  "@planByThisWeek": {
+    "description": "Reason fragment"
+  },
+  "planByBefore": "before {when}",
+  "@planByBefore": {
+    "description": "Reason fragment",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonFocusFull": "focus blocks are full {by}",
+  "@planReasonFocusFull": {
+    "description": "Unplaced reason",
+    "placeholders": {
+      "by": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonOnlyFit": "only {fit} of {need} min fit {by}",
+  "@planReasonOnlyFit": {
+    "description": "Unplaced reason",
+    "placeholders": {
+      "fit": {
+        "type": "int"
+      },
+      "need": {
+        "type": "int"
+      },
+      "by": {
+        "type": "String"
+      }
+    }
+  },
+  "planReasonNoSlot": "no free {minutes}-minute slot {by}",
+  "@planReasonNoSlot": {
+    "description": "Unplaced reason",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "by": {
+        "type": "String"
+      }
+    }
   }
 }

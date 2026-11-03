@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_bottom_sheet.dart';
+import 'plan_l10n.dart';
 import 'plan_scheduler.dart';
-import 'plan_strings.dart';
-import 'scheduler/scheduler.dart' show capacitySummary;
+import 'plan_reasons_l10n.dart';
 
 /// "Re-plan with Pip" for the week of [day]: runs the scheduler, shows the
 /// review sheet and applies the draft when the user says so.
@@ -24,7 +25,7 @@ Future<void> replanWithPip(
   final apply = await showReplanSheet(context, proposal);
   if (apply != true) return;
   final n = await scheduler.apply(proposal);
-  if (context.mounted) showPipToast(context, PlanStrings.applied(n));
+  if (context.mounted) showPipToast(context, context.l10n.planApplied(n));
 }
 
 /// "Schedule it for me" on one task: places it and says why in a toast.
@@ -35,15 +36,14 @@ Future<SingleSchedule> scheduleTaskForMe(
 ) async {
   final result = await ref.read(planSchedulerProvider).scheduleOne(taskId);
   if (context.mounted) {
+    final l = context.l10n;
     final p = result.placement;
+    final reason = localizePlanReason(l, result.reason);
     showPipToast(
       context,
       p == null
-          ? PlanStrings.notScheduled(result.reason)
-          : PlanStrings.scheduledAt(
-              PlanStrings.slot(p.start, p.end),
-              result.reason,
-            ),
+          ? l.planNotScheduled(reason)
+          : l.planScheduledAt(formatPlanSlot(l, p.start, p.end), reason),
     );
   }
   return result;
@@ -61,6 +61,7 @@ class ReplanSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final changes = proposal.changes;
     final unplaced = proposal.unplaced;
     final past = proposal.plan.capacity.days.isEmpty;
@@ -80,7 +81,7 @@ class ReplanSheet extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        PlanStrings.replanTitle,
+                        l.planReplanTitle,
                         style: AppText.display(size: 22),
                       ),
                     ),
@@ -89,10 +90,11 @@ class ReplanSheet extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   past
-                      ? PlanStrings.replanPast
+                      ? l.planReplanPast
                       : nothing
-                      ? PlanStrings.replanNothing
-                      : capacitySummary(
+                      ? l.planReplanNothing
+                      : planCapacitySummary(
+                          l,
                           proposal.plan.capacity,
                           deferrals: proposal.plan.deferralSuggestions.length,
                         ),
@@ -101,32 +103,34 @@ class ReplanSheet extends StatelessWidget {
                 if (proposal.keptCount > 0) ...[
                   const SizedBox(height: 4),
                   Text(
-                    PlanStrings.replanKept(proposal.keptCount),
+                    l.planReplanKept(proposal.keptCount),
                     style: AppText.body(size: 13, color: AppColors.muted),
                   ),
                 ],
                 if (changes.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  const SectionLabel(PlanStrings.replanPlacedLabel),
+                  SectionLabel(l.planReplanPlacedLabel),
                   const SizedBox(height: 8),
                   for (final p in changes)
                     _Row(
                       key: Key('replan-placed-${p.taskId}'),
                       title: proposal.titleOf(p.taskId),
-                      when: PlanStrings.slot(p.start, p.end),
-                      reasons: p.reasons,
+                      when: formatPlanSlot(l, p.start, p.end),
+                      reasons: [
+                        for (final r in p.reasons) localizePlanReason(l, r),
+                      ],
                       color: AppColors.lilac,
                     ),
                 ],
                 if (unplaced.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  const SectionLabel(PlanStrings.replanUnplacedLabel),
+                  SectionLabel(l.planReplanUnplacedLabel),
                   const SizedBox(height: 8),
                   for (final u in unplaced)
                     _Row(
                       key: Key('replan-unplaced-${u.taskId}'),
                       title: proposal.titleOf(u.taskId),
-                      reasons: [u.reason],
+                      reasons: [localizePlanReason(l, u.reason)],
                       color: AppColors.card,
                     ),
                 ],
@@ -139,7 +143,7 @@ class ReplanSheet extends StatelessWidget {
           children: [
             Expanded(
               child: PillButton(
-                label: PlanStrings.notNow,
+                label: l.planNotNow,
                 onPressed: () => Navigator.of(context).pop(false),
               ),
             ),
@@ -147,7 +151,7 @@ class ReplanSheet extends StatelessWidget {
             Expanded(
               child: PillButton(
                 key: const Key('replan-apply'),
-                label: PlanStrings.apply,
+                label: l.planApply,
                 color: AppColors.violet,
                 textColor: Colors.white,
                 onPressed: changes.isEmpty

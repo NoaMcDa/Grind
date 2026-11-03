@@ -8,11 +8,11 @@ import '../tasks/day_bounds.dart';
 
 export '../tasks/task_providers.dart' show TodayItem, todayTasksProvider;
 
-/// "Thursday, Oct 29" for the current day in the user's zone.
-final todayLabelProvider = Provider.autoDispose<String>((ref) {
-  final d = ref.watch(todayBoundsProvider).date;
-  return '${_weekdays[d.weekday - 1]}, ${_months[d.month - 1]} ${d.day}';
-});
+/// The current day in the user's zone; the screen words it with
+/// `formatTodayLabel` in the app language.
+final todayDateProvider = Provider.autoDispose<DateTime>(
+  (ref) => ref.watch(todayBoundsProvider).date,
+);
 
 /// "12:30" in [location] (the user's zone), or device-local time without
 /// one (for values that already are wall-clock fields).
@@ -29,27 +29,3 @@ Color taskTagColor(Task t) => switch (t.category) {
   'social' => AppColors.pink,
   _ => AppColors.violet,
 };
-
-const _weekdays = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
-const _months = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];

@@ -1717,4 +1717,234 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get capacityWeightsReset => 'איפוס לברירת מחדל';
+
+  @override
+  String get goodAfternoon => 'צהריים טובים!';
+
+  @override
+  String get goodEvening => 'ערב טוב!';
+
+  @override
+  String todayMarkOpen(String title) {
+    return 'סימון \"$title\" כפתוח';
+  }
+
+  @override
+  String todayComplete(String title) {
+    return 'השלמת \"$title\"';
+  }
+
+  @override
+  String get planReplanTitle => 'הטיוטה של פיפ לשבוע';
+
+  @override
+  String get planReplanPlacedLabel => 'איפה כל דבר נוחת';
+
+  @override
+  String get planReplanUnplacedLabel => 'מה לא נכנס';
+
+  @override
+  String get planReplanNothing => 'אין מה להזיז. השבוע שלך כבר נראה מסודר.';
+
+  @override
+  String get planReplanPast =>
+      'השבוע הזה כבר מאחורינו. אפשר לבחור את היום או יום מאוחר יותר.';
+
+  @override
+  String planReplanKept(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n דברים שהצבת בעצמך נשארים במקומם.',
+      one: 'דבר אחד שהצבת בעצמך נשאר במקומו.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planApply => 'אישור';
+
+  @override
+  String get planNotNow => 'לא עכשיו';
+
+  @override
+  String planApplied(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'בוצע. ל-$n דברים יש מקום עכשיו.',
+      one: 'בוצע. לדבר אחד יש מקום עכשיו.',
+      zero: 'הכול מוכן, לא היה צורך להזיז כלום.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planScheduledAt(String when, String reason) {
+    return '$when · $reason';
+  }
+
+  @override
+  String planNotScheduled(String reason) {
+    return 'עוד אין מקום: $reason';
+  }
+
+  @override
+  String get planNothingToSchedule => 'המשימה הזו כבר הושלמה';
+
+  @override
+  String get planNoRoomThisWeek => 'אין חלון פנוי עד סוף השבוע';
+
+  @override
+  String planHoursShort(String hours) {
+    return '$hours ש׳';
+  }
+
+  @override
+  String planCapacityFull(String amount) {
+    return 'שבוע מלא: חריגה של $amount. פיפ יעזור לקצץ.';
+  }
+
+  @override
+  String planCapacityNothing(String free) {
+    return '$free פנויות · עוד לא תוכנן כלום';
+  }
+
+  @override
+  String planCapacityLine(String free, String planned) {
+    return '$free פנויות · $planned מתוכננות';
+  }
+
+  @override
+  String planDurationHours(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n שעות',
+      two: 'שעתיים',
+      one: 'שעה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDurationMinutes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n דקות',
+      one: 'דקה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planSummaryHead(String free, String demand) {
+    return 'יש לך $free פנויות ו$demand של תוכניות.';
+  }
+
+  @override
+  String planSummaryFits(String head) {
+    return '$head הכול נכנס, ונשאר מקום לנשום.';
+  }
+
+  @override
+  String planSummaryLighter(String head) {
+    return '$head אולי שבוע קל יותר יעזור.';
+  }
+
+  @override
+  String planSummaryDefer(String head, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n דברים יכולים',
+      one: 'דבר אחד יכול',
+    );
+    return '$head $_temp0 לעבור לשבוע הבא.';
+  }
+
+  @override
+  String get planWordToday => 'היום';
+
+  @override
+  String get planWordTomorrow => 'מחר';
+
+  @override
+  String get planDeadlineToday => 'מועד היעד של היום';
+
+  @override
+  String get planDeadlineTomorrow => 'מועד היעד של מחר';
+
+  @override
+  String planDeadlineOn(String day) {
+    return 'מועד היעד של $day';
+  }
+
+  @override
+  String get planReasonPlacedByYou => 'הצבת את זה כאן';
+
+  @override
+  String planReasonDue(String when) {
+    return 'יעד: $when';
+  }
+
+  @override
+  String planReasonPartOf(String title) {
+    return 'חלק מ\"$title\"';
+  }
+
+  @override
+  String get planReasonFocusWindow => 'חלון הפוקוס שלך';
+
+  @override
+  String planReasonChunkFirst(int minutes, int total) {
+    return 'הראשון: $minutes מתוך $total דק׳';
+  }
+
+  @override
+  String planReasonChunkNext(int minutes, int total) {
+    return 'הבא: $minutes מתוך $total דק׳';
+  }
+
+  @override
+  String planReasonChunkLast(int minutes, int total) {
+    return 'האחרון: $minutes מתוך $total דק׳';
+  }
+
+  @override
+  String planReasonEarliestGap(int minutes) {
+    return 'החלון הפנוי הראשון של $minutes דקות';
+  }
+
+  @override
+  String planReasonEarliestGapBefore(int minutes, String deadline) {
+    return 'החלון הפנוי הראשון של $minutes דקות לפני $deadline';
+  }
+
+  @override
+  String get planReasonDatePassed => 'תאריך היעד עבר, רוצה לבחור חדש?';
+
+  @override
+  String get planByThisWeek => 'השבוע';
+
+  @override
+  String planByBefore(String when) {
+    return 'לפני $when';
+  }
+
+  @override
+  String planReasonFocusFull(String by) {
+    return 'בלוקי הפוקוס מלאים $by';
+  }
+
+  @override
+  String planReasonOnlyFit(int fit, int need, String by) {
+    return 'רק $fit מתוך $need דק׳ נכנסות $by';
+  }
+
+  @override
+  String planReasonNoSlot(int minutes, String by) {
+    return 'אין חלון פנוי של $minutes דקות $by';
+  }
 }

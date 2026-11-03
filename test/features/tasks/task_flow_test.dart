@@ -144,7 +144,7 @@ void main() {
 
   testWidgets('RTL sheet at 390x844 has no overflow', (tester) async {
     await pumpGrindApp(tester, overrides: _hebrew);
-    await tester.tap(find.bySemanticsLabel('Add a task'));
+    await tester.tap(find.bySemanticsLabel('הוספת משימה'));
     await tester.pumpAndSettle();
     expect(find.text('New task'), findsOneWidget);
     expect(tester.takeException(), isNull);

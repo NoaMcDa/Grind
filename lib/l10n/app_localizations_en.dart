@@ -1735,4 +1735,234 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get capacityWeightsReset => 'Reset to defaults';
+
+  @override
+  String get goodAfternoon => 'Good afternoon!';
+
+  @override
+  String get goodEvening => 'Good evening!';
+
+  @override
+  String todayMarkOpen(String title) {
+    return 'Mark $title as open';
+  }
+
+  @override
+  String todayComplete(String title) {
+    return 'Complete $title';
+  }
+
+  @override
+  String get planReplanTitle => 'Pip\'s draft for the week';
+
+  @override
+  String get planReplanPlacedLabel => 'Where things go';
+
+  @override
+  String get planReplanUnplacedLabel => 'What didn\'t fit';
+
+  @override
+  String get planReplanNothing =>
+      'Nothing to move. Your week already looks settled.';
+
+  @override
+  String get planReplanPast => 'This week has passed. Pick today or later.';
+
+  @override
+  String planReplanKept(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n things you placed yourself stay put.',
+      one: 'One thing you placed yourself stays put.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planApply => 'Apply';
+
+  @override
+  String get planNotNow => 'Not now';
+
+  @override
+  String planApplied(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Done. $n things have a spot now.',
+      one: 'Done. One thing has a spot now.',
+      zero: 'All set, nothing needed moving.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planScheduledAt(String when, String reason) {
+    return '$when · $reason';
+  }
+
+  @override
+  String planNotScheduled(String reason) {
+    return 'No spot yet: $reason';
+  }
+
+  @override
+  String get planNothingToSchedule => 'this one is already done';
+
+  @override
+  String get planNoRoomThisWeek => 'no free gap before the end of the week';
+
+  @override
+  String planHoursShort(String hours) {
+    return '$hours h';
+  }
+
+  @override
+  String planCapacityFull(String amount) {
+    return 'A full week: over by $amount. Pip can help trim it.';
+  }
+
+  @override
+  String planCapacityNothing(String free) {
+    return '$free free · nothing planned yet';
+  }
+
+  @override
+  String planCapacityLine(String free, String planned) {
+    return '$free free · $planned planned';
+  }
+
+  @override
+  String planDurationHours(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDurationMinutes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planSummaryHead(String free, String demand) {
+    return 'You have $free free and $demand of plans.';
+  }
+
+  @override
+  String planSummaryFits(String head) {
+    return '$head It fits, with room to breathe.';
+  }
+
+  @override
+  String planSummaryLighter(String head) {
+    return '$head A lighter week might help.';
+  }
+
+  @override
+  String planSummaryDefer(String head, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n things',
+      one: 'One thing',
+    );
+    return '$head $_temp0 could move to next week.';
+  }
+
+  @override
+  String get planWordToday => 'today';
+
+  @override
+  String get planWordTomorrow => 'tomorrow';
+
+  @override
+  String get planDeadlineToday => 'today\'s deadline';
+
+  @override
+  String get planDeadlineTomorrow => 'tomorrow\'s deadline';
+
+  @override
+  String planDeadlineOn(String day) {
+    return 'the $day deadline';
+  }
+
+  @override
+  String get planReasonPlacedByYou => 'you placed this here';
+
+  @override
+  String planReasonDue(String when) {
+    return 'due $when';
+  }
+
+  @override
+  String planReasonPartOf(String title) {
+    return 'part of $title';
+  }
+
+  @override
+  String get planReasonFocusWindow => 'your focus window';
+
+  @override
+  String planReasonChunkFirst(int minutes, int total) {
+    return 'first $minutes of $total min';
+  }
+
+  @override
+  String planReasonChunkNext(int minutes, int total) {
+    return 'next $minutes of $total min';
+  }
+
+  @override
+  String planReasonChunkLast(int minutes, int total) {
+    return 'last $minutes of $total min';
+  }
+
+  @override
+  String planReasonEarliestGap(int minutes) {
+    return 'earliest free $minutes-minute gap';
+  }
+
+  @override
+  String planReasonEarliestGapBefore(int minutes, String deadline) {
+    return 'earliest free $minutes-minute gap before $deadline';
+  }
+
+  @override
+  String get planReasonDatePassed =>
+      'the due date has passed, want to pick a new one?';
+
+  @override
+  String get planByThisWeek => 'this week';
+
+  @override
+  String planByBefore(String when) {
+    return 'before $when';
+  }
+
+  @override
+  String planReasonFocusFull(String by) {
+    return 'focus blocks are full $by';
+  }
+
+  @override
+  String planReasonOnlyFit(int fit, int need, String by) {
+    return 'only $fit of $need min fit $by';
+  }
+
+  @override
+  String planReasonNoSlot(int minutes, String by) {
+    return 'no free $minutes-minute slot $by';
+  }
 }
