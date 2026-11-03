@@ -239,6 +239,14 @@ class CalendarSyncEngine {
     final vanished = <CalendarEvent>[];
     for (final e in existing) {
       if (e.source != source || seen.contains(e.externalId)) continue;
+      // A write-back in a calendar we did not ask for (the user reads
+      // "Work", Grind writes to the primary one) is absent from `incoming`
+      // by construction, not because it was deleted.
+      if (e.taskId != null &&
+          e.calendarId != null &&
+          !ids.contains(e.calendarId)) {
+        continue;
+      }
       await calendarRepository.delete(e.id);
       removed.add(e);
       if (e.taskId != null) vanished.add(e);
