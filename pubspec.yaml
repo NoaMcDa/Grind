@@ -22,7 +22,7 @@ dependencies:
   googleapis: ^17.0.0
   intl: ^0.20.2
   path: ^1.9.1
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
   rrule: ^0.2.18
   share_plus: ^12.0.2
   sqlite3_flutter_libs: ^0.5.42
