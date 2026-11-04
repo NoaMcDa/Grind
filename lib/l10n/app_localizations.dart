@@ -650,6 +650,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String commonMinutes(int minutes);
 
+  /// Duration in whole hours
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String commonHours(int hours);
+
+  /// Duration in hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String commonHoursMinutes(int hours, int minutes);
+
   /// Short weekday name (list use)
   ///
   /// In en, this message translates to:
@@ -931,6 +943,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minutes'**
   String get tasksCustomMinutes;
+
+  /// Custom estimate field label that accepts hours or minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get tasksCustomDuration;
+
+  /// Hint for the custom duration field (hours or minutes)
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 4h, 1:30, 90'**
+  String get tasksCustomDurationHint;
+
+  /// Error when the custom duration field cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a duration like 4h, 1:30 or 90'**
+  String get tasksCustomDurationInvalid;
 
   /// First action field label
   ///
@@ -2075,14 +2105,14 @@ abstract class AppLocalizations {
   /// End-of-session sheet body
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.'**
-  String focusFocusedFor(int minutes);
+  /// **'You focused for {duration}.'**
+  String focusFocusedFor(String duration);
 
   /// End-of-session sheet body when the session had a task
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.'**
-  String focusFocusedForTask(int minutes, String task);
+  /// **'You focused for {duration} on {task}.'**
+  String focusFocusedForTask(String duration, String task);
 
   /// End-of-session button
   ///

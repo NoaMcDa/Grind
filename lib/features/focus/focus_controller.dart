@@ -28,12 +28,24 @@ class FocusSettings {
   final int longBreakMinutes;
   final int sessionsPerCycle;
 
-  /// Bounds for the length picker on the idle screen.
+  /// Bounds for the length picker on the idle screen. Four hours gives room
+  /// for a long deep-work block without turning the picker into a slider.
   static const minFocusMinutes = 5;
-  static const maxFocusMinutes = 120;
+  static const maxFocusMinutes = 240;
 
-  /// What "+5 min" adds, and the step of the idle length picker.
+  /// What "+5 min" adds, and the step of the idle length picker below the
+  /// coarse threshold.
   static const stepMinutes = 5;
+
+  /// Above [coarseStepThreshold] (one hour) the picker uses [coarseStepMinutes]
+  /// so 1 h → 4 h is reachable in a few taps.
+  static const coarseStepMinutes = 15;
+  static const coarseStepThreshold = 60;
+
+  /// Step to use when the current length is [current] minutes. Minutes stay
+  /// snapped to this step so the picker never lands on 65 or 80.
+  static int stepFor(int current) =>
+      current >= coarseStepThreshold ? coarseStepMinutes : stepMinutes;
 
   FocusSettings copyWith({
     int? focusMinutes,

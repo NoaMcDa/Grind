@@ -6,6 +6,7 @@ import 'package:grind/features/goals/goals.dart'
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../core/util/duration_input.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -36,7 +37,9 @@ Future<Task?> showTaskSheet(
 Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
     showTaskSheet(context, initialGoalId: goal.id);
 
-const _presets = [15, 30, 45, 60, 90];
+/// Estimate presets, in minutes. Hour presets (1 h, 2 h, 3 h, 4 h) sit after
+/// the short ones so longer tasks don't need the custom field.
+const _presets = [15, 30, 45, 60, 90, 120, 180, 240];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
   const TaskFormSheet({super.key, this.existing, this.initialGoalId});
@@ -86,7 +89,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _notes = TextEditingController(text: t?.notes ?? '');
     _minutes = t?.estimatedMinutes ?? 30;
     _customMode = !_presets.contains(_minutes);
-    _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
+    // Pre-fill the custom field with a readable form (e.g. "1h30" for 90
+    // min that isn't a preset), not raw minutes.
+    _custom = TextEditingController(
+      text: _customMode ? _initialCustomText(_minutes) : '',
+    );
     _energy = t?.energy ?? Energy.light;
     _goalId = t == null ? widget.initialGoalId : t.goalId;
     if (t == null) {
@@ -209,6 +216,17 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     );
   }
 
+  /// How the custom field starts when an existing task's estimate is not a
+  /// preset: whole hours come out as `"2h"`, mixed as `"1h30"`, otherwise
+  /// as plain minutes. Parses back to the same minute count.
+  static String _initialCustomText(int minutes) {
+    if (minutes <= 0 || minutes < 60) return '$minutes';
+    final h = minutes ~/ 60;
+    final rem = minutes % 60;
+    if (rem == 0) return '${h}h';
+    return '${h}h$rem';
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     final title = _title.text.trim();
@@ -216,7 +234,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       setState(() => _showError = true);
       return;
     }
-    final minutes = _customMode ? int.tryParse(_custom.text.trim()) : _minutes;
+    final minutes = _customMode ? parseDuration(_custom.text) : _minutes;
+    if (_customMode && minutes == null) {
+      setState(() => _showError = true);
+      return;
+    }
     final estimate = (minutes == null || minutes <= 0) ? 30 : minutes;
     final day = _date;
     final dueAt = day == null
@@ -434,7 +456,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     children: [
                       for (final m in _presets)
                         _Choice(
-                          label: context.l10n.commonMinutes(m),
+                          label: formatDuration(m, context.l10n),
                           selected: !_customMode && _minutes == m,
                           onTap: () => setState(() {
                             _customMode = false;
@@ -452,9 +474,23 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     const SizedBox(height: 8),
                     StickerTextField(
                       controller: _custom,
-                      label: context.l10n.tasksCustomMinutes,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      label: context.l10n.tasksCustomDuration,
+                      hint: context.l10n.tasksCustomDurationHint,
+                      // Text-mode keyboard so "h" and ":" are reachable; the
+                      // filter still keeps the field to the shapes we parse.
+                      keyboardType: TextInputType.text,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[0-9hHmM:\s]'),
+                        ),
+                      ],
+                      errorText:
+                          _showError && parseDuration(_custom.text) == null
+                          ? context.l10n.tasksCustomDurationInvalid
+                          : null,
+                      onChanged: (_) {
+                        if (_showError) setState(() {});
+                      },
                       onSubmitted: (_) => _save(),
                     ),
                   ],

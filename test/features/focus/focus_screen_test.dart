@@ -67,7 +67,9 @@ void main() {
 
     expect(find.text(en.focusEarlyTitle), findsOneWidget);
     expect(
-      find.text(en.focusFocusedForTask(12, 'Deep learning lab 4')),
+      find.text(
+        en.focusFocusedForTask(en.commonMinutes(12), 'Deep learning lab 4'),
+      ),
       findsOneWidget,
     );
     await tester.tap(find.bySemanticsLabel(en.focusMarkDone));

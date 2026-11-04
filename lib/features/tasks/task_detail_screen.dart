@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../core/util/duration_input.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -241,7 +242,7 @@ class TaskDetailScreen extends ConsumerWidget {
             task.energy == Energy.deep
                 ? IconChip.deep(label: context.l10n.energyDeep, height: 28)
                 : IconChip.light(label: context.l10n.energyLight, height: 28),
-            Pill(label: context.l10n.commonMinutes(task.estimatedMinutes)),
+            Pill(label: formatDuration(task.estimatedMinutes, context.l10n)),
             if (done) Pill(label: 'Done', color: AppColors.mint),
           ],
         ),

@@ -313,6 +313,16 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String commonHours(int hours) {
+    return '$hours שע׳';
+  }
+
+  @override
+  String commonHoursMinutes(int hours, int minutes) {
+    return '$hours שע׳ $minutes דק׳';
+  }
+
+  @override
   String get commonWeekdayShortMon => 'שני';
 
   @override
@@ -454,6 +464,15 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tasksCustomMinutes => 'דקות';
+
+  @override
+  String get tasksCustomDuration => 'משך';
+
+  @override
+  String get tasksCustomDurationHint => 'למשל 4h, 1:30, 90';
+
+  @override
+  String get tasksCustomDurationInvalid => 'הזינו משך כמו 4h, 1:30 או 90';
 
   @override
   String get tasksFirstActionLabel => 'צעד ראשון';
@@ -1171,25 +1190,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get focusEarlyTitle => 'הסבב הסתיים. הוא עדיין נחשב.';
 
   @override
-  String focusFocusedFor(int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0.';
+  String focusFocusedFor(String duration) {
+    return 'התרכזת $duration.';
   }
 
   @override
-  String focusFocusedForTask(int minutes, String task) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0 על $task.';
+  String focusFocusedForTask(String duration, String task) {
+    return 'התרכזת $duration על $task.';
   }
 
   @override

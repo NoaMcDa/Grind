@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../../core/core.dart';
+import '../../../core/util/duration_input.dart';
 import '../../../l10n/l10n.dart';
 import '../../../theme/app_text.dart';
 import '../../../theme/tokens.dart';
@@ -790,7 +791,7 @@ class _MilestoneTaskState extends ConsumerState<MilestoneTaskSheet> {
             children: [
               for (final m in _estimates)
                 ChoicePill(
-                  label: l.commonMinutes(m),
+                  label: formatDuration(m, l),
                   selected: _minutes == m,
                   onTap: () => setState(() => _minutes = m),
                 ),
