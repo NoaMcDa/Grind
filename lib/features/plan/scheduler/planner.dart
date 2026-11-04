@@ -302,6 +302,42 @@ DateTime defaultHorizonEnd(DateTime now, Preferences prefs) {
   return maxTime(endOfWeek, sevenDays);
 }
 
+/// Horizon end for a mid-day "Re-plan with Pip": the rest of today, unless a
+/// deadline allows tomorrow (epic #18).
+///
+/// Returns:
+///
+/// - local midnight after [now] by default (the rest of today), so re-plan
+///   never pushes work into tomorrow when every task can still land today;
+/// - extended to local midnight after the latest `dueAt` on any movable task
+///   (open and not pinned) that is after end-of-today, so a task due tomorrow
+///   or later gets the days it needs;
+/// - clamped to [defaultHorizonEnd] so we never plan past the week.
+///
+/// Pinned tasks (`lockedStart`) don't push the horizon: the planner keeps
+/// them where they are, so their deadlines are already met. Completed and
+/// skipped tasks are ignored for the same reason. Pure, deterministic, no
+/// clock reads: hand it the `now` the scheduler gets.
+DateTime rePlanHorizonEnd({
+  required DateTime now,
+  required Iterable<Task> tasks,
+  required Preferences prefs,
+}) {
+  final endOfToday = addDays(startOfDay(now), 1);
+  final cap = defaultHorizonEnd(now, prefs);
+  var latest = endOfToday;
+  for (final t in tasks) {
+    if (!isOpenTask(t) || isPinned(t)) continue;
+    final due = t.dueAt;
+    if (due == null) continue;
+    final local = due.toLocal();
+    if (!local.isAfter(endOfToday)) continue;
+    final endOfDue = addDays(startOfDay(local), 1);
+    if (endOfDue.isAfter(latest)) latest = endOfDue;
+  }
+  return minTime(latest, cap);
+}
+
 class _Option {
   const _Option(
     this.slot, {
