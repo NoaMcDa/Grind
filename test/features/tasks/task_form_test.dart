@@ -167,4 +167,60 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(const Key('task-form-goal')), findsNothing);
   });
+
+  // Regression for #151: a task with a time + estimate must occupy a
+  // block on the Plan timeline (and get pushed to a connected calendar
+  // on the next sync). The form had set `dueAt`/`remindAt` but left
+  // `scheduledStart`/`scheduledEnd` null, so the task was dropped from
+  // the grid.
+  testWidgets('a time + estimate sets scheduledStart/End of that length', (
+    t,
+  ) async {
+    // Seed: a draft that has a due time (10:00 local on the test day) and
+    // a 240-min estimate, but no scheduled block yet — the shape a task
+    // had before this fix.
+    final at10 = DateTime(2026, 10, 29, 10).toUtc();
+    final seeded = Task(
+      id: 'deep',
+      title: 'Deep work',
+      dueAt: at10,
+      remindAt: at10,
+      estimatedMinutes: 240,
+      createdAt: _t0,
+      updatedAt: _t0,
+    );
+    final c = await pumpGrindApp(
+      t,
+      overrides: [
+        devicePrefsOverride(),
+        taskRepositoryProvider.overrideWithValue(
+          InMemoryTaskRepository([seeded]),
+        ),
+      ],
+    );
+    expect(seeded.isScheduled, isFalse);
+
+    showTaskSheet(_ctx(t), existing: seeded);
+    await t.pumpAndSettle();
+    await _save(t);
+
+    final saved = (await c.read(taskRepositoryProvider).getById('deep'))!;
+    expect(saved.isScheduled, isTrue);
+    expect(saved.scheduledStart, at10);
+    expect(saved.scheduledEnd, at10.add(const Duration(minutes: 240)));
+    expect(saved.lockedStart, isTrue);
+  });
+
+  testWidgets('no time: no scheduled block is set', (t) async {
+    final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
+    await t.tap(find.bySemanticsLabel('Add a task'));
+    await t.pumpAndSettle();
+    await t.enterText(find.byType(TextField).first, 'Someday');
+    await _save(t);
+    final task = (await c.read(taskRepositoryProvider).getAll()).firstWhere(
+      (x) => x.title == 'Someday',
+    );
+    expect(task.isScheduled, isFalse);
+    expect(task.lockedStart, isFalse);
+  });
 }

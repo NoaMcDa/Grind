@@ -224,6 +224,15 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         : _at(day, _dueTime ?? const TimeOfDay(hour: 23, minute: 59));
     final remind = _effectiveRemind;
     var remindAt = remind == null ? null : _at(day ?? _today, remind);
+    // When the user picks a time, the task occupies a block on the Plan
+    // timeline of its estimate length; the scheduler leaves it alone
+    // ([Task.lockedStart]) and the next sync pushes it to a connected
+    // calendar. Computed from the picked time before the recurrence
+    // anchor fallback, so a series without an explicit time is not
+    // placed on the grid. A placement the scheduler or a drag made on
+    // the existing task is left in place when no time is picked here.
+    final scheduledStart = remind == null ? null : remindAt;
+    final scheduledEnd = scheduledStart?.add(Duration(minutes: estimate));
     // A series is anchored at its reminder.
     if (_recurrence != null) remindAt ??= _seriesAnchor();
     final first = _firstAction.text.trim();
@@ -237,6 +246,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         title: title,
         dueAt: dueAt,
         remindAt: remindAt,
+        scheduledStart: scheduledStart,
+        scheduledEnd: scheduledEnd,
+        lockedStart: scheduledStart != null,
         estimatedMinutes: estimate,
         energy: _energy,
         firstAction: first.isEmpty ? null : first,
@@ -244,16 +256,33 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         goalId: _goalId,
       );
     } else {
-      task = existing.copyWith(
-        title: title,
-        dueAt: dueAt,
-        remindAt: remindAt,
-        estimatedMinutes: estimate,
-        energy: _energy,
-        firstAction: first.isEmpty ? null : first,
-        notes: notes.isEmpty ? null : notes,
-        goalId: _goalId,
-      );
+      // Pass the computed scheduled range only when the user picked a
+      // time; otherwise leave the existing fields alone so a scheduler
+      // or drag placement survives an edit that doesn't touch the time.
+      task = scheduledStart != null
+          ? existing.copyWith(
+              title: title,
+              dueAt: dueAt,
+              remindAt: remindAt,
+              scheduledStart: scheduledStart,
+              scheduledEnd: scheduledEnd,
+              lockedStart: true,
+              estimatedMinutes: estimate,
+              energy: _energy,
+              firstAction: first.isEmpty ? null : first,
+              notes: notes.isEmpty ? null : notes,
+              goalId: _goalId,
+            )
+          : existing.copyWith(
+              title: title,
+              dueAt: dueAt,
+              remindAt: remindAt,
+              estimatedMinutes: estimate,
+              energy: _energy,
+              firstAction: first.isEmpty ? null : first,
+              notes: notes.isEmpty ? null : notes,
+              goalId: _goalId,
+            );
     }
     _saving = true;
     await actions.save(task);
