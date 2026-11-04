@@ -2065,6 +2065,41 @@ class AppLocalizationsHe extends AppLocalizations {
   String get planDiffRemovedNoLongerFits => 'לא נכנס השבוע';
 
   @override
+  String planTriggerSkipped(String title) {
+    return 'דילגת על $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title חרגה ב-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title חרגה ב-$hours שעות';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title חרגה ב-$hours שעות ו-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title נכנס ב-$time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title זז ל-$time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title זז ל$day ב-$time';
+  }
+
+  @override
   String get goalsMetricKindLabel => 'איך זה נספר';
 
   @override

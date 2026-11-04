@@ -2829,6 +2829,93 @@
   "@planDiffRemovedNoLongerFits": {
     "description": "Re-plan diff removal reason: fallback when no unplaced reason is available"
   },
+  "planTriggerSkipped": "you skipped {title}",
+  "@planTriggerSkipped": {
+    "description": "Re-plan trigger summary: the user marked a scheduled task as skipped",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerOverrunMinutes": "{title} ran {minutes} min over",
+  "@planTriggerOverrunMinutes": {
+    "description": "Re-plan trigger summary: a task overran by less than an hour",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerOverrunHours": "{title} ran {hours}h over",
+  "@planTriggerOverrunHours": {
+    "description": "Re-plan trigger summary: a task overran by a whole number of hours",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerOverrunHoursMinutes": "{title} ran {hours}h {minutes}m over",
+  "@planTriggerOverrunHoursMinutes": {
+    "description": "Re-plan trigger summary: a task overran by hours and minutes",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerEventLands": "{title} lands at {time}",
+  "@planTriggerEventLands": {
+    "description": "Re-plan trigger summary: a new calendar event was added inside today's plan",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerEventMovedTime": "{title} moved to {time}",
+  "@planTriggerEventMovedTime": {
+    "description": "Re-plan trigger summary: an existing event moved to a new time on the same day",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerEventMovedDayTime": "{title} moved to {day} {time}",
+  "@planTriggerEventMovedDayTime": {
+    "description": "Re-plan trigger summary: an existing event moved to a different day",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "goalsMetricKindLabel": "How it counts",
   "@goalsMetricKindLabel": {
     "description": "Goal form: metric kind"
