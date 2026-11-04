@@ -57,12 +57,13 @@ sealed class WidgetDeepLink {
     if (uri == null) return null;
     if (uri.scheme != scheme || uri.host != host) return null;
 
-    final segments = uri.pathSegments
-        .where((s) => s.isNotEmpty)
-        .toList(growable: false);
+    // `grind://widget` or `grind://widget/`: the plain container tap.
+    if (uri.path.isEmpty || uri.path == '/') return const WidgetOpenApp();
 
-    // `grind://widget` with no path: the plain container tap.
-    if (segments.isEmpty) return const WidgetOpenApp();
+    final segments = uri.pathSegments;
+    // Any empty segment means a double-slash or missing id (e.g. /task//done)
+    // — treat as unknown, not as a partial match.
+    if (segments.any((s) => s.isEmpty)) return null;
 
     switch (segments[0]) {
       case _verbTask:
