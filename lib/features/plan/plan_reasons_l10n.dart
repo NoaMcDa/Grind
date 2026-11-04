@@ -29,7 +29,9 @@ const _englishMonths = [
 ///
 /// The pure scheduler core writes its `reasons` in English. When [reason]
 /// matches one of its known templates it is rebuilt from ARB strings;
-/// anything else is returned unchanged.
+/// anything else is returned unchanged. Covers placement reasons, unplaced
+/// reasons and the move / removal reasons produced by `diffPlans` for the
+/// "Re-plan with Pip" diff view.
 String localizePlanReason(AppLocalizations l, String reason) {
   Match? m(String pattern) => RegExp('^$pattern\$').firstMatch(reason);
 
@@ -48,6 +50,24 @@ String localizePlanReason(AppLocalizations l, String reason) {
       return l.planReasonFocusClear;
     case 'in the order you chose':
       return l.planReasonYourOrder;
+    // Re-plan diff: move reasons from `_moveReason` in `replan.dart`.
+    case 'that time has passed':
+      return l.planDiffReasonTimePassed;
+    case 'your hours changed':
+      return l.planDiffReasonHoursChanged;
+    case 'an earlier slot opened up':
+      return l.planDiffReasonEarlierOpened;
+    case "reshuffled around today's changes":
+      return l.planDiffReasonReshuffled;
+    // Re-plan diff: removal reasons from `_removalReason` in `replan.dart`.
+    case 'no longer on your list':
+      return l.planDiffRemovedNotOnList;
+    case 'done, nice work':
+      return l.planDiffRemovedDone;
+    case 'skipped for now':
+      return l.planDiffRemovedSkipped;
+    case 'no longer fits this week':
+      return l.planDiffRemovedNoLongerFits;
   }
   var r = m(r'due (.+)');
   if (r != null) return l.planReasonDue(_dayWord(l, r[1]!));
@@ -86,6 +106,15 @@ String localizePlanReason(AppLocalizations l, String reason) {
   }
   r = m(r'no free (\d+)-minute slot (.+)');
   if (r != null) return l.planReasonNoSlot(int.parse(r[1]!), _by(l, r[2]!));
+  // Re-plan diff: parameterized move reasons from `_moveReason` in
+  // `replan.dart`. "you put" and "made room for" are checked before the
+  // broader "{title} now takes that time" because titles are free-form.
+  r = m(r'you put (.+) there');
+  if (r != null) return l.planDiffReasonPinned(r[1]!);
+  r = m(r'made room for (.+)');
+  if (r != null) return l.planDiffReasonMadeRoomFor(r[1]!);
+  r = m(r'(.+) now takes that time');
+  if (r != null) return l.planDiffReasonEventTook(r[1]!);
   return reason;
 }
 

@@ -8,7 +8,8 @@ export 'capacity.dart'
 export 'free_slots.dart'
     show freeSlots, freeSlotsForDay, blocksTime, minSlotMinutes;
 export 'models.dart';
-export 'planner.dart' show plan, defaultHorizonEnd, isOpenTask, isPinned;
+export 'planner.dart'
+    show plan, defaultHorizonEnd, rePlanHorizonEnd, isOpenTask, isPinned;
 export 'replan.dart';
 export 'replan_trigger.dart';
 export 'scheduler_service.dart';

@@ -37,6 +37,13 @@ completed/skipped tasks dropped and pinned tasks kept, plus a `PlanDiff`
 (`moved`, `added`, `removed`), one reason per change ("Team sync now takes that
 time", "an earlier slot opened up", "done, nice work").
 
+Pass `prevPlacements: prevPlacementsFromPlan(oldPlan)` for the minimal-change
+bias (#18): when every slot a task held before still fits the free time, it
+stays there. The scheduler only moves what has to move — a shifted meeting,
+a new pin, a changed estimate — and the rest of the day looks like the user
+left it. Empty by default, so callers that want the pre-#18 behaviour (every
+unlocked task re-fits from scratch) opt out by passing nothing.
+
 Lower-level pieces: `freeSlots(...)`, `weekCapacity(...)`,
 `deferralSuggestions(plan, ...)`, `score(...)` / `scoreBreakdown(...)`,
 `adjustedMinutes(task, stats)`.
