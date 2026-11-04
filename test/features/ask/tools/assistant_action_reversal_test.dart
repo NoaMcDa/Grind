@@ -236,17 +236,11 @@ void main() {
 
     test('rejects an empty calendarId or eventId', () {
       expect(
-        () => DeleteCalendarEventReversal(
-          calendarId: '',
-          eventId: 'evt-1',
-        ),
+        () => DeleteCalendarEventReversal(calendarId: '', eventId: 'evt-1'),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
       expect(
-        () => DeleteCalendarEventReversal(
-          calendarId: 'primary',
-          eventId: '',
-        ),
+        () => DeleteCalendarEventReversal(calendarId: 'primary', eventId: ''),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
     });
@@ -276,30 +270,31 @@ void main() {
 
     test('rejects a missing or empty kind', () {
       expect(
-        () => AssistantActionReversal.fromDescriptor(
-          <String, Object?>{'taskId': 't-1'},
-        ),
+        () => AssistantActionReversal.fromDescriptor(<String, Object?>{
+          'taskId': 't-1',
+        }),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
       expect(
-        () => AssistantActionReversal.fromDescriptor(
-          <String, Object?>{'kind': ''},
-        ),
+        () => AssistantActionReversal.fromDescriptor(<String, Object?>{
+          'kind': '',
+        }),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
     });
 
     test('rejects an unknown kind (e.g. "replan")', () {
       expect(
-        () => AssistantActionReversal.fromDescriptor(
-          <String, Object?>{'kind': 'restorePlan'},
-        ),
+        () => AssistantActionReversal.fromDescriptor(<String, Object?>{
+          'kind': 'restorePlan',
+        }),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
       expect(
-        () => AssistantActionReversal.fromDescriptor(
-          <String, Object?>{'kind': 'nope', 'x': 1},
-        ),
+        () => AssistantActionReversal.fromDescriptor(<String, Object?>{
+          'kind': 'nope',
+          'x': 1,
+        }),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
     });
@@ -307,9 +302,9 @@ void main() {
     test('propagates per-kind validation errors', () {
       // Missing "taskId" on a deleteTask descriptor.
       expect(
-        () => AssistantActionReversal.fromDescriptor(
-          <String, Object?>{'kind': 'deleteTask'},
-        ),
+        () => AssistantActionReversal.fromDescriptor(<String, Object?>{
+          'kind': 'deleteTask',
+        }),
         throwsA(isA<AssistantActionReversalFormatException>()),
       );
       // Malformed ISO timestamp on a restoreMoveTask descriptor.
