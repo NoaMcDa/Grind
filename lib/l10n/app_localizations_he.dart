@@ -56,6 +56,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get quickMoveGym => 'להעביר את האימון לערב';
 
   @override
+  String get quickWhatsNext => 'מה הבא?';
+
+  @override
   String get composerHint => 'כתבו או הקליטו משימה…';
 
   @override
@@ -313,6 +316,16 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String commonHours(int hours) {
+    return '$hours ש׳';
+  }
+
+  @override
+  String commonHoursMinutes(int hours, int minutes) {
+    return '$hours ש׳ $minutes דק׳';
+  }
+
+  @override
   String get commonWeekdayShortMon => 'שני';
 
   @override
@@ -454,6 +467,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tasksCustomMinutes => 'דקות';
+
+  @override
+  String get tasksCustomDuration => 'משך';
+
+  @override
+  String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
   String get tasksFirstActionLabel => 'צעד ראשון';
@@ -808,6 +827,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planOpenInCalendar => 'פתיחה ביומן';
+
+  @override
+  String get planAddAsTask => 'הוספה כמשימה';
 
   @override
   String get planOpenInCalendarSoon => 'פתיחת אפליקציית היומן תגיע בקרוב.';
@@ -1171,25 +1193,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get focusEarlyTitle => 'הסבב הסתיים. הוא עדיין נחשב.';
 
   @override
-  String focusFocusedFor(int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0.';
+  String focusFocusedFor(String duration) {
+    return 'התרכזת $duration.';
   }
 
   @override
-  String focusFocusedForTask(int minutes, String task) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0 על $task.';
+  String focusFocusedForTask(String duration, String task) {
+    return 'התרכזת $duration על $task.';
   }
 
   @override
@@ -1310,6 +1320,27 @@ class AppLocalizationsHe extends AppLocalizations {
   String get reviewRepeatsNote => 'חוזרת מעצמה, אז היא נשארת במקומה.';
 
   @override
+  String get reviewCheckInTitle => 'צ\'ק-אין על היעדים';
+
+  @override
+  String get reviewCheckInHint =>
+      'סמנו כל מה שעשיתם היום. פיפ ירשום +1 על כל אחד.';
+
+  @override
+  String get reviewCheckInEmpty =>
+      'אין עדיין יעדים חוזרים. אפשר להוסיף אחד מלשונית היעדים.';
+
+  @override
+  String reviewCheckInUnitWeek(String unit) {
+    return '$unit השבוע';
+  }
+
+  @override
+  String reviewCheckInUnitMonth(String unit) {
+    return '$unit החודש';
+  }
+
+  @override
   String get reviewWinTitle => 'ניצחון אחד';
 
   @override
@@ -1341,6 +1372,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get goalsTitle => 'יעדים';
+
+  @override
+  String get goalsAllGoalsLink => 'כל היעדים';
 
   @override
   String get goalsSubtitle => 'קרובים ורחוקים. כל צעד קטן נחשב.';
@@ -1999,6 +2033,80 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get planDiffReasonTimePassed => 'הזמן הזה כבר עבר';
+
+  @override
+  String planDiffReasonEventTook(String title) {
+    return 'עכשיו $title בשעה הזאת';
+  }
+
+  @override
+  String get planDiffReasonHoursChanged => 'שעות העבודה שלך השתנו';
+
+  @override
+  String planDiffReasonPinned(String title) {
+    return 'שמת שם את $title';
+  }
+
+  @override
+  String planDiffReasonMadeRoomFor(String title) {
+    return 'פיניתי מקום ל$title';
+  }
+
+  @override
+  String get planDiffReasonEarlierOpened => 'התפנה חלון מוקדם יותר';
+
+  @override
+  String get planDiffReasonReshuffled => 'סידרתי מחדש סביב השינויים של היום';
+
+  @override
+  String get planDiffRemovedNotOnList => 'כבר לא ברשימה שלך';
+
+  @override
+  String get planDiffRemovedDone => 'סיימת, יפה';
+
+  @override
+  String get planDiffRemovedSkipped => 'דילוג לעת עתה';
+
+  @override
+  String get planDiffRemovedNoLongerFits => 'לא נכנס השבוע';
+
+  @override
+  String planTriggerSkipped(String title) {
+    return 'דילגת על $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title חרגה ב-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title חרגה ב-$hours שעות';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title חרגה ב-$hours שעות ו-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title נכנס ב-$time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title זז ל-$time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title זז ל$day ב-$time';
+  }
+
+  @override
   String get goalsMetricKindLabel => 'איך זה נספר';
 
   @override
@@ -2632,4 +2740,147 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'זה לא נכנס שם';
+
+  @override
+  String get planExplainHeader => 'הנה היום שלך.';
+
+  @override
+  String planExplainBlocks(int n, String first, String last, String planned) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n בלוקים בין $first ל-$last, $planned סך הכול.',
+      one: 'בלוק אחד בין $first ל-$last, $planned סך הכול.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planExplainFocus => 'עבודה עמוקה נוחתת בחלון הפוקוס שלך.';
+
+  @override
+  String get planExplainNothing => 'אין מה לשבץ כרגע. היום שלך.';
+
+  @override
+  String get planExplainNoTime => 'לא נשאר זמן פנוי היום. מחר דף חדש.';
+
+  @override
+  String planExplainUnplacedOnly(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'אין מקום ביומן היום; $n משימות יחכו ליום אחר.',
+      one: 'אין מקום ביומן היום; משימה אחת תחכה ליום אחר.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planExplainUnplacedExtra(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות לא נכנסות היום.',
+      one: 'משימה אחת לא נכנסת היום.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String followupHereAt(String start, String reasons) {
+    return 'זה ב-$start, כי $reasons.';
+  }
+
+  @override
+  String followupHereNoReason(String start) {
+    return 'זה ב-$start.';
+  }
+
+  @override
+  String followupNotFit(String reason) {
+    return 'זה לא נכנס היום — $reason.';
+  }
+
+  @override
+  String get followupNotFitBare => 'זה לא נכנס היום.';
+
+  @override
+  String followupWhen(String start, String end) {
+    return 'זה מתחיל ב-$start ורץ עד $end.';
+  }
+
+  @override
+  String followupAlreadyPlaced(String start) {
+    return 'זה בתוכנית של היום, ב-$start.';
+  }
+
+  @override
+  String get followupUnknown => 'זה לא על התוכנית של היום.';
+
+  @override
+  String get voicePermissionTitle => 'הכתבת משימה';
+
+  @override
+  String get voicePermissionRationale =>
+      'Grind מקשיב רק בזמן שהכפתור לחוץ. מה שאתם אומרים הופך לטקסט בתיבה, ואתם רואים אותו לפני שנשלח משהו.';
+
+  @override
+  String get voicePermissionAllow => 'אישור מיקרופון';
+
+  @override
+  String get voicePermissionNotNow => 'לא עכשיו';
+
+  @override
+  String get voicePermissionGranted =>
+      'המיקרופון פעיל. החזיקו את הכפתור כדי להכתיב.';
+
+  @override
+  String get voicePermissionDenied =>
+      'בלי בעיה. אפשר להמשיך להקליד. את גישת המיקרופון אפשר להפעיל בהגדרות מתי שרוצים.';
+
+  @override
+  String get voicePermissionBlocked =>
+      'גישת המיקרופון ל-Grind כבויה. פתחו את ההגדרות כדי להפעיל.';
+
+  @override
+  String get voicePermissionOpenSettings => 'פתיחת ההגדרות';
+
+  @override
+  String get voicePrivacyNote =>
+      'באייפון הזיהוי מתבצע על המכשיר הזה. באינטרנט הדפדפן אחראי לכך — בחלק מהדפדפנים האודיו נשלח לשירות שלהם.';
+
+  @override
+  String get voiceUnavailable =>
+      'הכתבה קולית אינה זמינה בדפדפן הזה. תמיד אפשר להקליד.';
+
+  @override
+  String get voiceListening => 'מקשיב…';
+
+  @override
+  String get voiceStopListening => 'עצירת ההקלטה';
+
+  @override
+  String get voiceLocaleLabel => 'שפת ההכתבה';
+
+  @override
+  String get voiceLocaleHebrew => 'עברית';
+
+  @override
+  String get voiceLocaleEnglish => 'אנגלית';
+
+  @override
+  String toolConfirmationDone(String ranges) {
+    return 'בוצע: $ranges';
+  }
+
+  @override
+  String get toolConfirmationEmpty => 'בוצע.';
+
+  @override
+  String commonJoinAnd(String head, String tail) {
+    return '$head ו-$tail';
+  }
+
+  @override
+  String get commonListSeparator => ', ';
 }

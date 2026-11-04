@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/core.dart';
+import '../../l10n/duration_format.dart';
 import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -366,24 +367,27 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
 
     switch (s.phase) {
       case FocusPhase.idle:
+        final current = s.settings.focusMinutes;
+        final downStep = FocusSettings.idleStepFor(current, up: false);
+        final upStep = FocusSettings.idleStepFor(current, up: true);
         left = PillButton(
-          label: l.focusMinusMinutes(step),
+          label: l.focusMinusMinutes(downStep),
           height: 48,
           shadow: 3,
           fontSize: 15,
           horizontalPadding: 18,
-          onPressed: s.settings.focusMinutes > FocusSettings.minFocusMinutes
-              ? () => _ctrl.adjustNextLength(-step)
+          onPressed: current > FocusSettings.minFocusMinutes
+              ? () => _ctrl.adjustNextLength(-downStep)
               : null,
         );
         right = PillButton(
-          label: l.plusMinutes(step),
+          label: l.plusMinutes(upStep),
           height: 48,
           shadow: 3,
           fontSize: 15,
           horizontalPadding: 18,
-          onPressed: s.settings.focusMinutes < FocusSettings.maxFocusMinutes
-              ? () => _ctrl.adjustNextLength(step)
+          onPressed: current < FocusSettings.maxFocusMinutes
+              ? () => _ctrl.adjustNextLength(upStep)
               : null,
         );
         mainLabel = l.startFocus;
@@ -622,8 +626,11 @@ class _EndSheet extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           task == null
-              ? l.focusFocusedFor(outcome.focusedMinutes)
-              : l.focusFocusedForTask(outcome.focusedMinutes, task!.title),
+              ? l.focusFocusedFor(formatDuration(outcome.focusedMinutes, l))
+              : l.focusFocusedForTask(
+                  formatDuration(outcome.focusedMinutes, l),
+                  task!.title,
+                ),
           style: AppText.body(weight: FontWeight.w500),
         ),
         const SizedBox(height: 16),

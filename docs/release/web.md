@@ -32,4 +32,6 @@ An iOS home-screen icon is added at `web/icons/apple-touch-icon.png` (180x180). 
 
 (Check whether `index.html` already has a `<link rel="apple-touch-icon" ...>` pointing at `icons/Icon-192.png`, as the Flutter template does; if so, change its `href`.)
 
-Still open for #47: web push needs a push service and server, and is out of scope here. The manifest name, description and colours are still Flutter defaults at the time of writing and are being updated in a separate change.
+The manifest also lists two shortcuts, `Plan my day` and `Focus now`. Chrome and Edge surface them on long-press of the installed PWA (`./today`, `./focus`); iOS ignores them.
+
+Still open for #47: web push needs a push service and server, and is out of scope here. [docs/web/push-limits.md](../web/push-limits.md) is the reference for which browsers can deliver it, the iOS 16.4+ installed-PWA requirement and the Settings copy to show when push is not available.

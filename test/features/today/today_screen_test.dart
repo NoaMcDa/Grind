@@ -161,6 +161,74 @@ void main() {
     expect(find.text('Deep learning lab 4'), findsOneWidget);
   });
 
+  testWidgets('swipe left on a done plain task deletes it too (#147)', (
+    tester,
+  ) async {
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
+    final repo = container.read(taskRepositoryProvider);
+
+    // 'Call mom' is in the demo seed as a done (lilac) row with a reminder
+    // today: swiping it left should delete it just like an open row.
+    expect((await repo.getById('mom'))!.isDone, isTrue);
+    expect(find.text('Call mom'), findsOneWidget);
+
+    await tester.drag(find.text('Call mom'), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    expect(await repo.getById('mom'), isNull);
+    expect(find.text('Call mom'), findsNothing);
+    expect(find.text('Task deleted'), findsOneWidget);
+
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(await repo.getById('mom'), isNotNull);
+    expect(find.text('Call mom'), findsOneWidget);
+  });
+
+  testWidgets('swipe left after marking a plain task done deletes it (#147)', (
+    tester,
+  ) async {
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
+    final repo = container.read(taskRepositoryProvider);
+
+    await tester.tap(find.bySemanticsLabel('Complete Gym'));
+    await tester.pumpAndSettle();
+    expect((await repo.getById('gym'))!.isDone, isTrue);
+
+    await tester.drag(find.text('Gym'), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+    expect(await repo.getById('gym'), isNull);
+    expect(find.text('Gym'), findsNothing);
+    expect(find.text('Task deleted'), findsOneWidget);
+  });
+
+  testWidgets(
+    'swipe left on a done weekly occurrence deletes the series (#147)',
+    (tester) async {
+      final c = await _pumpWeekly(tester);
+      final repo = c.read(taskRepositoryProvider);
+      final rules = c.read(reminderRepositoryProvider);
+
+      // Complete today's occurrence; the row stays as a done (lilac) row.
+      await tester.tap(find.bySemanticsLabel('Complete Weekly review'));
+      await tester.pumpAndSettle();
+      expect(find.text('Weekly review'), findsOneWidget);
+      expect(find.text('1 of 1 today'), findsOneWidget);
+
+      await tester.drag(find.text('Weekly review'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(await repo.getById('w'), isNull);
+      expect(await rules.getForTask('w'), isNull);
+      expect(find.text('Weekly review'), findsNothing);
+      expect(find.text('Task deleted'), findsOneWidget);
+    },
+  );
+
   testWidgets('checkbox toggles done and undo reopens', (tester) async {
     final container = await pumpGrindApp(
       tester,

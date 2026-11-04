@@ -4,6 +4,34 @@ import '../../../core/core.dart';
 import 'calendar_sync_errors.dart';
 import 'sync_status.dart';
 
+/// Prefix on [Task.calendarEventId] marking a task that was created from an
+/// imported calendar event (see "Add as task" on the Plan event sheet).
+///
+/// [pushTask] never writes such a task back to the external calendar — the
+/// event is already there and Grind did not create it — while
+/// [CalendarSyncEngine.pullWriteBacks] still follows moves of the original
+/// event to the task through the same path as ordinary write-backs.
+const String importedCalendarEventIdPrefix = 'imported:';
+
+/// True when [calendarEventId] belongs to an "Add as task" conversion.
+bool isImportedCalendarEventId(String? calendarEventId) =>
+    calendarEventId != null &&
+    calendarEventId.startsWith(importedCalendarEventIdPrefix);
+
+/// Builds the sentinel [Task.calendarEventId] value for an imported event.
+String importedCalendarEventIdFor(String externalId) =>
+    '$importedCalendarEventIdPrefix$externalId';
+
+/// The provider external id inside [calendarEventId], or [calendarEventId]
+/// itself when there is no sentinel prefix.
+String? externalIdFromTaskCalendarEventId(String? calendarEventId) {
+  if (calendarEventId == null) return null;
+  if (!calendarEventId.startsWith(importedCalendarEventIdPrefix)) {
+    return calendarEventId;
+  }
+  return calendarEventId.substring(importedCalendarEventIdPrefix.length);
+}
+
 /// Result of one [CalendarSyncEngine.pull].
 class PullResult {
   const PullResult({
@@ -280,7 +308,11 @@ class CalendarSyncEngine {
 
     for (final e in moves) {
       final task = await taskRepository.getById(e.taskId!);
-      if (task == null || task.calendarEventId != e.externalId) continue;
+      if (task == null ||
+          externalIdFromTaskCalendarEventId(task.calendarEventId) !=
+              e.externalId) {
+        continue;
+      }
       if (task.scheduledStart == e.start && task.scheduledEnd == e.end) {
         continue;
       }
@@ -295,7 +327,11 @@ class CalendarSyncEngine {
     }
     for (final e in gone) {
       final task = await taskRepository.getById(e.taskId!);
-      if (task == null || task.calendarEventId != e.externalId) continue;
+      if (task == null ||
+          externalIdFromTaskCalendarEventId(task.calendarEventId) !=
+              e.externalId) {
+        continue;
+      }
       final next = task.copyWith(
         scheduledStart: null,
         scheduledEnd: null,
@@ -341,6 +377,10 @@ class CalendarSyncEngine {
   /// task as stored afterwards (with `calendarEventId` set or cleared).
   Future<Task> pushTask(Task task) async {
     if (!writeBack || !await provider.isConnected()) return task;
+    // "Add as task" conversions keep the originating event's id behind the
+    // [importedCalendarEventIdPrefix] sentinel. The event is already in the
+    // external calendar; Grind must never write such a task back there.
+    if (isImportedCalendarEventId(task.calendarEventId)) return task;
     final ext = task.calendarEventId;
     final local = ext == null
         ? null

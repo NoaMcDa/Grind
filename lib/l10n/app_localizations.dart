@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Move gym to evening'**
   String get quickMoveGym;
 
+  /// Quick prompt chip
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s next?'**
+  String get quickWhatsNext;
+
   /// Composer placeholder
   ///
   /// In en, this message translates to:
@@ -650,6 +656,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String commonMinutes(int minutes);
 
+  /// Duration on a round hour
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String commonHours(int hours);
+
+  /// Duration mixing hours and leftover minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String commonHoursMinutes(int hours, int minutes);
+
   /// Short weekday name (list use)
   ///
   /// In en, this message translates to:
@@ -931,6 +949,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minutes'**
   String get tasksCustomMinutes;
+
+  /// Custom estimate field label; accepts shapes like '90', '4h', '1:30'
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get tasksCustomDuration;
+
+  /// Hint for the custom duration field
+  ///
+  /// In en, this message translates to:
+  /// **'90, 4h, 1:30'**
+  String get tasksCustomDurationHint;
 
   /// First action field label
   ///
@@ -1441,6 +1471,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in calendar'**
   String get planOpenInCalendar;
+
+  /// Button on the event sheet that creates a Grind task prefilled from the calendar event; tapping it again later opens the already-created task.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as task'**
+  String get planAddAsTask;
 
   /// Toast
   ///
@@ -2072,17 +2108,17 @@ abstract class AppLocalizations {
   /// **'Session ended. It still counts.'**
   String get focusEarlyTitle;
 
-  /// End-of-session sheet body
+  /// End-of-session sheet body; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.'**
-  String focusFocusedFor(int minutes);
+  /// **'You focused for {duration}.'**
+  String focusFocusedFor(String duration);
 
-  /// End-of-session sheet body when the session had a task
+  /// End-of-session sheet body when the session had a task; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.'**
-  String focusFocusedForTask(int minutes, String task);
+  /// **'You focused for {duration} on {task}.'**
+  String focusFocusedForTask(String duration, String task);
 
   /// End-of-session button
   ///
@@ -2312,6 +2348,36 @@ abstract class AppLocalizations {
   /// **'Repeats on its own, so it stays put.'**
   String get reviewRepeatsNote;
 
+  /// Review step title for the daily check-in on recurring-metric goals
+  ///
+  /// In en, this message translates to:
+  /// **'Check in on your goals'**
+  String get reviewCheckInTitle;
+
+  /// Review check-in step hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tick any you hit today. Pip logs a +1 on each.'**
+  String get reviewCheckInHint;
+
+  /// Review check-in step empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring goals yet. You can add one from the Goals tab.'**
+  String get reviewCheckInEmpty;
+
+  /// Subtitle on a weekly check-in row: unit label with the current period
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} this week'**
+  String reviewCheckInUnitWeek(String unit);
+
+  /// Subtitle on a monthly check-in row: unit label with the current period
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} this month'**
+  String reviewCheckInUnitMonth(String unit);
+
   /// Review step title
   ///
   /// In en, this message translates to:
@@ -2377,6 +2443,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Goals'**
   String get goalsTitle;
+
+  /// Text link next to the Highlights card on the Pip screen that opens the full goals list
+  ///
+  /// In en, this message translates to:
+  /// **'All goals'**
+  String get goalsAllGoalsLink;
 
   /// Goals screen subtitle
   ///
@@ -3410,6 +3482,114 @@ abstract class AppLocalizations {
   /// **'no free {minutes}-minute slot {by}'**
   String planReasonNoSlot(int minutes, String by);
 
+  /// Re-plan diff reason: the previous slot is already in the past
+  ///
+  /// In en, this message translates to:
+  /// **'that time has passed'**
+  String get planDiffReasonTimePassed;
+
+  /// Re-plan diff reason: a calendar event now overlaps the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'{title} now takes that time'**
+  String planDiffReasonEventTook(String title);
+
+  /// Re-plan diff reason: the working hours no longer cover the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'your hours changed'**
+  String get planDiffReasonHoursChanged;
+
+  /// Re-plan diff reason: another task the user pinned took the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'you put {title} there'**
+  String planDiffReasonPinned(String title);
+
+  /// Re-plan diff reason: another task took the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'made room for {title}'**
+  String planDiffReasonMadeRoomFor(String title);
+
+  /// Re-plan diff reason: the task moved to an earlier free slot
+  ///
+  /// In en, this message translates to:
+  /// **'an earlier slot opened up'**
+  String get planDiffReasonEarlierOpened;
+
+  /// Re-plan diff reason: the task moved for a reason that does not fit the narrower templates
+  ///
+  /// In en, this message translates to:
+  /// **'reshuffled around today\'s changes'**
+  String get planDiffReasonReshuffled;
+
+  /// Re-plan diff removal reason: the task was deleted
+  ///
+  /// In en, this message translates to:
+  /// **'no longer on your list'**
+  String get planDiffRemovedNotOnList;
+
+  /// Re-plan diff removal reason: the task was completed
+  ///
+  /// In en, this message translates to:
+  /// **'done, nice work'**
+  String get planDiffRemovedDone;
+
+  /// Re-plan diff removal reason: the task was marked skipped
+  ///
+  /// In en, this message translates to:
+  /// **'skipped for now'**
+  String get planDiffRemovedSkipped;
+
+  /// Re-plan diff removal reason: fallback when no unplaced reason is available
+  ///
+  /// In en, this message translates to:
+  /// **'no longer fits this week'**
+  String get planDiffRemovedNoLongerFits;
+
+  /// Re-plan trigger summary: the user marked a scheduled task as skipped
+  ///
+  /// In en, this message translates to:
+  /// **'you skipped {title}'**
+  String planTriggerSkipped(String title);
+
+  /// Re-plan trigger summary: a task overran by less than an hour
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {minutes} min over'**
+  String planTriggerOverrunMinutes(String title, int minutes);
+
+  /// Re-plan trigger summary: a task overran by a whole number of hours
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h over'**
+  String planTriggerOverrunHours(String title, int hours);
+
+  /// Re-plan trigger summary: a task overran by hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h {minutes}m over'**
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes);
+
+  /// Re-plan trigger summary: a new calendar event was added inside today's plan
+  ///
+  /// In en, this message translates to:
+  /// **'{title} lands at {time}'**
+  String planTriggerEventLands(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a new time on the same day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {time}'**
+  String planTriggerEventMovedTime(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a different day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {day} {time}'**
+  String planTriggerEventMovedDayTime(String title, String day, String time);
+
   /// Goal form: metric kind
   ///
   /// In en, this message translates to:
@@ -4399,6 +4579,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That one does not fit there'**
   String get draftNoRoom;
+
+  /// Opening sentence of Pip's plan explainer
+  ///
+  /// In en, this message translates to:
+  /// **'Here is your day.'**
+  String get planExplainHeader;
+
+  /// Pip's plan explainer: count, time range and total planned duration
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One block between {first} and {last}, {planned} in all.} other{{n} blocks between {first} and {last}, {planned} in all.}}'**
+  String planExplainBlocks(int n, String first, String last, String planned);
+
+  /// Pip's plan explainer: at least one deep block sits in a focus window
+  ///
+  /// In en, this message translates to:
+  /// **'Deep work lands in your focus window.'**
+  String get planExplainFocus;
+
+  /// Pip's plan explainer when there is nothing to schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to plan right now. Your day is yours.'**
+  String get planExplainNothing;
+
+  /// Pip's plan explainer when there is no free time today
+  ///
+  /// In en, this message translates to:
+  /// **'No room left on today\'s calendar. Tomorrow is a fresh page.'**
+  String get planExplainNoTime;
+
+  /// Pip's plan explainer when nothing could be placed but tasks are due
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{No room on the calendar today; one task will wait for another day.} other{No room on the calendar today; {n} tasks will wait for another day.}}'**
+  String planExplainUnplacedOnly(int n);
+
+  /// Pip's plan explainer trailer when some tasks due today did not fit
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One task does not fit today.} other{{n} tasks do not fit today.}}'**
+  String planExplainUnplacedExtra(int n);
+
+  /// Pip's follow-up answer when a task has reasons: start time and reasons
+  ///
+  /// In en, this message translates to:
+  /// **'It is at {start}, because {reasons}.'**
+  String followupHereAt(String start, String reasons);
+
+  /// Pip's follow-up answer when a task has no scheduler reasons
+  ///
+  /// In en, this message translates to:
+  /// **'It is at {start}.'**
+  String followupHereNoReason(String start);
+
+  /// Pip's follow-up answer when a task is unplaced, with reason
+  ///
+  /// In en, this message translates to:
+  /// **'That one did not fit today — {reason}.'**
+  String followupNotFit(String reason);
+
+  /// Pip's follow-up answer when a task is unplaced and has no reason
+  ///
+  /// In en, this message translates to:
+  /// **'That one did not fit today.'**
+  String get followupNotFitBare;
+
+  /// Pip's follow-up answer naming a placed task's start and end
+  ///
+  /// In en, this message translates to:
+  /// **'It starts at {start} and runs until {end}.'**
+  String followupWhen(String start, String end);
+
+  /// Pip's follow-up answer when a task asked as unplaced is actually placed
+  ///
+  /// In en, this message translates to:
+  /// **'It is in today\'s plan at {start}.'**
+  String followupAlreadyPlaced(String start);
+
+  /// Pip's follow-up answer when the task is not in the draft at all
+  ///
+  /// In en, this message translates to:
+  /// **'I do not have that one on today\'s plan.'**
+  String get followupUnknown;
+
+  /// Microphone permission sheet title for assistant voice input
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate a task'**
+  String get voicePermissionTitle;
+
+  /// Rationale body shown with the microphone permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Grind listens only while you hold the mic. Your words become text in the composer, and you see it before anything is sent.'**
+  String get voicePermissionRationale;
+
+  /// Confirm button on the mic permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Allow mic'**
+  String get voicePermissionAllow;
+
+  /// Dismiss button on the mic permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get voicePermissionNotNow;
+
+  /// Confirmation after the mic permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Mic is on. Hold the mic button to dictate.'**
+  String get voicePermissionGranted;
+
+  /// Message shown when the user declines the mic permission
+  ///
+  /// In en, this message translates to:
+  /// **'No problem. You can keep typing. Turn mic access on in Settings whenever you like.'**
+  String get voicePermissionDenied;
+
+  /// Message when mic permission is permanently denied and the user must change it in system settings
+  ///
+  /// In en, this message translates to:
+  /// **'Mic access is off for Grind. Open Settings to turn it on.'**
+  String get voicePermissionBlocked;
+
+  /// Button that opens the system Settings app to change mic permission
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get voicePermissionOpenSettings;
+
+  /// Privacy note explaining where speech recognition runs on each platform
+  ///
+  /// In en, this message translates to:
+  /// **'On iPhone, recognition happens on this device. On the web, your browser does it — some browsers send audio to their own service.'**
+  String get voicePrivacyNote;
+
+  /// Shown on web when the browser has no speech recognition support
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is not available in this browser. You can still type.'**
+  String get voiceUnavailable;
+
+  /// Status while the mic is active and transcribing
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// Tooltip on the button that stops an active dictation
+  ///
+  /// In en, this message translates to:
+  /// **'Stop listening'**
+  String get voiceStopListening;
+
+  /// Label on the control that picks the dictation language
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation language'**
+  String get voiceLocaleLabel;
+
+  /// Dictation language option
+  ///
+  /// In en, this message translates to:
+  /// **'Hebrew'**
+  String get voiceLocaleHebrew;
+
+  /// Dictation language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get voiceLocaleEnglish;
+
+  /// One-line confirmation after an assistant tool runs, listing the time ranges it scheduled (e.g. "Done: 09:00–09:25 and 15:00–15:25")
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {ranges}'**
+  String toolConfirmationDone(String ranges);
+
+  /// One-line confirmation after an assistant tool runs with no time ranges to show (e.g. a replan that moved nothing)
+  ///
+  /// In en, this message translates to:
+  /// **'Done.'**
+  String get toolConfirmationEmpty;
+
+  /// Connects the last item in a list: "a and b" for two items, "a, b and c" with the serial separator for three+
+  ///
+  /// In en, this message translates to:
+  /// **'{head} and {tail}'**
+  String commonJoinAnd(String head, String tail);
+
+  /// Separator between middle items in a list, used before the trailing "and" connector
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get commonListSeparator;
 }
 
 class _AppLocalizationsDelegate

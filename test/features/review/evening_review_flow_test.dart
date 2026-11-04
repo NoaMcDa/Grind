@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/features/goals/domain/goal_metric.dart';
+import 'package:grind/features/goals/domain/goal_record.dart';
+import 'package:grind/features/goals/domain/goal_repository.dart';
+import 'package:grind/features/goals/domain/metric_ticks.dart';
+import 'package:grind/features/goals/goal_providers.dart';
 import 'package:grind/features/review/review.dart';
 import 'package:grind/l10n/l10n.dart';
 import 'package:grind/theme/app_theme.dart';
@@ -87,6 +92,8 @@ void main() {
     await tap(tester, const ValueKey('review-undo-c'));
     await tap(tester, const ValueKey('review-opt-c-drop'));
     await tap(tester, primary('Continue'));
+    // check-in step: no goals seeded, so an empty state and Continue.
+    await tap(tester, primary('Continue'));
     await tester.enterText(
       find.byKey(const ValueKey('review-win-field')),
       'Finished the draft',
@@ -109,7 +116,7 @@ void main() {
   ) async {
     var finished = false;
     final env = await pump(tester, seed, onFinished: () => finished = true);
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
       await tap(tester, const ValueKey('review-skip'));
     }
     expect(find.byKey(const ValueKey('review-praise')), findsOneWidget);
@@ -192,6 +199,64 @@ void main() {
     final r = (await tasks.getById('r'))!;
     expect(r.status, TaskStatus.open);
     expect(r.remindAt, DateTime.utc(2026, 11, 4, 9));
+  });
+
+  testWidgets('checked-in recurring goals get a +1 tick', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    final t0 = DateTime.utc(2026, 10, 1);
+    final tasks = InMemoryTaskRepository();
+    final reviews = InMemoryReviewRepository();
+    final goals = InMemoryGoalRepository(
+      clock: FixedClock(now),
+      seed: [
+        GoalRecord(
+          id: 'g-workouts',
+          title: 'Workouts',
+          metric: const RecurringMetric(quota: 4, unit: 'workouts'),
+          createdAt: t0,
+          updatedAt: t0,
+        ),
+        // A paused goal — stays off the list.
+        GoalRecord(
+          id: 'g-paused',
+          title: 'Paused',
+          status: GoalStatus.paused,
+          metric: const RecurringMetric(quota: 3, unit: 'runs'),
+          createdAt: t0,
+          updatedAt: t0,
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clockProvider.overrideWithValue(FixedClock(now)),
+          taskRepositoryProvider.overrideWithValue(tasks),
+          reviewRepositoryProvider.overrideWithValue(reviews),
+          goalRepositoryProvider.overrideWithValue(goals),
+        ],
+        child: MaterialApp(
+          theme: buildAppTheme(),
+          localizationsDelegates: localizationsDelegates,
+          supportedLocales: supportedLocales,
+          home: EveningReviewFlow(onFinished: () {}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Skip through done + move to land on check-in.
+    await tap(tester, primary('Continue'));
+    await tap(tester, primary('Continue'));
+    expect(find.text('Workouts'), findsOne);
+    expect(find.text('Paused'), findsNothing);
+    await tap(tester, const ValueKey('review-checkin-g-workouts'));
+    await tap(tester, primary('Continue'));
+    final ticks = (await tasks.getAll()).where(isMetricTick).toList();
+    expect(ticks, hasLength(1));
+    expect(ticks.single.goalId, 'g-workouts');
+    expect(ticks.single.completedAt, isNotNull);
   });
 
   testWidgets('lays out in RTL at 390x844', (tester) async {

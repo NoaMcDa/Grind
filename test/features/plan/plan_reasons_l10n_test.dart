@@ -53,12 +53,188 @@ void main() {
       localizePlanReason(he, 'no free 45-minute slot before Nov 12'),
       'אין חלון פנוי של 45 דקות לפני 12 בנוב׳',
     );
-    expect(localizePlanReason(he, 'Lecture now takes that time'), isNotEmpty);
     expect(
-      localizePlanReason(he, 'Lecture now takes that time'),
-      'Lecture now takes that time',
+      localizePlanReason(he, 'unknown reason text'),
+      'unknown reason text',
     );
   });
+
+  test('re-plan diff reasons round-trip in English', () {
+    const same = [
+      // Move reasons from `_moveReason` in `replan.dart`.
+      'that time has passed',
+      'your hours changed',
+      'an earlier slot opened up',
+      "reshuffled around today's changes",
+      'Team sync now takes that time',
+      'All-hands on deck now takes that time',
+      'you put Dentist there',
+      'you put Call mom there',
+      'made room for Essay outline',
+      'made room for Read paper',
+      // Removal reasons from `_removalReason` in `replan.dart`.
+      'no longer on your list',
+      'done, nice work',
+      'skipped for now',
+      'no longer fits this week',
+    ];
+    for (final r in same) {
+      expect(localizePlanReason(en, r), r, reason: r);
+    }
+  });
+
+  test('re-plan diff reasons render in Hebrew', () {
+    expect(localizePlanReason(he, 'that time has passed'), 'הזמן הזה כבר עבר');
+    expect(
+      localizePlanReason(he, 'your hours changed'),
+      'שעות העבודה שלך השתנו',
+    );
+    expect(
+      localizePlanReason(he, 'an earlier slot opened up'),
+      'התפנה חלון מוקדם יותר',
+    );
+    expect(
+      localizePlanReason(he, "reshuffled around today's changes"),
+      'סידרתי מחדש סביב השינויים של היום',
+    );
+    expect(
+      localizePlanReason(he, 'Team sync now takes that time'),
+      'עכשיו Team sync בשעה הזאת',
+    );
+    expect(
+      localizePlanReason(he, 'you put Dentist there'),
+      'שמת שם את Dentist',
+    );
+    expect(
+      localizePlanReason(he, 'made room for Essay outline'),
+      'פיניתי מקום לEssay outline',
+    );
+    expect(
+      localizePlanReason(he, 'no longer on your list'),
+      'כבר לא ברשימה שלך',
+    );
+    expect(localizePlanReason(he, 'done, nice work'), 'סיימת, יפה');
+    expect(localizePlanReason(he, 'skipped for now'), 'דילוג לעת עתה');
+    expect(localizePlanReason(he, 'no longer fits this week'), 'לא נכנס השבוע');
+  });
+
+  test('diff move reasons from the scheduler map through localization', () {
+    // Verbatim strings produced by `_moveReason` and `_removalReason` in
+    // `lib/features/plan/scheduler/replan.dart`. Guards against a future
+    // reason string diverging from what `localizePlanReason` recognizes.
+    final movedByEvent = 'Team sync now takes that time';
+    final newlyPinned = 'you put Dentist there';
+    final madeRoom = 'made room for Essay outline';
+    expect(localizePlanReason(en, movedByEvent), movedByEvent);
+    expect(localizePlanReason(en, newlyPinned), newlyPinned);
+    expect(localizePlanReason(en, madeRoom), madeRoom);
+    // The parameterized templates must not collapse one into another.
+    expect(
+      localizePlanReason(he, newlyPinned),
+      isNot(equals(localizePlanReason(he, madeRoom))),
+    );
+    expect(
+      localizePlanReason(he, movedByEvent),
+      isNot(equals(localizePlanReason(he, newlyPinned))),
+    );
+  });
+
+  test('re-plan trigger summaries round-trip in English', () {
+    // Verbatim strings produced by `_skipSummary`, `_overrunSummary`,
+    // `_addedSummary` and `_movedSummary` in
+    // `lib/features/plan/scheduler/replan_trigger.dart`.
+    const same = [
+      'you skipped Thesis chapter',
+      'Thesis chapter ran 15 min over',
+      'Thesis chapter ran 2h over',
+      'Thesis chapter ran 2h 15m over',
+      'Team sync lands at 15:00',
+      'Team sync moved to 15:30',
+      'Team sync moved to today 09:00',
+      'Team sync moved to tomorrow 09:00',
+      'Team sync moved to Thursday 09:00',
+      'Team sync moved to Nov 12 09:00',
+    ];
+    for (final s in same) {
+      expect(localizeReplanTriggerSummary(en, s), s, reason: s);
+    }
+  });
+
+  test('re-plan trigger summaries render in Hebrew', () {
+    expect(
+      localizeReplanTriggerSummary(he, 'you skipped Thesis chapter'),
+      'דילגת על Thesis chapter',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 15 min over'),
+      'Thesis chapter חרגה ב-15 דק׳',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 2h over'),
+      'Thesis chapter חרגה ב-2 שעות',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 2h 15m over'),
+      'Thesis chapter חרגה ב-2 שעות ו-15 דק׳',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync lands at 15:00'),
+      'Team sync נכנס ב-15:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to 15:30'),
+      'Team sync זז ל-15:30',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to Thursday 09:00'),
+      'Team sync זז ליום חמישי ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to tomorrow 09:00'),
+      'Team sync זז למחר ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to Nov 12 09:00'),
+      'Team sync זז ל12 בנוב׳ ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'something unrecognized'),
+      'something unrecognized',
+    );
+  });
+
+  test(
+    're-plan trigger summary templates do not collapse into one another',
+    () {
+      // Each template renders a distinct Hebrew phrase, even when fed a title
+      // that contains the English suffix of another template.
+      final overrunMinutes = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 15 min over',
+      );
+      final overrunHours = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 2h over',
+      );
+      final overrunHoursMinutes = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 2h 15m over',
+      );
+      final movedTime = localizeReplanTriggerSummary(
+        he,
+        'Thesis moved to 09:00',
+      );
+      final movedDayTime = localizeReplanTriggerSummary(
+        he,
+        'Thesis moved to Thursday 09:00',
+      );
+      final lands = localizeReplanTriggerSummary(he, 'Thesis lands at 09:00');
+      expect(overrunMinutes, isNot(equals(overrunHours)));
+      expect(overrunHours, isNot(equals(overrunHoursMinutes)));
+      expect(movedTime, isNot(equals(movedDayTime)));
+      expect(movedTime, isNot(equals(lands)));
+    },
+  );
 
   test('capacity pieces use ICU plurals', () {
     expect(

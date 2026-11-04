@@ -5,6 +5,68 @@ import 'models.dart';
 import 'planner.dart';
 import 'time_math.dart';
 
+/// True iff [t] has recorded progress and should be treated as "already
+/// underway". The re-plan path leaves started tasks where they are, so a
+/// task you have put minutes into is not snatched from under you.
+///
+/// Pure function of the task's own fields; `Task.minutesDone` is Grind's
+/// only "started" signal (see also `effort_score.dart`).
+bool isStarted(Task t) => t.minutesDone > 0;
+
+/// True iff the re-plan path is allowed to move [t]: open, not deleted, not
+/// pinned, not already started.
+///
+/// From epic #18:
+///
+/// > completed and pinned items are untouched; only unstarted tasks move
+///
+/// Pure: no clock, no events, no plan — only the task's own fields.
+bool isReplanCandidate(Task t) =>
+    isOpenTask(t) && !isPinned(t) && !isStarted(t);
+
+/// A task list split by what the re-plan path may do with each one.
+///
+/// [movable] is what the scheduler is free to re-place; [untouched] is
+/// everything the re-plan keeps where it is (pinned, started) or drops
+/// (done, skipped, deleted). The caller hands [movable] to `plan(...)` and
+/// leaves [untouched] alone.
+class ReplanPartition {
+  const ReplanPartition({required this.movable, required this.untouched});
+
+  static const empty = ReplanPartition(movable: [], untouched: []);
+
+  final List<Task> movable;
+  final List<Task> untouched;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ReplanPartition &&
+      sameList(other.movable, movable) &&
+      sameList(other.untouched, untouched);
+
+  @override
+  int get hashCode =>
+      Object.hash(Object.hashAll(movable), Object.hashAll(untouched));
+
+  @override
+  String toString() =>
+      'ReplanPartition(movable: ${movable.map((t) => t.id).toList()}, '
+      'untouched: ${untouched.map((t) => t.id).toList()})';
+}
+
+/// Splits [tasks] into [ReplanPartition.movable] (the re-plan may re-place
+/// these) and [ReplanPartition.untouched] (leave verbatim or drop). The
+/// input order is kept inside each list — the diff that the re-plan surface
+/// renders is deterministic.
+ReplanPartition partitionForReplan(Iterable<Task> tasks) {
+  final movable = <Task>[];
+  final untouched = <Task>[];
+  for (final t in tasks) {
+    (isReplanCandidate(t) ? movable : untouched).add(t);
+  }
+  return ReplanPartition(movable: movable, untouched: untouched);
+}
+
 /// A task whose blocks changed between two plans, with the one reason why.
 class PlanMove {
   const PlanMove({
@@ -84,6 +146,12 @@ class ReplanResult {
 /// Re-plans after the day changed: [plan] again with done/skipped tasks
 /// dropped and locked tasks kept where they are, plus a [PlanDiff] against
 /// [previous] that gives every move one reason.
+///
+/// Minimal-change bias: pass [prevPlacements] (or let it default to
+/// [prevPlacementsFromPlan] of [previous]) to keep a task at its previous
+/// slots whenever they still fit — the plan that moves the fewest items.
+/// Pass an empty map to drop the bias and re-fit every open task from
+/// scratch (the pre-#18 behaviour, kept for tests and callers that want it).
 ReplanResult replan({
   required Plan previous,
   required List<Task> tasks,
@@ -94,6 +162,7 @@ ReplanResult replan({
   UserStats stats = const UserStats(),
   SchedulerWeights weights = const SchedulerWeights(),
   DateTime? horizonEnd,
+  Map<String, List<Slot>> prevPlacements = const {},
 }) {
   final next = plan(
     tasks: tasks.where(isOpenTask).toList(),
@@ -104,6 +173,7 @@ ReplanResult replan({
     stats: stats,
     weights: weights,
     horizonEnd: horizonEnd,
+    prevPlacements: prevPlacements,
   );
   return ReplanResult(
     plan: next,
@@ -173,6 +243,21 @@ PlanDiff diffPlans({
       if (!before.containsKey(id)) id,
   ];
   return PlanDiff(moved: moved, added: added, removed: removed);
+}
+
+/// The unlocked placements of [plan], grouped by task id, for feeding
+/// [replan]'s minimal-change bias. Locked placements are skipped: the
+/// planner already keeps them verbatim.
+Map<String, List<Slot>> prevPlacementsFromPlan(Plan plan) {
+  final out = <String, List<Slot>>{};
+  for (final p in plan.placed) {
+    if (p.locked) continue;
+    (out[p.taskId] ??= []).add(p.slot);
+  }
+  for (final l in out.values) {
+    l.sort(compareSlots);
+  }
+  return out;
 }
 
 Map<String, List<Slot>> _slotsByTask(Plan p) {
