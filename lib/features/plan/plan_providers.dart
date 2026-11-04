@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../calendar/sync/calendar_sync_engine.dart'
+    show externalIdFromTaskCalendarEventId, isImportedCalendarEventId;
 import '../calendar/sync/task_mirrors.dart';
 import '../goals/domain/metric_ticks.dart';
 import '../tasks/day_bounds.dart';
@@ -64,6 +66,26 @@ List<Task> tasksOnDay(
       )
       .toList()
     ..sort((a, b) => a.scheduledStart!.compareTo(b.scheduledStart!));
+}
+
+/// Events with any whose [CalendarEvent.externalId] is already linked to an
+/// "Add as task" imported task filtered out: the task card replaces the
+/// dashed event card so the day does not show the same thing twice.
+List<CalendarEvent> eventsWithoutLinkedTasks(
+  Iterable<CalendarEvent> events,
+  Iterable<Task> tasks,
+) {
+  final linked = <String>{};
+  for (final t in tasks) {
+    if (!isImportedCalendarEventId(t.calendarEventId)) continue;
+    final ext = externalIdFromTaskCalendarEventId(t.calendarEventId);
+    if (ext != null) linked.add(ext);
+  }
+  if (linked.isEmpty) return events.toList();
+  return [
+    for (final e in events)
+      if (!linked.contains(e.externalId)) e,
+  ];
 }
 
 /// Tasks scheduled on the selected day, ordered by start, live (from the

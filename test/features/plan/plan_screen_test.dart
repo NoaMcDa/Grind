@@ -265,6 +265,28 @@ void main() {
     expect(find.byKey(const Key('plan-event-lesson')), findsNothing);
   });
 
+  testWidgets(
+    'an event linked to an imported task is hidden (no duplicate card)',
+    (t) async {
+      // Reuses the seeded Google "seminar" event; a task carrying the
+      // imported sentinel for its externalId should replace the dashed card.
+      final linkedTask = Task(
+        id: 'from-seminar',
+        title: 'Imported seminar task',
+        scheduledStart: DateTime(2026, 10, 29, 14).toUtc(),
+        scheduledEnd: DateTime(2026, 10, 29, 15, 30).toUtc(),
+        calendarEventId: importedCalendarEventIdFor('seminar'),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      );
+      await _pump(t, extraTasks: [linkedTask]);
+      // The task card appears; the original dashed event card is gone.
+      expect(find.text('Imported seminar task'), findsOneWidget);
+      expect(find.text('Seminar with supervisor'), findsNothing);
+      expect(find.byKey(const Key('plan-event-seminar')), findsNothing);
+    },
+  );
+
   testWidgets('tapping an event opens the read-only sheet', (t) async {
     await _pump(t);
     await t.tap(find.byKey(const Key('plan-event-seminar')));

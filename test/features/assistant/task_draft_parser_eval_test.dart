@@ -92,6 +92,18 @@ void _check(
       reason: 'rrule for "${c.input}" should contain "$r"',
     );
   }
+  if (c.firstActionContains != null) {
+    expect(
+      d.firstAction,
+      isNotNull,
+      reason: 'firstAction missing for "${c.input}"',
+    );
+    expect(
+      d.firstAction,
+      contains(c.firstActionContains!),
+      reason: 'firstAction for "${c.input}"',
+    );
+  }
   if (c.titleContains != null) {
     expect(
       d.title.toLowerCase(),
@@ -114,6 +126,7 @@ class _Case {
     this.energy,
     this.rruleContains = const <String>[],
     this.titleContains,
+    this.firstActionContains,
     this.noDate = false,
     this.noTime = false,
   });
@@ -138,6 +151,10 @@ class _Case {
 
   /// Case-insensitive title substring; null skips the title check.
   final String? titleContains;
+
+  /// Substring the parsed `firstAction` must contain (case-sensitive so
+  /// the "If "/"אם " casing is pinned). Null skips the check.
+  final String? firstActionContains;
 
   /// True asserts the draft has no date.
   final bool noDate;
@@ -461,6 +478,30 @@ const _enCases = <_Case>[
     date: '2027-01-04',
     titleContains: 'renew license',
   ),
+  // -- if-then first action ------------------------------------------- //
+  _Case(
+    input: 'gym tomorrow 7am 45 min, if alarm rings then lace up',
+    date: '2026-11-05',
+    time: '07:00',
+    duration: 45,
+    firstActionContains: 'If alarm rings, then lace up',
+    titleContains: 'gym',
+  ),
+  _Case(
+    // A time inside the if-clause must NOT become the task time.
+    input: "thesis tomorrow 90 min if it's 17:00, then pack your bag",
+    date: '2026-11-05',
+    duration: 90,
+    noTime: true,
+    firstActionContains: "If it's 17:00, then pack your bag",
+    titleContains: 'thesis',
+  ),
+  _Case(
+    input: 'review tomorrow if lunch is over then open the notebook',
+    date: '2026-11-05',
+    firstActionContains: 'If lunch is over, then open the notebook',
+    titleContains: 'review',
+  ),
 ];
 
 // --------------------------------- HE ---------------------------------- //
@@ -623,4 +664,24 @@ const _heCases = <_Case>[
   _Case(input: 'טיול בעוד שבועיים', date: '2026-11-18'),
   _Case(input: 'חידוש רישיון בעוד חודש', date: '2026-12-04'),
   _Case(input: 'ביקורת בעוד חודשיים', date: '2027-01-04'),
+  // -- if-then first action ------------------------------------------- //
+  _Case(
+    input: 'חדר כושר מחר ב-7, אם המתיחה נעימה אז לצאת לריצה',
+    date: '2026-11-05',
+    time: '07:00',
+    firstActionContains: 'אם המתיחה נעימה, אז לצאת לריצה',
+  ),
+  _Case(
+    // 17:00 is inside the condition → not the task's schedule.
+    input: 'לפתוח את התזה מחר אם השעה 17:00, אז לארוז תיק',
+    date: '2026-11-05',
+    noTime: true,
+    firstActionContains: 'אם השעה 17:00, אז לארוז תיק',
+  ),
+  _Case(
+    input: 'ריצה היום ב-19:00, אם קר אז לקחת מעיל',
+    date: '2026-11-04',
+    time: '19:00',
+    firstActionContains: 'אם קר, אז לקחת מעיל',
+  ),
 ];

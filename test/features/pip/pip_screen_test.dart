@@ -84,6 +84,8 @@ void main() {
   testWidgets('tapping an unlock changes what Pip wears', (tester) async {
     await _pump(tester, [for (var i = 0; i < 25; i++) _done('t$i', _now)]);
     expect(find.text('wearing: Scarf'), findsOneWidget);
+    await tester.ensureVisible(find.text('Party hat'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Party hat'));
     await tester.pumpAndSettle();
     expect(find.text('wearing: Party hat'), findsOneWidget);
@@ -94,6 +96,8 @@ void main() {
   ) async {
     final tasks = [for (var i = 0; i < 25; i++) _done('t$i', _now)];
     await _pump(tester, tasks);
+    await tester.ensureVisible(find.text('Party hat'));
+    await tester.pumpAndSettle();
     expect(find.text('Wearing'), findsOneWidget); // scarf
     expect(find.text('Tap to wear'), findsNWidgets(1)); // party hat
     expect(find.text('Finish a goal'), findsOneWidget); // crown locked

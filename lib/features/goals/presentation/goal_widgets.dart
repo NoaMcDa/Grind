@@ -11,21 +11,48 @@ import '../domain/goal_record.dart';
 import '../../../l10n/l10n.dart';
 import 'goal_l10n.dart';
 
-/// Area tag: palette colour, stroke icon, label.
+/// Area tag: palette colour, stroke icon, label. Optionally tappable, so
+/// task rows can jump from a task to its goal (`/goals/:id`).
 class GoalAreaChip extends StatelessWidget {
-  const GoalAreaChip({super.key, required this.area, this.height = 26});
+  const GoalAreaChip({
+    super.key,
+    required this.area,
+    this.height = 26,
+    this.onTap,
+    this.semanticLabel,
+  });
 
   final GoalArea area;
   final double height;
 
+  /// When set, the chip is a button; without it it renders as a plain tag.
+  final VoidCallback? onTap;
+
+  /// Semantic label for the tappable variant; the area label by default.
+  final String? semanticLabel;
+
   @override
-  Widget build(BuildContext context) => Pill(
-    label: area.label,
-    color: area.color,
-    textColor: area.onColor,
-    height: height,
-    icon: Icon(area.icon),
-  );
+  Widget build(BuildContext context) {
+    final chip = Pill(
+      label: area.label,
+      color: area.color,
+      textColor: area.onColor,
+      height: height,
+      icon: Icon(area.icon),
+    );
+    if (onTap == null) return chip;
+    return Semantics(
+      button: true,
+      label: semanticLabel ?? area.label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: chip,
+      ),
+    );
+  }
 }
 
 /// "Almost there" / "Completed" / "Done for the week" / "Resting", or
