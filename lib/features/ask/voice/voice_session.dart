@@ -283,10 +283,7 @@ class VoiceSessionController {
     // so the composer hands focus back to the user's typed text.
     if (_state.phase == VoiceSessionPhase.listening) {
       _emit(
-        VoiceSessionState(
-          phase: VoiceSessionPhase.cancelled,
-          locale: locale,
-        ),
+        VoiceSessionState(phase: VoiceSessionPhase.cancelled, locale: locale),
       );
     }
     _subscription = null;

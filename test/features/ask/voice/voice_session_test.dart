@@ -42,8 +42,7 @@ class _FakeVoiceService implements VoiceInputService {
     }
   }
 
-  void emit(String text) =>
-      _controller!.add(VoiceTranscript.partial(text));
+  void emit(String text) => _controller!.add(VoiceTranscript.partial(text));
 
   void emitFinal(String text) {
     _controller!.add(VoiceTranscript.finalResult(text));
@@ -94,8 +93,7 @@ void main() {
       expect(seen.single.phase, VoiceSessionPhase.listening);
     });
 
-    test('partial transcripts update text without leaving listening',
-        () async {
+    test('partial transcripts update text without leaving listening', () async {
       final service = _FakeVoiceService();
       final controller = VoiceSessionController(service);
       addTearDown(controller.dispose);
@@ -205,35 +203,39 @@ void main() {
       expect(controller.state.phase, VoiceSessionPhase.cancelled);
     });
 
-    test('unavailable service errors on start and never opens the stream',
-        () async {
-      final service = _FakeVoiceService(
-        isAvailable: false,
-        supportedLocales: const [],
-      );
-      final controller = VoiceSessionController(service);
-      addTearDown(controller.dispose);
+    test(
+      'unavailable service errors on start and never opens the stream',
+      () async {
+        final service = _FakeVoiceService(
+          isAvailable: false,
+          supportedLocales: const [],
+        );
+        final controller = VoiceSessionController(service);
+        addTearDown(controller.dispose);
 
-      final locale = await controller.start('en');
+        final locale = await controller.start('en');
 
-      expect(locale, isNull);
-      expect(controller.state.phase, VoiceSessionPhase.error);
-      expect(controller.state.error, isA<VoiceInputUnavailable>());
-      expect(service.startCount, 0);
-    });
+        expect(locale, isNull);
+        expect(controller.state.phase, VoiceSessionPhase.error);
+        expect(controller.state.error, isA<VoiceInputUnavailable>());
+        expect(service.startCount, 0);
+      },
+    );
 
-    test('no supported locale match errors without opening the stream',
-        () async {
-      final service = _FakeVoiceService(supportedLocales: const ['en-US']);
-      final controller = VoiceSessionController(service);
-      addTearDown(controller.dispose);
+    test(
+      'no supported locale match errors without opening the stream',
+      () async {
+        final service = _FakeVoiceService(supportedLocales: const ['en-US']);
+        final controller = VoiceSessionController(service);
+        addTearDown(controller.dispose);
 
-      final locale = await controller.start('fr-FR');
+        final locale = await controller.start('fr-FR');
 
-      expect(locale, isNull);
-      expect(controller.state.phase, VoiceSessionPhase.error);
-      expect(service.startCount, 0);
-    });
+        expect(locale, isNull);
+        expect(controller.state.phase, VoiceSessionPhase.error);
+        expect(service.startCount, 0);
+      },
+    );
 
     test('reset drops back to idle from any terminal phase', () async {
       final service = _FakeVoiceService();
@@ -269,18 +271,20 @@ void main() {
       expect(controller.state.text, isEmpty);
     });
 
-    test('dispose closes the state stream and ignores further events',
-        () async {
-      final service = _FakeVoiceService();
-      final controller = VoiceSessionController(service);
+    test(
+      'dispose closes the state stream and ignores further events',
+      () async {
+        final service = _FakeVoiceService();
+        final controller = VoiceSessionController(service);
 
-      await controller.start('en');
-      await controller.dispose();
+        await controller.start('en');
+        await controller.dispose();
 
-      expect(service.stopCount, greaterThanOrEqualTo(1));
-      // A second start after dispose is a no-op; nothing throws.
-      expect(await controller.start('en'), isNull);
-    });
+        expect(service.stopCount, greaterThanOrEqualTo(1));
+        // A second start after dispose is a no-op; nothing throws.
+        expect(await controller.start('en'), isNull);
+      },
+    );
 
     test('state equality ignores identity but tracks phase and text', () {
       const a = VoiceSessionState(
