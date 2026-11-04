@@ -532,21 +532,28 @@ class MilestoneActions {
     return m;
   }
 
-  Future<void> edit(Milestone m, {required String title, DateTime? dueAt}) =>
-      _milestones.upsert(
-        m.copyWith(title: title, dueAt: dueAt, updatedAt: _now),
-      );
+  Future<void> edit(
+    Milestone m, {
+    required String title,
+    DateTime? dueAt,
+  }) async {
+    final current = await _milestones.getById(m.id) ?? m;
+    await _milestones.upsert(
+      current.copyWith(title: title, dueAt: dueAt, updatedAt: _now),
+    );
+  }
 
   /// Done ↔ open.
   Future<Milestone> toggleDone(Milestone m) async {
+    final current = await _milestones.getById(m.id) ?? m;
     final now = _now;
-    final next = m.isDone
-        ? m.copyWith(
+    final next = current.isDone
+        ? current.copyWith(
             status: MilestoneStatus.open,
             completedAt: null,
             updatedAt: now,
           )
-        : m.copyWith(
+        : current.copyWith(
             status: MilestoneStatus.done,
             completedAt: now,
             updatedAt: now,
@@ -558,9 +565,10 @@ class MilestoneActions {
   /// Accepts the rollover: the milestone takes its suggested date. No-op
   /// when it is not moved.
   Future<void> acceptMove(Milestone m) async {
-    final date = suggestedMoveDate(m, _ctx);
+    final current = await _milestones.getById(m.id) ?? m;
+    final date = suggestedMoveDate(current, _ctx);
     if (date == null) return;
-    await _milestones.upsert(m.copyWith(dueAt: date, updatedAt: _now));
+    await _milestones.upsert(current.copyWith(dueAt: date, updatedAt: _now));
   }
 
   /// Moves [m] [by] places (negative: up) and renumbers the goal's list
