@@ -29,16 +29,22 @@ void main() {
     group('bidi marks', () {
       test('strips LTR/RTL marks', () {
         // U+200E LEFT-TO-RIGHT MARK, U+200F RIGHT-TO-LEFT MARK.
-        expect(sanitizeVoiceTranscript('‎go to ‏the gym'), 'Go to the gym');
+        expect(
+          sanitizeVoiceTranscript('\u200Ego to \u200Fthe gym'),
+          'Go to the gym',
+        );
       });
 
       test('strips embedding and isolate controls', () {
         // U+202A LRE, U+2069 POP DIRECTIONAL ISOLATE.
-        expect(sanitizeVoiceTranscript('‪go to the gym⁩'), 'Go to the gym');
+        expect(
+          sanitizeVoiceTranscript('\u202Ago to the gym\u2069'),
+          'Go to the gym',
+        );
       });
 
       test('input of only bidi marks and whitespace returns empty', () {
-        expect(sanitizeVoiceTranscript('‎‏  ⁩'), isEmpty);
+        expect(sanitizeVoiceTranscript('\u200E\u200F  \u2069'), isEmpty);
       });
     });
 
@@ -195,7 +201,7 @@ void main() {
 
       test('combines bidi strip, filler and punctuation for Hebrew', () {
         expect(
-          sanitizeVoiceTranscript('‏ אה, תזכיר לי מחר. ', locale: 'he-IL'),
+          sanitizeVoiceTranscript('\u200F אה, תזכיר לי מחר. ', locale: 'he-IL'),
           'תזכיר לי מחר',
         );
       });

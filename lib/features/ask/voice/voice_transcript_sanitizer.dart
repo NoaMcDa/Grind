@@ -75,7 +75,8 @@ String _collapseWhitespace(String s) =>
 ///
 /// U+200E LEFT-TO-RIGHT MARK, U+200F RIGHT-TO-LEFT MARK, U+202A..U+202E
 /// the LRE/RLE/PDF/LRO/RLO embedding set, U+2066..U+2069 the isolate set.
-String _stripBidiMarks(String s) => s.replaceAll(RegExp(r'[‎‏‪-‮⁦-⁩]'), '');
+String _stripBidiMarks(String s) =>
+    s.replaceAll(RegExp('[\u200E\u200F\u202A-\u202E\u2066-\u2069]'), '');
 
 /// EN fillers the user did not mean to dictate. Each is paired with an
 /// optional trailing `,` so `"um, go to the gym"` becomes `"go to the gym"`.
