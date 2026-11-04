@@ -24,7 +24,8 @@ void main() {
 
   test('requestAuthorization reports what iOS says', () async {
     reply = (_) => true;
-    final ok = await MethodChannelHardModeShieldService().requestAuthorization();
+    final ok = await MethodChannelHardModeShieldService()
+        .requestAuthorization();
     expect(ok, isTrue);
     expect(calls.single.method, 'requestAuthorization');
     expect(calls.single.arguments, isNull);
@@ -32,7 +33,8 @@ void main() {
 
   test('requestAuthorization reports false when the user declines', () async {
     reply = (_) => false;
-    final ok = await MethodChannelHardModeShieldService().requestAuthorization();
+    final ok = await MethodChannelHardModeShieldService()
+        .requestAuthorization();
     expect(ok, isFalse);
   });
 
@@ -63,14 +65,16 @@ void main() {
     expect(ok, isFalse);
   });
 
-  test('enable with an empty list still reaches iOS (clears the shield)',
-      () async {
-    reply = (_) => true;
-    await MethodChannelHardModeShieldService().enable(
-      applicationTokens: const [],
-    );
-    expect(calls.single.arguments, {'applicationTokens': <String>[]});
-  });
+  test(
+    'enable with an empty list still reaches iOS (clears the shield)',
+    () async {
+      reply = (_) => true;
+      await MethodChannelHardModeShieldService().enable(
+        applicationTokens: const [],
+      );
+      expect(calls.single.arguments, {'applicationTokens': <String>[]});
+    },
+  );
 
   test('disable takes no arguments', () async {
     await MethodChannelHardModeShieldService().disable();
@@ -103,18 +107,20 @@ void main() {
     await service.disable();
   });
 
-  test('the no-op service does nothing and reports nothing shielded',
-      () async {
-    const service = NoopHardModeShieldService();
-    expect(await service.requestAuthorization(), isFalse);
-    expect(await service.isAuthorized(), isFalse);
-    expect(
-      await service.enable(applicationTokens: const ['token-a']),
-      isFalse,
-    );
-    await service.disable();
-    expect(calls, isEmpty);
-  });
+  test(
+    'the no-op service does nothing and reports nothing shielded',
+    () async {
+      const service = NoopHardModeShieldService();
+      expect(await service.requestAuthorization(), isFalse);
+      expect(await service.isAuthorized(), isFalse);
+      expect(
+        await service.enable(applicationTokens: const ['token-a']),
+        isFalse,
+      );
+      await service.disable();
+      expect(calls, isEmpty);
+    },
+  );
 
   test('off iOS the provider is the no-op service', () {
     // Tests run on the host VM (Linux/macOS), never iOS.
