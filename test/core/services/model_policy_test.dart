@@ -9,17 +9,15 @@ void main() {
     });
 
     test('matches the epic rule: Sonnet for plan explanations', () {
-      expect(
-        ModelPolicy.defaults.tierFor('planExplanation'),
-        ModelTier.sonnet,
-      );
+      expect(ModelPolicy.defaults.tierFor('planExplanation'), ModelTier.sonnet);
     });
 
     test('covers exactly the three intents the gateway speaks today', () {
-      expect(
-        ModelPolicy.defaults.intents.toSet(),
-        {'capture', 'praise', 'planExplanation'},
-      );
+      expect(ModelPolicy.defaults.intents.toSet(), {
+        'capture',
+        'praise',
+        'planExplanation',
+      });
     });
   });
 
