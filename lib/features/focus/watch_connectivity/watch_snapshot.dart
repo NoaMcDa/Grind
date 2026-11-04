@@ -167,10 +167,10 @@ class WatchMomentum {
 
   static WatchMomentum? _tryDecode(Object? raw) {
     if (raw is! Map<String, Object?>) return null;
-    final value = (raw['value'] as num?)?.toDouble();
+    final rawValue = raw['value'];
     final level = raw['level'];
-    if (value == null || level is! String) return null;
-    return WatchMomentum(value: value, level: level);
+    if (rawValue is! num || level is! String) return null;
+    return WatchMomentum(value: rawValue.toDouble(), level: level);
   }
 
   @override
