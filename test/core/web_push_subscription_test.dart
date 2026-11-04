@@ -83,15 +83,18 @@ void main() {
       }
     });
 
-    test('fromJson accepts a mozilla autopush endpoint and Safari endpoint', () {
-      for (final ep in const [
-        'https://updates.push.services.mozilla.com/wpush/v2/gAAAAAB',
-        'https://web.push.apple.com/QF7b',
-      ]) {
-        final json = {...sample().toJson(), 'endpoint': ep};
-        expect(WebPushSubscription.fromJson(json).endpoint, ep);
-      }
-    });
+    test(
+      'fromJson accepts a mozilla autopush endpoint and Safari endpoint',
+      () {
+        for (final ep in const [
+          'https://updates.push.services.mozilla.com/wpush/v2/gAAAAAB',
+          'https://web.push.apple.com/QF7b',
+        ]) {
+          final json = {...sample().toJson(), 'endpoint': ep};
+          expect(WebPushSubscription.fromJson(json).endpoint, ep);
+        }
+      },
+    );
   });
 
   group('WebPushSubscription behaviour', () {
