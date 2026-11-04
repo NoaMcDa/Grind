@@ -23,34 +23,43 @@ void main() {
         );
       });
 
-      test('error_language_not_supported classifies to languageUnavailable', () {
-        expect(
-          classifyVoiceInputError('error_language_not_supported').kind,
-          VoiceInputErrorKind.languageUnavailable,
-        );
-      });
+      test(
+        'error_language_not_supported classifies to languageUnavailable',
+        () {
+          expect(
+            classifyVoiceInputError('error_language_not_supported').kind,
+            VoiceInputErrorKind.languageUnavailable,
+          );
+        },
+      );
 
-      test('error_network and error_network_timeout both classify to network', () {
-        expect(
-          classifyVoiceInputError('error_network').kind,
-          VoiceInputErrorKind.network,
-        );
-        expect(
-          classifyVoiceInputError('error_network_timeout').kind,
-          VoiceInputErrorKind.network,
-        );
-      });
+      test(
+        'error_network and error_network_timeout both classify to network',
+        () {
+          expect(
+            classifyVoiceInputError('error_network').kind,
+            VoiceInputErrorKind.network,
+          );
+          expect(
+            classifyVoiceInputError('error_network_timeout').kind,
+            VoiceInputErrorKind.network,
+          );
+        },
+      );
 
-      test('error_server and error_too_many_requests classify to serverBusy', () {
-        expect(
-          classifyVoiceInputError('error_server').kind,
-          VoiceInputErrorKind.serverBusy,
-        );
-        expect(
-          classifyVoiceInputError('error_too_many_requests').kind,
-          VoiceInputErrorKind.serverBusy,
-        );
-      });
+      test(
+        'error_server and error_too_many_requests classify to serverBusy',
+        () {
+          expect(
+            classifyVoiceInputError('error_server').kind,
+            VoiceInputErrorKind.serverBusy,
+          );
+          expect(
+            classifyVoiceInputError('error_too_many_requests').kind,
+            VoiceInputErrorKind.serverBusy,
+          );
+        },
+      );
 
       test('error_busy and error_audio classify to recognizerBusy', () {
         expect(
@@ -123,30 +132,27 @@ void main() {
         );
       });
 
-      test('aborted classifies to unknown — a user-initiated stop is not an error', () {
-        // The caller is expected to check for cancellation before
-        // classifying; if an aborted code leaks through we show the
-        // generic apology rather than a misleading snackbar.
-        expect(
-          classifyVoiceInputError('aborted').kind,
-          VoiceInputErrorKind.unknown,
-        );
-      });
+      test(
+        'aborted classifies to unknown — a user-initiated stop is not an error',
+        () {
+          // The caller is expected to check for cancellation before
+          // classifying; if an aborted code leaks through we show the
+          // generic apology rather than a misleading snackbar.
+          expect(
+            classifyVoiceInputError('aborted').kind,
+            VoiceInputErrorKind.unknown,
+          );
+        },
+      );
     });
 
     group('fallbacks and robustness', () {
       test('null classifies to unknown', () {
-        expect(
-          classifyVoiceInputError(null).kind,
-          VoiceInputErrorKind.unknown,
-        );
+        expect(classifyVoiceInputError(null).kind, VoiceInputErrorKind.unknown);
       });
 
       test('empty string classifies to unknown', () {
-        expect(
-          classifyVoiceInputError('').kind,
-          VoiceInputErrorKind.unknown,
-        );
+        expect(classifyVoiceInputError('').kind, VoiceInputErrorKind.unknown);
       });
 
       test('whitespace-only classifies to unknown', () {
@@ -174,18 +180,21 @@ void main() {
         );
       });
 
-      test('tolerates hyphen/underscore difference between the two vocabularies', () {
-        // The same classification whether a caller spells the code
-        // with the plugin's underscores or the Web API's hyphens.
-        expect(
-          classifyVoiceInputError('error-permission').kind,
-          classifyVoiceInputError('error_permission').kind,
-        );
-        expect(
-          classifyVoiceInputError('no_speech').kind,
-          classifyVoiceInputError('no-speech').kind,
-        );
-      });
+      test(
+        'tolerates hyphen/underscore difference between the two vocabularies',
+        () {
+          // The same classification whether a caller spells the code
+          // with the plugin's underscores or the Web API's hyphens.
+          expect(
+            classifyVoiceInputError('error-permission').kind,
+            classifyVoiceInputError('error_permission').kind,
+          );
+          expect(
+            classifyVoiceInputError('no_speech').kind,
+            classifyVoiceInputError('no-speech').kind,
+          );
+        },
+      );
 
       test('trims surrounding whitespace', () {
         expect(
