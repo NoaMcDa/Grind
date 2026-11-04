@@ -116,9 +116,9 @@ class AppIntentAddTask extends AppIntentPayload {
   int get hashCode => Object.hash('addTask', title, notes, dueAt);
 }
 
-/// "Start focus [on `<task>`]" from Siri / Shortcuts. [taskId] is optional:
+/// "Start focus on `task`" from Siri / Shortcuts. [taskId] is optional:
 /// a bare "Start focus" starts a free focus session on nothing in
-/// particular, while "Start focus on `<task>`" passes the picked id so the
+/// particular, while "Start focus on `task`" passes the picked id so the
 /// dispatcher can attribute the minutes.
 class AppIntentStartFocus extends AppIntentPayload {
   const AppIntentStartFocus({this.taskId});
