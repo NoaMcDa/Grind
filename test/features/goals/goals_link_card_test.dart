@@ -43,7 +43,9 @@ Future<ProviderContainer> _pump(
       goalRepositoryProvider.overrideWithValue(
         InMemoryGoalRepository(seed: goals, clock: FixedClock(_t0)),
       ),
-      taskRepositoryProvider.overrideWithValue(InMemoryTaskRepository(const [])),
+      taskRepositoryProvider.overrideWithValue(
+        InMemoryTaskRepository(const []),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -111,7 +113,9 @@ void main() {
       );
       final l = lookupAppLocalizations(const Locale('en'));
       expect(
-        find.text(l.goalsProgressLine(l.goalsOfTargetUnit(8, 12, 'lessons'), 67)),
+        find.text(
+          l.goalsProgressLine(l.goalsOfTargetUnit(8, 12, 'lessons'), 67),
+        ),
         findsOneWidget,
       );
     });
@@ -135,12 +139,7 @@ void main() {
             importance: 5,
             metric: const FiniteMetric(target: 10, unit: 'pages', current: 4),
           ),
-          _goal(
-            'done',
-            'Already done',
-            status: GoalStatus.done,
-            importance: 5,
-          ),
+          _goal('done', 'Already done', status: GoalStatus.done, importance: 5),
         ],
       );
       final l = lookupAppLocalizations(const Locale('en'));
@@ -152,10 +151,7 @@ void main() {
 
     testWidgets('tap: invokes the callback', (tester) async {
       var opened = false;
-      await _pump(
-        tester,
-        GoalsLinkCard(onTap: () => opened = true),
-      );
+      await _pump(tester, GoalsLinkCard(onTap: () => opened = true));
       await tester.tap(find.byKey(const Key('today-goals')));
       expect(opened, isTrue);
     });

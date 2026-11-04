@@ -10,13 +10,7 @@ import '../tasks/zone_test_support.dart';
 final _c = DateTime.utc(2026, 10, 29);
 
 GoalRecord _goal(String id, String title, {String area = 'learning'}) =>
-    GoalRecord(
-      id: id,
-      title: title,
-      area: area,
-      createdAt: _c,
-      updatedAt: _c,
-    );
+    GoalRecord(id: id, title: title, area: area, createdAt: _c, updatedAt: _c);
 
 Task _task(
   String id, {

@@ -129,10 +129,7 @@ class GoalsLinkCard extends ConsumerWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.body(
-                          size: 13,
-                          color: AppColors.muted,
-                        ),
+                        style: AppText.body(size: 13, color: AppColors.muted),
                       ),
                     ],
                   ),
@@ -151,9 +148,7 @@ class GoalsLinkCard extends ConsumerWidget {
   /// any active goal, then any goal at all; null when the list is empty.
   static GoalRecord? _pickTopActive(List<GoalRecord> goals) {
     if (goals.isEmpty) return null;
-    final active = goals
-        .where((g) => g.status == GoalStatus.active)
-        .toList();
+    final active = goals.where((g) => g.status == GoalStatus.active).toList();
     int rank(GoalRecord g) => g.metric == null ? 1 : 0;
     final pool = active.isEmpty ? goals.toList() : active;
     pool.sort((a, b) {
