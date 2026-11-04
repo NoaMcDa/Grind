@@ -167,18 +167,16 @@ class BudgetExceededException implements Exception {
 class AssistantBudgetTracker {
   AssistantBudgetTracker({
     required this.clock,
-    AssistantDailyBudget budget = AssistantDailyBudget.defaults,
-  }) : _budget = budget;
+    this.budget = AssistantDailyBudget.defaults,
+  });
 
   final Clock clock;
-  AssistantDailyBudget _budget;
-
-  final Map<String, AssistantDailyUsage> _byUser = {};
 
   /// The current cap. Change it at runtime (e.g. after a Settings toggle)
   /// without reconstructing the tracker; already-recorded usage is kept.
-  AssistantDailyBudget get budget => _budget;
-  set budget(AssistantDailyBudget value) => _budget = value;
+  AssistantDailyBudget budget;
+
+  final Map<String, AssistantDailyUsage> _byUser = {};
 
   /// This user's usage for today. Rolls to a fresh day if the clock has
   /// crossed local midnight since the last operation.
@@ -192,9 +190,9 @@ class AssistantBudgetTracker {
     assert(tokens >= 0);
     assert(calls >= 0);
     final usage = _refresh(userId);
-    final maxCalls = _budget.maxCalls;
+    final maxCalls = budget.maxCalls;
     if (maxCalls != null && usage.calls + calls > maxCalls) return false;
-    final maxTokens = _budget.maxTokens;
+    final maxTokens = budget.maxTokens;
     if (maxTokens != null && usage.totalTokens + tokens > maxTokens) {
       return false;
     }
@@ -209,22 +207,22 @@ class AssistantBudgetTracker {
     assert(tokens >= 0);
     assert(calls >= 0);
     final usage = _refresh(userId);
-    final maxCalls = _budget.maxCalls;
+    final maxCalls = budget.maxCalls;
     if (maxCalls != null && usage.calls + calls > maxCalls) {
       throw BudgetExceededException(
         reason: BudgetExceededReason.callLimit,
         userId: userId,
         usage: usage,
-        budget: _budget,
+        budget: budget,
       );
     }
-    final maxTokens = _budget.maxTokens;
+    final maxTokens = budget.maxTokens;
     if (maxTokens != null && usage.totalTokens + tokens > maxTokens) {
       throw BudgetExceededException(
         reason: BudgetExceededReason.tokenLimit,
         userId: userId,
         usage: usage,
-        budget: _budget,
+        budget: budget,
       );
     }
   }
