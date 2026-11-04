@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/features/ask/tools/assistant_action_log.dart';
@@ -270,6 +272,254 @@ void main() {
     test('the log is a Listenable the UI can observe', () {
       final log = AssistantActionLog();
       expect(log, isA<Listenable>());
+    });
+  });
+
+  group('AssistantAction JSON serialization', () {
+    test('toJson emits the expected shape with ISO-8601 UTC timestamp', () {
+      final a = _action(
+        id: 'a-1',
+        timestamp: DateTime.utc(2026, 11, 4, 12, 34, 56),
+        toolName: 'moveTask',
+        inverseDescriptor: const <String, Object?>{
+          'kind': 'restoreMoveTask',
+          'taskId': 't-1',
+          'previousStart': '2026-11-04T08:00:00Z',
+          'previousEnd': '2026-11-04T08:25:00Z',
+        },
+        humanLabel: 'Moved Gym · 09:00–09:25',
+        status: AssistantActionStatus.applied,
+      );
+      expect(a.toJson(), <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:34:56.000Z',
+        'toolName': 'moveTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'restoreMoveTask',
+          'taskId': 't-1',
+          'previousStart': '2026-11-04T08:00:00Z',
+          'previousEnd': '2026-11-04T08:25:00Z',
+        },
+        'humanLabel': 'Moved Gym · 09:00–09:25',
+        'status': 'applied',
+      });
+    });
+
+    test('fromJson round-trips an applied entry byte-for-byte', () {
+      final a = _action(
+        timestamp: DateTime.utc(2026, 11, 4, 9, 15),
+        inverseDescriptor: const <String, Object?>{
+          'kind': 'restoreTask',
+          'task': <String, Object?>{
+            'id': 't-1',
+            'title': 'Gym',
+            'minutes': 25,
+            'tags': <Object?>['fitness', 'morning'],
+            'notes': null,
+            'done': false,
+          },
+        },
+      );
+      final decoded = AssistantAction.fromJson(a.toJson());
+      expect(decoded, a);
+    });
+
+    test('fromJson round-trips an undone entry', () {
+      final a = _action(status: AssistantActionStatus.undone);
+      expect(AssistantAction.fromJson(a.toJson()), a);
+    });
+
+    test('a jsonEncode → jsonDecode cycle round-trips to an equal entry', () {
+      final a = _action(
+        timestamp: DateTime.utc(2026, 11, 4, 9),
+        inverseDescriptor: const <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+          'chunkTaskIds': <Object?>['c-1', 'c-2'],
+        },
+      );
+      final encoded = jsonEncode(a.toJson());
+      final decoded = AssistantAction.fromJson(
+        jsonDecode(encoded) as Object?,
+      );
+      expect(decoded, a);
+    });
+
+    test('defaults a missing status to applied', () {
+      final json = <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:00:00.000Z',
+        'toolName': 'addTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+        },
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+      };
+      expect(
+        AssistantAction.fromJson(json).status,
+        AssistantActionStatus.applied,
+      );
+    });
+
+    test('tolerates an unknown top-level field without throwing', () {
+      final a = _action();
+      final json = a.toJson()..['extra'] = 'future-field';
+      expect(AssistantAction.fromJson(json), a);
+    });
+
+    test('rejects a non-object payload', () {
+      expect(
+        () => AssistantAction.fromJson('not a map'),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(null),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+    });
+
+    test('rejects an empty or missing id, toolName or humanLabel', () {
+      Map<String, Object?> base() => <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:00:00.000Z',
+        'toolName': 'addTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+        },
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+      };
+      for (final key in const ['id', 'toolName', 'humanLabel']) {
+        expect(
+          () => AssistantAction.fromJson(base()..[key] = ''),
+          throwsA(isA<AssistantActionFormatException>()),
+          reason: '"$key" empty should throw',
+        );
+        expect(
+          () => AssistantAction.fromJson(base()..remove(key)),
+          throwsA(isA<AssistantActionFormatException>()),
+          reason: '"$key" missing should throw',
+        );
+      }
+    });
+
+    test('rejects a non-ISO timestamp, a non-UTC one, or a missing one', () {
+      Map<String, Object?> base() => <String, Object?>{
+        'id': 'a-1',
+        'toolName': 'addTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+        },
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+      };
+      expect(
+        () => AssistantAction.fromJson(base()..['timestamp'] = 'not-a-date'),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      // "no Z" means local time per DateTime.parse → not UTC.
+      expect(
+        () => AssistantAction.fromJson(
+          base()..['timestamp'] = '2026-11-04T12:00:00',
+        ),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(base()..['timestamp'] = 42),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(base()),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+    });
+
+    test('accepts an explicit +00:00 offset as UTC', () {
+      final json = <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:00:00+00:00',
+        'toolName': 'addTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+        },
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+      };
+      expect(
+        AssistantAction.fromJson(json).timestamp,
+        DateTime.utc(2026, 11, 4, 12),
+      );
+    });
+
+    test('rejects an inverseDescriptor missing a non-empty "kind"', () {
+      Map<String, Object?> base(Object? descriptor) => <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:00:00.000Z',
+        'toolName': 'addTask',
+        'inverseDescriptor': descriptor,
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+      };
+      expect(
+        () => AssistantAction.fromJson(base('not-a-map')),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(base(<String, Object?>{})),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(
+          base(<String, Object?>{'kind': ''}),
+        ),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+    });
+
+    test('rejects an unknown or malformed status value', () {
+      Map<String, Object?> base(Object? status) => <String, Object?>{
+        'id': 'a-1',
+        'timestamp': '2026-11-04T12:00:00.000Z',
+        'toolName': 'addTask',
+        'inverseDescriptor': <String, Object?>{
+          'kind': 'deleteTask',
+          'taskId': 't-1',
+        },
+        'humanLabel': 'Scheduled Gym · 09:00–09:25',
+        'status': status,
+      };
+      expect(
+        () => AssistantAction.fromJson(base('pending')),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(base('')),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+      expect(
+        () => AssistantAction.fromJson(base(42)),
+        throwsA(isA<AssistantActionFormatException>()),
+      );
+    });
+
+    test('a log of appended entries round-trips through JSON', () {
+      final log = AssistantActionLog();
+      final a = _action(id: 'a', timestamp: DateTime.utc(2026, 11, 4, 9));
+      final b = _action(
+        id: 'b',
+        timestamp: DateTime.utc(2026, 11, 4, 10),
+        status: AssistantActionStatus.undone,
+      );
+      log
+        ..append(a)
+        ..append(b);
+      final encoded = jsonEncode(
+        <Object?>[for (final e in log.entries) e.toJson()],
+      );
+      final restored = (jsonDecode(encoded) as List<Object?>)
+          .map(AssistantAction.fromJson)
+          .toList();
+      expect(restored, <AssistantAction>[b, a]);
     });
   });
 }
