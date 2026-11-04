@@ -44,8 +44,23 @@ void main() {
     // The encoder keeps N leading path segments as the app's base. One
     // segment == `/Grind/`. If the deploy workflow ever changes its
     // --base-href, this test fails so the 404 fallback is updated too.
-    final baseHref = RegExp(r'--base-href\s+(\S+)').firstMatch(deployYml);
-    expect(baseHref, isNotNull);
+    //
+    // Scan only `run:` lines (not `#`-prefixed comments) so prose like
+    // "# TODO: custom domain would change --base-href to /" cannot steal
+    // the match and let a real base-href change slip past (#164).
+    final runLines = deployYml
+        .split('\n')
+        .map((l) => l.trimLeft())
+        .where((l) => l.startsWith('- run:') || l.startsWith('run:'));
+    final baseHref = runLines
+        .map((l) => RegExp(r'--base-href\s+(\S+)').firstMatch(l))
+        .firstWhere((m) => m != null, orElse: () => null);
+    expect(
+      baseHref,
+      isNotNull,
+      reason:
+          'No `--base-href <value>` found in any run: line of deploy-web.yml',
+    );
     final segments = baseHref!
         .group(1)!
         .split('/')
