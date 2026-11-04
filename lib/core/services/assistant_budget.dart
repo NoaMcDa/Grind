@@ -189,6 +189,7 @@ class AssistantBudgetTracker {
   bool canSpend(String userId, {int tokens = 0, int calls = 1}) {
     assert(tokens >= 0);
     assert(calls >= 0);
+    if (calls == 0 && tokens == 0) return true;
     final usage = _refresh(userId);
     final maxCalls = budget.maxCalls;
     if (maxCalls != null && usage.calls + calls > maxCalls) return false;
