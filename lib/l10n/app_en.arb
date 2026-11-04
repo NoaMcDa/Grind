@@ -65,6 +65,10 @@
   "@quickMoveGym": {
     "description": "Quick prompt chip"
   },
+  "quickWhatsNext": "What's next?",
+  "@quickWhatsNext": {
+    "description": "Quick prompt chip"
+  },
   "composerHint": "Type or speak a task…",
   "@composerHint": {
     "description": "Composer placeholder"
@@ -432,7 +436,7 @@
   },
   "commonHours": "{hours} h",
   "@commonHours": {
-    "description": "Duration in whole hours",
+    "description": "Duration on a round hour",
     "placeholders": {
       "hours": {
         "type": "int"
@@ -441,7 +445,7 @@
   },
   "commonHoursMinutes": "{hours} h {minutes} min",
   "@commonHoursMinutes": {
-    "description": "Duration in hours and minutes",
+    "description": "Duration mixing hours and leftover minutes",
     "placeholders": {
       "hours": {
         "type": "int"
@@ -652,11 +656,11 @@
   },
   "tasksCustomDuration": "Duration",
   "@tasksCustomDuration": {
-    "description": "Custom estimate field label that accepts hours or minutes"
+    "description": "Custom estimate field label; accepts shapes like '90', '4h', '1:30'"
   },
-  "tasksCustomDurationHint": "e.g. 4h, 1:30, 90",
+  "tasksCustomDurationHint": "90, 4h, 1:30",
   "@tasksCustomDurationHint": {
-    "description": "Hint for the custom duration field (hours or minutes)"
+    "description": "Hint for the custom duration field"
   },
   "tasksCustomDurationInvalid": "Enter a duration like 4h, 1:30 or 90",
   "@tasksCustomDurationInvalid": {
@@ -1105,6 +1109,10 @@
   "planOpenInCalendar": "Open in calendar",
   "@planOpenInCalendar": {
     "description": "Button"
+  },
+  "planAddAsTask": "Add as task",
+  "@planAddAsTask": {
+    "description": "Button on the event sheet that creates a Grind task prefilled from the calendar event; tapping it again later opens the already-created task."
   },
   "planOpenInCalendarSoon": "Opening the calendar app is coming soon.",
   "@planOpenInCalendarSoon": {
@@ -1568,7 +1576,7 @@
   },
   "focusFocusedFor": "You focused for {duration}.",
   "@focusFocusedFor": {
-    "description": "End-of-session sheet body",
+    "description": "End-of-session sheet body; duration is a localized string such as '45 min' or '1 h 30 min'",
     "placeholders": {
       "duration": {
         "type": "String"
@@ -1577,7 +1585,7 @@
   },
   "focusFocusedForTask": "You focused for {duration} on {task}.",
   "@focusFocusedForTask": {
-    "description": "End-of-session sheet body when the session had a task",
+    "description": "End-of-session sheet body when the session had a task; duration is a localized string such as '45 min' or '1 h 30 min'",
     "placeholders": {
       "duration": {
         "type": "String"
@@ -1814,6 +1822,10 @@
   "goalsTitle": "Goals",
   "@goalsTitle": {
     "description": "Goals screen title"
+  },
+  "goalsAllGoalsLink": "All goals",
+  "@goalsAllGoalsLink": {
+    "description": "Text link next to the Highlights card on the Pip screen that opens the full goals list"
   },
   "goalsSubtitle": "Near and far. Every small step counts.",
   "@goalsSubtitle": {
@@ -2853,6 +2865,93 @@
   "planDiffRemovedNoLongerFits": "no longer fits this week",
   "@planDiffRemovedNoLongerFits": {
     "description": "Re-plan diff removal reason: fallback when no unplaced reason is available"
+  },
+  "planTriggerSkipped": "you skipped {title}",
+  "@planTriggerSkipped": {
+    "description": "Re-plan trigger summary: the user marked a scheduled task as skipped",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerOverrunMinutes": "{title} ran {minutes} min over",
+  "@planTriggerOverrunMinutes": {
+    "description": "Re-plan trigger summary: a task overran by less than an hour",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerOverrunHours": "{title} ran {hours}h over",
+  "@planTriggerOverrunHours": {
+    "description": "Re-plan trigger summary: a task overran by a whole number of hours",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerOverrunHoursMinutes": "{title} ran {hours}h {minutes}m over",
+  "@planTriggerOverrunHoursMinutes": {
+    "description": "Re-plan trigger summary: a task overran by hours and minutes",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "planTriggerEventLands": "{title} lands at {time}",
+  "@planTriggerEventLands": {
+    "description": "Re-plan trigger summary: a new calendar event was added inside today's plan",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerEventMovedTime": "{title} moved to {time}",
+  "@planTriggerEventMovedTime": {
+    "description": "Re-plan trigger summary: an existing event moved to a new time on the same day",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "planTriggerEventMovedDayTime": "{title} moved to {day} {time}",
+  "@planTriggerEventMovedDayTime": {
+    "description": "Re-plan trigger summary: an existing event moved to a different day",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "goalsMetricKindLabel": "How it counts",
   "@goalsMetricKindLabel": {

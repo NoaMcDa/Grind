@@ -56,6 +56,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get quickMoveGym => 'להעביר את האימון לערב';
 
   @override
+  String get quickWhatsNext => 'מה הבא?';
+
+  @override
   String get composerHint => 'כתבו או הקליטו משימה…';
 
   @override
@@ -314,12 +317,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String commonHours(int hours) {
-    return '$hours שע׳';
+    return '$hours ש׳';
   }
 
   @override
   String commonHoursMinutes(int hours, int minutes) {
-    return '$hours שע׳ $minutes דק׳';
+    return '$hours ש׳ $minutes דק׳';
   }
 
   @override
@@ -469,7 +472,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get tasksCustomDuration => 'משך';
 
   @override
-  String get tasksCustomDurationHint => 'למשל 4h, 1:30, 90';
+  String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
   String get tasksCustomDurationInvalid => 'הזינו משך כמו 4h, 1:30 או 90';
@@ -827,6 +830,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planOpenInCalendar => 'פתיחה ביומן';
+
+  @override
+  String get planAddAsTask => 'הוספה כמשימה';
 
   @override
   String get planOpenInCalendarSoon => 'פתיחת אפליקציית היומן תגיע בקרוב.';
@@ -1369,6 +1375,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get goalsTitle => 'יעדים';
+
+  @override
+  String get goalsAllGoalsLink => 'כל היעדים';
 
   @override
   String get goalsSubtitle => 'קרובים ורחוקים. כל צעד קטן נחשב.';
@@ -2064,6 +2073,41 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planDiffRemovedNoLongerFits => 'לא נכנס השבוע';
+
+  @override
+  String planTriggerSkipped(String title) {
+    return 'דילגת על $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title חרגה ב-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title חרגה ב-$hours שעות';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title חרגה ב-$hours שעות ו-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title נכנס ב-$time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title זז ל-$time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title זז ל$day ב-$time';
+  }
 
   @override
   String get goalsMetricKindLabel => 'איך זה נספר';

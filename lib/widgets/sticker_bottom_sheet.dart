@@ -10,6 +10,19 @@ Future<T?> showStickerSheet<T>(
   WidgetBuilder builder, {
   bool isScrollControlled = true,
 }) {
+  // Floating Pip toasts sit on the root [ScaffoldMessenger]'s overlay,
+  // which is above this modal route, so a lingering toast would cover the
+  // sheet's own buttons. Clear the current one AND clear once more on the
+  // next frame — the trigger that opened this sheet may also have fired a
+  // celebration-bus event in the same microtask, whose own `showPipToast`
+  // reaches the messenger after this synchronous call returns.
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  messenger?.clearSnackBars();
+  if (messenger != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      messenger.clearSnackBars();
+    });
+  }
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,

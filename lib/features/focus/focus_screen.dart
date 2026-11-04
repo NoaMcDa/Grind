@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/core.dart';
-import '../../core/util/duration_input.dart';
+import '../../l10n/duration_format.dart';
 import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
@@ -369,8 +369,8 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
       case FocusPhase.idle:
         // Coarser steps above an hour so 1 h → 4 h is a handful of taps.
         final current = s.settings.focusMinutes;
-        final upStep = FocusSettings.stepFor(current);
-        final downStep = FocusSettings.stepFor(current - 1);
+        final downStep = FocusSettings.idleStepFor(current, up: false);
+        final upStep = FocusSettings.idleStepFor(current, up: true);
         left = PillButton(
           label: l.focusMinusMinutes(downStep),
           height: 48,

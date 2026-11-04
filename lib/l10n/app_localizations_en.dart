@@ -56,6 +56,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickMoveGym => 'Move gym to evening';
 
   @override
+  String get quickWhatsNext => 'What\'s next?';
+
+  @override
   String get composerHint => 'Type or speak a task…';
 
   @override
@@ -469,7 +472,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksCustomDuration => 'Duration';
 
   @override
-  String get tasksCustomDurationHint => 'e.g. 4h, 1:30, 90';
+  String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
   String get tasksCustomDurationInvalid =>
@@ -829,6 +832,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planOpenInCalendar => 'Open in calendar';
+
+  @override
+  String get planAddAsTask => 'Add as task';
 
   @override
   String get planOpenInCalendarSoon =>
@@ -1386,6 +1392,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsTitle => 'Goals';
+
+  @override
+  String get goalsAllGoalsLink => 'All goals';
 
   @override
   String get goalsSubtitle => 'Near and far. Every small step counts.';
@@ -2083,6 +2092,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planDiffRemovedNoLongerFits => 'no longer fits this week';
+
+  @override
+  String planTriggerSkipped(String title) {
+    return 'you skipped $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title ran $minutes min over';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title ran ${hours}h over';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title ran ${hours}h ${minutes}m over';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title lands at $time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title moved to $time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title moved to $day $time';
+  }
 
   @override
   String get goalsMetricKindLabel => 'How it counts';

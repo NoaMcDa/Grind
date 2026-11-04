@@ -37,6 +37,12 @@ class TaskDraftParser {
 
     var remaining = normalised;
 
+    // "If X, then Y" first — so a time, duration or recurrence inside the
+    // clause is not mistaken for the task's own schedule.
+    final firstActionResult = _extractFirstAction(remaining, lexicon);
+    final firstAction = firstActionResult.firstAction;
+    remaining = firstActionResult.remaining;
+
     final durResult = _extractDuration(remaining, lexicon);
     final duration = durResult.minutes;
     remaining = durResult.remaining;
@@ -69,6 +75,7 @@ class TaskDraftParser {
       time: timeOfDay == null ? null : _fmtTime(timeOfDay),
       durationMinutes: duration,
       energy: energy,
+      firstAction: firstAction,
       recurrenceRrule: rrule,
     );
   }
@@ -243,6 +250,51 @@ class TaskDraftParser {
       return _DateResult(today.add(Duration(days: n)), _squish(out));
     }
 
+    // "in N weeks", "בעוד N שבועות"
+    final inWeeks = _bodyRe(r'(?:in|בעוד)\s+(\d+)\s+(?:weeks?|שבועות)');
+    final inWeeksMatch = inWeeks.firstMatch(out);
+    if (inWeeksMatch != null) {
+      final n = int.parse(inWeeksMatch[1]!);
+      out = out.replaceFirst(inWeeks, ' ');
+      return _DateResult(today.add(Duration(days: n * 7)), _squish(out));
+    }
+
+    // "in a week" / "in one week"; HE dual "בעוד שבועיים" (= 2 weeks)
+    // and singular "בעוד שבוע". The HE word boundary keeps "שבוע" from
+    // matching inside "שבועיים" or "שבועות".
+    final inTwoWeeksHe = _bodyRe(r'בעוד\s+שבועיים');
+    if (inTwoWeeksHe.hasMatch(out)) {
+      out = out.replaceAll(inTwoWeeksHe, ' ');
+      return _DateResult(today.add(const Duration(days: 14)), _squish(out));
+    }
+    final inOneWeek = _bodyRe(r'(?:in\s+(?:a|one)\s+week|בעוד\s+שבוע)');
+    if (inOneWeek.hasMatch(out)) {
+      out = out.replaceAll(inOneWeek, ' ');
+      return _DateResult(today.add(const Duration(days: 7)), _squish(out));
+    }
+
+    // "in N months", "בעוד N חודשים"
+    final inMonths = _bodyRe(r'(?:in|בעוד)\s+(\d+)\s+(?:months?|חודשים)');
+    final inMonthsMatch = inMonths.firstMatch(out);
+    if (inMonthsMatch != null) {
+      final n = int.parse(inMonthsMatch[1]!);
+      out = out.replaceFirst(inMonths, ' ');
+      return _DateResult(_addMonths(today, n), _squish(out));
+    }
+
+    // "in a month" / "in one month"; HE dual "בעוד חודשיים" (= 2 months)
+    // and singular "בעוד חודש".
+    final inTwoMonthsHe = _bodyRe(r'בעוד\s+חודשיים');
+    if (inTwoMonthsHe.hasMatch(out)) {
+      out = out.replaceAll(inTwoMonthsHe, ' ');
+      return _DateResult(_addMonths(today, 2), _squish(out));
+    }
+    final inOneMonth = _bodyRe(r'(?:in\s+(?:a|one)\s+month|בעוד\s+חודש)');
+    if (inOneMonth.hasMatch(out)) {
+      out = out.replaceAll(inOneMonth, ' ');
+      return _DateResult(_addMonths(today, 1), _squish(out));
+    }
+
     // "next week", "בשבוע הבא"
     final nextWeek = _bodyRe(r'(?:next\s+week|בשבוע\s+הבא)');
     if (nextWeek.hasMatch(out)) {
@@ -287,6 +339,41 @@ class TaskDraftParser {
       if (_word(w).hasMatch(s)) return _EnergyResult(Energy.light, s);
     }
     return _EnergyResult(null, s);
+  }
+
+  // ------------------------------ first action -------------------------- //
+
+  /// Pulls an `if <condition> (then|,) <action>` clause out of [s] and
+  /// returns the formatted if-then string plus the text with the clause
+  /// removed.
+  ///
+  /// The clause is extracted BEFORE date/time/duration/recurrence so a
+  /// time ("if it's 17:00") or duration ("if you have 30 min") inside
+  /// the condition is not mistaken for the task's own schedule.
+  _FirstActionResult _extractFirstAction(String s, _Lexicon lex) {
+    final body =
+        '${RegExp.escape(lex.ifMarker)}\\s+(.+?)\\s*,?\\s+'
+        '${RegExp.escape(lex.thenMarker)}\\s+(.+?)\$';
+    final re = RegExp(_lb + body + _rb, caseSensitive: false);
+    final m = re.firstMatch(s);
+    if (m == null) return _FirstActionResult(null, s);
+
+    final cond = m[1]!.trim();
+    final action = m[2]!.trim();
+    if (cond.isEmpty || action.isEmpty) return _FirstActionResult(null, s);
+
+    final before = s.substring(0, m.start).trim();
+    // The clause is often written as "..., if X then Y": strip the
+    // trailing comma left behind so the title cleanup never inherits
+    // stray punctuation.
+    final beforeClean = before.endsWith(',')
+        ? before.substring(0, before.length - 1).trim()
+        : before;
+
+    final formatted =
+        '${lex.ifMarkerCanonical} $cond, ${lex.thenMarker} '
+        '$action';
+    return _FirstActionResult(formatted, _squish(beforeClean));
   }
 
   // ------------------------------- recurrence ---------------------------- //
@@ -399,6 +486,18 @@ String _fmtTime(_Time t) =>
 
 const _oneDay = Duration(days: 1);
 
+/// Adds [months] calendar months to [d], clamping the day to the last day of
+/// the resulting month. "In 1 month" from Jan 31 lands on Feb 28/29, not on
+/// Mar 3. Keeps the parser locale-free.
+DateTime _addMonths(DateTime d, int months) {
+  final zeroBasedMonth = d.month - 1 + months;
+  final newYear = d.year + (zeroBasedMonth ~/ 12);
+  final newMonth = (zeroBasedMonth % 12) + 1;
+  final lastDay = DateTime(newYear, newMonth + 1, 0).day;
+  final newDay = d.day > lastDay ? lastDay : d.day;
+  return DateTime(newYear, newMonth, newDay);
+}
+
 class _Time {
   const _Time(this.hour, this.minute);
   final int hour;
@@ -435,6 +534,12 @@ class _RecurrenceResult {
   final String remaining;
 }
 
+class _FirstActionResult {
+  const _FirstActionResult(this.firstAction, this.remaining);
+  final String? firstAction;
+  final String remaining;
+}
+
 class _Lexicon {
   const _Lexicon({
     required this.weekdays,
@@ -447,6 +552,9 @@ class _Lexicon {
     required this.nextMarkers,
     required this.thisMarkers,
     required this.fillerWords,
+    required this.ifMarker,
+    required this.ifMarkerCanonical,
+    required this.thenMarker,
   });
 
   /// Lowercase weekday → [DateTime.weekday].
@@ -479,6 +587,17 @@ class _Lexicon {
   /// Noise words that linger after extraction and should not end up in
   /// the title.
   final List<String> fillerWords;
+
+  /// The "if" marker used in the `if … then …` extractor, matched
+  /// case-insensitively.
+  final String ifMarker;
+
+  /// How the "if" marker is spelled in the formatted output (EN
+  /// capitalises it to match the demo seed style; HE has no case).
+  final String ifMarkerCanonical;
+
+  /// The "then" marker used in the extractor (also the output spelling).
+  final String thenMarker;
 }
 
 const _Lexicon _en = _Lexicon(
@@ -533,6 +652,9 @@ const _Lexicon _en = _Lexicon(
   nextMarkers: ['next', 'coming'],
   thisMarkers: ['this', 'on'],
   fillerWords: ['at', 'on', 'for', 'about', 'around', 'the', 'a'],
+  ifMarker: 'if',
+  ifMarkerCanonical: 'If',
+  thenMarker: 'then',
 );
 
 const _Lexicon _he = _Lexicon(
@@ -565,4 +687,7 @@ const _Lexicon _he = _Lexicon(
   nextMarkers: ['הבא', 'הקרוב'],
   thisMarkers: ['ביום'],
   fillerWords: ['של', 'ל'],
+  ifMarker: 'אם',
+  ifMarkerCanonical: 'אם',
+  thenMarker: 'אז',
 );

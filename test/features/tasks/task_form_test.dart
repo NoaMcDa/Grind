@@ -204,4 +204,69 @@ void main() {
     );
     expect(task.estimatedMinutes, 90);
   });
+
+  // Issue #151: a timed task with a custom estimate was saved without
+  // `scheduledStart` / `scheduledEnd`, so it never appeared on the Plan
+  // timeline and was skipped by the calendar write-back push. Saving one
+  // now blocks the estimate's length out on the grid starting at that time.
+  testWidgets('a picked time sets a scheduled range of the estimate length', (
+    t,
+  ) async {
+    final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
+    await t.tap(find.bySemanticsLabel('Add a task'));
+    await t.pumpAndSettle();
+    await t.enterText(find.byType(TextField).first, 'Deep work');
+    // The due-time row opens the time picker; OK keeps the default 09:00.
+    await t.tap(find.bySemanticsLabel('Add a time').first);
+    await t.pumpAndSettle();
+    await t.tap(find.text('OK'));
+    await t.pumpAndSettle();
+    // Custom estimate of 240 minutes (the issue's example: "4 hours focus").
+    await t.ensureVisible(find.text('Custom'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Custom'));
+    await t.pumpAndSettle();
+    // Two fields are now on the sheet: the title (first) and the duration
+    // field (next). The field accepts hour-shaped input too (#153), but
+    // digits alone are still a valid minute count.
+    await t.enterText(find.byType(TextField).at(1), '240');
+    await t.pumpAndSettle();
+    await _save(t);
+
+    final saved = (await c.read(taskRepositoryProvider).getAll()).firstWhere(
+      (x) => x.title == 'Deep work',
+    );
+    expect(saved.estimatedMinutes, 240);
+    expect(saved.remindAt, isNotNull);
+    expect(saved.scheduledStart, saved.remindAt);
+    expect(saved.scheduledEnd, isNotNull);
+    expect(
+      saved.scheduledEnd!.difference(saved.scheduledStart!),
+      const Duration(minutes: 240),
+    );
+    expect(saved.isScheduled, isTrue);
+    // Issue #189: a time the user picks here pins the task, like a drag,
+    // so Re-plan with Pip keeps it where it is instead of re-fitting it.
+    expect(saved.lockedStart, isTrue);
+  });
+
+  // A task saved without any picked time stays off the grid (there is no
+  // "Anytime" strip yet — tracked as a follow-up to #151).
+  testWidgets('without a picked time, no scheduled range is written', (
+    t,
+  ) async {
+    final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
+    await t.tap(find.bySemanticsLabel('Add a task'));
+    await t.pumpAndSettle();
+    await t.enterText(find.byType(TextField).first, 'Someday');
+    await _save(t);
+    final saved = (await c.read(taskRepositoryProvider).getAll()).firstWhere(
+      (x) => x.title == 'Someday',
+    );
+    expect(saved.scheduledStart, isNull);
+    expect(saved.scheduledEnd, isNull);
+    expect(saved.isScheduled, isFalse);
+    // No scheduled range means nothing to pin either (#189).
+    expect(saved.lockedStart, isFalse);
+  });
 }

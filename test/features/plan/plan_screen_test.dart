@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/demo_seed.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/features/calendar/sync/calendar_sync_engine.dart';
 import 'package:grind/features/plan/plan_screen.dart';
 
 import '../../test_fonts.dart';
@@ -212,6 +213,79 @@ void main() {
     expect(find.text('Tokyo call'), findsOneWidget);
     expect(find.text('19:00–21:00'), findsOneWidget);
   });
+
+  testWidgets('a task written back to the calendar shows once', (t) async {
+    final c = DateTime.utc(2026);
+    final task = Task(
+      id: 'pushed',
+      title: 'Pushed to Google',
+      scheduledStart: DateTime(2026, 10, 29, 8).toUtc(),
+      scheduledEnd: DateTime(2026, 10, 29, 9).toUtc(),
+      calendarEventId: 'ext-pushed',
+      createdAt: c,
+      updatedAt: c,
+    );
+    final mirror = CalendarEvent(
+      id: 'google:ext-pushed',
+      source: CalendarSource.google,
+      externalId: 'ext-pushed',
+      title: 'Pushed to Google',
+      start: task.scheduledStart!,
+      end: task.scheduledEnd!,
+      taskId: 'pushed',
+      createdAt: c,
+      updatedAt: c,
+    );
+    await _pump(t, extraTasks: [task], extraEvents: [mirror]);
+    expect(find.text('Pushed to Google'), findsOneWidget);
+    expect(find.byKey(const Key('plan-task-pushed')), findsOneWidget);
+    expect(find.byKey(const Key('plan-event-google:ext-pushed')), findsNothing);
+  });
+
+  testWidgets('an event added as a task shows only as the task', (t) async {
+    final c = DateTime.utc(2026);
+    final event = _event(
+      'lesson',
+      'Krav lesson',
+      DateTime(2026, 10, 29, 8),
+      DateTime(2026, 10, 29, 9),
+    );
+    final task = Task(
+      id: 'lesson-task',
+      title: 'Krav lesson',
+      scheduledStart: event.start,
+      scheduledEnd: event.end,
+      calendarEventId: importedCalendarEventIdFor('lesson'),
+      createdAt: c,
+      updatedAt: c,
+    );
+    await _pump(t, extraTasks: [task], extraEvents: [event]);
+    expect(find.text('Krav lesson'), findsOneWidget);
+    expect(find.byKey(const Key('plan-task-lesson-task')), findsOneWidget);
+    expect(find.byKey(const Key('plan-event-lesson')), findsNothing);
+  });
+
+  testWidgets(
+    'an event linked to an imported task is hidden (no duplicate card)',
+    (t) async {
+      // Reuses the seeded Google "seminar" event; a task carrying the
+      // imported sentinel for its externalId should replace the dashed card.
+      final linkedTask = Task(
+        id: 'from-seminar',
+        title: 'Imported seminar task',
+        scheduledStart: DateTime(2026, 10, 29, 14).toUtc(),
+        scheduledEnd: DateTime(2026, 10, 29, 15, 30).toUtc(),
+        calendarEventId: importedCalendarEventIdFor('seminar'),
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      );
+      await _pump(t, extraTasks: [linkedTask]);
+      // The task card appears; the original dashed event card is gone.
+      expect(find.text('Imported seminar task'), findsOneWidget);
+      expect(find.text('Seminar with supervisor'), findsNothing);
+      expect(find.byKey(const Key('plan-event-seminar')), findsNothing);
+    },
+  );
 
   testWidgets('tapping an event opens the read-only sheet', (t) async {
     await _pump(t);

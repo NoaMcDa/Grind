@@ -6,7 +6,7 @@ import 'package:grind/features/goals/goals.dart'
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
-import '../../core/util/duration_input.dart';
+import '../../l10n/duration_format.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -19,16 +19,24 @@ import '../../l10n/l10n.dart';
 import '../plan/plan_l10n.dart' show formatPlanDay;
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
-/// [initialGoalId] presets the goal of a new task. Resolves to the saved
+/// [initialGoalId] presets the goal of a new task. [initial] prefills the
+/// form (title, scheduled range, estimate, notes, goal and any
+/// `calendarEventId`) for a new task — used by "Add as task" on the Plan
+/// event sheet to seed the form from a [CalendarEvent]. Resolves to the saved
 /// task, or null when dismissed.
 Future<Task?> showTaskSheet(
   BuildContext context, {
   Task? existing,
+  Task? initial,
   String? initialGoalId,
 }) {
   return showStickerSheet<Task>(
     context,
-    (_) => TaskFormSheet(existing: existing, initialGoalId: initialGoalId),
+    (_) => TaskFormSheet(
+      existing: existing,
+      initial: initial,
+      initialGoalId: initialGoalId,
+    ),
   );
 }
 
@@ -37,14 +45,24 @@ Future<Task?> showTaskSheet(
 Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
     showTaskSheet(context, initialGoalId: goal.id);
 
-/// Estimate presets, in minutes. Hour presets (1 h, 2 h, 3 h, 4 h) sit after
-/// the short ones so longer tasks don't need the custom field.
+/// Estimate presets in minutes. 15 min through 90 min as before, then a
+/// stretch of whole hours up to 4 h for long tasks (#153).
 const _presets = [15, 30, 45, 60, 90, 120, 180, 240];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
-  const TaskFormSheet({super.key, this.existing, this.initialGoalId});
+  const TaskFormSheet({
+    super.key,
+    this.existing,
+    this.initial,
+    this.initialGoalId,
+  });
 
   final Task? existing;
+
+  /// Prefills a new task's fields (ignored when editing [existing]). Fields
+  /// the form itself doesn't expose (`scheduledStart`, `scheduledEnd`,
+  /// `calendarEventId`) are carried into the saved task unchanged.
+  final Task? initial;
 
   /// The goal a new task starts linked to (ignored when editing).
   final String? initialGoalId;
@@ -83,7 +101,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   @override
   void initState() {
     super.initState();
-    final t = _existing;
+    final t = _existing ?? widget.initial;
     _title = TextEditingController(text: t?.title ?? '');
     _firstAction = TextEditingController(text: t?.firstAction ?? '');
     _notes = TextEditingController(text: t?.notes ?? '');
@@ -95,11 +113,22 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       text: _customMode ? _initialCustomText(_minutes) : '',
     );
     _energy = t?.energy ?? Energy.light;
-    _goalId = t == null ? widget.initialGoalId : t.goalId;
-    if (t == null) {
+    _goalId = _existing == null
+        ? (widget.initial?.goalId ?? widget.initialGoalId)
+        : _existing!.goalId;
+    if (_existing == null && t == null) {
       _date = _today;
+    } else if (_existing == null && t != null) {
+      // Prefilling a new task: the form needs a date, so use the scheduled
+      // day when present (as for an event), else [t.dueAt]'s day, else today.
+      final sched = t.scheduledStart == null
+          ? null
+          : zoneWall(t.scheduledStart!, _location);
+      final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
+      final seed = sched ?? due;
+      _date = seed == null ? _today : DateTime(seed.year, seed.month, seed.day);
     } else {
-      _loadRule(t.id);
+      _loadRule(t!.id);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       if (due != null) {
         _date = DateTime(due.year, due.month, due.day);
@@ -248,14 +277,23 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     var remindAt = remind == null ? null : _at(day ?? _today, remind);
     // A series is anchored at its reminder.
     if (_recurrence != null) remindAt ??= _seriesAnchor();
+    // When the user picked a time (reminder or due), block that slot out on
+    // the Plan timeline: the task spans its estimate, starting at that time.
+    // The sync scheduler debounces a push after save so it also reaches the
+    // connected calendar when write-back is on.
+    final startTime = _effectiveRemind ?? _dueTime;
+    final scheduledStart = (day != null && startTime != null)
+        ? _at(day, startTime)
+        : null;
+    final scheduledEnd = scheduledStart?.add(Duration(minutes: estimate));
     final first = _firstAction.text.trim();
     final notes = _notes.text.trim();
 
     final actions = ref.read(taskActionsProvider);
-    final Task task;
+    Task task;
     final existing = _existing;
     if (existing == null) {
-      task = actions.create(
+      final seeded = actions.create(
         title: title,
         dueAt: dueAt,
         remindAt: remindAt,
@@ -265,6 +303,19 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
       );
+      // Carry over fields the form doesn't expose but [initial] may hold:
+      // the scheduled range (so "Add as task" from an event places it), its
+      // pinned state (so Re-plan with Pip keeps it where the user chose
+      // — #189), and the calendar-event link (so push-back skips it).
+      final init = widget.initial;
+      task = init == null
+          ? seeded
+          : seeded.copyWith(
+              scheduledStart: init.scheduledStart,
+              scheduledEnd: init.scheduledEnd,
+              calendarEventId: init.calendarEventId,
+              lockedStart: init.lockedStart,
+            );
     } else {
       task = existing.copyWith(
         title: title,
@@ -275,6 +326,16 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         firstAction: first.isEmpty ? null : first,
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
+      );
+    }
+    if (scheduledStart != null) {
+      // A time the user picked here pins the task on the Plan timeline, like
+      // a drag does: Re-plan with Pip then keeps it where the user chose
+      // instead of trying to re-fit it (#189).
+      task = task.copyWith(
+        scheduledStart: scheduledStart,
+        scheduledEnd: scheduledEnd,
+        lockedStart: true,
       );
     }
     _saving = true;

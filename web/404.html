@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Grind</title>
+  <!--
+    SPA deep-link fallback for GitHub Pages — encoder half.
+
+    WHY: GitHub Pages is a static host. It only serves files that exist on
+    disk, so a deep link like `/Grind/today` returns this 404 page because
+    there is no `/Grind/today/index.html`. Without this fix Flutter never
+    boots on any route but `/Grind/` itself (issue #100, console 404 #101).
+
+    This script runs on the 404 response, captures the requested path and
+    redirects to `/Grind/?/today`, which DOES resolve to `index.html` and
+    boots Flutter. The paired decoder in `web/spa_redirect.js` then uses
+    `history.replaceState` to put the original path back before go_router
+    looks at it, so the user sees the deep link they typed.
+
+    `pathSegmentsToKeep = 1` matches the single-segment base href
+    (`/Grind/`) passed to `flutter build web --base-href /Grind/` in
+    `.github/workflows/deploy-web.yml`. If the base href changes (e.g. a
+    custom domain drops it to `/`), update this constant in step with it.
+
+    Pattern: https://github.com/rafgraph/spa-github-pages (MIT). Inline is
+    fine here because 404.html has no CSP meta tag; the sibling decoder is
+    kept external so index.html's CSP can stay `script-src 'self' ...`.
+  -->
+  <script>
+    (function () {
+      var pathSegmentsToKeep = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') +
+        '/?/' +
+        l.pathname
+          .slice(1)
+          .split('/')
+          .slice(pathSegmentsToKeep)
+          .join('/')
+          .replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash,
+      );
+    })();
+  </script>
+</head>
+<body></body>
+</html>

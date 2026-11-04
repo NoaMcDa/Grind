@@ -10,9 +10,12 @@ import '../../widgets/pill.dart';
 import '../../widgets/pip_toast.dart';
 import '../../widgets/sticker_bottom_sheet.dart';
 import '../../widgets/sticker_card.dart';
+import '../calendar/sync/calendar_sync_engine.dart'
+    show importedCalendarEventIdFor, isImportedCalendarEventId;
 import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
+import '../tasks/task_form.dart';
 import '../today/today_providers.dart' show formatClock;
 import 'plan_replan_sheet.dart';
 import '../../l10n/l10n.dart';
@@ -211,21 +214,36 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
           ),
           const SizedBox(height: 16),
           Consumer(
-            builder: (context, ref, _) => PillButton(
-              key: const Key('plan-open-in-calendar'),
-              label: context.l10n.planOpenInCalendar,
-              icon: const Icon(Icons.open_in_new),
-              onPressed: url == null
-                  ? null
-                  : () async {
-                      final ok = await ref.read(planUrlLauncherProvider)(url);
-                      if (!ok && context.mounted) {
-                        showPipToast(
-                          context,
-                          context.l10n.planOpenInCalendarFailed,
-                        );
-                      }
-                    },
+            builder: (context, ref, _) => Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                PillButton(
+                  key: const Key('plan-add-as-task'),
+                  label: context.l10n.planAddAsTask,
+                  color: AppColors.mint,
+                  icon: const Icon(Icons.add_task),
+                  onPressed: () => _addAsTask(context, ref, e),
+                ),
+                PillButton(
+                  key: const Key('plan-open-in-calendar'),
+                  label: context.l10n.planOpenInCalendar,
+                  icon: const Icon(Icons.open_in_new),
+                  onPressed: url == null
+                      ? null
+                      : () async {
+                          final ok = await ref.read(planUrlLauncherProvider)(
+                            url,
+                          );
+                          if (!ok && context.mounted) {
+                            showPipToast(
+                              context,
+                              context.l10n.planOpenInCalendarFailed,
+                            );
+                          }
+                        },
+                ),
+              ],
             ),
           ),
           if (url == null) ...[
@@ -241,4 +259,53 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
       ),
     ),
   );
+}
+
+/// Tapping "Add as task" on the event sheet.
+///
+/// Reopens an already-converted task when one exists for this event; else
+/// seeds the task form with the event's title, scheduled range and estimate,
+/// and tags the new task with the sentinel `calendarEventId` so the sync
+/// engine never pushes it back as a duplicate write-back.
+Future<void> _addAsTask(
+  BuildContext context,
+  WidgetRef ref,
+  CalendarEvent e,
+) async {
+  final tasks = ref.read(taskRepositoryProvider);
+  final sentinel = importedCalendarEventIdFor(e.externalId);
+  final existing = (await tasks.getAll())
+      .where((t) => t.calendarEventId == sentinel)
+      .firstOrNull;
+  if (!context.mounted) return;
+
+  // The read-only event sheet stays under the task sheet: closing it with
+  // the Consumer's context above the sheet route would also end this
+  // `context`, so stack the task sheet on top instead. When the task sheet
+  // closes the event sheet is still there, and a second "Add as task" tap
+  // finds the task we just made.
+  if (existing != null) {
+    await showTaskSheet(context, existing: existing);
+    return;
+  }
+
+  final now = ref.read(clockProvider).now().toUtc();
+  final duration = e.end.difference(e.start);
+  final minutes = duration.inMinutes < 1 ? 30 : duration.inMinutes;
+  final seed = Task(
+    id: '',
+    title: e.title,
+    estimatedMinutes: minutes,
+    scheduledStart: e.start,
+    scheduledEnd: e.end,
+    // Pin the conversion at the event's time: Re-plan with Pip keeps it
+    // there instead of re-fitting it over the busy event (#189).
+    lockedStart: true,
+    calendarEventId: sentinel,
+    createdAt: now,
+    updatedAt: now,
+  );
+  // Defensive: should always be true for a fresh seed.
+  assert(isImportedCalendarEventId(seed.calendarEventId));
+  await showTaskSheet(context, initial: seed);
 }

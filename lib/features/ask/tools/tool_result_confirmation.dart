@@ -1,3 +1,5 @@
+import 'dart:ui' show TextDirection;
+
 import 'package:flutter/foundation.dart';
 
 import '../../../l10n/l10n.dart';
@@ -48,7 +50,13 @@ String formatToolConfirmation(AppLocalizations l, List<ScheduledRange> ranges) {
   return l.toolConfirmationDone(_joinWithAnd(l, parts));
 }
 
-String _formatRange(ScheduledRange r) => '${_hm(r.start)}–${_hm(r.end)}';
+// Each range is wrapped in a Left-to-Right Isolate (LRI..PDI) so the
+// en-dash between the two clock times — a neutral character under the
+// Unicode Bidi algorithm (UAX #9) — stays between the digits when the
+// sentence is embedded in a Hebrew paragraph. The isolate marks are
+// zero-width, so the LTR rendering is unaffected.
+String _formatRange(ScheduledRange r) =>
+    Bidi.isolate('${_hm(r.start)}–${_hm(r.end)}', direction: TextDirection.ltr);
 
 String _hm(DateTime t) =>
     '${t.hour.toString().padLeft(2, '0')}:'
