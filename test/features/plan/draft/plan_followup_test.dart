@@ -70,36 +70,40 @@ void main() {
       expect(a.sentences, ['It is at 09:00, because your focus window.']);
     });
 
-    test('placed task with several reasons: joined with commas, capped at 3',
-        () {
-      final draft = _syntheticDraft(
-        items: [
-          _item(
-            start: at(0, 13),
-            end: at(0, 13, 30),
-            reasons: const [
-              'due today',
-              'keeps your focus window clear',
-              'earliest free 30-minute gap',
-              'fills a 30-minute gap',
-            ],
+    test(
+      'placed task with several reasons: joined with commas, capped at 3',
+      () {
+        final draft = _syntheticDraft(
+          items: [
+            _item(
+              start: at(0, 13),
+              end: at(0, 13, 30),
+              reasons: const [
+                'due today',
+                'keeps your focus window clear',
+                'earliest free 30-minute gap',
+                'fills a 30-minute gap',
+              ],
+            ),
+          ],
+        );
+        final a = answerPlanQuestion(
+          draft: draft,
+          question: const WhyTaskHere('x'),
+          l: en,
+        );
+        // Only the first three reasons survive the cap.
+        expect(a.sentences.single, startsWith('It is at 13:00, because '));
+        expect(
+          a.sentences.single,
+          contains(
+            'due today, keeps your focus window clear, '
+            'earliest free 30-minute gap',
           ),
-        ],
-      );
-      final a = answerPlanQuestion(
-        draft: draft,
-        question: const WhyTaskHere('x'),
-        l: en,
-      );
-      // Only the first three reasons survive the cap.
-      expect(a.sentences.single, startsWith('It is at 13:00, because '));
-      expect(
-        a.sentences.single,
-        contains('due today, keeps your focus window clear, '
-            'earliest free 30-minute gap'),
-      );
-      expect(a.sentences.single, isNot(contains('fills a 30-minute gap')));
-    });
+        );
+        expect(a.sentences.single, isNot(contains('fills a 30-minute gap')));
+      },
+    );
 
     test('placed task with no reasons: just the start time', () {
       final draft = _syntheticDraft(
@@ -131,24 +135,26 @@ void main() {
       expect(a.sentences.single, 'It is at 10:00, because due today.');
     });
 
-    test('unplaced task asked as "why here": answers with the unplaced reason',
-        () {
-      final draft = _syntheticDraft(
-        unplaced: const [
-          UnplacedTask(
-            taskId: 'u',
-            reason: "no free 60-minute slot before today's deadline",
-            minutes: 60,
-          ),
-        ],
-      );
-      final a = answerPlanQuestion(
-        draft: draft,
-        question: const WhyTaskHere('u'),
-        l: en,
-      );
-      expect(a.sentences.single, startsWith('That one did not fit today — '));
-    });
+    test(
+      'unplaced task asked as "why here": answers with the unplaced reason',
+      () {
+        final draft = _syntheticDraft(
+          unplaced: const [
+            UnplacedTask(
+              taskId: 'u',
+              reason: "no free 60-minute slot before today's deadline",
+              minutes: 60,
+            ),
+          ],
+        );
+        final a = answerPlanQuestion(
+          draft: draft,
+          question: const WhyTaskHere('u'),
+          l: en,
+        );
+        expect(a.sentences.single, startsWith('That one did not fit today — '));
+      },
+    );
 
     test('unknown task: safe unknown line', () {
       final a = answerPlanQuestion(
@@ -160,9 +166,7 @@ void main() {
     });
 
     test('Hebrew: start time and reason localize', () {
-      final draft = _draft([
-        task('thesis', minutes: 90, energy: Energy.deep),
-      ]);
+      final draft = _draft([task('thesis', minutes: 90, energy: Energy.deep)]);
       final a = answerPlanQuestion(
         draft: draft,
         question: const WhyTaskHere('thesis'),
@@ -197,9 +201,7 @@ void main() {
 
     test('unplaced task with an empty reason: the bare line', () {
       final draft = _syntheticDraft(
-        unplaced: const [
-          UnplacedTask(taskId: 'u', reason: '', minutes: 30),
-        ],
+        unplaced: const [UnplacedTask(taskId: 'u', reason: '', minutes: 30)],
       );
       final a = answerPlanQuestion(
         draft: draft,
@@ -232,9 +234,7 @@ void main() {
 
     test('Hebrew unplaced: bare line localizes', () {
       final draft = _syntheticDraft(
-        unplaced: const [
-          UnplacedTask(taskId: 'u', reason: '', minutes: 30),
-        ],
+        unplaced: const [UnplacedTask(taskId: 'u', reason: '', minutes: 30)],
       );
       final a = answerPlanQuestion(
         draft: draft,
@@ -260,9 +260,7 @@ void main() {
 
     test('unplaced task: bare "did not fit" line', () {
       final draft = _syntheticDraft(
-        unplaced: const [
-          UnplacedTask(taskId: 'u', reason: 'r', minutes: 30),
-        ],
+        unplaced: const [UnplacedTask(taskId: 'u', reason: 'r', minutes: 30)],
       );
       final a = answerPlanQuestion(
         draft: draft,
@@ -324,13 +322,8 @@ void main() {
         WhenTaskStarts('u'),
         WhenTaskStarts('ghost'),
       ]) {
-        final text = answerPlanQuestion(
-          draft: draft,
-          question: q,
-          l: en,
-        ).text;
-        expect(text, isNot(contains('overdue')),
-            reason: '$q leaked "overdue"');
+        final text = answerPlanQuestion(draft: draft, question: q, l: en).text;
+        expect(text, isNot(contains('overdue')), reason: '$q leaked "overdue"');
         expect(text, isNot(contains('missed')), reason: '$q leaked "missed"');
         expect(text, isNot(contains('failed')), reason: '$q leaked "failed"');
       }
@@ -356,8 +349,11 @@ void main() {
         WhenTaskStarts('x'),
       ]) {
         final a = answerPlanQuestion(draft: draft, question: q, l: en);
-        expect(a.sentences.length, inInclusiveRange(1, 2),
-            reason: '$q had ${a.sentences.length} sentences');
+        expect(
+          a.sentences.length,
+          inInclusiveRange(1, 2),
+          reason: '$q had ${a.sentences.length} sentences',
+        );
       }
     });
   });
