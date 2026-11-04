@@ -2654,4 +2654,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'That one does not fit there';
+
+  @override
+  String get planExplainHeader => 'Here is your day.';
+
+  @override
+  String planExplainBlocks(int n, String first, String last, String planned) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n blocks between $first and $last, $planned in all.',
+      one: 'One block between $first and $last, $planned in all.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planExplainFocus => 'Deep work lands in your focus window.';
+
+  @override
+  String get planExplainNothing =>
+      'Nothing to plan right now. Your day is yours.';
+
+  @override
+  String get planExplainNoTime =>
+      'No room left on today\'s calendar. Tomorrow is a fresh page.';
+
+  @override
+  String planExplainUnplacedOnly(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'No room on the calendar today; $n tasks will wait for another day.',
+      one: 'No room on the calendar today; one task will wait for another day.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planExplainUnplacedExtra(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tasks do not fit today.',
+      one: 'One task does not fit today.',
+    );
+    return '$_temp0';
+  }
 }

@@ -4399,6 +4399,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That one does not fit there'**
   String get draftNoRoom;
+
+  /// Opening sentence of Pip's plan explainer
+  ///
+  /// In en, this message translates to:
+  /// **'Here is your day.'**
+  String get planExplainHeader;
+
+  /// Pip's plan explainer: count, time range and total planned duration
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One block between {first} and {last}, {planned} in all.} other{{n} blocks between {first} and {last}, {planned} in all.}}'**
+  String planExplainBlocks(int n, String first, String last, String planned);
+
+  /// Pip's plan explainer: at least one deep block sits in a focus window
+  ///
+  /// In en, this message translates to:
+  /// **'Deep work lands in your focus window.'**
+  String get planExplainFocus;
+
+  /// Pip's plan explainer when there is nothing to schedule
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to plan right now. Your day is yours.'**
+  String get planExplainNothing;
+
+  /// Pip's plan explainer when there is no free time today
+  ///
+  /// In en, this message translates to:
+  /// **'No room left on today\'s calendar. Tomorrow is a fresh page.'**
+  String get planExplainNoTime;
+
+  /// Pip's plan explainer when nothing could be placed but tasks are due
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{No room on the calendar today; one task will wait for another day.} other{No room on the calendar today; {n} tasks will wait for another day.}}'**
+  String planExplainUnplacedOnly(int n);
+
+  /// Pip's plan explainer trailer when some tasks due today did not fit
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One task does not fit today.} other{{n} tasks do not fit today.}}'**
+  String planExplainUnplacedExtra(int n);
 }
 
 class _AppLocalizationsDelegate

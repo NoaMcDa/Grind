@@ -716,5 +716,12 @@
   "draftRemove": "להסיר את {title} מהטיוטה",
   "draftMoveEarlier": "להקדים את {title}",
   "draftMoveLater": "לדחות את {title}",
-  "draftNoRoom": "זה לא נכנס שם"
+  "draftNoRoom": "זה לא נכנס שם",
+  "planExplainHeader": "הנה היום שלך.",
+  "planExplainBlocks": "{n, plural, =1{בלוק אחד בין {first} ל-{last}, {planned} סך הכול.} other{{n} בלוקים בין {first} ל-{last}, {planned} סך הכול.}}",
+  "planExplainFocus": "עבודה עמוקה נוחתת בחלון הפוקוס שלך.",
+  "planExplainNothing": "אין מה לשבץ כרגע. היום שלך.",
+  "planExplainNoTime": "לא נשאר זמן פנוי היום. מחר דף חדש.",
+  "planExplainUnplacedOnly": "{n, plural, =1{אין מקום ביומן היום; משימה אחת תחכה ליום אחר.} other{אין מקום ביומן היום; {n} משימות יחכו ליום אחר.}}",
+  "planExplainUnplacedExtra": "{n, plural, =1{משימה אחת לא נכנסת היום.} other{{n} משימות לא נכנסות היום.}}"
 }

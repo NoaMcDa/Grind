@@ -2632,4 +2632,49 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'זה לא נכנס שם';
+
+  @override
+  String get planExplainHeader => 'הנה היום שלך.';
+
+  @override
+  String planExplainBlocks(int n, String first, String last, String planned) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n בלוקים בין $first ל-$last, $planned סך הכול.',
+      one: 'בלוק אחד בין $first ל-$last, $planned סך הכול.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planExplainFocus => 'עבודה עמוקה נוחתת בחלון הפוקוס שלך.';
+
+  @override
+  String get planExplainNothing => 'אין מה לשבץ כרגע. היום שלך.';
+
+  @override
+  String get planExplainNoTime => 'לא נשאר זמן פנוי היום. מחר דף חדש.';
+
+  @override
+  String planExplainUnplacedOnly(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'אין מקום ביומן היום; $n משימות יחכו ליום אחר.',
+      one: 'אין מקום ביומן היום; משימה אחת תחכה ליום אחר.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planExplainUnplacedExtra(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות לא נכנסות היום.',
+      one: 'משימה אחת לא נכנסת היום.',
+    );
+    return '$_temp0';
+  }
 }

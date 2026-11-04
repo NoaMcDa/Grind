@@ -3684,5 +3684,57 @@
   "draftNoRoom": "That one does not fit there",
   "@draftNoRoom": {
     "description": "Day draft toast when a move does not fit"
+  },
+  "planExplainHeader": "Here is your day.",
+  "@planExplainHeader": {
+    "description": "Opening sentence of Pip's plan explainer"
+  },
+  "planExplainBlocks": "{n, plural, =1{One block between {first} and {last}, {planned} in all.} other{{n} blocks between {first} and {last}, {planned} in all.}}",
+  "@planExplainBlocks": {
+    "description": "Pip's plan explainer: count, time range and total planned duration",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "String"
+      }
+    }
+  },
+  "planExplainFocus": "Deep work lands in your focus window.",
+  "@planExplainFocus": {
+    "description": "Pip's plan explainer: at least one deep block sits in a focus window"
+  },
+  "planExplainNothing": "Nothing to plan right now. Your day is yours.",
+  "@planExplainNothing": {
+    "description": "Pip's plan explainer when there is nothing to schedule"
+  },
+  "planExplainNoTime": "No room left on today's calendar. Tomorrow is a fresh page.",
+  "@planExplainNoTime": {
+    "description": "Pip's plan explainer when there is no free time today"
+  },
+  "planExplainUnplacedOnly": "{n, plural, =1{No room on the calendar today; one task will wait for another day.} other{No room on the calendar today; {n} tasks will wait for another day.}}",
+  "@planExplainUnplacedOnly": {
+    "description": "Pip's plan explainer when nothing could be placed but tasks are due",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planExplainUnplacedExtra": "{n, plural, =1{One task does not fit today.} other{{n} tasks do not fit today.}}",
+  "@planExplainUnplacedExtra": {
+    "description": "Pip's plan explainer trailer when some tasks due today did not fit",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }
