@@ -9,19 +9,21 @@ FocusBlock _b(int sh, int sm, int eh, int em) =>
 
 void main() {
   group('even halves on the 5-minute grid', () {
-    test('a 60-minute block splits into 25 / 5 / 30 with a bumped first half',
-        () {
-      final res = splitLongBlock(_b(9, 0, 10, 0));
-      expect(res.isOk, isTrue);
-      final s = res.split!;
-      // 60 - 5 (gap) = 55 focus minutes. Floor-half is 25, bumped first is 30
-      // but 30 + 25 >= minPart (15), so the heavier half lands first.
-      expect(s.first, _b(9, 0, 9, 30));
-      expect(s.gap, _b(9, 30, 9, 35));
-      expect(s.second, _b(9, 35, 10, 0));
-      expect(s.totalFocusMinutes, 55);
-      expect(s.blocks, [s.first, s.second]);
-    });
+    test(
+      'a 60-minute block splits into 25 / 5 / 30 with a bumped first half',
+      () {
+        final res = splitLongBlock(_b(9, 0, 10, 0));
+        expect(res.isOk, isTrue);
+        final s = res.split!;
+        // 60 - 5 (gap) = 55 focus minutes. Floor-half is 25, bumped first is 30
+        // but 30 + 25 >= minPart (15), so the heavier half lands first.
+        expect(s.first, _b(9, 0, 9, 30));
+        expect(s.gap, _b(9, 30, 9, 35));
+        expect(s.second, _b(9, 35, 10, 0));
+        expect(s.totalFocusMinutes, 55);
+        expect(s.blocks, [s.first, s.second]);
+      },
+    );
 
     test('a 50-minute block splits cleanly in half with a 5-minute gap', () {
       final res = splitLongBlock(_b(14, 0, 14, 50));
@@ -78,10 +80,7 @@ void main() {
     });
 
     test('empty and inverted blocks are refused', () {
-      expect(
-        splitLongBlock(_b(9, 0, 9, 0)).refusal,
-        SplitRefusal.tooShort,
-      );
+      expect(splitLongBlock(_b(9, 0, 9, 0)).refusal, SplitRefusal.tooShort);
       expect(
         splitLongBlock(FocusBlock(_at(10, 0), _at(9, 0))).refusal,
         SplitRefusal.tooShort,
@@ -161,14 +160,16 @@ void main() {
       expect(res.refusal, SplitRefusal.quietHoursOverlap);
     });
 
-    test('quiet hours that fit exactly inside the gap still allow the split',
-        () {
-      // 09:00–10:00 → gap 09:30–09:35. A quiet-hours window that matches
-      // the gap exactly leaves both halves clean.
-      final gapOnly = TimeRange.hm(9, 30, 9, 35);
-      final res = splitLongBlock(_b(9, 0, 10, 0), quietHours: gapOnly);
-      expect(res.isOk, isTrue);
-    });
+    test(
+      'quiet hours that fit exactly inside the gap still allow the split',
+      () {
+        // 09:00–10:00 → gap 09:30–09:35. A quiet-hours window that matches
+        // the gap exactly leaves both halves clean.
+        final gapOnly = TimeRange.hm(9, 30, 9, 35);
+        final res = splitLongBlock(_b(9, 0, 10, 0), quietHours: gapOnly);
+        expect(res.isOk, isTrue);
+      },
+    );
   });
 
   group('determinism and equality', () {

@@ -75,7 +75,8 @@ class FocusBlockSplit {
   int get hashCode => Object.hash(first, second, gap);
 
   @override
-  String toString() => 'FocusBlockSplit(first=$first, gap=$gap, second=$second)';
+  String toString() =>
+      'FocusBlockSplit(first=$first, gap=$gap, second=$second)';
 }
 
 /// Why a split was refused. The chat layer uses this to pick which offline
