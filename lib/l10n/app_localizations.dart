@@ -3410,6 +3410,72 @@ abstract class AppLocalizations {
   /// **'no free {minutes}-minute slot {by}'**
   String planReasonNoSlot(int minutes, String by);
 
+  /// Re-plan diff reason: the previous slot is already in the past
+  ///
+  /// In en, this message translates to:
+  /// **'that time has passed'**
+  String get planDiffReasonTimePassed;
+
+  /// Re-plan diff reason: a calendar event now overlaps the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'{title} now takes that time'**
+  String planDiffReasonEventTook(String title);
+
+  /// Re-plan diff reason: the working hours no longer cover the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'your hours changed'**
+  String get planDiffReasonHoursChanged;
+
+  /// Re-plan diff reason: another task the user pinned took the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'you put {title} there'**
+  String planDiffReasonPinned(String title);
+
+  /// Re-plan diff reason: another task took the previous slot
+  ///
+  /// In en, this message translates to:
+  /// **'made room for {title}'**
+  String planDiffReasonMadeRoomFor(String title);
+
+  /// Re-plan diff reason: the task moved to an earlier free slot
+  ///
+  /// In en, this message translates to:
+  /// **'an earlier slot opened up'**
+  String get planDiffReasonEarlierOpened;
+
+  /// Re-plan diff reason: the task moved for a reason that does not fit the narrower templates
+  ///
+  /// In en, this message translates to:
+  /// **'reshuffled around today\'s changes'**
+  String get planDiffReasonReshuffled;
+
+  /// Re-plan diff removal reason: the task was deleted
+  ///
+  /// In en, this message translates to:
+  /// **'no longer on your list'**
+  String get planDiffRemovedNotOnList;
+
+  /// Re-plan diff removal reason: the task was completed
+  ///
+  /// In en, this message translates to:
+  /// **'done, nice work'**
+  String get planDiffRemovedDone;
+
+  /// Re-plan diff removal reason: the task was marked skipped
+  ///
+  /// In en, this message translates to:
+  /// **'skipped for now'**
+  String get planDiffRemovedSkipped;
+
+  /// Re-plan diff removal reason: fallback when no unplaced reason is available
+  ///
+  /// In en, this message translates to:
+  /// **'no longer fits this week'**
+  String get planDiffRemovedNoLongerFits;
+
   /// Goal form: metric kind
   ///
   /// In en, this message translates to:

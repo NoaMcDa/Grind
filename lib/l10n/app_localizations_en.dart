@@ -2017,6 +2017,46 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get planDiffReasonTimePassed => 'that time has passed';
+
+  @override
+  String planDiffReasonEventTook(String title) {
+    return '$title now takes that time';
+  }
+
+  @override
+  String get planDiffReasonHoursChanged => 'your hours changed';
+
+  @override
+  String planDiffReasonPinned(String title) {
+    return 'you put $title there';
+  }
+
+  @override
+  String planDiffReasonMadeRoomFor(String title) {
+    return 'made room for $title';
+  }
+
+  @override
+  String get planDiffReasonEarlierOpened => 'an earlier slot opened up';
+
+  @override
+  String get planDiffReasonReshuffled =>
+      'reshuffled around today\'s changes';
+
+  @override
+  String get planDiffRemovedNotOnList => 'no longer on your list';
+
+  @override
+  String get planDiffRemovedDone => 'done, nice work';
+
+  @override
+  String get planDiffRemovedSkipped => 'skipped for now';
+
+  @override
+  String get planDiffRemovedNoLongerFits => 'no longer fits this week';
+
+  @override
   String get goalsMetricKindLabel => 'How it counts';
 
   @override

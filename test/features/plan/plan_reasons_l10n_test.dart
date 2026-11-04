@@ -53,10 +53,92 @@ void main() {
       localizePlanReason(he, 'no free 45-minute slot before Nov 12'),
       'אין חלון פנוי של 45 דקות לפני 12 בנוב׳',
     );
-    expect(localizePlanReason(he, 'Lecture now takes that time'), isNotEmpty);
     expect(
-      localizePlanReason(he, 'Lecture now takes that time'),
-      'Lecture now takes that time',
+      localizePlanReason(he, 'unknown reason text'),
+      'unknown reason text',
+    );
+  });
+
+  test('re-plan diff reasons round-trip in English', () {
+    const same = [
+      // Move reasons from `_moveReason` in `replan.dart`.
+      'that time has passed',
+      'your hours changed',
+      'an earlier slot opened up',
+      "reshuffled around today's changes",
+      'Team sync now takes that time',
+      'All-hands on deck now takes that time',
+      'you put Dentist there',
+      'you put Call mom there',
+      'made room for Essay outline',
+      'made room for Read paper',
+      // Removal reasons from `_removalReason` in `replan.dart`.
+      'no longer on your list',
+      'done, nice work',
+      'skipped for now',
+      'no longer fits this week',
+    ];
+    for (final r in same) {
+      expect(localizePlanReason(en, r), r, reason: r);
+    }
+  });
+
+  test('re-plan diff reasons render in Hebrew', () {
+    expect(localizePlanReason(he, 'that time has passed'), 'הזמן הזה כבר עבר');
+    expect(
+      localizePlanReason(he, 'your hours changed'),
+      'שעות העבודה שלך השתנו',
+    );
+    expect(
+      localizePlanReason(he, 'an earlier slot opened up'),
+      'התפנה חלון מוקדם יותר',
+    );
+    expect(
+      localizePlanReason(he, "reshuffled around today's changes"),
+      'סידרתי מחדש סביב השינויים של היום',
+    );
+    expect(
+      localizePlanReason(he, 'Team sync now takes that time'),
+      'עכשיו Team sync בשעה הזאת',
+    );
+    expect(
+      localizePlanReason(he, 'you put Dentist there'),
+      'שמת שם את Dentist',
+    );
+    expect(
+      localizePlanReason(he, 'made room for Essay outline'),
+      'פיניתי מקום לEssay outline',
+    );
+    expect(
+      localizePlanReason(he, 'no longer on your list'),
+      'כבר לא ברשימה שלך',
+    );
+    expect(localizePlanReason(he, 'done, nice work'), 'סיימת, יפה');
+    expect(localizePlanReason(he, 'skipped for now'), 'דילוג לעת עתה');
+    expect(
+      localizePlanReason(he, 'no longer fits this week'),
+      'לא נכנס השבוע',
+    );
+  });
+
+  test('diff move reasons from the scheduler map through localization', () {
+    // Verbatim strings produced by `_moveReason` and `_removalReason` in
+    // `lib/features/plan/scheduler/replan.dart`. Guards against a future
+    // reason string diverging from what `localizePlanReason` recognizes.
+    final movedByEvent = 'Team sync now takes that time';
+    final newlyPinned = 'you put Dentist there';
+    final madeRoom = 'made room for Essay outline';
+    expect(localizePlanReason(en, movedByEvent), movedByEvent);
+    expect(localizePlanReason(en, newlyPinned), newlyPinned);
+    expect(localizePlanReason(en, madeRoom), madeRoom);
+    // The parameterized templates must not collapse one into another.
+    expect(
+      localizePlanReason(he, newlyPinned),
+      isNot(equals(localizePlanReason(he, madeRoom))),
+    );
+    expect(
+      localizePlanReason(he, movedByEvent),
+      isNot(equals(localizePlanReason(he, newlyPinned))),
     );
   });
 
