@@ -81,7 +81,10 @@ List<CalendarEvent> eventsWithoutLinkedTasks(
     if (ext != null) linked.add(ext);
   }
   if (linked.isEmpty) return events.toList();
-  return [for (final e in events) if (!linked.contains(e.externalId)) e];
+  return [
+    for (final e in events)
+      if (!linked.contains(e.externalId)) e,
+  ];
 }
 
 /// Tasks scheduled on the selected day, ordered by start, live (from the
