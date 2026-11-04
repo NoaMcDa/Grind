@@ -52,21 +52,42 @@ enum WidgetSnapshotFreshness {
 /// defaults because the only callers that construct this type are
 /// tests.
 class WidgetSnapshotFreshnessThresholds {
-  const WidgetSnapshotFreshnessThresholds({
+  /// Constructs a thresholds value and verifies the invariant in debug
+  /// builds. Non-const so the asserts can use `Duration`'s comparison
+  /// operators (a const-eval context forbids them). Callers that need a
+  /// const default (e.g. a default parameter) should use
+  /// [WidgetSnapshotFreshnessThresholds.raw] instead.
+  factory WidgetSnapshotFreshnessThresholds({
+    Duration agingAfter = const Duration(minutes: 2),
+    Duration staleAfter = const Duration(minutes: 15),
+    Duration expiredAfter = const Duration(hours: 1),
+  }) {
+    assert(
+      agingAfter >= Duration.zero &&
+          staleAfter >= Duration.zero &&
+          expiredAfter >= Duration.zero,
+      'WidgetSnapshotFreshnessThresholds durations must be non-negative',
+    );
+    assert(
+      agingAfter < staleAfter && staleAfter < expiredAfter,
+      'WidgetSnapshotFreshnessThresholds must satisfy '
+      'agingAfter < staleAfter < expiredAfter',
+    );
+    return WidgetSnapshotFreshnessThresholds.raw(
+      agingAfter: agingAfter,
+      staleAfter: staleAfter,
+      expiredAfter: expiredAfter,
+    );
+  }
+
+  /// Const-friendly raw constructor that skips the invariant check so it
+  /// can be used in `const` contexts (default parameters, static const
+  /// values). Prefer the unnamed constructor outside those spots.
+  const WidgetSnapshotFreshnessThresholds.raw({
     this.agingAfter = const Duration(minutes: 2),
     this.staleAfter = const Duration(minutes: 15),
     this.expiredAfter = const Duration(hours: 1),
-  }) : assert(
-         agingAfter >= Duration.zero &&
-             staleAfter >= Duration.zero &&
-             expiredAfter >= Duration.zero,
-         'WidgetSnapshotFreshnessThresholds durations must be non-negative',
-       ),
-       assert(
-         agingAfter < staleAfter && staleAfter < expiredAfter,
-         'WidgetSnapshotFreshnessThresholds must satisfy '
-         'agingAfter < staleAfter < expiredAfter',
-       );
+  });
 
   /// Oldest age that still counts as [WidgetSnapshotFreshness.fresh].
   /// 2 min covers the writer-side debounce plus one scheduler tick.
@@ -113,7 +134,7 @@ abstract final class WidgetSnapshotFreshnessCalculator {
     required WidgetSnapshot? snapshot,
     required DateTime now,
     WidgetSnapshotFreshnessThresholds thresholds =
-        const WidgetSnapshotFreshnessThresholds(),
+        const WidgetSnapshotFreshnessThresholds.raw(),
   }) {
     if (snapshot == null) return WidgetSnapshotFreshness.expired;
     final elapsed = now.toUtc().difference(snapshot.writtenAt.toUtc());
@@ -133,7 +154,7 @@ abstract final class WidgetSnapshotFreshnessCalculator {
     required WidgetSnapshot? snapshot,
     required DateTime now,
     WidgetSnapshotFreshnessThresholds thresholds =
-        const WidgetSnapshotFreshnessThresholds(),
+        const WidgetSnapshotFreshnessThresholds.raw(),
   }) =>
       grade(snapshot: snapshot, now: now, thresholds: thresholds) !=
       WidgetSnapshotFreshness.expired;

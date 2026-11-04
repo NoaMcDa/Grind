@@ -136,7 +136,7 @@ void main() {
 
   group('custom thresholds', () {
     test('tighter thresholds move boundaries earlier', () {
-      const tight = WidgetSnapshotFreshnessThresholds(
+      const tight = WidgetSnapshotFreshnessThresholds.raw(
         agingAfter: Duration(seconds: 30),
         staleAfter: Duration(minutes: 2),
         expiredAfter: Duration(minutes: 10),
@@ -183,7 +183,7 @@ void main() {
     test('default thresholds pin to the documented values', () {
       // The grader's default-parameter const value must match the public
       // class exactly — a drift would silently change the widget's bands.
-      const defaults = WidgetSnapshotFreshnessThresholds();
+      const defaults = WidgetSnapshotFreshnessThresholds.raw();
       expect(defaults.agingAfter, const Duration(minutes: 2));
       expect(defaults.staleAfter, const Duration(minutes: 15));
       expect(defaults.expiredAfter, const Duration(hours: 1));
