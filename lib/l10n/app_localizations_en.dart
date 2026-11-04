@@ -2793,4 +2793,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get followupUnknown => 'I do not have that one on today\'s plan.';
+
+  @override
+  String get voicePermissionTitle => 'Dictate a task';
+
+  @override
+  String get voicePermissionRationale =>
+      'Grind listens only while you hold the mic. Your words become text in the composer, and you see it before anything is sent.';
+
+  @override
+  String get voicePermissionAllow => 'Allow mic';
+
+  @override
+  String get voicePermissionNotNow => 'Not now';
+
+  @override
+  String get voicePermissionGranted =>
+      'Mic is on. Hold the mic button to dictate.';
+
+  @override
+  String get voicePermissionDenied =>
+      'No problem. You can keep typing. Turn mic access on in Settings whenever you like.';
+
+  @override
+  String get voicePermissionBlocked =>
+      'Mic access is off for Grind. Open Settings to turn it on.';
+
+  @override
+  String get voicePermissionOpenSettings => 'Open Settings';
+
+  @override
+  String get voicePrivacyNote =>
+      'On iPhone, recognition happens on this device. On the web, your browser does it — some browsers send audio to their own service.';
+
+  @override
+  String get voiceUnavailable =>
+      'Voice input is not available in this browser. You can still type.';
+
+  @override
+  String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceStopListening => 'Stop listening';
+
+  @override
+  String get voiceLocaleLabel => 'Dictation language';
+
+  @override
+  String get voiceLocaleHebrew => 'Hebrew';
+
+  @override
+  String get voiceLocaleEnglish => 'English';
 }

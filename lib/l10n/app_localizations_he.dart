@@ -2768,4 +2768,55 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get followupUnknown => 'זה לא על התוכנית של היום.';
+
+  @override
+  String get voicePermissionTitle => 'הכתבת משימה';
+
+  @override
+  String get voicePermissionRationale =>
+      'Grind מקשיב רק בזמן שהכפתור לחוץ. מה שאתם אומרים הופך לטקסט בתיבה, ואתם רואים אותו לפני שנשלח משהו.';
+
+  @override
+  String get voicePermissionAllow => 'אישור מיקרופון';
+
+  @override
+  String get voicePermissionNotNow => 'לא עכשיו';
+
+  @override
+  String get voicePermissionGranted =>
+      'המיקרופון פעיל. החזיקו את הכפתור כדי להכתיב.';
+
+  @override
+  String get voicePermissionDenied =>
+      'בלי בעיה. אפשר להמשיך להקליד. את גישת המיקרופון אפשר להפעיל בהגדרות מתי שרוצים.';
+
+  @override
+  String get voicePermissionBlocked =>
+      'גישת המיקרופון ל-Grind כבויה. פתחו את ההגדרות כדי להפעיל.';
+
+  @override
+  String get voicePermissionOpenSettings => 'פתיחת ההגדרות';
+
+  @override
+  String get voicePrivacyNote =>
+      'באייפון הזיהוי מתבצע על המכשיר הזה. באינטרנט הדפדפן אחראי לכך — בחלק מהדפדפנים האודיו נשלח לשירות שלהם.';
+
+  @override
+  String get voiceUnavailable =>
+      'הכתבה קולית אינה זמינה בדפדפן הזה. תמיד אפשר להקליד.';
+
+  @override
+  String get voiceListening => 'מקשיב…';
+
+  @override
+  String get voiceStopListening => 'עצירת ההקלטה';
+
+  @override
+  String get voiceLocaleLabel => 'שפת ההכתבה';
+
+  @override
+  String get voiceLocaleHebrew => 'עברית';
+
+  @override
+  String get voiceLocaleEnglish => 'אנגלית';
 }

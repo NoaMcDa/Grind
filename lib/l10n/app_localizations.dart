@@ -4579,6 +4579,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I do not have that one on today\'s plan.'**
   String get followupUnknown;
+
+  /// Microphone permission sheet title for assistant voice input
+  ///
+  /// In en, this message translates to:
+  /// **'Dictate a task'**
+  String get voicePermissionTitle;
+
+  /// Rationale body shown with the microphone permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Grind listens only while you hold the mic. Your words become text in the composer, and you see it before anything is sent.'**
+  String get voicePermissionRationale;
+
+  /// Confirm button on the mic permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Allow mic'**
+  String get voicePermissionAllow;
+
+  /// Dismiss button on the mic permission prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get voicePermissionNotNow;
+
+  /// Confirmation after the mic permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Mic is on. Hold the mic button to dictate.'**
+  String get voicePermissionGranted;
+
+  /// Message shown when the user declines the mic permission
+  ///
+  /// In en, this message translates to:
+  /// **'No problem. You can keep typing. Turn mic access on in Settings whenever you like.'**
+  String get voicePermissionDenied;
+
+  /// Message when mic permission is permanently denied and the user must change it in system settings
+  ///
+  /// In en, this message translates to:
+  /// **'Mic access is off for Grind. Open Settings to turn it on.'**
+  String get voicePermissionBlocked;
+
+  /// Button that opens the system Settings app to change mic permission
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get voicePermissionOpenSettings;
+
+  /// Privacy note explaining where speech recognition runs on each platform
+  ///
+  /// In en, this message translates to:
+  /// **'On iPhone, recognition happens on this device. On the web, your browser does it — some browsers send audio to their own service.'**
+  String get voicePrivacyNote;
+
+  /// Shown on web when the browser has no speech recognition support
+  ///
+  /// In en, this message translates to:
+  /// **'Voice input is not available in this browser. You can still type.'**
+  String get voiceUnavailable;
+
+  /// Status while the mic is active and transcribing
+  ///
+  /// In en, this message translates to:
+  /// **'Listening…'**
+  String get voiceListening;
+
+  /// Tooltip on the button that stops an active dictation
+  ///
+  /// In en, this message translates to:
+  /// **'Stop listening'**
+  String get voiceStopListening;
+
+  /// Label on the control that picks the dictation language
+  ///
+  /// In en, this message translates to:
+  /// **'Dictation language'**
+  String get voiceLocaleLabel;
+
+  /// Dictation language option
+  ///
+  /// In en, this message translates to:
+  /// **'Hebrew'**
+  String get voiceLocaleHebrew;
+
+  /// Dictation language option
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get voiceLocaleEnglish;
 }
 
 class _AppLocalizationsDelegate
