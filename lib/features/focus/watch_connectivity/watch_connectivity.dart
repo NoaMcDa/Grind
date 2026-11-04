@@ -6,6 +6,7 @@ import 'watch_connectivity_service.dart';
 
 export 'method_channel_watch_connectivity_service.dart';
 export 'watch_connectivity_service.dart';
+export 'watch_snapshot.dart';
 
 /// The Apple Watch bridge the focus controller drives (#46). The method
 /// channel on iOS, a no-op everywhere else (web, tests). Needs no override
