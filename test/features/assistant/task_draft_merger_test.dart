@@ -101,17 +101,11 @@ void main() {
       // through an explicit copyWith, not through a merge.
       const base = TaskDraft(title: 'Gym', durationMinutes: 45);
       const overlay = TaskDraft(title: 'Gym');
-      expect(
-        TaskDraftMerger.merge(base, overlay).durationMinutes,
-        45,
-      );
+      expect(TaskDraftMerger.merge(base, overlay).durationMinutes, 45);
     });
 
     test('first action and recurrence follow the same rule', () {
-      const base = TaskDraft(
-        title: 'Run',
-        firstAction: 'lace up',
-      );
+      const base = TaskDraft(title: 'Run', firstAction: 'lace up');
       const overlay = TaskDraft(
         title: 'Run',
         firstAction: 'fill water bottle',
@@ -165,10 +159,7 @@ void main() {
 
     test('diff from base to merge(base, overlay) is overlay-set fields', () {
       // Sanity-check the contract against TaskDraftDiff.
-      const base = TaskDraft(
-        title: 'Gym',
-        date: '2026-11-05',
-      );
+      const base = TaskDraft(title: 'Gym', date: '2026-11-05');
       const overlay = TaskDraft(
         title: 'Gym',
         time: '07:00',
