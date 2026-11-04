@@ -298,6 +298,8 @@ Future<void> _addAsTask(
     estimatedMinutes: minutes,
     scheduledStart: e.start,
     scheduledEnd: e.end,
+    // The event's time is a fact, not a suggestion: pin the task there.
+    lockedStart: true,
     calendarEventId: sentinel,
     createdAt: now,
     updatedAt: now,

@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../core/core.dart';
 import '../../core/notifications/time_zones.dart';
 import '../analytics/analytics_providers.dart';
+import '../calendar/sync/task_mirrors.dart';
 import '../capacity/capacity_providers.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart' show dateOnly, nextDay, weekOf;
@@ -104,9 +105,14 @@ class PlanScheduler {
       for (final t in all)
         if (_isOpen(t) && !_pinnedOutside(t, start, end, loc)) t,
     ];
-    final events = await _events.getBetween(
-      fromZoneWall(start, loc),
-      fromZoneWall(end, loc),
+    // The calendar copies of tasks (write-backs, "Add as task" imports)
+    // must not block the time of the task they mirror.
+    final events = withoutTaskMirrors(
+      await _events.getBetween(
+        fromZoneWall(start, loc),
+        fromZoneWall(end, loc),
+      ),
+      all,
     );
 
     final plan = from.isBefore(end)
@@ -182,9 +188,9 @@ class PlanScheduler {
         if (t.id != taskId && _isOpen(t) && t.isScheduled)
           t.copyWith(lockedStart: true),
     ];
-    final events = await _events.getBetween(
-      _nowUtc,
-      fromZoneWall(horizonEnd, loc),
+    final events = withoutTaskMirrors(
+      await _events.getBetween(_nowUtc, fromZoneWall(horizonEnd, loc)),
+      all,
     );
     final target = task.copyWith(
       scheduledStart: null,

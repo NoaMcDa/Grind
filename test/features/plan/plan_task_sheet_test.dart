@@ -130,6 +130,7 @@ void main() {
         );
         expect(saved.scheduledStart, eventStart);
         expect(saved.scheduledEnd, eventEnd);
+        expect(saved.lockedStart, isTrue, reason: 'pinned at the event');
         expect(saved.estimatedMinutes, 90);
         expect(
           saved.calendarEventId,

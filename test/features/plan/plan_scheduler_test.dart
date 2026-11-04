@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/core/notifications/time_zones.dart';
+import 'package:grind/features/calendar/sync/calendar_sync_engine.dart';
 import 'package:grind/features/plan/plan_providers.dart';
 import 'package:grind/features/plan/plan_scheduler.dart';
 import 'package:grind/features/plan/plan_l10n.dart';
@@ -68,7 +69,11 @@ List<CalendarEvent> _events() => [
   _event('seminar', _at(29, 14), _at(29, 15, 30)),
 ];
 
-ProviderContainer _container({List<Task>? tasks, DateTime? now}) {
+ProviderContainer _container({
+  List<Task>? tasks,
+  List<CalendarEvent>? events,
+  DateTime? now,
+}) {
   final c = ProviderContainer(
     overrides: [
       clockProvider.overrideWithValue(FixedClock(now ?? _now)),
@@ -76,7 +81,7 @@ ProviderContainer _container({List<Task>? tasks, DateTime? now}) {
         InMemoryTaskRepository(tasks ?? _tasks()),
       ),
       calendarRepositoryProvider.overrideWithValue(
-        InMemoryCalendarRepository(_events()),
+        InMemoryCalendarRepository(events ?? _events()),
       ),
       devicePrefsOverride(),
     ],
@@ -129,6 +134,72 @@ void main() {
     final huge = p.unplaced.where((u) => u.taskId == 'huge').single;
     expect(huge.reason, isNotEmpty);
     expect(p.titleOf('huge'), 'Task huge');
+  });
+
+  // A work-day event (09:30-18:00, busy) leaves no free slot, but the user
+  // placed two tasks inside it by hand. They are kept, not reported as
+  // "didn't fit".
+  test('hand-placed tasks over a busy event are kept, not unplaced', () async {
+    final c = _container(
+      tasks: [
+        _task(
+          'lesson',
+          minutes: 240,
+          due: _at(30, 23, 59),
+          start: _at(30, 10),
+          end: _at(30, 14),
+          locked: true,
+        ),
+        _task(
+          'study',
+          minutes: 120,
+          due: _at(30, 23, 59),
+          start: _at(30, 15),
+          end: _at(30, 17),
+          locked: true,
+        ),
+      ],
+      events: [_event('work', _at(30, 9, 30), _at(30, 18))],
+    );
+    final p = await c.read(planSchedulerProvider).proposeWeek(_now);
+    expect(p.unplaced, isEmpty);
+    expect(p.keptCount, 2);
+    expect(p.changes, isEmpty);
+  });
+
+  // The calendar copies of a task (a write-back with `taskId`, or the event
+  // "Add as task" imported it from) do not block that task's own time.
+  test('a task is not blocked by its own calendar copy', () async {
+    final imported = _event('krav-ext', _at(30, 10), _at(30, 14));
+    final writeBack = _event(
+      'study-ext',
+      _at(30, 15),
+      _at(30, 17),
+    ).copyWith(taskId: 'study');
+    final c = _container(
+      tasks: [
+        _task(
+          'krav',
+          minutes: 240,
+          due: _at(30, 14),
+          start: _at(30, 10),
+          end: _at(30, 14),
+        ).copyWith(calendarEventId: importedCalendarEventIdFor('krav-ext')),
+        _task(
+          'study',
+          minutes: 120,
+          due: _at(30, 17),
+          start: _at(30, 15),
+          end: _at(30, 17),
+        ).copyWith(calendarEventId: 'study-ext'),
+      ],
+      events: [imported, writeBack],
+    );
+    final p = await c.read(planSchedulerProvider).proposeWeek(_now);
+    expect(p.unplaced, isEmpty);
+    for (final id in ['krav', 'study']) {
+      expect(p.plan.placementsFor(id), isNotEmpty, reason: id);
+    }
   });
 
   test('apply writes UTC slots and leaves pinned tasks alone', () async {

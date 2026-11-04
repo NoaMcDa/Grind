@@ -206,6 +206,8 @@ void main() {
       const Duration(minutes: 240),
     );
     expect(saved.isScheduled, isTrue);
+    // Placed by hand, so "Re-plan with Pip" keeps it there.
+    expect(saved.lockedStart, isTrue);
   });
 
   // A task saved without any picked time stays off the grid (there is no
