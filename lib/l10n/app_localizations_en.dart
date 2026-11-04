@@ -2654,4 +2654,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'That one does not fit there';
+
+  @override
+  String followupHereAt(String start, String reasons) {
+    return 'It is at $start, because $reasons.';
+  }
+
+  @override
+  String followupHereNoReason(String start) {
+    return 'It is at $start.';
+  }
+
+  @override
+  String followupNotFit(String reason) {
+    return 'That one did not fit today — $reason.';
+  }
+
+  @override
+  String get followupNotFitBare => 'That one did not fit today.';
+
+  @override
+  String followupWhen(String start, String end) {
+    return 'It starts at $start and runs until $end.';
+  }
+
+  @override
+  String followupAlreadyPlaced(String start) {
+    return 'It is in today\'s plan at $start.';
+  }
+
+  @override
+  String get followupUnknown => 'I do not have that one on today\'s plan.';
 }

@@ -2632,4 +2632,35 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'זה לא נכנס שם';
+
+  @override
+  String followupHereAt(String start, String reasons) {
+    return 'זה ב-$start, כי $reasons.';
+  }
+
+  @override
+  String followupHereNoReason(String start) {
+    return 'זה ב-$start.';
+  }
+
+  @override
+  String followupNotFit(String reason) {
+    return 'זה לא נכנס היום — $reason.';
+  }
+
+  @override
+  String get followupNotFitBare => 'זה לא נכנס היום.';
+
+  @override
+  String followupWhen(String start, String end) {
+    return 'זה מתחיל ב-$start ורץ עד $end.';
+  }
+
+  @override
+  String followupAlreadyPlaced(String start) {
+    return 'זה בתוכנית של היום, ב-$start.';
+  }
+
+  @override
+  String get followupUnknown => 'זה לא על התוכנית של היום.';
 }

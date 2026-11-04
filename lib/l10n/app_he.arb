@@ -716,5 +716,12 @@
   "draftRemove": "להסיר את {title} מהטיוטה",
   "draftMoveEarlier": "להקדים את {title}",
   "draftMoveLater": "לדחות את {title}",
-  "draftNoRoom": "זה לא נכנס שם"
+  "draftNoRoom": "זה לא נכנס שם",
+  "followupHereAt": "זה ב-{start}, כי {reasons}.",
+  "followupHereNoReason": "זה ב-{start}.",
+  "followupNotFit": "זה לא נכנס היום — {reason}.",
+  "followupNotFitBare": "זה לא נכנס היום.",
+  "followupWhen": "זה מתחיל ב-{start} ורץ עד {end}.",
+  "followupAlreadyPlaced": "זה בתוכנית של היום, ב-{start}.",
+  "followupUnknown": "זה לא על התוכנית של היום."
 }
