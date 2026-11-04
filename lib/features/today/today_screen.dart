@@ -43,8 +43,10 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     return custom == null ? null : (_) => custom();
   }
 
-  /// Ids swiped away; hidden at once so the Dismissible leaves the tree
-  /// before the repository stream catches up.
+  /// Row keys ([TodayItem.key]) swiped away; hidden at once so the
+  /// Dismissible leaves the tree before the repository stream catches up.
+  /// Keyed by row identity, not task id, so a done occurrence row and its
+  /// series share the same scheme.
   final Set<String> _hidden = {};
 
   void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
@@ -62,7 +64,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   Widget build(BuildContext context) {
     final tasks = ref
         .watch(todayTasksProvider)
-        .where((i) => !_hidden.contains(i.task.id))
+        .where((i) => !_hidden.contains(i.key))
         .toList();
     final location = ref.watch(zoneLocationProvider);
     final doneCount = tasks.where((t) => t.isDone).length;
@@ -245,15 +247,19 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
           await toggle();
           return false;
         }
+        // Swipe-left always deletes, finished or not. For an occurrence row
+        // the delete falls back on the series task (which may itself be
+        // open).
         return true;
       },
       onDismissed: (_) {
-        setState(() => _hidden.add(t.id));
+        final rowKey = item.key;
+        setState(() => _hidden.add(rowKey));
         actions.deleteWithUndo(
           context,
           t,
           onUndo: () {
-            if (mounted) setState(() => _hidden.remove(t.id));
+            if (mounted) setState(() => _hidden.remove(rowKey));
           },
         );
       },

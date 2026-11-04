@@ -161,6 +161,43 @@ void main() {
     expect(find.text('Deep learning lab 4'), findsOneWidget);
   });
 
+  testWidgets('swipe left deletes a done plain task (regression #147)', (
+    tester,
+  ) async {
+    final container = await pumpGrindApp(
+      tester,
+      overrides: [devicePrefsOverride()],
+    );
+    final repo = container.read(taskRepositoryProvider);
+    // "Call mom" is already done in the demo seed.
+    expect((await repo.getById('mom'))!.isDone, isTrue);
+    await tester.drag(find.text('Call mom'), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Call mom'), findsNothing);
+    expect(find.text('Task deleted'), findsOneWidget);
+    expect(await repo.getById('mom'), isNull);
+  });
+
+  testWidgets(
+    'swipe left deletes a done weekly occurrence row (regression #147)',
+    (tester) async {
+      final c = await _pumpWeekly(tester);
+      final rules = c.read(reminderRepositoryProvider);
+      final repo = c.read(taskRepositoryProvider);
+      await tester.tap(find.bySemanticsLabel('Complete Weekly review'));
+      await tester.pumpAndSettle();
+      // The occurrence stays as a done row on Today until swiped away.
+      expect(find.text('1 of 1 today'), findsOneWidget);
+      await tester.drag(find.text('Weekly review'), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Weekly review'), findsNothing);
+      expect(find.text('Task deleted'), findsOneWidget);
+      // The series and its rule are soft-deleted (getById hides deleted rows).
+      expect(await repo.getById('w'), isNull);
+      expect(await rules.getForTask('w'), isNull);
+    },
+  );
+
   testWidgets('checkbox toggles done and undo reopens', (tester) async {
     final container = await pumpGrindApp(
       tester,
