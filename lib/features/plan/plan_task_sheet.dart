@@ -185,10 +185,7 @@ Uri? calendarDayUrl(CalendarEvent e, [tz.Location? location]) {
 /// sync engine uses to skip write-back (no duplicate in the external
 /// calendar); the local mirror is marked with the new task's id so it
 /// stays linked across pulls.
-Future<void> showPlanEventSheet(
-  BuildContext context,
-  CalendarEvent e,
-) async {
+Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final location = container.read(zoneLocationProvider);
   final url = calendarDayUrl(e, location);
@@ -240,9 +237,9 @@ Future<void> showPlanEventSheet(
                   onPressed: url == null
                       ? null
                       : () async {
-                          final ok = await ref.read(
-                            planUrlLauncherProvider,
-                          )(url);
+                          final ok = await ref.read(planUrlLauncherProvider)(
+                            url,
+                          );
                           if (!ok && btnContext.mounted) {
                             showPipToast(
                               btnContext,

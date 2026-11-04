@@ -222,8 +222,9 @@ void main() {
   });
 
   testWidgets('"Add as task" adopts the event: opens the task sheet '
-      'prefilled, links the event and does not duplicate it in the calendar',
-      (t) async {
+      'prefilled, links the event and does not duplicate it in the calendar', (
+    t,
+  ) async {
     final c = await _pump(t);
     await t.tap(find.byKey(const Key('plan-event-seminar')));
     await t.pumpAndSettle();
