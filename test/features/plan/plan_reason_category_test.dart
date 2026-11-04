@@ -68,10 +68,7 @@ void main() {
     });
 
     test('part of <goal>', () {
-      expect(
-        categorizePlanReason('part of Thesis'),
-        ReasonCategory.partOfGoal,
-      );
+      expect(categorizePlanReason('part of Thesis'), ReasonCategory.partOfGoal);
       expect(
         categorizePlanReason('part of Launch roadmap'),
         ReasonCategory.partOfGoal,
@@ -144,11 +141,7 @@ void main() {
         'no longer fits this week',
       ];
       for (final s in samples) {
-        expect(
-          categorizePlanReason(s),
-          ReasonCategory.replanRemove,
-          reason: s,
-        );
+        expect(categorizePlanReason(s), ReasonCategory.replanRemove, reason: s);
       }
     });
   });
@@ -165,10 +158,7 @@ void main() {
         categorizePlanReason('  your focus window  '),
         ReasonCategory.focusWindow,
       );
-      expect(
-        categorizePlanReason('\tdue tomorrow\n'),
-        ReasonCategory.deadline,
-      );
+      expect(categorizePlanReason('\tdue tomorrow\n'), ReasonCategory.deadline);
     });
 
     test('unknown free-form string reads as other', () {
@@ -183,21 +173,12 @@ void main() {
       // Part-of is matched only when the string begins with "part of ";
       // a goal titled "part of me" is unusual but legal, and the "part of"
       // template reads the whole string, not a prefix of a longer one.
-      expect(
-        categorizePlanReason('part of Thesis'),
-        ReasonCategory.partOfGoal,
-      );
+      expect(categorizePlanReason('part of Thesis'), ReasonCategory.partOfGoal);
       // A string that merely mentions "due" is not the "due <day>" template.
-      expect(
-        categorizePlanReason('overdue later'),
-        ReasonCategory.other,
-      );
+      expect(categorizePlanReason('overdue later'), ReasonCategory.other);
       // "earliest free gap" without the minute count is not the placement
       // template; the scheduler always writes the digits.
-      expect(
-        categorizePlanReason('earliest free gap'),
-        ReasonCategory.other,
-      );
+      expect(categorizePlanReason('earliest free gap'), ReasonCategory.other);
     });
   });
 
