@@ -10,17 +10,11 @@ void main() {
     });
 
     test('uses LRI when direction is ltr', () {
-      expect(
-        Bidi.isolate('John', direction: TextDirection.ltr),
-        '⁦John⁩',
-      );
+      expect(Bidi.isolate('John', direction: TextDirection.ltr), '⁦John⁩');
     });
 
     test('uses RLI when direction is rtl', () {
-      expect(
-        Bidi.isolate('שלום', direction: TextDirection.rtl),
-        '⁧שלום⁩',
-      );
+      expect(Bidi.isolate('שלום', direction: TextDirection.rtl), '⁧שלום⁩');
     });
 
     test('leaves the empty string alone', () {
@@ -63,10 +57,7 @@ void main() {
 
   group('Bidi.wrapLatinRuns', () {
     test('wraps a single Latin word', () {
-      expect(
-        Bidi.wrapLatinRuns('פגישה עם John'),
-        'פגישה עם ⁨John⁩',
-      );
+      expect(Bidi.wrapLatinRuns('פגישה עם John'), 'פגישה עם ⁨John⁩');
     });
 
     test('wraps multiple Latin and digit runs', () {
