@@ -20,6 +20,7 @@ class SchedulerService {
     UserStats stats = const UserStats(),
     SchedulerWeights weights = const SchedulerWeights(),
     DateTime? horizonEnd,
+    Map<String, List<Slot>> prevPlacements = const {},
   }) => planner.plan(
     tasks: tasks,
     goals: goals,
@@ -29,6 +30,7 @@ class SchedulerService {
     stats: stats,
     weights: weights,
     horizonEnd: horizonEnd,
+    prevPlacements: prevPlacements,
   );
 
   replanner.ReplanResult replan({
@@ -40,6 +42,7 @@ class SchedulerService {
     UserStats stats = const UserStats(),
     SchedulerWeights weights = const SchedulerWeights(),
     DateTime? horizonEnd,
+    Map<String, List<Slot>> prevPlacements = const {},
   }) => replanner.replan(
     previous: previous,
     tasks: tasks,
@@ -50,5 +53,6 @@ class SchedulerService {
     stats: stats,
     weights: weights,
     horizonEnd: horizonEnd,
+    prevPlacements: prevPlacements,
   );
 }

@@ -84,6 +84,12 @@ class ReplanResult {
 /// Re-plans after the day changed: [plan] again with done/skipped tasks
 /// dropped and locked tasks kept where they are, plus a [PlanDiff] against
 /// [previous] that gives every move one reason.
+///
+/// Minimal-change bias: pass [prevPlacements] (or let it default to
+/// [prevPlacementsFromPlan] of [previous]) to keep a task at its previous
+/// slots whenever they still fit — the plan that moves the fewest items.
+/// Pass an empty map to drop the bias and re-fit every open task from
+/// scratch (the pre-#18 behaviour, kept for tests and callers that want it).
 ReplanResult replan({
   required Plan previous,
   required List<Task> tasks,
@@ -94,6 +100,7 @@ ReplanResult replan({
   UserStats stats = const UserStats(),
   SchedulerWeights weights = const SchedulerWeights(),
   DateTime? horizonEnd,
+  Map<String, List<Slot>> prevPlacements = const {},
 }) {
   final next = plan(
     tasks: tasks.where(isOpenTask).toList(),
@@ -104,6 +111,7 @@ ReplanResult replan({
     stats: stats,
     weights: weights,
     horizonEnd: horizonEnd,
+    prevPlacements: prevPlacements,
   );
   return ReplanResult(
     plan: next,
@@ -173,6 +181,21 @@ PlanDiff diffPlans({
       if (!before.containsKey(id)) id,
   ];
   return PlanDiff(moved: moved, added: added, removed: removed);
+}
+
+/// The unlocked placements of [plan], grouped by task id, for feeding
+/// [replan]'s minimal-change bias. Locked placements are skipped: the
+/// planner already keeps them verbatim.
+Map<String, List<Slot>> prevPlacementsFromPlan(Plan plan) {
+  final out = <String, List<Slot>>{};
+  for (final p in plan.placed) {
+    if (p.locked) continue;
+    (out[p.taskId] ??= []).add(p.slot);
+  }
+  for (final l in out.values) {
+    l.sort(compareSlots);
+  }
+  return out;
 }
 
 Map<String, List<Slot>> _slotsByTask(Plan p) {
