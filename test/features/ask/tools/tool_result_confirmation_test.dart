@@ -18,7 +18,7 @@ void main() {
   // en-dash stays between its digits once the sentence is dropped into
   // a Hebrew paragraph. Keep the expected values readable by building
   // them with the same mark here.
-  String iso(String s) => '⁦$s⁩';
+  String iso(String s) => '\u{2066}$s\u{2069}';
 
   group('formatToolConfirmation (en)', () {
     test('empty ranges render the plain "Done." sentence', () {
@@ -92,8 +92,8 @@ void main() {
         r(9, 0, 9, 25),
         r(15, 0, 15, 25),
       ]);
-      expect('⁦'.allMatches(out).length, 2);
-      expect('⁩'.allMatches(out).length, 2);
+      expect('\u{2066}'.allMatches(out).length, 2);
+      expect('\u{2069}'.allMatches(out).length, 2);
       var depth = 0;
       for (final cu in out.runes) {
         if (cu == 0x2066) depth++;
