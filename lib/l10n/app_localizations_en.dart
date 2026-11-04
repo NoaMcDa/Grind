@@ -2840,6 +2840,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get followupUnknown => 'I do not have that one on today\'s plan.';
 
   @override
+  String get planDiffNothing => 'Nothing shifted. Your plan stays as is.';
+
+  @override
+  String planDiffMoved(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tasks moved to new times.',
+      one: 'One task moved to a new time.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDiffAdded(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tasks joined your plan.',
+      one: 'One task joined your plan.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDiffRemoved(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n tasks came off your plan.',
+      one: 'One task came off your plan.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get voicePermissionTitle => 'Dictate a task';
 
   @override

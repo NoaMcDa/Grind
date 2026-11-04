@@ -4658,6 +4658,30 @@ abstract class AppLocalizations {
   /// **'I do not have that one on today\'s plan.'**
   String get followupUnknown;
 
+  /// Pip's plan-diff summary when nothing moved, was added or removed
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing shifted. Your plan stays as is.'**
+  String get planDiffNothing;
+
+  /// Pip's plan-diff summary: how many tasks shifted to new times
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One task moved to a new time.} other{{n} tasks moved to new times.}}'**
+  String planDiffMoved(int n);
+
+  /// Pip's plan-diff summary: how many tasks newly joined the plan
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One task joined your plan.} other{{n} tasks joined your plan.}}'**
+  String planDiffAdded(int n);
+
+  /// Pip's plan-diff summary: how many tasks came off the plan
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{One task came off your plan.} other{{n} tasks came off your plan.}}'**
+  String planDiffRemoved(int n);
+
   /// Microphone permission sheet title for assistant voice input
   ///
   /// In en, this message translates to:
