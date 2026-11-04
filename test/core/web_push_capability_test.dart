@@ -46,25 +46,22 @@ void main() {
       );
     });
 
-    test(
-      'a denied permission still wins on iOS Safari, in or out of PWA',
-      () {
-        for (final standalone in const [false, true]) {
-          expect(
-            WebPushCapability.from(
-              env(
-                isIosSafari: true,
-                iosMajorVersion: 17,
-                isStandalonePwa: standalone,
-                notificationPermission: WebNotificationPermission.denied,
-              ),
+    test('a denied permission still wins on iOS Safari, in or out of PWA', () {
+      for (final standalone in const [false, true]) {
+        expect(
+          WebPushCapability.from(
+            env(
+              isIosSafari: true,
+              iosMajorVersion: 17,
+              isStandalonePwa: standalone,
+              notificationPermission: WebNotificationPermission.denied,
             ),
-            WebPushCapability.permissionDenied,
-            reason: 'denied overrides standalone=$standalone',
-          );
-        }
-      },
-    );
+          ),
+          WebPushCapability.permissionDenied,
+          reason: 'denied overrides standalone=$standalone',
+        );
+      }
+    });
 
     test('missing Notification API collapses to unsupported', () {
       expect(
@@ -93,21 +90,13 @@ void main() {
     test('iOS 16.4+ in a regular tab needs install', () {
       expect(
         WebPushCapability.from(
-          env(
-            isIosSafari: true,
-            iosMajorVersion: 16,
-            isStandalonePwa: false,
-          ),
+          env(isIosSafari: true, iosMajorVersion: 16, isStandalonePwa: false),
         ),
         WebPushCapability.needsInstall,
       );
       expect(
         WebPushCapability.from(
-          env(
-            isIosSafari: true,
-            iosMajorVersion: 17,
-            isStandalonePwa: false,
-          ),
+          env(isIosSafari: true, iosMajorVersion: 17, isStandalonePwa: false),
         ),
         WebPushCapability.needsInstall,
       );
@@ -116,11 +105,7 @@ void main() {
     test('iOS 16.4+ as an installed PWA is ready', () {
       expect(
         WebPushCapability.from(
-          env(
-            isIosSafari: true,
-            iosMajorVersion: 16,
-            isStandalonePwa: true,
-          ),
+          env(isIosSafari: true, iosMajorVersion: 16, isStandalonePwa: true),
         ),
         WebPushCapability.ready,
       );
@@ -144,29 +129,29 @@ void main() {
 
     test('iOS with unknown version is treated as too old', () {
       expect(
-        WebPushCapability.from(
-          env(isIosSafari: true, iosMajorVersion: null),
-        ),
+        WebPushCapability.from(env(isIosSafari: true, iosMajorVersion: null)),
         WebPushCapability.unsupported,
       );
     });
 
-    test('iOS Safari without PushManager is unsupported, even when installed',
-        () {
-      // Matches iOS 16.0–16.3: the browser shim can claim standalone but has
-      // no PushManager.
-      expect(
-        WebPushCapability.from(
-          env(
-            hasPushManager: false,
-            isIosSafari: true,
-            iosMajorVersion: 16,
-            isStandalonePwa: true,
+    test(
+      'iOS Safari without PushManager is unsupported, even when installed',
+      () {
+        // Matches iOS 16.0–16.3: the browser shim can claim standalone but has
+        // no PushManager.
+        expect(
+          WebPushCapability.from(
+            env(
+              hasPushManager: false,
+              isIosSafari: true,
+              iosMajorVersion: 16,
+              isStandalonePwa: true,
+            ),
           ),
-        ),
-        WebPushCapability.unsupported,
-      );
-    });
+          WebPushCapability.unsupported,
+        );
+      },
+    );
 
     test('non-iOS browsers ignore the standalone flag', () {
       // Desktop Chrome — standalone is informational, not a gate.
@@ -194,14 +179,8 @@ void main() {
     test('equal by value across every field', () {
       expect(env(), env());
       expect(env().hashCode, env().hashCode);
-      expect(
-        env(hasPushManager: false),
-        isNot(env()),
-      );
-      expect(
-        env(iosMajorVersion: 17),
-        isNot(env(iosMajorVersion: 16)),
-      );
+      expect(env(hasPushManager: false), isNot(env()));
+      expect(env(iosMajorVersion: 17), isNot(env(iosMajorVersion: 16)));
       expect(
         env(notificationPermission: WebNotificationPermission.granted),
         isNot(env(notificationPermission: WebNotificationPermission.denied)),
