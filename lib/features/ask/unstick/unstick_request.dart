@@ -136,8 +136,7 @@ class UnstickRequest {
   final String localeCode;
 
   /// True when [overdueBy] is a positive duration.
-  bool get isOverdue =>
-      overdueBy != null && overdueBy! > Duration.zero;
+  bool get isOverdue => overdueBy != null && overdueBy! > Duration.zero;
 
   /// Serialised shape the LLM path sends over the wire.
   Map<String, Object?> toJson() => {
@@ -228,10 +227,7 @@ class UnstickRequest {
 
   @override
   String toString() {
-    final parts = <String>[
-      'title: "$taskTitle"',
-      'est: ${estimatedMinutes}m',
-    ];
+    final parts = <String>['title: "$taskTitle"', 'est: ${estimatedMinutes}m'];
     if (overdueBy != null) parts.add('overdue: ${overdueBy!.inMinutes}m');
     if (recentHistory.isNotEmpty) parts.add('history: ${recentHistory.length}');
     parts.add('locale: $localeCode');

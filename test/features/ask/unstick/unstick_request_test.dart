@@ -20,10 +20,7 @@ void main() {
     });
 
     test('isOverdue is true only for a positive duration', () {
-      final notOverdue = UnstickRequest(
-        taskTitle: 'x',
-        estimatedMinutes: 30,
-      );
+      final notOverdue = UnstickRequest(taskTitle: 'x', estimatedMinutes: 30);
       final zero = UnstickRequest(
         taskTitle: 'x',
         estimatedMinutes: 30,
@@ -162,10 +159,7 @@ void main() {
     });
 
     test('omits optional fields when absent', () {
-      final req = UnstickRequest(
-        taskTitle: 'x',
-        estimatedMinutes: 30,
-      );
+      final req = UnstickRequest(taskTitle: 'x', estimatedMinutes: 30);
       final json = req.toJson();
 
       expect(json.containsKey('overdueMinutes'), isFalse);
@@ -178,17 +172,11 @@ void main() {
       expect(UnstickRequest.fromJson('nope'), isNull);
       expect(UnstickRequest.fromJson({'taskTitle': ''}), isNull);
       expect(
-        UnstickRequest.fromJson({
-          'taskTitle': 'x',
-          'estimatedMinutes': 0,
-        }),
+        UnstickRequest.fromJson({'taskTitle': 'x', 'estimatedMinutes': 0}),
         isNull,
       );
       expect(
-        UnstickRequest.fromJson({
-          'taskTitle': 'x',
-          'estimatedMinutes': -1,
-        }),
+        UnstickRequest.fromJson({'taskTitle': 'x', 'estimatedMinutes': -1}),
         isNull,
       );
       expect(
