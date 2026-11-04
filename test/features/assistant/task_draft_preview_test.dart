@@ -28,10 +28,7 @@ void main() {
 
     test('today when draft date matches now', () {
       const d = TaskDraft(title: 'Standup', date: '2026-11-04', time: '10:30');
-      expect(
-        TaskDraftPreview.format(d, now: now),
-        'Standup · Today 10:30',
-      );
+      expect(TaskDraftPreview.format(d, now: now), 'Standup · Today 10:30');
     });
 
     test('yesterday when draft date is day before', () {
@@ -42,10 +39,7 @@ void main() {
     test('weekday name for a date within the coming week', () {
       // 2026-11-04 is Wed. 2026-11-08 is next Sunday (delta = 4).
       const d = TaskDraft(title: 'Brunch', date: '2026-11-08', time: '11:00');
-      expect(
-        TaskDraftPreview.format(d, now: now),
-        'Brunch · Sunday 11:00',
-      );
+      expect(TaskDraftPreview.format(d, now: now), 'Brunch · Sunday 11:00');
     });
 
     test('short absolute date for a far-future date', () {
@@ -134,10 +128,7 @@ void main() {
 
     test('hour phrasing: one, two, many', () {
       const a = TaskDraft(title: 'לקרוא', durationMinutes: 60);
-      expect(
-        TaskDraftPreview.format(a, now: now, locale: 'he'),
-        'לקרוא · שעה',
-      );
+      expect(TaskDraftPreview.format(a, now: now, locale: 'he'), 'לקרוא · שעה');
       const b = TaskDraft(title: 'לקרוא', durationMinutes: 120);
       expect(
         TaskDraftPreview.format(b, now: now, locale: 'he'),
