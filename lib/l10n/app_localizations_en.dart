@@ -2080,6 +2080,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDiffRemovedNoLongerFits => 'no longer fits this week';
 
   @override
+  String planTriggerSkipped(String title) {
+    return 'you skipped $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title ran $minutes min over';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title ran ${hours}h over';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title ran ${hours}h ${minutes}m over';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title lands at $time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title moved to $time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title moved to $day $time';
+  }
+
+  @override
   String get goalsMetricKindLabel => 'How it counts';
 
   @override

@@ -3512,6 +3512,48 @@ abstract class AppLocalizations {
   /// **'no longer fits this week'**
   String get planDiffRemovedNoLongerFits;
 
+  /// Re-plan trigger summary: the user marked a scheduled task as skipped
+  ///
+  /// In en, this message translates to:
+  /// **'you skipped {title}'**
+  String planTriggerSkipped(String title);
+
+  /// Re-plan trigger summary: a task overran by less than an hour
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {minutes} min over'**
+  String planTriggerOverrunMinutes(String title, int minutes);
+
+  /// Re-plan trigger summary: a task overran by a whole number of hours
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h over'**
+  String planTriggerOverrunHours(String title, int hours);
+
+  /// Re-plan trigger summary: a task overran by hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h {minutes}m over'**
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes);
+
+  /// Re-plan trigger summary: a new calendar event was added inside today's plan
+  ///
+  /// In en, this message translates to:
+  /// **'{title} lands at {time}'**
+  String planTriggerEventLands(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a new time on the same day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {time}'**
+  String planTriggerEventMovedTime(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a different day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {day} {time}'**
+  String planTriggerEventMovedDayTime(String title, String day, String time);
+
   /// Goal form: metric kind
   ///
   /// In en, this message translates to:

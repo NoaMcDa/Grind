@@ -139,6 +139,97 @@ void main() {
     );
   });
 
+  test('re-plan trigger summaries round-trip in English', () {
+    // Verbatim strings produced by `_skipSummary`, `_overrunSummary`,
+    // `_addedSummary` and `_movedSummary` in
+    // `lib/features/plan/scheduler/replan_trigger.dart`.
+    const same = [
+      'you skipped Thesis chapter',
+      'Thesis chapter ran 15 min over',
+      'Thesis chapter ran 2h over',
+      'Thesis chapter ran 2h 15m over',
+      'Team sync lands at 15:00',
+      'Team sync moved to 15:30',
+      'Team sync moved to today 09:00',
+      'Team sync moved to tomorrow 09:00',
+      'Team sync moved to Thursday 09:00',
+      'Team sync moved to Nov 12 09:00',
+    ];
+    for (final s in same) {
+      expect(localizeReplanTriggerSummary(en, s), s, reason: s);
+    }
+  });
+
+  test('re-plan trigger summaries render in Hebrew', () {
+    expect(
+      localizeReplanTriggerSummary(he, 'you skipped Thesis chapter'),
+      'דילגת על Thesis chapter',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 15 min over'),
+      'Thesis chapter חרגה ב-15 דק׳',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 2h over'),
+      'Thesis chapter חרגה ב-2 שעות',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Thesis chapter ran 2h 15m over'),
+      'Thesis chapter חרגה ב-2 שעות ו-15 דק׳',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync lands at 15:00'),
+      'Team sync נכנס ב-15:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to 15:30'),
+      'Team sync זז ל-15:30',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to Thursday 09:00'),
+      'Team sync זז ליום חמישי ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to tomorrow 09:00'),
+      'Team sync זז למחר ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'Team sync moved to Nov 12 09:00'),
+      'Team sync זז ל12 בנוב׳ ב-09:00',
+    );
+    expect(
+      localizeReplanTriggerSummary(he, 'something unrecognized'),
+      'something unrecognized',
+    );
+  });
+
+  test('re-plan trigger summary templates do not collapse into one another', () {
+    // Each template renders a distinct Hebrew phrase, even when fed a title
+    // that contains the English suffix of another template.
+    final overrunMinutes = localizeReplanTriggerSummary(
+      he,
+      'Thesis ran 15 min over',
+    );
+    final overrunHours = localizeReplanTriggerSummary(
+      he,
+      'Thesis ran 2h over',
+    );
+    final overrunHoursMinutes = localizeReplanTriggerSummary(
+      he,
+      'Thesis ran 2h 15m over',
+    );
+    final movedTime = localizeReplanTriggerSummary(he, 'Thesis moved to 09:00');
+    final movedDayTime = localizeReplanTriggerSummary(
+      he,
+      'Thesis moved to Thursday 09:00',
+    );
+    final lands = localizeReplanTriggerSummary(he, 'Thesis lands at 09:00');
+    expect(overrunMinutes, isNot(equals(overrunHours)));
+    expect(overrunHours, isNot(equals(overrunHoursMinutes)));
+    expect(movedTime, isNot(equals(movedDayTime)));
+    expect(movedTime, isNot(equals(lands)));
+  });
+
   test('capacity pieces use ICU plurals', () {
     expect(
       planCapacityLine(en, freeMinutes: 90, plannedMinutes: 45),
