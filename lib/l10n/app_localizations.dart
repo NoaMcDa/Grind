@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Move gym to evening'**
   String get quickMoveGym;
 
+  /// Quick prompt chip
+  ///
+  /// In en, this message translates to:
+  /// **'What's next?'**
+  String get quickWhatsNext;
+
   /// Composer placeholder
   ///
   /// In en, this message translates to:
