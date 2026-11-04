@@ -87,10 +87,7 @@ void main() {
     final service = MethodChannelHardModeShieldService();
     expect(await service.requestAuthorization(), isFalse);
     expect(await service.isAuthorized(), isFalse);
-    expect(
-      await service.enable(applicationTokens: const ['x']),
-      isFalse,
-    );
+    expect(await service.enable(applicationTokens: const ['x']), isFalse);
     await service.disable();
     expect(calls, hasLength(4));
   });
@@ -100,27 +97,18 @@ void main() {
     final service = MethodChannelHardModeShieldService();
     expect(await service.requestAuthorization(), isFalse);
     expect(await service.isAuthorized(), isFalse);
-    expect(
-      await service.enable(applicationTokens: const ['x']),
-      isFalse,
-    );
+    expect(await service.enable(applicationTokens: const ['x']), isFalse);
     await service.disable();
   });
 
-  test(
-    'the no-op service does nothing and reports nothing shielded',
-    () async {
-      const service = NoopHardModeShieldService();
-      expect(await service.requestAuthorization(), isFalse);
-      expect(await service.isAuthorized(), isFalse);
-      expect(
-        await service.enable(applicationTokens: const ['token-a']),
-        isFalse,
-      );
-      await service.disable();
-      expect(calls, isEmpty);
-    },
-  );
+  test('the no-op service does nothing and reports nothing shielded', () async {
+    const service = NoopHardModeShieldService();
+    expect(await service.requestAuthorization(), isFalse);
+    expect(await service.isAuthorized(), isFalse);
+    expect(await service.enable(applicationTokens: const ['token-a']), isFalse);
+    await service.disable();
+    expect(calls, isEmpty);
+  });
 
   test('off iOS the provider is the no-op service', () {
     // Tests run on the host VM (Linux/macOS), never iOS.
