@@ -170,10 +170,9 @@ abstract final class UnstickToneRules {
     String text, {
     String localeCode = 'en',
     bool isSmallStep = false,
-  }) =>
-      violations(
-        text,
-        localeCode: localeCode,
-        isSmallStep: isSmallStep,
-      ).isEmpty;
+  }) => violations(
+    text,
+    localeCode: localeCode,
+    isSmallStep: isSmallStep,
+  ).isEmpty;
 }

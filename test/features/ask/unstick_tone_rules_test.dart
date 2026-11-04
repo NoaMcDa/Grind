@@ -26,11 +26,7 @@ void main() {
         'You need to pick one.',
         'You have to try.',
       ]) {
-        expect(
-          UnstickToneRules.violations(line),
-          isNotEmpty,
-          reason: line,
-        );
+        expect(UnstickToneRules.violations(line), isNotEmpty, reason: line);
       }
     });
 
@@ -41,11 +37,7 @@ void main() {
         'You missed it.',
         "You've failed again.",
       ]) {
-        expect(
-          UnstickToneRules.violations(line),
-          isNotEmpty,
-          reason: line,
-        );
+        expect(UnstickToneRules.violations(line), isNotEmpty, reason: line);
       }
     });
 
@@ -68,10 +60,7 @@ void main() {
     test('single "!" is allowed by default', () {
       // The tone guide allows one exclamation for big wins. Only the
       // small-step line gets the stricter rule.
-      expect(
-        UnstickToneRules.violations('Take a breath!'),
-        isEmpty,
-      );
+      expect(UnstickToneRules.violations('Take a breath!'), isEmpty);
     });
 
     test('small step forbids any "!"', () {
