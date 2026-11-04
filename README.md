@@ -22,3 +22,7 @@ flutter build web --release  # output in build/web
 - `lib/core` — contracts: domain model, repository and service interfaces, DI providers
 - `lib/features/<name>` — Today · Plan · Focus · Pip · Ask; new features follow `data/`, `domain/`, `presentation/` (see `docs/adr/0002-state-management.md`)
 - `docs/handoff` — product handoff, market research, mockups and renders
+
+## Merging
+
+Pull requests to `main` merge automatically once the CI workflow passes (`.github/workflows/auto-merge.yml`). Keep a PR as a draft, or add the `no-auto-merge` label, to hold it for a manual merge.

@@ -1,0 +1,73 @@
+name: Auto-merge
+
+# Merges a pull request into main as soon as the CI workflow succeeds on it.
+#
+# How it works:
+# - Runs after every completed "CI" run that was triggered by a pull_request.
+# - Finds the open, non-draft PRs targeting main whose head is that exact
+#   commit (--match-head-commit refuses to merge if new commits landed since
+#   CI ran; the next CI run will merge them instead).
+# - Only PRs from branches in this repository are merged. A fork PR could edit
+#   ci.yml to make CI trivially green, so those still need a human merge.
+# - Squash-merges and deletes the branch, matching the history on main.
+# - Pushes made with the Actions token do not trigger push workflows, so the
+#   Pages deploy is dispatched explicitly after a successful merge.
+#
+# Skip auto-merge for a PR by keeping it a draft or by adding the
+# "no-auto-merge" label.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: auto-merge
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Merge pull requests whose head passed CI
+        run: |
+          set -euo pipefail
+          merged=0
+          # PRs associated with the commit CI ran on.
+          numbers=$(gh api "repos/$REPO/commits/$HEAD_SHA/pulls" --paginate --jq \
+            '.[] | select(.state == "open" and .draft == false and .base.ref == "main"
+                          and .head.sha == env.HEAD_SHA
+                          and .head.repo.full_name == env.REPO
+                          and (any(.labels[]; .name == "no-auto-merge") | not))
+                 | .number')
+          if [ -z "$numbers" ]; then
+            echo "No open, non-draft, same-repo PR to main at $HEAD_SHA."
+            exit 0
+          fi
+          for n in $numbers; do
+            echo "Merging #$n"
+            if gh pr merge "$n" --repo "$REPO" --squash --delete-branch --match-head-commit "$HEAD_SHA"; then
+              merged=1
+            else
+              echo "::warning::Could not merge #$n (conflict, branch protection, or head moved). Merge it manually."
+            fi
+          done
+          echo "merged=$merged" >> "$GITHUB_OUTPUT"
+        id: merge
+
+      - name: Deploy main to GitHub Pages
+        if: steps.merge.outputs.merged == '1'
+        run: gh workflow run deploy-web.yml --repo "$REPO" --ref main
