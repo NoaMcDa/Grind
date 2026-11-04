@@ -10,5 +10,6 @@ export 'free_slots.dart'
 export 'models.dart';
 export 'planner.dart' show plan, defaultHorizonEnd, isOpenTask, isPinned;
 export 'replan.dart';
+export 'replan_trigger.dart';
 export 'scheduler_service.dart';
 export 'scoring.dart';
