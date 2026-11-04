@@ -1310,6 +1310,27 @@ class AppLocalizationsHe extends AppLocalizations {
   String get reviewRepeatsNote => 'חוזרת מעצמה, אז היא נשארת במקומה.';
 
   @override
+  String get reviewCheckInTitle => 'צ\'ק-אין על היעדים';
+
+  @override
+  String get reviewCheckInHint =>
+      'סמנו כל מה שעשיתם היום. פיפ ירשום +1 על כל אחד.';
+
+  @override
+  String get reviewCheckInEmpty =>
+      'אין עדיין יעדים חוזרים. אפשר להוסיף אחד מלשונית היעדים.';
+
+  @override
+  String reviewCheckInUnitWeek(String unit) {
+    return '$unit השבוע';
+  }
+
+  @override
+  String reviewCheckInUnitMonth(String unit) {
+    return '$unit החודש';
+  }
+
+  @override
   String get reviewWinTitle => 'ניצחון אחד';
 
   @override

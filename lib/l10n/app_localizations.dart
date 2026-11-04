@@ -2312,6 +2312,36 @@ abstract class AppLocalizations {
   /// **'Repeats on its own, so it stays put.'**
   String get reviewRepeatsNote;
 
+  /// Review step title for the daily check-in on recurring-metric goals
+  ///
+  /// In en, this message translates to:
+  /// **'Check in on your goals'**
+  String get reviewCheckInTitle;
+
+  /// Review check-in step hint
+  ///
+  /// In en, this message translates to:
+  /// **'Tick any you hit today. Pip logs a +1 on each.'**
+  String get reviewCheckInHint;
+
+  /// Review check-in step empty state
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring goals yet. You can add one from the Goals tab.'**
+  String get reviewCheckInEmpty;
+
+  /// Subtitle on a weekly check-in row: unit label with the current period
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} this week'**
+  String reviewCheckInUnitWeek(String unit);
+
+  /// Subtitle on a monthly check-in row: unit label with the current period
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} this month'**
+  String reviewCheckInUnitMonth(String unit);
+
   /// Review step title
   ///
   /// In en, this message translates to:
