@@ -6,6 +6,7 @@ import 'web_voice_input_service.dart';
 
 export 'voice_input_service.dart';
 export 'voice_session.dart';
+export 'voice_transcript_sanitizer.dart';
 export 'web_voice_input_service.dart';
 
 /// The mic bridge the Ask composer uses to turn speech into text (#43).
