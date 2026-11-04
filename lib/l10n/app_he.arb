@@ -716,5 +716,20 @@
   "draftRemove": "להסיר את {title} מהטיוטה",
   "draftMoveEarlier": "להקדים את {title}",
   "draftMoveLater": "לדחות את {title}",
-  "draftNoRoom": "זה לא נכנס שם"
+  "draftNoRoom": "זה לא נכנס שם",
+  "voicePermissionTitle": "הכתבת משימה",
+  "voicePermissionRationale": "Grind מקשיב רק בזמן שהכפתור לחוץ. מה שאתם אומרים הופך לטקסט בתיבה, ואתם רואים אותו לפני שנשלח משהו.",
+  "voicePermissionAllow": "אישור מיקרופון",
+  "voicePermissionNotNow": "לא עכשיו",
+  "voicePermissionGranted": "המיקרופון פעיל. החזיקו את הכפתור כדי להכתיב.",
+  "voicePermissionDenied": "בלי בעיה. אפשר להמשיך להקליד. את גישת המיקרופון אפשר להפעיל בהגדרות מתי שרוצים.",
+  "voicePermissionBlocked": "גישת המיקרופון ל-Grind כבויה. פתחו את ההגדרות כדי להפעיל.",
+  "voicePermissionOpenSettings": "פתיחת ההגדרות",
+  "voicePrivacyNote": "באייפון הזיהוי מתבצע על המכשיר הזה. באינטרנט הדפדפן אחראי לכך — בחלק מהדפדפנים האודיו נשלח לשירות שלהם.",
+  "voiceUnavailable": "הכתבה קולית אינה זמינה בדפדפן הזה. תמיד אפשר להקליד.",
+  "voiceListening": "מקשיב…",
+  "voiceStopListening": "עצירת ההקלטה",
+  "voiceLocaleLabel": "שפת ההכתבה",
+  "voiceLocaleHebrew": "עברית",
+  "voiceLocaleEnglish": "אנגלית"
 }
