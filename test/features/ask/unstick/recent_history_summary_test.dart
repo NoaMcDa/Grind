@@ -213,7 +213,10 @@ void main() {
         event(RecentEventKind.completed, 'Morning'),
       ]);
 
-      expect(recentHistoryHeadline(s, localeCode: 'fr'), '1 done so far today.');
+      expect(
+        recentHistoryHeadline(s, localeCode: 'fr'),
+        '1 done so far today.',
+      );
     });
   });
 }

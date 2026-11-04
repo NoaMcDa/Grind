@@ -17,6 +17,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+
 import 'unstick_request.dart';
 
 /// Counts and a few shape hints derived from [UnstickRequest.recentHistory].
@@ -144,8 +145,8 @@ RecentHistorySummary summarizeRecentHistory(List<RecentEvent> events) {
   String? lastDropTitle;
   for (var i = events.length - 1; i >= 0; i--) {
     final e = events[i];
-    final isDrop = e.kind == RecentEventKind.skipped ||
-        e.kind == RecentEventKind.missed;
+    final isDrop =
+        e.kind == RecentEventKind.skipped || e.kind == RecentEventKind.missed;
     if (!isDrop) break;
     trailingDrops++;
     lastDropTitle ??= e.taskTitle;
