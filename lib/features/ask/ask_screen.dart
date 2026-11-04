@@ -194,7 +194,7 @@ class _AskScreenState extends ConsumerState<AskScreen> {
                 "What's next?",
               ])
                 Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsetsDirectional.only(end: 8),
                   child: PillButton(
                     label: q,
                     height: 36,
@@ -214,7 +214,7 @@ class _AskScreenState extends ConsumerState<AskScreen> {
               Expanded(
                 child: Container(
                   height: 50,
-                  padding: const EdgeInsets.only(left: 16, right: 4),
+                  padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(AppRadii.pill),
@@ -304,18 +304,21 @@ class _UserBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // User bubble sits on the writing-end side (right in LTR, left in RTL)
+    // with the tail pointing to the same end, so Hebrew conversations mirror
+    // the English layout instead of putting the tail on the wrong corner.
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 300),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color: AppColors.violet,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(6),
+          borderRadius: const BorderRadiusDirectional.only(
+            topStart: Radius.circular(20),
+            topEnd: Radius.circular(20),
+            bottomStart: Radius.circular(20),
+            bottomEnd: Radius.circular(6),
           ),
           border: Border.all(color: AppColors.ink, width: AppStroke.border),
           boxShadow: AppShadows.hard(3),
@@ -335,19 +338,21 @@ class _PipBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pip bubble sits on the writing-start side and keeps its tail on the
+    // same corner, so it flips with the text direction.
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: FractionallySizedBox(
         widthFactor: 0.88,
         child: Container(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-              bottomLeft: Radius.circular(6),
+            borderRadius: const BorderRadiusDirectional.only(
+              topStart: Radius.circular(20),
+              topEnd: Radius.circular(20),
+              bottomEnd: Radius.circular(20),
+              bottomStart: Radius.circular(6),
             ),
             border: Border.all(color: AppColors.ink, width: AppStroke.border),
             boxShadow: AppShadows.hard(3),
