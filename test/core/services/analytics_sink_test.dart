@@ -38,7 +38,9 @@ void main() {
       expect(
         () => AnalyticsEvent.of(
           'bad',
-          properties: const {'tags': ['a', 'b']},
+          properties: const {
+            'tags': ['a', 'b'],
+          },
         ),
         throwsA(
           isA<InvalidAnalyticsPropertyException>().having(
@@ -54,7 +56,9 @@ void main() {
       expect(
         () => AnalyticsEvent.of(
           'bad',
-          properties: const {'nested': {'k': 'v'}},
+          properties: const {
+            'nested': {'k': 'v'},
+          },
         ),
         throwsA(isA<InvalidAnalyticsPropertyException>()),
       );
@@ -120,10 +124,7 @@ void main() {
       sink.record(AnalyticsEvent.of('a'));
       sink.record(AnalyticsEvent.of('b'));
       sink.record(AnalyticsEvent.of('c'));
-      expect(
-        sink.events.map((e) => e.name).toList(),
-        ['a', 'b', 'c'],
-      );
+      expect(sink.events.map((e) => e.name).toList(), ['a', 'b', 'c']);
     });
 
     test('clear empties the buffer without affecting later records', () {

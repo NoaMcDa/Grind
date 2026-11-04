@@ -105,10 +105,9 @@ class AnalyticsEvent {
   );
 
   @override
-  String toString() =>
-      properties.isEmpty
-          ? 'AnalyticsEvent($name)'
-          : 'AnalyticsEvent($name, $properties)';
+  String toString() => properties.isEmpty
+      ? 'AnalyticsEvent($name)'
+      : 'AnalyticsEvent($name, $properties)';
 }
 
 /// Where analytics events go. The seam that decouples call sites from
