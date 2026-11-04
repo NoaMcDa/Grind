@@ -200,17 +200,19 @@ void main() {
   });
 
   group('rule ordering', () {
-    test('"why is X not on today" goes to whyTaskNotPlaced, not whyTaskHere',
-        () {
-      expect(
-        _en('why is reading not on today').intent,
-        AskIntent.whyTaskNotPlaced,
-      );
-      expect(
-        _en("why isn't reading on today").intent,
-        AskIntent.whyTaskNotPlaced,
-      );
-    });
+    test(
+      '"why is X not on today" goes to whyTaskNotPlaced, not whyTaskHere',
+      () {
+        expect(
+          _en('why is reading not on today').intent,
+          AskIntent.whyTaskNotPlaced,
+        );
+        expect(
+          _en("why isn't reading on today").intent,
+          AskIntent.whyTaskNotPlaced,
+        );
+      },
+    );
 
     test('"why is X in the morning" stays whyTaskHere', () {
       final m = _en('why is reading in the morning');

@@ -90,9 +90,7 @@ String? _extractRef(Match m, String lang) {
   if (raw == null) return null;
   var trimmed = raw.trim();
   // Drop a leading article so "the gym" and "gym" normalize the same way.
-  final article = lang == 'he'
-      ? RegExp(r'^(ה)')
-      : RegExp(r'^(the|a|an|my) ');
+  final article = lang == 'he' ? RegExp(r'^(ה)') : RegExp(r'^(the|a|an|my) ');
   trimmed = trimmed.replaceFirst(article, '').trim();
   // Trailing punctuation inside a captured group can leak from loose
   // patterns; strip it so the caller gets a clean task name.
@@ -224,9 +222,7 @@ final List<_Rule> _heRules = [
     AskIntent.explainPlan,
   ),
   _Rule(
-    RegExp(
-      r'^(?:ספר|ספרי|ספרו)(?: לי)?(?: על)? (?:ה)?(?:תוכנית|יום)(?: |$)',
-    ),
+    RegExp(r'^(?:ספר|ספרי|ספרו)(?: לי)?(?: על)? (?:ה)?(?:תוכנית|יום)(?: |$)'),
     AskIntent.explainPlan,
   ),
 
@@ -270,9 +266,5 @@ final List<_Rule> _heRules = [
     AskIntent.whenTaskStarts,
     extractsTask: true,
   ),
-  _Rule(
-    RegExp(r'^מתי (.+?)$'),
-    AskIntent.whenTaskStarts,
-    extractsTask: true,
-  ),
+  _Rule(RegExp(r'^מתי (.+?)$'), AskIntent.whenTaskStarts, extractsTask: true),
 ];
