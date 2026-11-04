@@ -187,8 +187,10 @@ String localizeReplanTriggerSummary(AppLocalizations l, String summary) {
   if (r != null) return l.planTriggerEventLands(r[1]!, r[2]!);
   // `dayWord` from the scheduler core: "today", "tomorrow", a weekday, or
   // "Nov 12" (month + day).
-  r = m(r'(.+) moved to (today|tomorrow|[A-Z][a-z]+(?: \d{1,2})?) '
-      r'(\d{2}:\d{2})');
+  r = m(
+    r'(.+) moved to (today|tomorrow|[A-Z][a-z]+(?: \d{1,2})?) '
+    r'(\d{2}:\d{2})',
+  );
   if (r != null) {
     return l.planTriggerEventMovedDayTime(r[1]!, _dayWord(l, r[2]!), r[3]!);
   }

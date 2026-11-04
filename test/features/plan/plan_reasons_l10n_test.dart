@@ -203,32 +203,38 @@ void main() {
     );
   });
 
-  test('re-plan trigger summary templates do not collapse into one another', () {
-    // Each template renders a distinct Hebrew phrase, even when fed a title
-    // that contains the English suffix of another template.
-    final overrunMinutes = localizeReplanTriggerSummary(
-      he,
-      'Thesis ran 15 min over',
-    );
-    final overrunHours = localizeReplanTriggerSummary(
-      he,
-      'Thesis ran 2h over',
-    );
-    final overrunHoursMinutes = localizeReplanTriggerSummary(
-      he,
-      'Thesis ran 2h 15m over',
-    );
-    final movedTime = localizeReplanTriggerSummary(he, 'Thesis moved to 09:00');
-    final movedDayTime = localizeReplanTriggerSummary(
-      he,
-      'Thesis moved to Thursday 09:00',
-    );
-    final lands = localizeReplanTriggerSummary(he, 'Thesis lands at 09:00');
-    expect(overrunMinutes, isNot(equals(overrunHours)));
-    expect(overrunHours, isNot(equals(overrunHoursMinutes)));
-    expect(movedTime, isNot(equals(movedDayTime)));
-    expect(movedTime, isNot(equals(lands)));
-  });
+  test(
+    're-plan trigger summary templates do not collapse into one another',
+    () {
+      // Each template renders a distinct Hebrew phrase, even when fed a title
+      // that contains the English suffix of another template.
+      final overrunMinutes = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 15 min over',
+      );
+      final overrunHours = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 2h over',
+      );
+      final overrunHoursMinutes = localizeReplanTriggerSummary(
+        he,
+        'Thesis ran 2h 15m over',
+      );
+      final movedTime = localizeReplanTriggerSummary(
+        he,
+        'Thesis moved to 09:00',
+      );
+      final movedDayTime = localizeReplanTriggerSummary(
+        he,
+        'Thesis moved to Thursday 09:00',
+      );
+      final lands = localizeReplanTriggerSummary(he, 'Thesis lands at 09:00');
+      expect(overrunMinutes, isNot(equals(overrunHours)));
+      expect(overrunHours, isNot(equals(overrunHoursMinutes)));
+      expect(movedTime, isNot(equals(movedDayTime)));
+      expect(movedTime, isNot(equals(lands)));
+    },
+  );
 
   test('capacity pieces use ICU plurals', () {
     expect(
