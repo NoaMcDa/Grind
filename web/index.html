@@ -59,6 +59,11 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+  <!-- SPA deep-link fallback decoder. Must run BEFORE flutter_bootstrap.js
+       so go_router sees the real path. Paired with web/404.html; see
+       web/spa_redirect.js for the full WHY. External file so it falls
+       under script-src 'self' without widening the CSP above. -->
+  <script src="spa_redirect.js"></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
