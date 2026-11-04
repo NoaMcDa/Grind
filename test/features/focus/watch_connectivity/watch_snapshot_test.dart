@@ -142,10 +142,7 @@ void main() {
     test('missing or malformed momentum block', () {
       expect(
         WatchSnapshot.tryDecode(
-          jsonEncode({
-            'schema': 1,
-            'writtenAt': writtenAt.toIso8601String(),
-          }),
+          jsonEncode({'schema': 1, 'writtenAt': writtenAt.toIso8601String()}),
         ),
         isNull,
       );
