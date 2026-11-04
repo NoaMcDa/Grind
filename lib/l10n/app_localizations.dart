@@ -650,6 +650,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String commonMinutes(int minutes);
 
+  /// Duration on a round hour
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String commonHours(int hours);
+
+  /// Duration mixing hours and leftover minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String commonHoursMinutes(int hours, int minutes);
+
   /// Short weekday name (list use)
   ///
   /// In en, this message translates to:
@@ -931,6 +943,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minutes'**
   String get tasksCustomMinutes;
+
+  /// Custom estimate field label; accepts shapes like '90', '4h', '1:30'
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get tasksCustomDuration;
+
+  /// Hint for the custom duration field
+  ///
+  /// In en, this message translates to:
+  /// **'90, 4h, 1:30'**
+  String get tasksCustomDurationHint;
 
   /// First action field label
   ///
@@ -2072,17 +2096,17 @@ abstract class AppLocalizations {
   /// **'Session ended. It still counts.'**
   String get focusEarlyTitle;
 
-  /// End-of-session sheet body
+  /// End-of-session sheet body; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.'**
-  String focusFocusedFor(int minutes);
+  /// **'You focused for {duration}.'**
+  String focusFocusedFor(String duration);
 
-  /// End-of-session sheet body when the session had a task
+  /// End-of-session sheet body when the session had a task; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.'**
-  String focusFocusedForTask(int minutes, String task);
+  /// **'You focused for {duration} on {task}.'**
+  String focusFocusedForTask(String duration, String task);
 
   /// End-of-session button
   ///

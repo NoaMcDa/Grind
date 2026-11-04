@@ -313,6 +313,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String commonHours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String commonHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
   String get commonWeekdayShortMon => 'Mon';
 
   @override
@@ -454,6 +464,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tasksCustomMinutes => 'Minutes';
+
+  @override
+  String get tasksCustomDuration => 'Duration';
+
+  @override
+  String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
   String get tasksFirstActionLabel => 'First action';
@@ -1178,25 +1194,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get focusEarlyTitle => 'Session ended. It still counts.';
 
   @override
-  String focusFocusedFor(int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes minutes',
-      one: '1 minute',
-    );
-    return 'You focused for $_temp0.';
+  String focusFocusedFor(String duration) {
+    return 'You focused for $duration.';
   }
 
   @override
-  String focusFocusedForTask(int minutes, String task) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes minutes',
-      one: '1 minute',
-    );
-    return 'You focused for $_temp0 on $task.';
+  String focusFocusedForTask(String duration, String task) {
+    return 'You focused for $duration on $task.';
   }
 
   @override

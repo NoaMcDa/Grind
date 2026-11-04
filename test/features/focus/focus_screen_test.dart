@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/l10n/app_localizations.dart';
+import 'package:grind/l10n/duration_format.dart';
 import 'package:grind/features/focus/providers.dart';
 
 import '../../test_fonts.dart';
@@ -67,7 +68,9 @@ void main() {
 
     expect(find.text(en.focusEarlyTitle), findsOneWidget);
     expect(
-      find.text(en.focusFocusedForTask(12, 'Deep learning lab 4')),
+      find.text(
+        en.focusFocusedForTask(formatDuration(12, en), 'Deep learning lab 4'),
+      ),
       findsOneWidget,
     );
     await tester.tap(find.bySemanticsLabel(en.focusMarkDone));
