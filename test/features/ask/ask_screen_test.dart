@@ -50,33 +50,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('quick-prompt chip labels come from AppLocalizations in English',
-      (tester) async {
-    await pumpApp(tester, const ProviderScope(child: AskScreen()));
-    // All three chips render, in English, and each one has its stable key
-    // so other tests and golden images can pin them down.
-    expect(find.byKey(_planMyDayKey), findsOneWidget);
-    expect(find.byKey(_moveGymKey), findsOneWidget);
-    expect(find.byKey(_whatsNextKey), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(_planMyDayKey),
-        matching: find.text('Plan my day'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(_whatsNextKey),
-        matching: find.text("What's next?"),
-      ),
-      findsOneWidget,
-    );
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'quick-prompt chip labels come from AppLocalizations in English',
+    (tester) async {
+      await pumpApp(tester, const ProviderScope(child: AskScreen()));
+      // All three chips render, in English, and each one has its stable key
+      // so other tests and golden images can pin them down.
+      expect(find.byKey(_planMyDayKey), findsOneWidget);
+      expect(find.byKey(_moveGymKey), findsOneWidget);
+      expect(find.byKey(_whatsNextKey), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(_planMyDayKey),
+          matching: find.text('Plan my day'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(_whatsNextKey),
+          matching: find.text("What's next?"),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('quick-prompt chip labels come from AppLocalizations in Hebrew',
-      (tester) async {
+  testWidgets('quick-prompt chip labels come from AppLocalizations in Hebrew', (
+    tester,
+  ) async {
     await pumpApp(
       tester,
       const ProviderScope(child: AskScreen()),
@@ -101,8 +104,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('"Plan my day" chip fires the onPlanMyDay callback end-to-end',
-      (tester) async {
+  testWidgets('"Plan my day" chip fires the onPlanMyDay callback end-to-end', (
+    tester,
+  ) async {
     var taps = 0;
     await pumpApp(
       tester,
