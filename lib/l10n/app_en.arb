@@ -1722,14 +1722,20 @@
   "@reviewCheckInUnitWeek": {
     "description": "Subtitle on a weekly check-in row: unit label with the current period",
     "placeholders": {
-      "unit": {"type": "String", "example": "workouts"}
+      "unit": {
+        "type": "String",
+        "example": "workouts"
+      }
     }
   },
   "reviewCheckInUnitMonth": "{unit} this month",
   "@reviewCheckInUnitMonth": {
     "description": "Subtitle on a monthly check-in row: unit label with the current period",
     "placeholders": {
-      "unit": {"type": "String", "example": "runs"}
+      "unit": {
+        "type": "String",
+        "example": "runs"
+      }
     }
   },
   "reviewWinTitle": "One win",
@@ -3821,5 +3827,64 @@
         "type": "int"
       }
     }
+  },
+  "followupHereAt": "It is at {start}, because {reasons}.",
+  "@followupHereAt": {
+    "description": "Pip's follow-up answer when a task has reasons: start time and reasons",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "reasons": {
+        "type": "String"
+      }
+    }
+  },
+  "followupHereNoReason": "It is at {start}.",
+  "@followupHereNoReason": {
+    "description": "Pip's follow-up answer when a task has no scheduler reasons",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "followupNotFit": "That one did not fit today — {reason}.",
+  "@followupNotFit": {
+    "description": "Pip's follow-up answer when a task is unplaced, with reason",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "followupNotFitBare": "That one did not fit today.",
+  "@followupNotFitBare": {
+    "description": "Pip's follow-up answer when a task is unplaced and has no reason"
+  },
+  "followupWhen": "It starts at {start} and runs until {end}.",
+  "@followupWhen": {
+    "description": "Pip's follow-up answer naming a placed task's start and end",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "followupAlreadyPlaced": "It is in today's plan at {start}.",
+  "@followupAlreadyPlaced": {
+    "description": "Pip's follow-up answer when a task asked as unplaced is actually placed",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "followupUnknown": "I do not have that one on today's plan.",
+  "@followupUnknown": {
+    "description": "Pip's follow-up answer when the task is not in the draft at all"
   }
 }

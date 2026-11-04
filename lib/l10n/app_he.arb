@@ -739,5 +739,12 @@
   "planExplainNothing": "אין מה לשבץ כרגע. היום שלך.",
   "planExplainNoTime": "לא נשאר זמן פנוי היום. מחר דף חדש.",
   "planExplainUnplacedOnly": "{n, plural, =1{אין מקום ביומן היום; משימה אחת תחכה ליום אחר.} other{אין מקום ביומן היום; {n} משימות יחכו ליום אחר.}}",
-  "planExplainUnplacedExtra": "{n, plural, =1{משימה אחת לא נכנסת היום.} other{{n} משימות לא נכנסות היום.}}"
+  "planExplainUnplacedExtra": "{n, plural, =1{משימה אחת לא נכנסת היום.} other{{n} משימות לא נכנסות היום.}}",
+  "followupHereAt": "זה ב-{start}, כי {reasons}.",
+  "followupHereNoReason": "זה ב-{start}.",
+  "followupNotFit": "זה לא נכנס היום — {reason}.",
+  "followupNotFitBare": "זה לא נכנס היום.",
+  "followupWhen": "זה מתחיל ב-{start} ורץ עד {end}.",
+  "followupAlreadyPlaced": "זה בתוכנית של היום, ב-{start}.",
+  "followupUnknown": "זה לא על התוכנית של היום."
 }

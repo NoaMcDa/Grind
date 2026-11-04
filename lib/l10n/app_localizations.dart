@@ -4537,6 +4537,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n, plural, =1{One task does not fit today.} other{{n} tasks do not fit today.}}'**
   String planExplainUnplacedExtra(int n);
+
+  /// Pip's follow-up answer when a task has reasons: start time and reasons
+  ///
+  /// In en, this message translates to:
+  /// **'It is at {start}, because {reasons}.'**
+  String followupHereAt(String start, String reasons);
+
+  /// Pip's follow-up answer when a task has no scheduler reasons
+  ///
+  /// In en, this message translates to:
+  /// **'It is at {start}.'**
+  String followupHereNoReason(String start);
+
+  /// Pip's follow-up answer when a task is unplaced, with reason
+  ///
+  /// In en, this message translates to:
+  /// **'That one did not fit today — {reason}.'**
+  String followupNotFit(String reason);
+
+  /// Pip's follow-up answer when a task is unplaced and has no reason
+  ///
+  /// In en, this message translates to:
+  /// **'That one did not fit today.'**
+  String get followupNotFitBare;
+
+  /// Pip's follow-up answer naming a placed task's start and end
+  ///
+  /// In en, this message translates to:
+  /// **'It starts at {start} and runs until {end}.'**
+  String followupWhen(String start, String end);
+
+  /// Pip's follow-up answer when a task asked as unplaced is actually placed
+  ///
+  /// In en, this message translates to:
+  /// **'It is in today\'s plan at {start}.'**
+  String followupAlreadyPlaced(String start);
+
+  /// Pip's follow-up answer when the task is not in the draft at all
+  ///
+  /// In en, this message translates to:
+  /// **'I do not have that one on today\'s plan.'**
+  String get followupUnknown;
 }
 
 class _AppLocalizationsDelegate
