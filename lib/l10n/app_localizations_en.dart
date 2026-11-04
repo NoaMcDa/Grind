@@ -2844,4 +2844,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceLocaleEnglish => 'English';
+
+  @override
+  String toolConfirmationDone(String ranges) {
+    return 'Done: $ranges';
+  }
+
+  @override
+  String get toolConfirmationEmpty => 'Done.';
+
+  @override
+  String commonJoinAnd(String head, String tail) {
+    return '$head and $tail';
+  }
+
+  @override
+  String get commonListSeparator => ', ';
 }

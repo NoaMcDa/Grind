@@ -4669,6 +4669,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get voiceLocaleEnglish;
+
+  /// One-line confirmation after an assistant tool runs, listing the time ranges it scheduled (e.g. "Done: 09:00–09:25 and 15:00–15:25")
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {ranges}'**
+  String toolConfirmationDone(String ranges);
+
+  /// One-line confirmation after an assistant tool runs with no time ranges to show (e.g. a replan that moved nothing)
+  ///
+  /// In en, this message translates to:
+  /// **'Done.'**
+  String get toolConfirmationEmpty;
+
+  /// Connects the last item in a list: "a and b" for two items, "a, b and c" with the serial separator for three+
+  ///
+  /// In en, this message translates to:
+  /// **'{head} and {tail}'**
+  String commonJoinAnd(String head, String tail);
+
+  /// Separator between middle items in a list, used before the trailing "and" connector
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get commonListSeparator;
 }
 
 class _AppLocalizationsDelegate

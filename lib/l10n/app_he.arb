@@ -761,5 +761,9 @@
   "voiceStopListening": "עצירת ההקלטה",
   "voiceLocaleLabel": "שפת ההכתבה",
   "voiceLocaleHebrew": "עברית",
-  "voiceLocaleEnglish": "אנגלית"
+  "voiceLocaleEnglish": "אנגלית",
+  "toolConfirmationDone": "בוצע: {ranges}",
+  "toolConfirmationEmpty": "בוצע.",
+  "commonJoinAnd": "{head} ו-{tail}",
+  "commonListSeparator": ", "
 }

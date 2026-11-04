@@ -3946,5 +3946,34 @@
   "voiceLocaleEnglish": "English",
   "@voiceLocaleEnglish": {
     "description": "Dictation language option"
+  },
+  "toolConfirmationDone": "Done: {ranges}",
+  "@toolConfirmationDone": {
+    "description": "One-line confirmation after an assistant tool runs, listing the time ranges it scheduled (e.g. \"Done: 09:00–09:25 and 15:00–15:25\")",
+    "placeholders": {
+      "ranges": {
+        "type": "String"
+      }
+    }
+  },
+  "toolConfirmationEmpty": "Done.",
+  "@toolConfirmationEmpty": {
+    "description": "One-line confirmation after an assistant tool runs with no time ranges to show (e.g. a replan that moved nothing)"
+  },
+  "commonJoinAnd": "{head} and {tail}",
+  "@commonJoinAnd": {
+    "description": "Connects the last item in a list: \"a and b\" for two items, \"a, b and c\" with the serial separator for three+",
+    "placeholders": {
+      "head": {
+        "type": "String"
+      },
+      "tail": {
+        "type": "String"
+      }
+    }
+  },
+  "commonListSeparator": ", ",
+  "@commonListSeparator": {
+    "description": "Separator between middle items in a list, used before the trailing \"and\" connector"
   }
 }
