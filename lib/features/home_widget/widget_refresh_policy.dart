@@ -101,9 +101,7 @@ class WidgetRefreshPolicy {
     // not as a reason to block the refresh forever.
     final elapsed = now.difference(lastRefreshAt);
     if (!elapsed.isNegative && elapsed < minInterval) {
-      return const WidgetRefreshDecision.skip(
-        WidgetRefreshSkipReason.tooSoon,
-      );
+      return const WidgetRefreshDecision.skip(WidgetRefreshSkipReason.tooSoon);
     }
     return WidgetRefreshDecision.refresh(trigger);
   }
