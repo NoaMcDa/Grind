@@ -716,5 +716,9 @@
   "draftRemove": "להסיר את {title} מהטיוטה",
   "draftMoveEarlier": "להקדים את {title}",
   "draftMoveLater": "לדחות את {title}",
-  "draftNoRoom": "זה לא נכנס שם"
+  "draftNoRoom": "זה לא נכנס שם",
+  "toolConfirmationDone": "בוצע: {ranges}",
+  "toolConfirmationEmpty": "בוצע.",
+  "commonJoinAnd": "{head} ו-{tail}",
+  "commonListSeparator": ", "
 }

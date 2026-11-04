@@ -2632,4 +2632,20 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get draftNoRoom => 'זה לא נכנס שם';
+
+  @override
+  String toolConfirmationDone(String ranges) {
+    return 'בוצע: $ranges';
+  }
+
+  @override
+  String get toolConfirmationEmpty => 'בוצע.';
+
+  @override
+  String commonJoinAnd(String head, String tail) {
+    return '$head ו-$tail';
+  }
+
+  @override
+  String get commonListSeparator => ', ';
 }
