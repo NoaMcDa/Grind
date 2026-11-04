@@ -1,6 +1,7 @@
 library;
 
 export 'analytics_sink.dart';
+export 'assistant_budget.dart';
 export 'assistant_context.dart';
 export 'assistant_gateway.dart';
 export 'assistant_retry_policy.dart';
