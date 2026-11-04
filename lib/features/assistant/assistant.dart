@@ -11,8 +11,11 @@
 ///   [Task] (and parsed [Recurrence] when the draft repeats) in the
 ///   user's zone, so the Ask composer's "Add" can hand the task to the
 ///   repository.
+/// - [TaskDraftPreview]: one-line EN/HE summary of a draft for the chat
+///   task card, so the user confirms with one tap.
 library;
 
 export 'task_draft.dart';
 export 'task_draft_parser.dart';
+export 'task_draft_preview.dart';
 export 'task_draft_resolver.dart';
