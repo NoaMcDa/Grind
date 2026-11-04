@@ -40,7 +40,9 @@ void main() {
       final payload = AppIntentAddTask(title: '  padded  ');
       expect(payload.title, 'padded');
       final decoded =
-          AppIntentPayload.tryDecode(jsonEncode({'kind': 'addTask', 'title': '  padded  '}))
+          AppIntentPayload.tryDecode(
+                jsonEncode({'kind': 'addTask', 'title': '  padded  '}),
+              )
               as AppIntentAddTask?;
       expect(decoded?.title, 'padded');
     });
@@ -111,13 +113,20 @@ void main() {
     });
 
     test('rejects AddTask with a missing, non-string, or blank title', () {
-      expect(AppIntentPayload.tryDecode(jsonEncode({'kind': 'addTask'})), isNull);
       expect(
-        AppIntentPayload.tryDecode(jsonEncode({'kind': 'addTask', 'title': 42})),
+        AppIntentPayload.tryDecode(jsonEncode({'kind': 'addTask'})),
         isNull,
       );
       expect(
-        AppIntentPayload.tryDecode(jsonEncode({'kind': 'addTask', 'title': ''})),
+        AppIntentPayload.tryDecode(
+          jsonEncode({'kind': 'addTask', 'title': 42}),
+        ),
+        isNull,
+      );
+      expect(
+        AppIntentPayload.tryDecode(
+          jsonEncode({'kind': 'addTask', 'title': ''}),
+        ),
         isNull,
       );
       expect(
