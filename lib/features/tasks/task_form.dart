@@ -294,8 +294,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         goalId: _goalId,
       );
       // Carry over fields the form doesn't expose but [initial] may hold:
-      // the scheduled range (so "Add as task" from an event places it) and
-      // the calendar-event link (so push-back skips it).
+      // the scheduled range (so "Add as task" from an event places it), its
+      // pinned state (so Re-plan with Pip keeps it where the user chose
+      // — #189), and the calendar-event link (so push-back skips it).
       final init = widget.initial;
       task = init == null
           ? seeded
@@ -303,6 +304,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               scheduledStart: init.scheduledStart,
               scheduledEnd: init.scheduledEnd,
               calendarEventId: init.calendarEventId,
+              lockedStart: init.lockedStart,
             );
     } else {
       task = existing.copyWith(
@@ -317,9 +319,13 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       );
     }
     if (scheduledStart != null) {
+      // A time the user picked here pins the task on the Plan timeline, like
+      // a drag does: Re-plan with Pip then keeps it where the user chose
+      // instead of trying to re-fit it (#189).
       task = task.copyWith(
         scheduledStart: scheduledStart,
         scheduledEnd: scheduledEnd,
+        lockedStart: true,
       );
     }
     _saving = true;

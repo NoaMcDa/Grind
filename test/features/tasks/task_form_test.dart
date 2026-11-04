@@ -206,6 +206,9 @@ void main() {
       const Duration(minutes: 240),
     );
     expect(saved.isScheduled, isTrue);
+    // Issue #189: a time the user picks here pins the task, like a drag,
+    // so Re-plan with Pip keeps it where it is instead of re-fitting it.
+    expect(saved.lockedStart, isTrue);
   });
 
   // A task saved without any picked time stays off the grid (there is no
@@ -224,5 +227,7 @@ void main() {
     expect(saved.scheduledStart, isNull);
     expect(saved.scheduledEnd, isNull);
     expect(saved.isScheduled, isFalse);
+    // No scheduled range means nothing to pin either (#189).
+    expect(saved.lockedStart, isFalse);
   });
 }
