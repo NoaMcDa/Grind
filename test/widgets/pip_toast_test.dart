@@ -82,13 +82,21 @@ void main() {
       expect(finder.hitTestable(), findsOneWidget, reason: '$label hittable');
     }
 
-    // And the toast's own top must sit above the tab bar's top.
-    final snackRect = tester.getRect(find.byType(SnackBar));
+    // And the toast's visible card must sit above the tab bar. The
+    // `SnackBar` widget itself wraps the card in the floating margin, so
+    // its rect reaches the screen bottom; the inner `Material` is the
+    // card the user actually sees.
+    final snackCardFinder = find.descendant(
+      of: find.byType(SnackBar),
+      matching: find.byType(Material),
+    );
+    expect(snackCardFinder, findsAtLeastNWidgets(1));
+    final snackCardRect = tester.getRect(snackCardFinder.first);
     final tabRect = tester.getRect(find.byType(GrindTabBar));
     expect(
-      snackRect.bottom,
+      snackCardRect.bottom,
       lessThanOrEqualTo(tabRect.top),
-      reason: 'toast must not overlap the tab bar',
+      reason: 'toast card must not overlap the tab bar',
     );
 
     // Let the duration run out so the test tears down cleanly.

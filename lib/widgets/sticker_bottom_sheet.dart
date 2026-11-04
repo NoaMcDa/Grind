@@ -10,6 +10,10 @@ Future<T?> showStickerSheet<T>(
   WidgetBuilder builder, {
   bool isScrollControlled = true,
 }) {
+  // Floating Pip toasts sit on the root [ScaffoldMessenger]'s overlay, which
+  // is above this modal route, so a lingering toast would cover the sheet's
+  // own buttons. Dismiss it before the sheet appears.
+  ScaffoldMessenger.of(context).clearSnackBars();
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
