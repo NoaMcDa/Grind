@@ -36,7 +36,9 @@ cd ios
 fastlane beta      # flutter build, build_app, upload_to_testflight
 ```
 
-Then in App Store Connect > TestFlight: wait for processing (about 10 to 30 minutes), answer the export-compliance question (the app only uses standard OS encryption: "Yes, exempt"), add yourself as an internal tester, install through the TestFlight app. Every upload needs a higher build number: bump `+N` in `pubspec.yaml`.
+Then in App Store Connect > TestFlight: wait for processing (about 10 to 30 minutes), add yourself as an internal tester, install through the TestFlight app. Every upload needs a higher build number: bump `+N` in `pubspec.yaml`.
+
+The export-compliance question is answered automatically: `ITSAppUsesNonExemptEncryption` is set to `false` in `ios/Runner/Info.plist` (Grind only uses Apple-provided TLS, exempt under EAR Category 5 Part 2 Note 4). Flip it to `true` if the app ever ships custom or proprietary cryptography, and expect to upload an annual self-classification report.
 
 Smoke test on a real device: onboarding, notification permission, a reminder firing with actions and snooze, calendar permission (full access) and Apple Calendar sync, focus session, backup export. The notification and calendar code paths are untested on iOS so far.
 

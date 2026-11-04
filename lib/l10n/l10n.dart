@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_localizations.dart';
 
 export 'app_localizations.dart';
+export 'bidi.dart';
 
 /// `context.l10n.tabToday` shorthand.
 extension L10nX on BuildContext {
