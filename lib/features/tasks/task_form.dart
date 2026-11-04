@@ -18,16 +18,24 @@ import '../../l10n/l10n.dart';
 import '../plan/plan_l10n.dart' show formatPlanDay;
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
-/// [initialGoalId] presets the goal of a new task. Resolves to the saved
+/// [initialGoalId] presets the goal of a new task. [initial] prefills the
+/// form (title, scheduled range, estimate, notes, goal and any
+/// `calendarEventId`) for a new task — used by "Add as task" on the Plan
+/// event sheet to seed the form from a [CalendarEvent]. Resolves to the saved
 /// task, or null when dismissed.
 Future<Task?> showTaskSheet(
   BuildContext context, {
   Task? existing,
+  Task? initial,
   String? initialGoalId,
 }) {
   return showStickerSheet<Task>(
     context,
-    (_) => TaskFormSheet(existing: existing, initialGoalId: initialGoalId),
+    (_) => TaskFormSheet(
+      existing: existing,
+      initial: initial,
+      initialGoalId: initialGoalId,
+    ),
   );
 }
 
@@ -39,9 +47,19 @@ Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
 const _presets = [15, 30, 45, 60, 90];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
-  const TaskFormSheet({super.key, this.existing, this.initialGoalId});
+  const TaskFormSheet({
+    super.key,
+    this.existing,
+    this.initial,
+    this.initialGoalId,
+  });
 
   final Task? existing;
+
+  /// Prefills a new task's fields (ignored when editing [existing]). Fields
+  /// the form itself doesn't expose (`scheduledStart`, `scheduledEnd`,
+  /// `calendarEventId`) are carried into the saved task unchanged.
+  final Task? initial;
 
   /// The goal a new task starts linked to (ignored when editing).
   final String? initialGoalId;
@@ -80,7 +98,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   @override
   void initState() {
     super.initState();
-    final t = _existing;
+    final t = _existing ?? widget.initial;
     _title = TextEditingController(text: t?.title ?? '');
     _firstAction = TextEditingController(text: t?.firstAction ?? '');
     _notes = TextEditingController(text: t?.notes ?? '');
@@ -88,11 +106,24 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _customMode = !_presets.contains(_minutes);
     _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
     _energy = t?.energy ?? Energy.light;
-    _goalId = t == null ? widget.initialGoalId : t.goalId;
-    if (t == null) {
+    _goalId = _existing == null
+        ? (widget.initial?.goalId ?? widget.initialGoalId)
+        : _existing!.goalId;
+    if (_existing == null && t == null) {
       _date = _today;
+    } else if (_existing == null && t != null) {
+      // Prefilling a new task: the form needs a date, so use the scheduled
+      // day when present (as for an event), else [t.dueAt]'s day, else today.
+      final sched = t.scheduledStart == null
+          ? null
+          : zoneWall(t.scheduledStart!, _location);
+      final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
+      final seed = sched ?? due;
+      _date = seed == null
+          ? _today
+          : DateTime(seed.year, seed.month, seed.day);
     } else {
-      _loadRule(t.id);
+      _loadRule(t!.id);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       if (due != null) {
         _date = DateTime(due.year, due.month, due.day);
@@ -233,7 +264,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     final Task task;
     final existing = _existing;
     if (existing == null) {
-      task = actions.create(
+      final seeded = actions.create(
         title: title,
         dueAt: dueAt,
         remindAt: remindAt,
@@ -243,6 +274,17 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
       );
+      // Carry over fields the form doesn't expose but [initial] may hold:
+      // the scheduled range (so "Add as task" from an event places it) and
+      // the calendar-event link (so push-back skips it).
+      final init = widget.initial;
+      task = init == null
+          ? seeded
+          : seeded.copyWith(
+              scheduledStart: init.scheduledStart,
+              scheduledEnd: init.scheduledEnd,
+              calendarEventId: init.calendarEventId,
+            );
     } else {
       task = existing.copyWith(
         title: title,

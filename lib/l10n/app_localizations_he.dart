@@ -810,6 +810,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get planOpenInCalendar => 'פתיחה ביומן';
 
   @override
+  String get planAddAsTask => 'הוספה כמשימה';
+
+  @override
   String get planOpenInCalendarSoon => 'פתיחת אפליקציית היומן תגיע בקרוב.';
 
   @override

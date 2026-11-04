@@ -1442,6 +1442,12 @@ abstract class AppLocalizations {
   /// **'Open in calendar'**
   String get planOpenInCalendar;
 
+  /// Button on the event sheet that creates a Grind task prefilled from the calendar event; tapping it again later opens the already-created task.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as task'**
+  String get planAddAsTask;
+
   /// Toast
   ///
   /// In en, this message translates to:

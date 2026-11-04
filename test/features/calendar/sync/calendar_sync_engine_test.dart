@@ -337,6 +337,46 @@ void main() {
       await engine.pushTask(task('t1', day: 4));
       expect(provider.calls, isEmpty);
     });
+
+    test(
+      '"Add as task" tasks never write back as a duplicate event',
+      () async {
+        // The event is already in the external calendar (imported by pull).
+        provider.events.add(meeting('ext-seminar', 4, 10));
+        await engine.pull();
+        // The Plan event sheet created a task from that event: the task
+        // carries the sentinel `calendarEventId` and the mirrored event
+        // points back at it.
+        final imported = task('from-seminar', day: 4).copyWith(
+          calendarEventId: importedCalendarEventIdFor('ext-seminar'),
+        );
+        await tasks.upsert(imported);
+        final mirrored = (await calendars.getByExternalId(
+          CalendarSource.google,
+          'ext-seminar',
+        ))!;
+        await calendars.upsert(mirrored.copyWith(taskId: imported.id));
+
+        // Push alone and a full sync both leave the external calendar at
+        // one event — Grind must not create a second one.
+        final pushed = await engine.pushTask(imported);
+        expect(pushed, same(imported));
+        await engine.sync();
+        await engine.sync();
+        expect(provider.calls.where((c) => c.startsWith('create')), isEmpty);
+        expect(provider.calls.where((c) => c.startsWith('update')), isEmpty);
+        expect(provider.events, hasLength(1));
+        expect(provider.events.single.externalId, 'ext-seminar');
+
+        // Renaming the task on Grind's side also stays local-only.
+        await tasks.upsert(
+          imported.copyWith(title: 'Seminar prep notes'),
+        );
+        await engine.sync();
+        expect(provider.calls.where((c) => c.startsWith('update')), isEmpty);
+        expect(provider.events.single.title, 'Sync');
+      },
+    );
   });
 
   group('pullWriteBacks (calendar wins for time)', () {
