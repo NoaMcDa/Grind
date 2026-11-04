@@ -170,9 +170,7 @@ void main() {
 
       // The edit sheet shows the existing task's title, no duplicate is made.
       expect(find.text('Edit task'), findsOneWidget);
-      final titleField = tester.widget<TextField>(
-        find.byType(TextField).first,
-      );
+      final titleField = tester.widget<TextField>(find.byType(TextField).first);
       expect(titleField.controller?.text, 'Seminar prep');
       final all = await container.read(taskRepositoryProvider).getAll();
       expect(all.map((t) => t.id).toSet(), {'from-seminar'});

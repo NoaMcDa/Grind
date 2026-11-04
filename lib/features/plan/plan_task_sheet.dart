@@ -232,8 +232,9 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
                   onPressed: url == null
                       ? null
                       : () async {
-                          final ok =
-                              await ref.read(planUrlLauncherProvider)(url);
+                          final ok = await ref.read(planUrlLauncherProvider)(
+                            url,
+                          );
                           if (!ok && context.mounted) {
                             showPipToast(
                               context,

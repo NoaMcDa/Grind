@@ -119,9 +119,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
           : zoneWall(t.scheduledStart!, _location);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       final seed = sched ?? due;
-      _date = seed == null
-          ? _today
-          : DateTime(seed.year, seed.month, seed.day);
+      _date = seed == null ? _today : DateTime(seed.year, seed.month, seed.day);
     } else {
       _loadRule(t!.id);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
