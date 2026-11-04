@@ -56,6 +56,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get quickMoveGym => 'להעביר את האימון לערב';
 
   @override
+  String get quickWhatsNext => 'מה הבא?';
+
+  @override
   String get composerHint => 'כתבו או הקליטו משימה…';
 
   @override

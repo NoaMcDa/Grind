@@ -65,6 +65,10 @@
   "@quickMoveGym": {
     "description": "Quick prompt chip"
   },
+  "quickWhatsNext": "What's next?",
+  "@quickWhatsNext": {
+    "description": "Quick prompt chip"
+  },
   "composerHint": "Type or speak a task…",
   "@composerHint": {
     "description": "Composer placeholder"

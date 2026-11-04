@@ -1,15 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/pill.dart';
 import '../../widgets/pip_avatar.dart';
 import '../../widgets/sticker_card.dart';
+import '../plan/draft/day_draft_sheet.dart';
 
 /// Assistant layer: natural-language capture and gentle re-planning.
+///
+/// [onPlanMyDay] overrides the default action behind the "Plan my day"
+/// quick prompt (opening the deterministic day draft sheet). Tests pass
+/// it so they can verify the chip is wired without pulling the real
+/// drafter providers into the widget tree.
 class AskScreen extends ConsumerStatefulWidget {
-  const AskScreen({super.key});
+  const AskScreen({super.key, this.onPlanMyDay});
+
+  final VoidCallback? onPlanMyDay;
 
   @override
   ConsumerState<AskScreen> createState() => _AskScreenState();
@@ -25,6 +36,45 @@ class _AskScreenState extends ConsumerState<AskScreen> {
     _controller.dispose();
     super.dispose();
   }
+
+  /// Runs the "Plan my day" chip's end-to-end action: opens the
+  /// deterministic day draft sheet (`planMyDayWithPip` in
+  /// `day_draft_sheet.dart`). The other quick prompts still fall back to
+  /// populating the composer until their intents are wired up; see epic
+  /// #40 for the follow-up work.
+  void _onQuickPrompt(_QuickPrompt q) {
+    switch (q.kind) {
+      case _QuickPromptKind.planMyDay:
+        final override = widget.onPlanMyDay;
+        if (override != null) {
+          override();
+        } else {
+          // Fire-and-forget: the sheet is pumped on the next frame and the
+          // chip's tap returns straight away.
+          unawaited(planMyDayWithPip(context, ref));
+        }
+      case _QuickPromptKind.populateComposer:
+        _controller.text = q.label;
+    }
+  }
+
+  List<_QuickPrompt> _quickPrompts(AppLocalizations l) => [
+    _QuickPrompt(
+      label: l.quickPlanMyDay,
+      kind: _QuickPromptKind.planMyDay,
+      widgetKey: const Key('ask-quick-plan-my-day'),
+    ),
+    _QuickPrompt(
+      label: l.quickMoveGym,
+      kind: _QuickPromptKind.populateComposer,
+      widgetKey: const Key('ask-quick-move-gym'),
+    ),
+    _QuickPrompt(
+      label: l.quickWhatsNext,
+      kind: _QuickPromptKind.populateComposer,
+      widgetKey: const Key('ask-quick-whats-next'),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -188,20 +238,17 @@ class _AskScreenState extends ConsumerState<AskScreen> {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
             children: [
-              for (final q in const [
-                'Plan my day',
-                'Move gym to evening',
-                "What's next?",
-              ])
+              for (final q in _quickPrompts(context.l10n))
                 Padding(
                   padding: const EdgeInsetsDirectional.only(end: 8),
                   child: PillButton(
-                    label: q,
+                    key: q.widgetKey,
+                    label: q.label,
                     height: 36,
                     shadow: 0,
                     fontSize: 13,
                     horizontalPadding: 13,
-                    onPressed: () => _controller.text = q,
+                    onPressed: () => _onQuickPrompt(q),
                   ),
                 ),
             ],
@@ -362,4 +409,21 @@ class _PipBubble extends StatelessWidget {
       ),
     );
   }
+}
+
+/// How a quick-prompt chip's tap is handled. Only [planMyDay] runs an
+/// action; the others still fall through to populating the composer
+/// until their intents are wired up end-to-end.
+enum _QuickPromptKind { planMyDay, populateComposer }
+
+class _QuickPrompt {
+  const _QuickPrompt({
+    required this.label,
+    required this.kind,
+    required this.widgetKey,
+  });
+
+  final String label;
+  final _QuickPromptKind kind;
+  final Key widgetKey;
 }
