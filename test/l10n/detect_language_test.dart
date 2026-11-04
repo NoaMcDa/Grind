@@ -21,10 +21,7 @@ void main() {
 
     test('digits and punctuation only fall back', () {
       expect(detectLanguageFromText('09:00 - 09:25'), 'en');
-      expect(
-        detectLanguageFromText('09:00 - 09:25', fallback: 'he'),
-        'he',
-      );
+      expect(detectLanguageFromText('09:00 - 09:25', fallback: 'he'), 'he');
     });
 
     test('empty string falls back', () {
@@ -44,17 +41,11 @@ void main() {
 
     test('English with one Hebrew word picks English', () {
       // majority Latin letters
-      expect(
-        detectLanguageFromText('remind me about שבת at 18:00'),
-        'en',
-      );
+      expect(detectLanguageFromText('remind me about שבת at 18:00'), 'en');
     });
 
     test('Hebrew sentence with numbers and times picks Hebrew', () {
-      expect(
-        detectLanguageFromText('קבע ריצה 20 דק מחר ב-07:30'),
-        'he',
-      );
+      expect(detectLanguageFromText('קבע ריצה 20 דק מחר ב-07:30'), 'he');
     });
 
     test('equal letter counts fall back to default', () {
@@ -66,10 +57,7 @@ void main() {
     test('Hebrew niqqud and gershayim do not swing the count', () {
       // All niqqud / gershayim — no Hebrew letters, no Latin letters.
       expect(detectLanguageFromText('ְֱֲֳִֵֶַָֹֻּׁׂ״׳'), 'en');
-      expect(
-        detectLanguageFromText('ְֱֲֳִֵֶַָֹֻּׁׂ״׳', fallback: 'he'),
-        'he',
-      );
+      expect(detectLanguageFromText('ְֱֲֳִֵֶַָֹֻּׁׂ״׳', fallback: 'he'), 'he');
     });
 
     test('non-Latin non-Hebrew letters (Cyrillic, Arabic) fall back', () {
