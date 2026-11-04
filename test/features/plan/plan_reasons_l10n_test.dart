@@ -115,10 +115,7 @@ void main() {
     );
     expect(localizePlanReason(he, 'done, nice work'), 'סיימת, יפה');
     expect(localizePlanReason(he, 'skipped for now'), 'דילוג לעת עתה');
-    expect(
-      localizePlanReason(he, 'no longer fits this week'),
-      'לא נכנס השבוע',
-    );
+    expect(localizePlanReason(he, 'no longer fits this week'), 'לא נכנס השבוע');
   });
 
   test('diff move reasons from the scheduler map through localization', () {

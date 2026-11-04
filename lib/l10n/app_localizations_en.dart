@@ -2041,8 +2041,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planDiffReasonEarlierOpened => 'an earlier slot opened up';
 
   @override
-  String get planDiffReasonReshuffled =>
-      'reshuffled around today\'s changes';
+  String get planDiffReasonReshuffled => 'reshuffled around today\'s changes';
 
   @override
   String get planDiffRemovedNotOnList => 'no longer on your list';
