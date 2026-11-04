@@ -9,8 +9,10 @@ void main() {
   final he = lookupAppLocalizations(const Locale('he'));
 
   // Local-time helper for compact ranges in these tests.
-  ScheduledRange r(int sh, int sm, int eh, int em) =>
-      ScheduledRange(DateTime(2026, 11, 4, sh, sm), DateTime(2026, 11, 4, eh, em));
+  ScheduledRange r(int sh, int sm, int eh, int em) => ScheduledRange(
+    DateTime(2026, 11, 4, sh, sm),
+    DateTime(2026, 11, 4, eh, em),
+  );
 
   group('formatToolConfirmation (en)', () {
     test('empty ranges render the plain "Done." sentence', () {

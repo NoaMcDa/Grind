@@ -42,10 +42,7 @@ class ScheduledRange {
 ///
 /// Pure Dart on purpose — the executor and tests both call it, no
 /// `BuildContext` needed.
-String formatToolConfirmation(
-  AppLocalizations l,
-  List<ScheduledRange> ranges,
-) {
+String formatToolConfirmation(AppLocalizations l, List<ScheduledRange> ranges) {
   if (ranges.isEmpty) return l.toolConfirmationEmpty;
   final parts = [for (final r in ranges) _formatRange(r)];
   return l.toolConfirmationDone(_joinWithAnd(l, parts));
