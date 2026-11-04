@@ -434,6 +434,27 @@
       }
     }
   },
+  "commonHours": "{hours} h",
+  "@commonHours": {
+    "description": "Duration on a round hour",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "commonHoursMinutes": "{hours} h {minutes} min",
+  "@commonHoursMinutes": {
+    "description": "Duration mixing hours and leftover minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "commonWeekdayShortMon": "Mon",
   "@commonWeekdayShortMon": {
     "description": "Short weekday name (list use)"
@@ -632,6 +653,14 @@
   "tasksCustomMinutes": "Minutes",
   "@tasksCustomMinutes": {
     "description": "Custom estimate field label"
+  },
+  "tasksCustomDuration": "Duration",
+  "@tasksCustomDuration": {
+    "description": "Custom estimate field label; accepts shapes like '90', '4h', '1:30'"
+  },
+  "tasksCustomDurationHint": "90, 4h, 1:30",
+  "@tasksCustomDurationHint": {
+    "description": "Hint for the custom duration field"
   },
   "tasksFirstActionLabel": "First action",
   "@tasksFirstActionLabel": {
@@ -1541,21 +1570,21 @@
   "@focusEarlyTitle": {
     "description": "End-of-session sheet title after ending early"
   },
-  "focusFocusedFor": "You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.",
+  "focusFocusedFor": "You focused for {duration}.",
   "@focusFocusedFor": {
-    "description": "End-of-session sheet body",
+    "description": "End-of-session sheet body; duration is a localized string such as '45 min' or '1 h 30 min'",
     "placeholders": {
-      "minutes": {
-        "type": "int"
+      "duration": {
+        "type": "String"
       }
     }
   },
-  "focusFocusedForTask": "You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.",
+  "focusFocusedForTask": "You focused for {duration} on {task}.",
   "@focusFocusedForTask": {
-    "description": "End-of-session sheet body when the session had a task",
+    "description": "End-of-session sheet body when the session had a task; duration is a localized string such as '45 min' or '1 h 30 min'",
     "placeholders": {
-      "minutes": {
-        "type": "int"
+      "duration": {
+        "type": "String"
       },
       "task": {
         "type": "String"

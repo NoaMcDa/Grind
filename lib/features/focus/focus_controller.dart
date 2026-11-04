@@ -30,10 +30,30 @@ class FocusSettings {
 
   /// Bounds for the length picker on the idle screen.
   static const minFocusMinutes = 5;
-  static const maxFocusMinutes = 120;
+  static const maxFocusMinutes = 240;
 
-  /// What "+5 min" adds, and the step of the idle length picker.
+  /// What "+5 min" adds on an active session, and the fine step of the
+  /// idle length picker. Above [coarseStepThreshold] the idle picker
+  /// moves in [coarseStepMinutes] instead so hour-long blocks stay
+  /// reachable with a handful of taps (#153).
   static const stepMinutes = 5;
+  static const coarseStepMinutes = 15;
+  static const coarseStepThreshold = 60;
+
+  /// How much `adjustNextLength` should add or remove, given the current
+  /// length. Fine steps up to an hour, coarse ones above.
+  static int idleStepFor(int currentMinutes, {required bool up}) {
+    // Crossing the threshold uses the fine step on either side so the
+    // picker lands exactly on 60.
+    if (up) {
+      return currentMinutes >= coarseStepThreshold
+          ? coarseStepMinutes
+          : stepMinutes;
+    }
+    return currentMinutes > coarseStepThreshold
+        ? coarseStepMinutes
+        : stepMinutes;
+  }
 
   FocusSettings copyWith({
     int? focusMinutes,

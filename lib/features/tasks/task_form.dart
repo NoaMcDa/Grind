@@ -6,6 +6,7 @@ import 'package:grind/features/goals/goals.dart'
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../l10n/duration_format.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -44,7 +45,9 @@ Future<Task?> showTaskSheet(
 Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
     showTaskSheet(context, initialGoalId: goal.id);
 
-const _presets = [15, 30, 45, 60, 90];
+/// Estimate presets in minutes. 15 min through 90 min as before, then a
+/// stretch of whole hours up to 4 h for long tasks (#153).
+const _presets = [15, 30, 45, 60, 90, 120, 180, 240];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
   const TaskFormSheet({
@@ -92,6 +95,13 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
   Task? get _existing => widget.existing;
 
+  /// Pre-fill text for the custom field: a round hour becomes `"2h"`, an
+  /// uneven value a plain minute count so the user can still read it.
+  static String _initialCustomText(int minutes) {
+    if (minutes >= 60 && minutes % 60 == 0) return '${minutes ~/ 60}h';
+    return '$minutes';
+  }
+
   /// Days and times in the form are in the user's zone.
   tz.Location get _location => ref.read(zoneLocationProvider);
 
@@ -104,7 +114,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _notes = TextEditingController(text: t?.notes ?? '');
     _minutes = t?.estimatedMinutes ?? 30;
     _customMode = !_presets.contains(_minutes);
-    _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
+    _custom = TextEditingController(
+      text: _customMode ? _initialCustomText(_minutes) : '',
+    );
     _energy = t?.energy ?? Energy.light;
     _goalId = _existing == null
         ? (widget.initial?.goalId ?? widget.initialGoalId)
@@ -245,7 +257,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       setState(() => _showError = true);
       return;
     }
-    final minutes = _customMode ? int.tryParse(_custom.text.trim()) : _minutes;
+    final minutes = _customMode ? parseDuration(_custom.text) : _minutes;
     final estimate = (minutes == null || minutes <= 0) ? 30 : minutes;
     final day = _date;
     final dueAt = day == null
@@ -489,7 +501,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     children: [
                       for (final m in _presets)
                         _Choice(
-                          label: context.l10n.commonMinutes(m),
+                          label: formatDuration(m, context.l10n),
                           selected: !_customMode && _minutes == m,
                           onTap: () => setState(() {
                             _customMode = false;
@@ -507,9 +519,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     const SizedBox(height: 8),
                     StickerTextField(
                       controller: _custom,
-                      label: context.l10n.tasksCustomMinutes,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      label: context.l10n.tasksCustomDuration,
+                      hint: context.l10n.tasksCustomDurationHint,
+                      // Hours and colons are allowed, so plain text with a
+                      // number-friendly keyboard rather than digits-only.
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: false,
+                        signed: false,
+                      ),
                       onSubmitted: (_) => _save(),
                     ),
                   ],
