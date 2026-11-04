@@ -39,6 +39,30 @@ jobs:
       # variables > Actions > Variables); without it Google Calendar stays
       # disconnected with a setup hint in the app.
       - run: flutter build web --release --no-web-resources-cdn --base-href /Grind/ --dart-define=GOOGLE_CLIENT_ID_WEB="$GOOGLE_CLIENT_ID_WEB"
+      # GitHub Pages is a static host, so a deep link like `/Grind/today`
+      # returns HTTP 404 — there is no `/Grind/today/index.html` on disk.
+      # `web/404.html` + `web/spa_redirect.js` already give the right
+      # in-browser experience via a JS redirect (PR #134), but the HTTP
+      # response is still 404, which the cloud QA sweep rightly flags
+      # (#162) and which also breaks crawlers, link previews and caches.
+      #
+      # Fix: stamp a copy of `build/web/index.html` into `build/web/<route>/`
+      # for every static top-level route. Pages then serves 200 for them,
+      # and Flutter boots directly at the right path because the `<base
+      # href="/Grind/">` inside the stamped index normalises window.location
+      # back to `/Grind/` while go_router reads the deep path. The sibling
+      # `web/404.html` fallback stays for dynamic routes (`/task/:id`,
+      # `/goals/:id`) that we can't enumerate here.
+      #
+      # Keep this list in sync with the top-level static GoRoute paths in
+      # `lib/app/router.dart`; `test/web/spa_fallback_test.dart` pins the
+      # cross-reference and fails loudly if they drift.
+      - name: Pre-render per-route stubs for GitHub Pages SPA routing
+        run: |
+          for route in today plan focus pip ask goals week highlights analytics settings review; do
+            mkdir -p "build/web/$route"
+            cp build/web/index.html "build/web/$route/index.html"
+          done
       - uses: actions/upload-pages-artifact@v5
         with:
           path: build/web
