@@ -149,8 +149,12 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
     );
     final day = ref.watch(selectedDayProvider);
     final tasks = ref.watch(planTasksProvider);
-    final events =
-        ref.watch(planEventsProvider).valueOrNull ?? const <CalendarEvent>[];
+    // Hide calendar events that already have a linked "Add as task" task —
+    // the task card takes the event's place on the timeline, no duplicate.
+    final events = eventsWithoutLinkedTasks(
+      ref.watch(planEventsProvider).valueOrNull ?? const <CalendarEvent>[],
+      ref.watch(tasksProvider).valueOrNull ?? const <Task>[],
+    );
     final prefs = ref.watch(planPrefsProvider);
     final clock = ref.watch(clockProvider);
     final isToday = ref.watch(planTodayProvider) == day;
