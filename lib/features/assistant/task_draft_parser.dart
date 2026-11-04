@@ -37,6 +37,12 @@ class TaskDraftParser {
 
     var remaining = normalised;
 
+    // "If X, then Y" first — so a time, duration or recurrence inside the
+    // clause is not mistaken for the task's own schedule.
+    final firstActionResult = _extractFirstAction(remaining, lexicon);
+    final firstAction = firstActionResult.firstAction;
+    remaining = firstActionResult.remaining;
+
     final durResult = _extractDuration(remaining, lexicon);
     final duration = durResult.minutes;
     remaining = durResult.remaining;
@@ -69,6 +75,7 @@ class TaskDraftParser {
       time: timeOfDay == null ? null : _fmtTime(timeOfDay),
       durationMinutes: duration,
       energy: energy,
+      firstAction: firstAction,
       recurrenceRrule: rrule,
     );
   }
@@ -289,6 +296,40 @@ class TaskDraftParser {
     return _EnergyResult(null, s);
   }
 
+  // ------------------------------ first action -------------------------- //
+
+  /// Pulls an `if <condition> (then|,) <action>` clause out of [s] and
+  /// returns the formatted if-then string plus the text with the clause
+  /// removed.
+  ///
+  /// The clause is extracted BEFORE date/time/duration/recurrence so a
+  /// time ("if it's 17:00") or duration ("if you have 30 min") inside
+  /// the condition is not mistaken for the task's own schedule.
+  _FirstActionResult _extractFirstAction(String s, _Lexicon lex) {
+    final body =
+        '${RegExp.escape(lex.ifMarker)}\\s+(.+?)\\s*,?\\s+'
+        '${RegExp.escape(lex.thenMarker)}\\s+(.+?)\$';
+    final re = RegExp(_lb + body + _rb, caseSensitive: false);
+    final m = re.firstMatch(s);
+    if (m == null) return _FirstActionResult(null, s);
+
+    final cond = m[1]!.trim();
+    final action = m[2]!.trim();
+    if (cond.isEmpty || action.isEmpty) return _FirstActionResult(null, s);
+
+    final before = s.substring(0, m.start).trim();
+    // The clause is often written as "..., if X then Y": strip the
+    // trailing comma left behind so the title cleanup never inherits
+    // stray punctuation.
+    final beforeClean = before.endsWith(',')
+        ? before.substring(0, before.length - 1).trim()
+        : before;
+
+    final formatted = '${lex.ifMarkerCanonical} $cond, ${lex.thenMarker} '
+        '$action';
+    return _FirstActionResult(formatted, _squish(beforeClean));
+  }
+
   // ------------------------------- recurrence ---------------------------- //
 
   _RecurrenceResult _extractRecurrence(String s, _Lexicon lex) {
@@ -435,6 +476,12 @@ class _RecurrenceResult {
   final String remaining;
 }
 
+class _FirstActionResult {
+  const _FirstActionResult(this.firstAction, this.remaining);
+  final String? firstAction;
+  final String remaining;
+}
+
 class _Lexicon {
   const _Lexicon({
     required this.weekdays,
@@ -447,6 +494,9 @@ class _Lexicon {
     required this.nextMarkers,
     required this.thisMarkers,
     required this.fillerWords,
+    required this.ifMarker,
+    required this.ifMarkerCanonical,
+    required this.thenMarker,
   });
 
   /// Lowercase weekday → [DateTime.weekday].
@@ -479,6 +529,17 @@ class _Lexicon {
   /// Noise words that linger after extraction and should not end up in
   /// the title.
   final List<String> fillerWords;
+
+  /// The "if" marker used in the `if … then …` extractor, matched
+  /// case-insensitively.
+  final String ifMarker;
+
+  /// How the "if" marker is spelled in the formatted output (EN
+  /// capitalises it to match the demo seed style; HE has no case).
+  final String ifMarkerCanonical;
+
+  /// The "then" marker used in the extractor (also the output spelling).
+  final String thenMarker;
 }
 
 const _Lexicon _en = _Lexicon(
@@ -533,6 +594,9 @@ const _Lexicon _en = _Lexicon(
   nextMarkers: ['next', 'coming'],
   thisMarkers: ['this', 'on'],
   fillerWords: ['at', 'on', 'for', 'about', 'around', 'the', 'a'],
+  ifMarker: 'if',
+  ifMarkerCanonical: 'If',
+  thenMarker: 'then',
 );
 
 const _Lexicon _he = _Lexicon(
@@ -565,4 +629,7 @@ const _Lexicon _he = _Lexicon(
   nextMarkers: ['הבא', 'הקרוב'],
   thisMarkers: ['ביום'],
   fillerWords: ['של', 'ל'],
+  ifMarker: 'אם',
+  ifMarkerCanonical: 'אם',
+  thenMarker: 'אז',
 );

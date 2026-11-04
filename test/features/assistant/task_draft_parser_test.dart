@@ -199,4 +199,82 @@ void main() {
       expect(d.time, '19:00');
     });
   });
+
+  group('if-then first action (EN)', () {
+    test('trailing if-then clause is extracted and stripped from title', () {
+      final d = parser.parse(
+        'gym tomorrow 7am 45 min, if alarm rings then lace up',
+        now: now,
+      );
+      expect(d.title.toLowerCase(), 'gym');
+      expect(d.date, '2026-11-05');
+      expect(d.time, '07:00');
+      expect(d.durationMinutes, 45);
+      expect(d.firstAction, 'If alarm rings, then lace up');
+    });
+
+    test('comma between if-clause and then is preserved in output', () {
+      final d = parser.parse(
+        "thesis tomorrow 90 min, if it's 17:00, then pack your bag",
+        now: now,
+      );
+      expect(d.firstAction, "If it's 17:00, then pack your bag");
+      // The 17:00 inside the clause must NOT become the task time.
+      expect(d.time, isNull);
+      expect(d.durationMinutes, 90);
+    });
+
+    test('bare "if ... then ..." without punctuation', () {
+      final d = parser.parse(
+        'review tomorrow if lunch is over then open the notebook',
+        now: now,
+      );
+      expect(d.firstAction, 'If lunch is over, then open the notebook');
+      expect(d.title.toLowerCase(), 'review');
+      expect(d.date, '2026-11-05');
+    });
+
+    test('no if-then → firstAction is null', () {
+      final d = parser.parse('gym tomorrow 7am', now: now);
+      expect(d.firstAction, isNull);
+    });
+
+    test('"wife" / "then" false positives do not trigger', () {
+      // "if" is a word; "wife" has "if" inside but no word boundary.
+      // Also, "then" alone (no "if") is not enough.
+      final d = parser.parse('call wife then relax', now: now);
+      expect(d.firstAction, isNull);
+      expect(d.title.toLowerCase(), contains('wife'));
+    });
+  });
+
+  group('if-then first action (HE)', () {
+    test('"אם ... אז ..." is extracted', () {
+      final d = parser.parse(
+        'חדר כושר מחר ב-7, אם המתיחה נעימה אז לצאת לריצה',
+        now: now,
+        locale: 'he',
+      );
+      expect(d.firstAction, 'אם המתיחה נעימה, אז לצאת לריצה');
+      expect(d.date, '2026-11-05');
+      expect(d.time, '07:00');
+      expect(d.title, contains('חדר כושר'));
+    });
+
+    test('time inside the condition is not taken as schedule', () {
+      final d = parser.parse(
+        'לפתוח את התזה מחר אם השעה 17:00, אז לארוז תיק',
+        now: now,
+        locale: 'he',
+      );
+      expect(d.firstAction, 'אם השעה 17:00, אז לארוז תיק');
+      expect(d.time, isNull);
+      expect(d.date, '2026-11-05');
+    });
+
+    test('no "אז" marker → firstAction is null', () {
+      final d = parser.parse('לקרוא ספר אם יש זמן', now: now, locale: 'he');
+      expect(d.firstAction, isNull);
+    });
+  });
 }
