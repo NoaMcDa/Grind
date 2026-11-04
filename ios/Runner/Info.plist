@@ -72,5 +72,13 @@
 	<array>
 		<string>fetch</string>
 	</array>
+	<!-- Export compliance: Grind only uses Apple-provided TLS (optional
+	     Google Calendar sync) and no custom or proprietary cryptography, so
+	     it is exempt under Category 5 Part 2 Note 4 of the US Export
+	     Administration Regulations. Declaring this here auto-answers the
+	     TestFlight / App Store Connect export-compliance prompt on every
+	     build; flip to <true/> if we ever bundle non-exempt crypto. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
