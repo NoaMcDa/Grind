@@ -165,10 +165,7 @@ class WidgetStartFocus extends WidgetDeepLink {
   Uri toUri() => Uri(
     scheme: WidgetDeepLink.scheme,
     host: WidgetDeepLink.host,
-    pathSegments: [
-      WidgetDeepLink._verbFocus,
-      if (taskId != null) taskId!,
-    ],
+    pathSegments: [WidgetDeepLink._verbFocus, if (taskId != null) taskId!],
   );
 
   @override

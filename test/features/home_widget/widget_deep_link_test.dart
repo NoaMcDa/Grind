@@ -39,7 +39,10 @@ void main() {
 
     test('accepts a Uri as well as a string', () {
       final uri = Uri.parse('grind://widget/task/xy/done');
-      expect(WidgetDeepLink.tryParse(uri), const WidgetMarkTaskDone(taskId: 'xy'));
+      expect(
+        WidgetDeepLink.tryParse(uri),
+        const WidgetMarkTaskDone(taskId: 'xy'),
+      );
     });
 
     test('non-widget URIs return null', () {
