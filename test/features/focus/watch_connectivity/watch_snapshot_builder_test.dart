@@ -77,27 +77,30 @@ void main() {
     expect(snap.nextReminder?.fireAt, now.add(const Duration(minutes: 30)));
   });
 
-  test('reminders in the past are dropped so the watch does not show stale lines', () {
-    final plan = [
-      reminder(
-        id: 'n-past',
-        taskId: 't-past',
-        fromNow: const Duration(minutes: -5),
-      ),
-      reminder(
-        id: 'n-future',
-        taskId: 't-future',
-        fromNow: const Duration(minutes: 20),
-        title: 'Workout',
-      ),
-    ];
-    final snap = WatchSnapshotBuilder.build(
-      plan: plan,
-      momentum: momentum,
-      now: now,
-    );
-    expect(snap.nextReminder?.taskId, 't-future');
-  });
+  test(
+    'reminders in the past are dropped so the watch does not show stale lines',
+    () {
+      final plan = [
+        reminder(
+          id: 'n-past',
+          taskId: 't-past',
+          fromNow: const Duration(minutes: -5),
+        ),
+        reminder(
+          id: 'n-future',
+          taskId: 't-future',
+          fromNow: const Duration(minutes: 20),
+          title: 'Workout',
+        ),
+      ];
+      final snap = WatchSnapshotBuilder.build(
+        plan: plan,
+        momentum: momentum,
+        now: now,
+      );
+      expect(snap.nextReminder?.taskId, 't-future');
+    },
+  );
 
   test('a reminder whose fireAt equals now is treated as already fired', () {
     final plan = [
@@ -214,18 +217,25 @@ void main() {
     expect(snap.nextReminder?.ifThen, isNull);
   });
 
-  test('an empty ifThen string is dropped so the Pip screen hides the cue line', () {
-    final plan = [
-      reminder(id: 'n-1', taskId: 't-1', fromNow: const Duration(minutes: 30)),
-    ];
-    final snap = WatchSnapshotBuilder.build(
-      plan: plan,
-      momentum: momentum,
-      now: now,
-      ifThenByTaskId: const {'t-1': ''},
-    );
-    expect(snap.nextReminder?.ifThen, isNull);
-  });
+  test(
+    'an empty ifThen string is dropped so the Pip screen hides the cue line',
+    () {
+      final plan = [
+        reminder(
+          id: 'n-1',
+          taskId: 't-1',
+          fromNow: const Duration(minutes: 30),
+        ),
+      ];
+      final snap = WatchSnapshotBuilder.build(
+        plan: plan,
+        momentum: momentum,
+        now: now,
+        ifThenByTaskId: const {'t-1': ''},
+      );
+      expect(snap.nextReminder?.ifThen, isNull);
+    },
+  );
 
   test('equal inputs produce byte-identical encoded JSON', () {
     // The watch skips a redraw when the payload bytes have not changed, so
