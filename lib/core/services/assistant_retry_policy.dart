@@ -112,12 +112,15 @@ class AssistantRetryPolicy {
 
   /// A policy that never retries. Handy for tests that want the first
   /// failure to surface, and for a "no retries on mobile data" toggle
-  /// later.
+  /// later. [shouldRetry] returns false for every kind, so a caller that
+  /// only consults [shouldRetry] (without also checking [maxAttempts])
+  /// still gets the no-retry behaviour.
   static final AssistantRetryPolicy noRetry = AssistantRetryPolicy(
     maxAttempts: 1,
     initialDelay: Duration.zero,
     maxDelay: Duration.zero,
     multiplier: 1,
+    retryableKinds: const <AssistantErrorKind>{},
   );
 
   /// True when [kind] is in [retryableKinds].
