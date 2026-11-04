@@ -15,7 +15,8 @@ AssistantAction _action({
     timestamp: timestamp ?? DateTime.utc(2026, 11, 4, 12),
     toolName: toolName,
     inverseDescriptor:
-        inverseDescriptor ?? <String, Object?>{'kind': 'deleteTask', 'taskId': 't-1'},
+        inverseDescriptor ??
+        <String, Object?>{'kind': 'deleteTask', 'taskId': 't-1'},
     humanLabel: humanLabel,
     status: status,
   );
@@ -47,15 +48,11 @@ void main() {
         throwsArgumentError,
       );
       expect(
-        () => _action(
-          inverseDescriptor: const <String, Object?>{'kind': ''},
-        ),
+        () => _action(inverseDescriptor: const <String, Object?>{'kind': ''}),
         throwsArgumentError,
       );
       expect(
-        () => _action(
-          inverseDescriptor: const <String, Object?>{'kind': 42},
-        ),
+        () => _action(inverseDescriptor: const <String, Object?>{'kind': 42}),
         throwsArgumentError,
       );
     });

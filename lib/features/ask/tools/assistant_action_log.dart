@@ -259,7 +259,7 @@ void _requireJsonValue(Object? value, String path) {
     value,
     path,
     'descriptor values must be JSON-serializable '
-        '(null, bool, num, String, List, or Map<String, Object?>)',
+    '(null, bool, num, String, List, or Map<String, Object?>)',
   );
 }
 
