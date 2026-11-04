@@ -140,9 +140,7 @@ class AppStoreListing {
     final out = <String>[];
     void check(String field, String value, int max) {
       if (value.length > max) {
-        out.add(
-          '$field is ${value.length} characters, limit is $max.',
-        );
+        out.add('$field is ${value.length} characters, limit is $max.');
       }
     }
 

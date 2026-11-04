@@ -39,9 +39,7 @@ void main() {
         primaryCategory: 'Productivity',
       );
       expect(listing.isValid, isFalse);
-      expect(listing.violations(), [
-        'name is 31 characters, limit is 30.',
-      ]);
+      expect(listing.violations(), ['name is 31 characters, limit is 30.']);
     });
 
     test('reports every over-run, not just the first', () {
