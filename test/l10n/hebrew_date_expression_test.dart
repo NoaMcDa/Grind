@@ -225,10 +225,7 @@ void main() {
     });
 
     test('HebrewTimeOfDay.toString is zero-padded', () {
-      expect(
-        const HebrewTimeOfDay(7, 5).toString(),
-        'HebrewTimeOfDay(07:05)',
-      );
+      expect(const HebrewTimeOfDay(7, 5).toString(), 'HebrewTimeOfDay(07:05)');
     });
   });
 }

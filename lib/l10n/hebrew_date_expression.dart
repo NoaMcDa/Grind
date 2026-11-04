@@ -52,8 +52,7 @@ class HebrewDateExpression {
       other.deltaMinutes == deltaMinutes;
 
   @override
-  int get hashCode =>
-      Object.hash(resolved, dayKeyword, time, deltaMinutes);
+  int get hashCode => Object.hash(resolved, dayKeyword, time, deltaMinutes);
 
   @override
   String toString() =>
@@ -160,8 +159,11 @@ HebrewDateExpression? _parseDayKeyword(String text, DateTime now) {
   final explicitTime = _parseTime(remainder);
   final time = explicitTime ?? matchedSpec.impliedTime;
 
-  final day = DateTime(now.year, now.month, now.day)
-      .add(Duration(days: matchedSpec.dayOffset));
+  final day = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).add(Duration(days: matchedSpec.dayOffset));
   final resolved = time == null
       ? day
       : DateTime(day.year, day.month, day.day, time.hour, time.minute);
