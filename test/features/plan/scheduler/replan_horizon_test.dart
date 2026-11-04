@@ -30,10 +30,7 @@ void main() {
     });
 
     test('one deadline tomorrow: horizon extends to end of tomorrow', () {
-      final tasks = [
-        task('a', due: at(0, 16)),
-        task('b', due: at(1, 10)),
-      ];
+      final tasks = [task('a', due: at(0, 16)), task('b', due: at(1, 10))];
       expect(
         rePlanHorizonEnd(now: now, tasks: tasks, prefs: prefsFixture),
         endOfTomorrow,
@@ -94,16 +91,13 @@ void main() {
       );
     });
 
-    test(
-      'a deadline at end-of-today does not extend past today',
-      () {
-        final tasks = [task('a', due: endOfToday)];
-        expect(
-          rePlanHorizonEnd(now: now, tasks: tasks, prefs: prefsFixture),
-          endOfToday,
-        );
-      },
-    );
+    test('a deadline at end-of-today does not extend past today', () {
+      final tasks = [task('a', due: endOfToday)];
+      expect(
+        rePlanHorizonEnd(now: now, tasks: tasks, prefs: prefsFixture),
+        endOfToday,
+      );
+    });
 
     test('used as a horizon, the plan stays within the day', () {
       final tasks = [
@@ -130,40 +124,37 @@ void main() {
       }
     });
 
-    test(
-      'with a tomorrow deadline the plan may spill into tomorrow',
-      () {
-        // Fixture day leaves ~5 hours after now=10:00 (lunch + cushion). Three
-        // 2 h tasks don't all fit today, so one must land tomorrow.
-        final tasks = [
-          for (var i = 0; i < 3; i++)
-            task('t$i', title: 'T$i', minutes: 120, due: at(1, 16)),
-        ];
-        final horizon = rePlanHorizonEnd(
-          now: now,
-          tasks: tasks,
-          prefs: prefsFixture,
-        );
-        expect(horizon, endOfTomorrow);
-        final p = plan(
-          tasks: tasks,
-          goals: const {},
-          events: const [],
-          prefs: prefsFixture,
-          now: now,
-          horizonEnd: horizon,
-        );
-        // At least one placement lands tomorrow now that the horizon allows
-        // it; without this helper the planner would default to the week.
-        expect(
-          p.placed.any((pl) => pl.start.day == at(1, 0).day),
-          isTrue,
-          reason: 'expected at least one placement to spill to tomorrow',
-        );
-        for (final pl in p.placed) {
-          expect(pl.end.isAfter(endOfTomorrow), isFalse);
-        }
-      },
-    );
+    test('with a tomorrow deadline the plan may spill into tomorrow', () {
+      // Fixture day leaves ~5 hours after now=10:00 (lunch + cushion). Three
+      // 2 h tasks don't all fit today, so one must land tomorrow.
+      final tasks = [
+        for (var i = 0; i < 3; i++)
+          task('t$i', title: 'T$i', minutes: 120, due: at(1, 16)),
+      ];
+      final horizon = rePlanHorizonEnd(
+        now: now,
+        tasks: tasks,
+        prefs: prefsFixture,
+      );
+      expect(horizon, endOfTomorrow);
+      final p = plan(
+        tasks: tasks,
+        goals: const {},
+        events: const [],
+        prefs: prefsFixture,
+        now: now,
+        horizonEnd: horizon,
+      );
+      // At least one placement lands tomorrow now that the horizon allows
+      // it; without this helper the planner would default to the week.
+      expect(
+        p.placed.any((pl) => pl.start.day == at(1, 0).day),
+        isTrue,
+        reason: 'expected at least one placement to spill to tomorrow',
+      );
+      for (final pl in p.placed) {
+        expect(pl.end.isAfter(endOfTomorrow), isFalse);
+      }
+    });
   });
 }
