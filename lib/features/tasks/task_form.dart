@@ -226,11 +226,20 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     var remindAt = remind == null ? null : _at(day ?? _today, remind);
     // A series is anchored at its reminder.
     if (_recurrence != null) remindAt ??= _seriesAnchor();
+    // When the user picked a time (reminder or due), block that slot out on
+    // the Plan timeline: the task spans its estimate, starting at that time.
+    // The sync scheduler debounces a push after save so it also reaches the
+    // connected calendar when write-back is on.
+    final startTime = _effectiveRemind ?? _dueTime;
+    final scheduledStart = (day != null && startTime != null)
+        ? _at(day, startTime)
+        : null;
+    final scheduledEnd = scheduledStart?.add(Duration(minutes: estimate));
     final first = _firstAction.text.trim();
     final notes = _notes.text.trim();
 
     final actions = ref.read(taskActionsProvider);
-    final Task task;
+    Task task;
     final existing = _existing;
     if (existing == null) {
       task = actions.create(
@@ -253,6 +262,12 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         firstAction: first.isEmpty ? null : first,
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
+      );
+    }
+    if (scheduledStart != null) {
+      task = task.copyWith(
+        scheduledStart: scheduledStart,
+        scheduledEnd: scheduledEnd,
       );
     }
     _saving = true;
