@@ -1077,6 +1077,10 @@
   "@planOpenInCalendar": {
     "description": "Button"
   },
+  "planAddAsTask": "Add as task",
+  "@planAddAsTask": {
+    "description": "Button on the event sheet that creates a Grind task prefilled from the calendar event; tapping it again later opens the already-created task."
+  },
   "planOpenInCalendarSoon": "Opening the calendar app is coming soon.",
   "@planOpenInCalendarSoon": {
     "description": "Toast"
