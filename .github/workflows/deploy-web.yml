@@ -39,7 +39,7 @@ jobs:
       # variables > Actions > Variables); without it Google Calendar stays
       # disconnected with a setup hint in the app.
       - run: flutter build web --release --no-web-resources-cdn --base-href /Grind/ --dart-define=GOOGLE_CLIENT_ID_WEB="$GOOGLE_CLIENT_ID_WEB"
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: build/web
 
