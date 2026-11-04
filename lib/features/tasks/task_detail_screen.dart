@@ -4,9 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../l10n/duration_format.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
+import '../goals/domain/goal_area.dart';
+import '../goals/goal_providers.dart';
+import '../goals/presentation/goal_widgets.dart';
 import '../plan/plan_replan_sheet.dart' show scheduleTaskForMe;
 import '../plan/plan_l10n.dart';
 import '../recurrence/providers.dart';
@@ -221,6 +225,9 @@ class TaskDetailScreen extends ConsumerWidget {
         recurrence = null;
       }
     }
+    final goalId = task.goalId;
+    final goal = goalId == null ? null : ref.watch(goalByIdProvider(goalId));
+    final goalArea = goal == null ? null : GoalArea.resolve(goal.area);
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
       children: [
@@ -241,8 +248,15 @@ class TaskDetailScreen extends ConsumerWidget {
             task.energy == Energy.deep
                 ? IconChip.deep(label: context.l10n.energyDeep, height: 28)
                 : IconChip.light(label: context.l10n.energyLight, height: 28),
-            Pill(label: context.l10n.commonMinutes(task.estimatedMinutes)),
+            Pill(label: formatDuration(task.estimatedMinutes, context.l10n)),
             if (done) Pill(label: 'Done', color: AppColors.mint),
+            if (goalArea != null)
+              GoalAreaChip(
+                key: Key('task-detail-goal-${task.id}'),
+                area: goalArea,
+                height: 28,
+                onTap: () => context.push('/goals/${goal!.id}'),
+              ),
           ],
         ),
         const SizedBox(height: 16),

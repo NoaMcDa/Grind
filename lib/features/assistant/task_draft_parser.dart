@@ -250,6 +250,51 @@ class TaskDraftParser {
       return _DateResult(today.add(Duration(days: n)), _squish(out));
     }
 
+    // "in N weeks", "בעוד N שבועות"
+    final inWeeks = _bodyRe(r'(?:in|בעוד)\s+(\d+)\s+(?:weeks?|שבועות)');
+    final inWeeksMatch = inWeeks.firstMatch(out);
+    if (inWeeksMatch != null) {
+      final n = int.parse(inWeeksMatch[1]!);
+      out = out.replaceFirst(inWeeks, ' ');
+      return _DateResult(today.add(Duration(days: n * 7)), _squish(out));
+    }
+
+    // "in a week" / "in one week"; HE dual "בעוד שבועיים" (= 2 weeks)
+    // and singular "בעוד שבוע". The HE word boundary keeps "שבוע" from
+    // matching inside "שבועיים" or "שבועות".
+    final inTwoWeeksHe = _bodyRe(r'בעוד\s+שבועיים');
+    if (inTwoWeeksHe.hasMatch(out)) {
+      out = out.replaceAll(inTwoWeeksHe, ' ');
+      return _DateResult(today.add(const Duration(days: 14)), _squish(out));
+    }
+    final inOneWeek = _bodyRe(r'(?:in\s+(?:a|one)\s+week|בעוד\s+שבוע)');
+    if (inOneWeek.hasMatch(out)) {
+      out = out.replaceAll(inOneWeek, ' ');
+      return _DateResult(today.add(const Duration(days: 7)), _squish(out));
+    }
+
+    // "in N months", "בעוד N חודשים"
+    final inMonths = _bodyRe(r'(?:in|בעוד)\s+(\d+)\s+(?:months?|חודשים)');
+    final inMonthsMatch = inMonths.firstMatch(out);
+    if (inMonthsMatch != null) {
+      final n = int.parse(inMonthsMatch[1]!);
+      out = out.replaceFirst(inMonths, ' ');
+      return _DateResult(_addMonths(today, n), _squish(out));
+    }
+
+    // "in a month" / "in one month"; HE dual "בעוד חודשיים" (= 2 months)
+    // and singular "בעוד חודש".
+    final inTwoMonthsHe = _bodyRe(r'בעוד\s+חודשיים');
+    if (inTwoMonthsHe.hasMatch(out)) {
+      out = out.replaceAll(inTwoMonthsHe, ' ');
+      return _DateResult(_addMonths(today, 2), _squish(out));
+    }
+    final inOneMonth = _bodyRe(r'(?:in\s+(?:a|one)\s+month|בעוד\s+חודש)');
+    if (inOneMonth.hasMatch(out)) {
+      out = out.replaceAll(inOneMonth, ' ');
+      return _DateResult(_addMonths(today, 1), _squish(out));
+    }
+
     // "next week", "בשבוע הבא"
     final nextWeek = _bodyRe(r'(?:next\s+week|בשבוע\s+הבא)');
     if (nextWeek.hasMatch(out)) {
@@ -440,6 +485,18 @@ String _fmtTime(_Time t) =>
     '${t.minute.toString().padLeft(2, '0')}';
 
 const _oneDay = Duration(days: 1);
+
+/// Adds [months] calendar months to [d], clamping the day to the last day of
+/// the resulting month. "In 1 month" from Jan 31 lands on Feb 28/29, not on
+/// Mar 3. Keeps the parser locale-free.
+DateTime _addMonths(DateTime d, int months) {
+  final zeroBasedMonth = d.month - 1 + months;
+  final newYear = d.year + (zeroBasedMonth ~/ 12);
+  final newMonth = (zeroBasedMonth % 12) + 1;
+  final lastDay = DateTime(newYear, newMonth + 1, 0).day;
+  final newDay = d.day > lastDay ? lastDay : d.day;
+  return DateTime(newYear, newMonth, newDay);
+}
 
 class _Time {
   const _Time(this.hour, this.minute);

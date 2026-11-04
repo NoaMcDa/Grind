@@ -316,6 +316,16 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String commonHours(int hours) {
+    return '$hours ש׳';
+  }
+
+  @override
+  String commonHoursMinutes(int hours, int minutes) {
+    return '$hours ש׳ $minutes דק׳';
+  }
+
+  @override
   String get commonWeekdayShortMon => 'שני';
 
   @override
@@ -457,6 +467,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tasksCustomMinutes => 'דקות';
+
+  @override
+  String get tasksCustomDuration => 'משך';
+
+  @override
+  String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
   String get tasksFirstActionLabel => 'צעד ראשון';
@@ -811,6 +827,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planOpenInCalendar => 'פתיחה ביומן';
+
+  @override
+  String get planAddAsTask => 'הוספה כמשימה';
 
   @override
   String get planOpenInCalendarSoon => 'פתיחת אפליקציית היומן תגיע בקרוב.';
@@ -1174,25 +1193,13 @@ class AppLocalizationsHe extends AppLocalizations {
   String get focusEarlyTitle => 'הסבב הסתיים. הוא עדיין נחשב.';
 
   @override
-  String focusFocusedFor(int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0.';
+  String focusFocusedFor(String duration) {
+    return 'התרכזת $duration.';
   }
 
   @override
-  String focusFocusedForTask(int minutes, String task) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes דקות',
-      one: 'דקה אחת',
-    );
-    return 'התרכזת $_temp0 על $task.';
+  String focusFocusedForTask(String duration, String task) {
+    return 'התרכזת $duration על $task.';
   }
 
   @override
@@ -1365,6 +1372,9 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get goalsTitle => 'יעדים';
+
+  @override
+  String get goalsAllGoalsLink => 'כל היעדים';
 
   @override
   String get goalsSubtitle => 'קרובים ורחוקים. כל צעד קטן נחשב.';
@@ -2060,6 +2070,41 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get planDiffRemovedNoLongerFits => 'לא נכנס השבוע';
+
+  @override
+  String planTriggerSkipped(String title) {
+    return 'דילגת על $title';
+  }
+
+  @override
+  String planTriggerOverrunMinutes(String title, int minutes) {
+    return '$title חרגה ב-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerOverrunHours(String title, int hours) {
+    return '$title חרגה ב-$hours שעות';
+  }
+
+  @override
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes) {
+    return '$title חרגה ב-$hours שעות ו-$minutes דק׳';
+  }
+
+  @override
+  String planTriggerEventLands(String title, String time) {
+    return '$title נכנס ב-$time';
+  }
+
+  @override
+  String planTriggerEventMovedTime(String title, String time) {
+    return '$title זז ל-$time';
+  }
+
+  @override
+  String planTriggerEventMovedDayTime(String title, String day, String time) {
+    return '$title זז ל$day ב-$time';
+  }
 
   @override
   String get goalsMetricKindLabel => 'איך זה נספר';

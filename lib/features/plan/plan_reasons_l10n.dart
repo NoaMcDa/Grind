@@ -156,3 +156,45 @@ String _by(AppLocalizations l, String by) {
   }
   return by;
 }
+
+/// Shows a re-plan trigger summary in the app language.
+///
+/// `replanTrigger(...)` in `scheduler/replan_trigger.dart` writes its
+/// `summary` in English ("you skipped X", "X ran 15 min over", "Dentist
+/// lands at 15:00", "Seminar moved to Thursday 09:00"). When [summary]
+/// matches one of those templates it is rebuilt from ARB strings; anything
+/// else is returned unchanged. The patterns with specific English suffixes
+/// are checked before the broader "{title} moved to ..." so a title that
+/// contains those phrases still routes correctly.
+String localizeReplanTriggerSummary(AppLocalizations l, String summary) {
+  Match? m(String pattern) => RegExp('^$pattern\$').firstMatch(summary);
+
+  var r = m(r'you skipped (.+)');
+  if (r != null) return l.planTriggerSkipped(r[1]!);
+  r = m(r'(.+) ran (\d+)h (\d+)m over');
+  if (r != null) {
+    return l.planTriggerOverrunHoursMinutes(
+      r[1]!,
+      int.parse(r[2]!),
+      int.parse(r[3]!),
+    );
+  }
+  r = m(r'(.+) ran (\d+)h over');
+  if (r != null) return l.planTriggerOverrunHours(r[1]!, int.parse(r[2]!));
+  r = m(r'(.+) ran (\d+) min over');
+  if (r != null) return l.planTriggerOverrunMinutes(r[1]!, int.parse(r[2]!));
+  r = m(r'(.+) lands at (\d{2}:\d{2})');
+  if (r != null) return l.planTriggerEventLands(r[1]!, r[2]!);
+  // `dayWord` from the scheduler core: "today", "tomorrow", a weekday, or
+  // "Nov 12" (month + day).
+  r = m(
+    r'(.+) moved to (today|tomorrow|[A-Z][a-z]+(?: \d{1,2})?) '
+    r'(\d{2}:\d{2})',
+  );
+  if (r != null) {
+    return l.planTriggerEventMovedDayTime(r[1]!, _dayWord(l, r[2]!), r[3]!);
+  }
+  r = m(r'(.+) moved to (\d{2}:\d{2})');
+  if (r != null) return l.planTriggerEventMovedTime(r[1]!, r[2]!);
+  return summary;
+}

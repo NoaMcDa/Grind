@@ -6,3 +6,4 @@ library;
 
 export 'widget_snapshot.dart';
 export 'widget_snapshot_builder.dart';
+export 'widget_snapshot_delta.dart';

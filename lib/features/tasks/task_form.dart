@@ -6,6 +6,7 @@ import 'package:grind/features/goals/goals.dart'
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../../l10n/duration_format.dart';
 import '../../theme/app_text.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/widgets.dart';
@@ -18,16 +19,24 @@ import '../../l10n/l10n.dart';
 import '../plan/plan_l10n.dart' show formatPlanDay;
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
-/// [initialGoalId] presets the goal of a new task. Resolves to the saved
+/// [initialGoalId] presets the goal of a new task. [initial] prefills the
+/// form (title, scheduled range, estimate, notes, goal and any
+/// `calendarEventId`) for a new task — used by "Add as task" on the Plan
+/// event sheet to seed the form from a [CalendarEvent]. Resolves to the saved
 /// task, or null when dismissed.
 Future<Task?> showTaskSheet(
   BuildContext context, {
   Task? existing,
+  Task? initial,
   String? initialGoalId,
 }) {
   return showStickerSheet<Task>(
     context,
-    (_) => TaskFormSheet(existing: existing, initialGoalId: initialGoalId),
+    (_) => TaskFormSheet(
+      existing: existing,
+      initial: initial,
+      initialGoalId: initialGoalId,
+    ),
   );
 }
 
@@ -36,12 +45,24 @@ Future<Task?> showTaskSheet(
 Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
     showTaskSheet(context, initialGoalId: goal.id);
 
-const _presets = [15, 30, 45, 60, 90];
+/// Estimate presets in minutes. 15 min through 90 min as before, then a
+/// stretch of whole hours up to 4 h for long tasks (#153).
+const _presets = [15, 30, 45, 60, 90, 120, 180, 240];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
-  const TaskFormSheet({super.key, this.existing, this.initialGoalId});
+  const TaskFormSheet({
+    super.key,
+    this.existing,
+    this.initial,
+    this.initialGoalId,
+  });
 
   final Task? existing;
+
+  /// Prefills a new task's fields (ignored when editing [existing]). Fields
+  /// the form itself doesn't expose (`scheduledStart`, `scheduledEnd`,
+  /// `calendarEventId`) are carried into the saved task unchanged.
+  final Task? initial;
 
   /// The goal a new task starts linked to (ignored when editing).
   final String? initialGoalId;
@@ -74,25 +95,45 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
   Task? get _existing => widget.existing;
 
+  /// Pre-fill text for the custom field: a round hour becomes `"2h"`, an
+  /// uneven value a plain minute count so the user can still read it.
+  static String _initialCustomText(int minutes) {
+    if (minutes >= 60 && minutes % 60 == 0) return '${minutes ~/ 60}h';
+    return '$minutes';
+  }
+
   /// Days and times in the form are in the user's zone.
   tz.Location get _location => ref.read(zoneLocationProvider);
 
   @override
   void initState() {
     super.initState();
-    final t = _existing;
+    final t = _existing ?? widget.initial;
     _title = TextEditingController(text: t?.title ?? '');
     _firstAction = TextEditingController(text: t?.firstAction ?? '');
     _notes = TextEditingController(text: t?.notes ?? '');
     _minutes = t?.estimatedMinutes ?? 30;
     _customMode = !_presets.contains(_minutes);
-    _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
+    _custom = TextEditingController(
+      text: _customMode ? _initialCustomText(_minutes) : '',
+    );
     _energy = t?.energy ?? Energy.light;
-    _goalId = t == null ? widget.initialGoalId : t.goalId;
-    if (t == null) {
+    _goalId = _existing == null
+        ? (widget.initial?.goalId ?? widget.initialGoalId)
+        : _existing!.goalId;
+    if (_existing == null && t == null) {
       _date = _today;
+    } else if (_existing == null && t != null) {
+      // Prefilling a new task: the form needs a date, so use the scheduled
+      // day when present (as for an event), else [t.dueAt]'s day, else today.
+      final sched = t.scheduledStart == null
+          ? null
+          : zoneWall(t.scheduledStart!, _location);
+      final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
+      final seed = sched ?? due;
+      _date = seed == null ? _today : DateTime(seed.year, seed.month, seed.day);
     } else {
-      _loadRule(t.id);
+      _loadRule(t!.id);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       if (due != null) {
         _date = DateTime(due.year, due.month, due.day);
@@ -216,7 +257,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       setState(() => _showError = true);
       return;
     }
-    final minutes = _customMode ? int.tryParse(_custom.text.trim()) : _minutes;
+    final minutes = _customMode ? parseDuration(_custom.text) : _minutes;
     final estimate = (minutes == null || minutes <= 0) ? 30 : minutes;
     final day = _date;
     final dueAt = day == null
@@ -242,7 +283,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     Task task;
     final existing = _existing;
     if (existing == null) {
-      task = actions.create(
+      final seeded = actions.create(
         title: title,
         dueAt: dueAt,
         remindAt: remindAt,
@@ -252,6 +293,17 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
       );
+      // Carry over fields the form doesn't expose but [initial] may hold:
+      // the scheduled range (so "Add as task" from an event places it) and
+      // the calendar-event link (so push-back skips it).
+      final init = widget.initial;
+      task = init == null
+          ? seeded
+          : seeded.copyWith(
+              scheduledStart: init.scheduledStart,
+              scheduledEnd: init.scheduledEnd,
+              calendarEventId: init.calendarEventId,
+            );
     } else {
       task = existing.copyWith(
         title: title,
@@ -449,7 +501,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     children: [
                       for (final m in _presets)
                         _Choice(
-                          label: context.l10n.commonMinutes(m),
+                          label: formatDuration(m, context.l10n),
                           selected: !_customMode && _minutes == m,
                           onTap: () => setState(() {
                             _customMode = false;
@@ -467,9 +519,14 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                     const SizedBox(height: 8),
                     StickerTextField(
                       controller: _custom,
-                      label: context.l10n.tasksCustomMinutes,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      label: context.l10n.tasksCustomDuration,
+                      hint: context.l10n.tasksCustomDurationHint,
+                      // Hours and colons are allowed, so plain text with a
+                      // number-friendly keyboard rather than digits-only.
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: false,
+                        signed: false,
+                      ),
                       onSubmitted: (_) => _save(),
                     ),
                   ],

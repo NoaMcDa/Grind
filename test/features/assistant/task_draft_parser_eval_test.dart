@@ -463,6 +463,21 @@ const _enCases = <_Case>[
     rruleContains: ['FREQ=DAILY'],
     titleContains: 'standup',
   ),
+  _Case(
+    input: 'follow up in a week',
+    date: '2026-11-11',
+    titleContains: 'follow up',
+  ),
+  _Case(
+    input: 'quarterly review in 2 weeks',
+    date: '2026-11-18',
+    titleContains: 'quarterly review',
+  ),
+  _Case(
+    input: 'renew license in 2 months',
+    date: '2027-01-04',
+    titleContains: 'renew license',
+  ),
   // -- if-then first action ------------------------------------------- //
   _Case(
     input: 'gym tomorrow 7am 45 min, if alarm rings then lace up',
@@ -645,6 +660,10 @@ const _heCases = <_Case>[
     energy: Energy.light,
   ),
   _Case(input: 'לקרוא ספר 30 דקות היום', date: '2026-11-04', duration: 30),
+  _Case(input: 'חופש בעוד שבוע', date: '2026-11-11'),
+  _Case(input: 'טיול בעוד שבועיים', date: '2026-11-18'),
+  _Case(input: 'חידוש רישיון בעוד חודש', date: '2026-12-04'),
+  _Case(input: 'ביקורת בעוד חודשיים', date: '2027-01-04'),
   // -- if-then first action ------------------------------------------- //
   _Case(
     input: 'חדר כושר מחר ב-7, אם המתיחה נעימה אז לצאת לריצה',

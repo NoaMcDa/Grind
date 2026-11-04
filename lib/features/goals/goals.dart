@@ -28,6 +28,7 @@ export 'goal_providers.dart';
 export 'presentation/goal_detail_screen.dart';
 export 'presentation/goal_form.dart';
 export 'presentation/goal_widgets.dart';
+export 'presentation/goals_link_card.dart';
 export 'presentation/goals_screen.dart';
 export 'presentation/highlights_screen.dart';
 export 'presentation/metric_trend.dart';

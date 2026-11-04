@@ -79,6 +79,33 @@ void main() {
       expect(d.date, '2026-11-07');
     });
 
+    test('in 2 weeks', () {
+      final d = parser.parse('renew passport in 2 weeks', now: now);
+      expect(d.date, '2026-11-18');
+    });
+
+    test('in 1 week', () {
+      final d = parser.parse('follow up in 1 week', now: now);
+      expect(d.date, '2026-11-11');
+    });
+
+    test('in a week', () {
+      final d = parser.parse('follow up in a week', now: now);
+      expect(d.date, '2026-11-11');
+    });
+
+    test('in 2 months', () {
+      final d = parser.parse('quarterly review in 2 months', now: now);
+      expect(d.date, '2027-01-04');
+    });
+
+    test('in a month clamps to last day when needed', () {
+      // "in a month" from Jan 31 must not overflow into March.
+      final jan31 = DateTime(2027, 1, 31, 9);
+      final d = parser.parse('rotate certs in a month', now: jan31);
+      expect(d.date, '2027-02-28');
+    });
+
     test('every day → daily RRULE', () {
       final d = parser.parse('meditation every day 10 min', now: now);
       expect(d.recurrenceRrule, contains('FREQ=DAILY'));
@@ -177,6 +204,31 @@ void main() {
     test('בעוד 3 ימים', () {
       final d = parser.parse('לחדש דרכון בעוד 3 ימים', now: now, locale: 'he');
       expect(d.date, '2026-11-07');
+    });
+
+    test('בעוד שבוע → +7 days', () {
+      final d = parser.parse('לחדש דרכון בעוד שבוע', now: now, locale: 'he');
+      expect(d.date, '2026-11-11');
+    });
+
+    test('בעוד שבועיים → +14 days', () {
+      final d = parser.parse('לחדש דרכון בעוד שבועיים', now: now, locale: 'he');
+      expect(d.date, '2026-11-18');
+    });
+
+    test('בעוד 3 שבועות → +21 days', () {
+      final d = parser.parse('חופש בעוד 3 שבועות', now: now, locale: 'he');
+      expect(d.date, '2026-11-25');
+    });
+
+    test('בעוד חודש → +1 month', () {
+      final d = parser.parse('מנוי בעוד חודש', now: now, locale: 'he');
+      expect(d.date, '2026-12-04');
+    });
+
+    test('בעוד חודשיים → +2 months', () {
+      final d = parser.parse('ביקורת בעוד חודשיים', now: now, locale: 'he');
+      expect(d.date, '2027-01-04');
     });
 
     test('שעה וחצי', () {

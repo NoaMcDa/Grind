@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// Quick prompt chip
   ///
   /// In en, this message translates to:
-  /// **'What's next?'**
+  /// **'What\'s next?'**
   String get quickWhatsNext;
 
   /// Composer placeholder
@@ -656,6 +656,18 @@ abstract class AppLocalizations {
   /// **'{minutes} min'**
   String commonMinutes(int minutes);
 
+  /// Duration on a round hour
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String commonHours(int hours);
+
+  /// Duration mixing hours and leftover minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String commonHoursMinutes(int hours, int minutes);
+
   /// Short weekday name (list use)
   ///
   /// In en, this message translates to:
@@ -937,6 +949,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minutes'**
   String get tasksCustomMinutes;
+
+  /// Custom estimate field label; accepts shapes like '90', '4h', '1:30'
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get tasksCustomDuration;
+
+  /// Hint for the custom duration field
+  ///
+  /// In en, this message translates to:
+  /// **'90, 4h, 1:30'**
+  String get tasksCustomDurationHint;
 
   /// First action field label
   ///
@@ -1447,6 +1471,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in calendar'**
   String get planOpenInCalendar;
+
+  /// Button on the event sheet that creates a Grind task prefilled from the calendar event; tapping it again later opens the already-created task.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as task'**
+  String get planAddAsTask;
 
   /// Toast
   ///
@@ -2078,17 +2108,17 @@ abstract class AppLocalizations {
   /// **'Session ended. It still counts.'**
   String get focusEarlyTitle;
 
-  /// End-of-session sheet body
+  /// End-of-session sheet body; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}}.'**
-  String focusFocusedFor(int minutes);
+  /// **'You focused for {duration}.'**
+  String focusFocusedFor(String duration);
 
-  /// End-of-session sheet body when the session had a task
+  /// End-of-session sheet body when the session had a task; duration is a localized string such as '45 min' or '1 h 30 min'
   ///
   /// In en, this message translates to:
-  /// **'You focused for {minutes, plural, =1{1 minute} other{{minutes} minutes}} on {task}.'**
-  String focusFocusedForTask(int minutes, String task);
+  /// **'You focused for {duration} on {task}.'**
+  String focusFocusedForTask(String duration, String task);
 
   /// End-of-session button
   ///
@@ -2413,6 +2443,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Goals'**
   String get goalsTitle;
+
+  /// Text link next to the Highlights card on the Pip screen that opens the full goals list
+  ///
+  /// In en, this message translates to:
+  /// **'All goals'**
+  String get goalsAllGoalsLink;
 
   /// Goals screen subtitle
   ///
@@ -3511,6 +3547,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'no longer fits this week'**
   String get planDiffRemovedNoLongerFits;
+
+  /// Re-plan trigger summary: the user marked a scheduled task as skipped
+  ///
+  /// In en, this message translates to:
+  /// **'you skipped {title}'**
+  String planTriggerSkipped(String title);
+
+  /// Re-plan trigger summary: a task overran by less than an hour
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {minutes} min over'**
+  String planTriggerOverrunMinutes(String title, int minutes);
+
+  /// Re-plan trigger summary: a task overran by a whole number of hours
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h over'**
+  String planTriggerOverrunHours(String title, int hours);
+
+  /// Re-plan trigger summary: a task overran by hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{title} ran {hours}h {minutes}m over'**
+  String planTriggerOverrunHoursMinutes(String title, int hours, int minutes);
+
+  /// Re-plan trigger summary: a new calendar event was added inside today's plan
+  ///
+  /// In en, this message translates to:
+  /// **'{title} lands at {time}'**
+  String planTriggerEventLands(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a new time on the same day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {time}'**
+  String planTriggerEventMovedTime(String title, String time);
+
+  /// Re-plan trigger summary: an existing event moved to a different day
+  ///
+  /// In en, this message translates to:
+  /// **'{title} moved to {day} {time}'**
+  String planTriggerEventMovedDayTime(String title, String day, String time);
 
   /// Goal form: metric kind
   ///

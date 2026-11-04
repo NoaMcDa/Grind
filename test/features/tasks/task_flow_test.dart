@@ -82,9 +82,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('60 min'));
+    await tester.ensureVisible(find.text('1 h'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('60 min'));
+    await tester.tap(find.text('1 h'));
     await tester.ensureVisible(find.text('Deep focus'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Deep focus'));

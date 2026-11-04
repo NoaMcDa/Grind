@@ -32,6 +32,12 @@ class GrindTabBar extends StatelessWidget {
   final AppTab current;
   final ValueChanged<AppTab> onSelect;
 
+  /// The tab bar's visible height above the bottom safe area
+  /// (padding top 8 + item height 52 + padding bottom 6). Used by overlays
+  /// such as [showPipToast] so a floating snackbar sits above it rather than
+  /// over it. The bottom safe area is added by the caller via `MediaQuery`.
+  static const double visualHeight = 66.0;
+
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
