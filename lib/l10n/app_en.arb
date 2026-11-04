@@ -2756,6 +2756,65 @@
       }
     }
   },
+  "planDiffReasonTimePassed": "that time has passed",
+  "@planDiffReasonTimePassed": {
+    "description": "Re-plan diff reason: the previous slot is already in the past"
+  },
+  "planDiffReasonEventTook": "{title} now takes that time",
+  "@planDiffReasonEventTook": {
+    "description": "Re-plan diff reason: a calendar event now overlaps the previous slot",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planDiffReasonHoursChanged": "your hours changed",
+  "@planDiffReasonHoursChanged": {
+    "description": "Re-plan diff reason: the working hours no longer cover the previous slot"
+  },
+  "planDiffReasonPinned": "you put {title} there",
+  "@planDiffReasonPinned": {
+    "description": "Re-plan diff reason: another task the user pinned took the previous slot",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planDiffReasonMadeRoomFor": "made room for {title}",
+  "@planDiffReasonMadeRoomFor": {
+    "description": "Re-plan diff reason: another task took the previous slot",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "planDiffReasonEarlierOpened": "an earlier slot opened up",
+  "@planDiffReasonEarlierOpened": {
+    "description": "Re-plan diff reason: the task moved to an earlier free slot"
+  },
+  "planDiffReasonReshuffled": "reshuffled around today's changes",
+  "@planDiffReasonReshuffled": {
+    "description": "Re-plan diff reason: the task moved for a reason that does not fit the narrower templates"
+  },
+  "planDiffRemovedNotOnList": "no longer on your list",
+  "@planDiffRemovedNotOnList": {
+    "description": "Re-plan diff removal reason: the task was deleted"
+  },
+  "planDiffRemovedDone": "done, nice work",
+  "@planDiffRemovedDone": {
+    "description": "Re-plan diff removal reason: the task was completed"
+  },
+  "planDiffRemovedSkipped": "skipped for now",
+  "@planDiffRemovedSkipped": {
+    "description": "Re-plan diff removal reason: the task was marked skipped"
+  },
+  "planDiffRemovedNoLongerFits": "no longer fits this week",
+  "@planDiffRemovedNoLongerFits": {
+    "description": "Re-plan diff removal reason: fallback when no unplaced reason is available"
+  },
   "goalsMetricKindLabel": "How it counts",
   "@goalsMetricKindLabel": {
     "description": "Goal form: metric kind"

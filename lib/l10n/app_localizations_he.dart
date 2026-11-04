@@ -2020,6 +2020,45 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
+  String get planDiffReasonTimePassed => 'הזמן הזה כבר עבר';
+
+  @override
+  String planDiffReasonEventTook(String title) {
+    return 'עכשיו $title בשעה הזאת';
+  }
+
+  @override
+  String get planDiffReasonHoursChanged => 'שעות העבודה שלך השתנו';
+
+  @override
+  String planDiffReasonPinned(String title) {
+    return 'שמת שם את $title';
+  }
+
+  @override
+  String planDiffReasonMadeRoomFor(String title) {
+    return 'פיניתי מקום ל$title';
+  }
+
+  @override
+  String get planDiffReasonEarlierOpened => 'התפנה חלון מוקדם יותר';
+
+  @override
+  String get planDiffReasonReshuffled => 'סידרתי מחדש סביב השינויים של היום';
+
+  @override
+  String get planDiffRemovedNotOnList => 'כבר לא ברשימה שלך';
+
+  @override
+  String get planDiffRemovedDone => 'סיימת, יפה';
+
+  @override
+  String get planDiffRemovedSkipped => 'דילוג לעת עתה';
+
+  @override
+  String get planDiffRemovedNoLongerFits => 'לא נכנס השבוע';
+
+  @override
   String get goalsMetricKindLabel => 'איך זה נספר';
 
   @override
