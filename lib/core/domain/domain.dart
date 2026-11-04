@@ -10,3 +10,4 @@ export 'preferences.dart';
 export 'reminder_rule.dart';
 export 'task.dart';
 export 'time_range.dart';
+export 'web_push_subscription.dart';
