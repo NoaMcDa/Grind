@@ -1326,6 +1326,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewRepeatsNote => 'Repeats on its own, so it stays put.';
 
   @override
+  String get reviewCheckInTitle => 'Check in on your goals';
+
+  @override
+  String get reviewCheckInHint =>
+      'Tick any you hit today. Pip logs a +1 on each.';
+
+  @override
+  String get reviewCheckInEmpty =>
+      'No recurring goals yet. You can add one from the Goals tab.';
+
+  @override
+  String reviewCheckInUnitWeek(String unit) {
+    return '$unit this week';
+  }
+
+  @override
+  String reviewCheckInUnitMonth(String unit) {
+    return '$unit this month';
+  }
+
+  @override
   String get reviewWinTitle => 'One win';
 
   @override
@@ -2017,6 +2038,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get planDiffReasonTimePassed => 'that time has passed';
+
+  @override
+  String planDiffReasonEventTook(String title) {
+    return '$title now takes that time';
+  }
+
+  @override
+  String get planDiffReasonHoursChanged => 'your hours changed';
+
+  @override
+  String planDiffReasonPinned(String title) {
+    return 'you put $title there';
+  }
+
+  @override
+  String planDiffReasonMadeRoomFor(String title) {
+    return 'made room for $title';
+  }
+
+  @override
+  String get planDiffReasonEarlierOpened => 'an earlier slot opened up';
+
+  @override
+  String get planDiffReasonReshuffled => 'reshuffled around today\'s changes';
+
+  @override
+  String get planDiffRemovedNotOnList => 'no longer on your list';
+
+  @override
+  String get planDiffRemovedDone => 'done, nice work';
+
+  @override
+  String get planDiffRemovedSkipped => 'skipped for now';
+
+  @override
+  String get planDiffRemovedNoLongerFits => 'no longer fits this week';
+
+  @override
   String get goalsMetricKindLabel => 'How it counts';
 
   @override
@@ -2702,4 +2762,102 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String followupHereAt(String start, String reasons) {
+    return 'It is at $start, because $reasons.';
+  }
+
+  @override
+  String followupHereNoReason(String start) {
+    return 'It is at $start.';
+  }
+
+  @override
+  String followupNotFit(String reason) {
+    return 'That one did not fit today — $reason.';
+  }
+
+  @override
+  String get followupNotFitBare => 'That one did not fit today.';
+
+  @override
+  String followupWhen(String start, String end) {
+    return 'It starts at $start and runs until $end.';
+  }
+
+  @override
+  String followupAlreadyPlaced(String start) {
+    return 'It is in today\'s plan at $start.';
+  }
+
+  @override
+  String get followupUnknown => 'I do not have that one on today\'s plan.';
+
+  @override
+  String get voicePermissionTitle => 'Dictate a task';
+
+  @override
+  String get voicePermissionRationale =>
+      'Grind listens only while you hold the mic. Your words become text in the composer, and you see it before anything is sent.';
+
+  @override
+  String get voicePermissionAllow => 'Allow mic';
+
+  @override
+  String get voicePermissionNotNow => 'Not now';
+
+  @override
+  String get voicePermissionGranted =>
+      'Mic is on. Hold the mic button to dictate.';
+
+  @override
+  String get voicePermissionDenied =>
+      'No problem. You can keep typing. Turn mic access on in Settings whenever you like.';
+
+  @override
+  String get voicePermissionBlocked =>
+      'Mic access is off for Grind. Open Settings to turn it on.';
+
+  @override
+  String get voicePermissionOpenSettings => 'Open Settings';
+
+  @override
+  String get voicePrivacyNote =>
+      'On iPhone, recognition happens on this device. On the web, your browser does it — some browsers send audio to their own service.';
+
+  @override
+  String get voiceUnavailable =>
+      'Voice input is not available in this browser. You can still type.';
+
+  @override
+  String get voiceListening => 'Listening…';
+
+  @override
+  String get voiceStopListening => 'Stop listening';
+
+  @override
+  String get voiceLocaleLabel => 'Dictation language';
+
+  @override
+  String get voiceLocaleHebrew => 'Hebrew';
+
+  @override
+  String get voiceLocaleEnglish => 'English';
+
+  @override
+  String toolConfirmationDone(String ranges) {
+    return 'Done: $ranges';
+  }
+
+  @override
+  String get toolConfirmationEmpty => 'Done.';
+
+  @override
+  String commonJoinAnd(String head, String tail) {
+    return '$head and $tail';
+  }
+
+  @override
+  String get commonListSeparator => ', ';
 }

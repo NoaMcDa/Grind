@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/features/goals/domain/goal_metric.dart';
+import 'package:grind/features/goals/domain/goal_record.dart';
+import 'package:grind/features/goals/goal_providers.dart';
 import 'package:grind/features/recurrence/occurrence_completion.dart';
 import 'package:grind/theme/app_text.dart';
 import 'package:grind/theme/tokens.dart';
@@ -68,7 +71,8 @@ class EveningReviewBanner extends ConsumerWidget {
   }
 }
 
-/// Three skippable steps: what got done, what moves on, one win.
+/// Four skippable steps: what got done, what moves on, a check-in on
+/// recurring-metric goals (#31), and one win.
 class EveningReviewFlow extends ConsumerStatefulWidget {
   const EveningReviewFlow({super.key, required this.onFinished});
 
@@ -79,7 +83,7 @@ class EveningReviewFlow extends ConsumerStatefulWidget {
 }
 
 class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
-  static const _steps = 4; // done, move, win, finish
+  static const _steps = 5; // done, move, check-in, win, finish
 
   final _controller = PageController();
   final _win = TextEditingController();
@@ -88,11 +92,14 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
 
   List<Task> _today = [];
   Map<String, ReminderRule> _rules = {};
+  List<GoalRecord> _checkInGoals = [];
   final Set<String> _checked = {};
   final Set<String> _doneIds = {};
+  final Set<String> _checkedInGoalIds = {};
   final Map<String, RolloverChoice> _choices = {};
   int _doneCount = 0;
   int _movedCount = 0;
+  int _checkInCount = 0;
   bool _saved = false;
 
   DateTime get _now => ref.read(clockProvider).now();
@@ -113,12 +120,20 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
   Future<void> _load() async {
     final all = await ref.read(taskRepositoryProvider).getAll();
     final rules = await ref.read(reminderRepositoryProvider).getAll();
+    final goals = await ref.read(goalRepositoryProvider).getAll();
     // Shown once: whatever happens next, today's review is not offered again.
     await ref.read(reviewRepositoryProvider).markHandled(dayKey(_now));
     if (!mounted) return;
     setState(() {
       _today = reviewTasksFor(all, _now);
       _rules = {for (final r in rules) r.taskId: r};
+      _checkInGoals = [
+        for (final g in goals)
+          if (g.deletedAt == null &&
+              g.status == GoalStatus.active &&
+              g.recurring != null)
+            g,
+      ];
       _loaded = true;
     });
   }
@@ -202,9 +217,21 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
     _go();
   }
 
+  Future<void> _confirmCheckIn() async {
+    final actions = ref.read(goalActionsProvider);
+    for (final g in _checkInGoals) {
+      if (_checkedInGoalIds.contains(g.id)) {
+        await actions.increment(g);
+        _checkInCount++;
+      }
+    }
+    _go();
+  }
+
   Future<void> _saveWin() async {
     final win = _win.text.trim();
-    if (!_saved && (win.isNotEmpty || _doneCount + _movedCount > 0)) {
+    if (!_saved &&
+        (win.isNotEmpty || _doneCount + _movedCount + _checkInCount > 0)) {
       _saved = true;
       await ref
           .read(reviewRepositoryProvider)
@@ -291,6 +318,21 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
                           _primary(
                             context.l10n.onboardingContinue,
                             _confirmMoves,
+                          ),
+                        ]),
+                        _page([
+                          _title(context.l10n.reviewCheckInTitle),
+                          const SizedBox(height: 6),
+                          _hint(context.l10n.reviewCheckInHint),
+                          const SizedBox(height: 16),
+                          if (_checkInGoals.isEmpty)
+                            _hint(context.l10n.reviewCheckInEmpty)
+                          else
+                            for (final g in _checkInGoals) _checkInRow(g),
+                          const SizedBox(height: 16),
+                          _primary(
+                            context.l10n.onboardingContinue,
+                            _confirmCheckIn,
                           ),
                         ]),
                         _page([
@@ -394,6 +436,57 @@ class _EveningReviewFlowState extends ConsumerState<EveningReviewFlow> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(child: Text(t.title, style: AppText.bold(size: 15))),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _checkInRow(GoalRecord g) {
+    final on = _checkedInGoalIds.contains(g.id);
+    final m = g.recurring!;
+    final sub = switch (m.period) {
+      MetricPeriod.week => context.l10n.reviewCheckInUnitWeek(m.unit),
+      MetricPeriod.month => context.l10n.reviewCheckInUnitMonth(m.unit),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        key: ValueKey('review-checkin-${g.id}'),
+        borderRadius: BorderRadius.circular(AppRadii.row),
+        onTap: () => setState(() {
+          on ? _checkedInGoalIds.remove(g.id) : _checkedInGoalIds.add(g.id);
+        }),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: StickerCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            shadow: 2,
+            color: on ? AppColors.mint.withValues(alpha: 0.25) : AppColors.card,
+            child: Row(
+              children: [
+                Icon(
+                  on
+                      ? Icons.check_box_rounded
+                      : Icons.check_box_outline_blank_rounded,
+                  color: on ? AppColors.mint : AppColors.ink,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(g.title, style: AppText.bold(size: 15)),
+                      const SizedBox(height: 2),
+                      Text(
+                        sub,
+                        style: AppText.body(size: 13, color: AppColors.muted),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
