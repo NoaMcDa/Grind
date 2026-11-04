@@ -815,6 +815,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Opening the calendar app is coming soon.';
 
   @override
+  String get planAddAsTask => 'Add as task';
+
+  @override
   String get planMarkDone => 'Mark done';
 
   @override

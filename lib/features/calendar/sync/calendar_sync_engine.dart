@@ -345,6 +345,13 @@ class CalendarSyncEngine {
     final local = ext == null
         ? null
         : await calendarRepository.getByExternalId(source, ext);
+    // Adopted from an imported event: the mirror existed before the task
+    // (the event was pulled first, then turned into a task from the Plan).
+    // Grind owns the task; the external calendar keeps its event, so the
+    // engine never creates, updates or deletes a second event for it.
+    if (local != null && local.createdAt.isBefore(task.createdAt)) {
+      return task;
+    }
     final wants =
         task.deletedAt == null &&
         task.isScheduled &&

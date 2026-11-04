@@ -1448,6 +1448,12 @@ abstract class AppLocalizations {
   /// **'Opening the calendar app is coming soon.'**
   String get planOpenInCalendarSoon;
 
+  /// Button on the event sheet that turns the event into a task
+  ///
+  /// In en, this message translates to:
+  /// **'Add as task'**
+  String get planAddAsTask;
+
   /// Button
   ///
   /// In en, this message translates to:

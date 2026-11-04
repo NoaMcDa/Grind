@@ -13,6 +13,7 @@ import '../../widgets/sticker_card.dart';
 import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
 import '../tasks/task_detail_screen.dart';
+import '../tasks/task_form.dart';
 import '../today/today_providers.dart' show formatClock;
 import 'plan_replan_sheet.dart';
 import '../../l10n/l10n.dart';
@@ -178,14 +179,20 @@ Uri? calendarDayUrl(CalendarEvent e, [tz.Location? location]) {
   );
 }
 
-/// Read-only sheet for a calendar event.
-Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
-  final location = ProviderScope.containerOf(
-    context,
-    listen: false,
-  ).read(zoneLocationProvider);
+/// Read-only sheet for a calendar event, with an "Add as task" action that
+/// adopts the event into Grind as a task scheduled over the same slot.
+/// The adopted task carries `calendarEventId = e.externalId`, which the
+/// sync engine uses to skip write-back (no duplicate in the external
+/// calendar); the local mirror is marked with the new task's id so it
+/// stays linked across pulls.
+Future<void> showPlanEventSheet(
+  BuildContext context,
+  CalendarEvent e,
+) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+  final location = container.read(zoneLocationProvider);
   final url = calendarDayUrl(e, location);
-  return showStickerSheet<void>(
+  final action = await showStickerSheet<_EventSheetAction>(
     context,
     (ctx) => Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -211,21 +218,40 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
           ),
           const SizedBox(height: 16),
           Consumer(
-            builder: (context, ref, _) => PillButton(
-              key: const Key('plan-open-in-calendar'),
-              label: context.l10n.planOpenInCalendar,
-              icon: const Icon(Icons.open_in_new),
-              onPressed: url == null
-                  ? null
-                  : () async {
-                      final ok = await ref.read(planUrlLauncherProvider)(url);
-                      if (!ok && context.mounted) {
-                        showPipToast(
-                          context,
-                          context.l10n.planOpenInCalendarFailed,
-                        );
-                      }
-                    },
+            builder: (btnContext, ref, _) => Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                PillButton(
+                  key: const Key('plan-event-add-as-task'),
+                  label: btnContext.l10n.planAddAsTask,
+                  color: AppColors.mint,
+                  icon: const Icon(Icons.add_task),
+                  onPressed: () {
+                    Navigator.of(
+                      btnContext,
+                    ).maybePop(_EventSheetAction.addAsTask);
+                  },
+                ),
+                PillButton(
+                  key: const Key('plan-open-in-calendar'),
+                  label: btnContext.l10n.planOpenInCalendar,
+                  icon: const Icon(Icons.open_in_new),
+                  onPressed: url == null
+                      ? null
+                      : () async {
+                          final ok = await ref.read(
+                            planUrlLauncherProvider,
+                          )(url);
+                          if (!ok && btnContext.mounted) {
+                            showPipToast(
+                              btnContext,
+                              btnContext.l10n.planOpenInCalendarFailed,
+                            );
+                          }
+                        },
+                ),
+              ],
             ),
           ),
           if (url == null) ...[
@@ -241,4 +267,40 @@ Future<void> showPlanEventSheet(BuildContext context, CalendarEvent e) {
       ),
     ),
   );
+  if (action != _EventSheetAction.addAsTask) return;
+  if (!context.mounted) return;
+  await _addEventAsTask(context, container, e);
+}
+
+enum _EventSheetAction { addAsTask }
+
+/// Adopts [event] as a task: opens the task sheet prefilled from the event
+/// and, on save, links the local mirror to the new task. The adopted task
+/// carries `calendarEventId = event.externalId`, which the sync engine
+/// treats as "don't write this one back to the external calendar".
+Future<void> _addEventAsTask(
+  BuildContext context,
+  ProviderContainer container,
+  CalendarEvent event,
+) async {
+  final now = container.read(clockProvider).now().toUtc();
+  final int minutes = event.duration.inMinutes.clamp(5, 24 * 60);
+  final template = Task(
+    id: '',
+    title: event.title,
+    estimatedMinutes: minutes,
+    scheduledStart: event.start,
+    scheduledEnd: event.end,
+    // A person placed the event; keep the slot when the scheduler runs.
+    lockedStart: true,
+    calendarEventId: event.externalId,
+    createdAt: now,
+    updatedAt: now,
+  );
+  final saved = await showTaskSheet(context, initial: template);
+  if (saved == null) return;
+  final repo = container.read(calendarRepositoryProvider);
+  // Mark the mirrored event with the new task id so sync keeps them in
+  // step (and so a repeat of this flow can find the existing task).
+  await repo.upsert(event.copyWith(taskId: saved.id, updatedAt: now));
 }

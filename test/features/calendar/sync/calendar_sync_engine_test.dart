@@ -337,6 +337,54 @@ void main() {
       await engine.pushTask(task('t1', day: 4));
       expect(provider.calls, isEmpty);
     });
+
+    test(
+      'skips a task adopted from an imported event (no duplicate write-back)',
+      () async {
+        // The event is pulled first and mirrored.
+        provider.events.add(meeting('ext-sync', 4, 10));
+        await engine.pull();
+
+        // The user adopts it from Plan: a task is created with
+        // calendarEventId = event.externalId and a createdAt strictly
+        // after the mirror's (which is how pushTask tells adoption from
+        // write-back). The mirror is marked with the new task's id so
+        // the two stay linked.
+        final later = now.add(const Duration(minutes: 1));
+        final adopted = Task(
+          id: 'adopt',
+          title: 'Sync',
+          scheduledStart: at(4, 10),
+          scheduledEnd: at(4, 11),
+          lockedStart: true,
+          calendarEventId: 'ext-sync',
+          createdAt: later,
+          updatedAt: later,
+        );
+        await tasks.upsert(adopted);
+        final mirror = (await calendars.getByExternalId(
+          CalendarSource.google,
+          'ext-sync',
+        ))!;
+        await calendars.upsert(
+          mirror.copyWith(taskId: adopted.id, updatedAt: later),
+        );
+
+        // A full sync must not create, update or delete anything on the
+        // provider for the adopted event.
+        final callsBefore = provider.calls.length;
+        await engine.sync();
+        expect(
+          provider.calls.length,
+          callsBefore,
+          reason: 'no create/update/delete for the adopted event',
+        );
+        expect(provider.events, hasLength(1));
+        // The task keeps its link; no second event was created.
+        final after = (await tasks.getById('adopt'))!;
+        expect(after.calendarEventId, 'ext-sync');
+      },
+    );
   });
 
   group('pullWriteBacks (calendar wins for time)', () {

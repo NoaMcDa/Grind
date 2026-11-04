@@ -221,6 +221,53 @@ void main() {
     expect(find.text('14:00–15:30'), findsWidgets);
   });
 
+  testWidgets('"Add as task" adopts the event: opens the task sheet '
+      'prefilled, links the event and does not duplicate it in the calendar',
+      (t) async {
+    final c = await _pump(t);
+    await t.tap(find.byKey(const Key('plan-event-seminar')));
+    await t.pumpAndSettle();
+
+    // The new action lives next to "Open in calendar".
+    expect(find.byKey(const Key('plan-event-add-as-task')), findsOneWidget);
+    expect(find.text('Add as task'), findsOneWidget);
+
+    await t.tap(find.byKey(const Key('plan-event-add-as-task')));
+    await t.pumpAndSettle();
+
+    // Task sheet opened, prefilled from the event: it is a NEW task
+    // (not "Edit"), the title is the event's and the estimate is the
+    // event's length (90 minutes, which happens to be one of the presets).
+    expect(find.text('New task'), findsOneWidget);
+    expect(
+      find.widgetWithText(TextField, 'Seminar with supervisor'),
+      findsOneWidget,
+    );
+    final ninety = t.getSemantics(find.bySemanticsLabel('90 min'));
+    expect(ninety.flagsCollection.isSelected, isTrue);
+
+    await t.tap(find.bySemanticsLabel('Save'));
+    await t.pumpAndSettle();
+
+    final tasks = await c.read(taskRepositoryProvider).getAll();
+    final adopted = tasks.firstWhere(
+      (x) => x.title == 'Seminar with supervisor',
+    );
+    // The task is scheduled over the event's slot and linked to it.
+    expect(adopted.scheduledStart, DateTime(2026, 10, 29, 14).toUtc());
+    expect(adopted.scheduledEnd, DateTime(2026, 10, 29, 15, 30).toUtc());
+    expect(adopted.calendarEventId, 'seminar');
+    expect(adopted.estimatedMinutes, 90);
+    expect(adopted.lockedStart, isTrue);
+
+    // The mirrored event is now linked back, so a later sync knows the
+    // two are one and the same.
+    final e = (await c
+        .read(calendarRepositoryProvider)
+        .getByExternalId(CalendarSource.local, 'seminar'))!;
+    expect(e.taskId, adopted.id);
+  });
+
   testWidgets('tapping a task opens the detail and can unschedule', (t) async {
     final c = await _pump(t);
     await t.tap(find.byKey(const Key('plan-task-lab')));

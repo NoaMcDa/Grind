@@ -18,16 +18,25 @@ import '../../l10n/l10n.dart';
 import '../plan/plan_l10n.dart' show formatPlanDay;
 
 /// Opens the quick-add sheet, or the edit sheet when [existing] is given.
-/// [initialGoalId] presets the goal of a new task. Resolves to the saved
-/// task, or null when dismissed.
+/// [initialGoalId] presets the goal of a new task. [initial] prefills a new
+/// task from a template (e.g. a calendar event being adopted): its title,
+/// due date / time, estimate and notes seed the form; its
+/// `scheduledStart` / `scheduledEnd` / `calendarEventId` / `lockedStart`
+/// are carried onto the created task. Resolves to the saved task, or null
+/// when dismissed.
 Future<Task?> showTaskSheet(
   BuildContext context, {
   Task? existing,
   String? initialGoalId,
+  Task? initial,
 }) {
   return showStickerSheet<Task>(
     context,
-    (_) => TaskFormSheet(existing: existing, initialGoalId: initialGoalId),
+    (_) => TaskFormSheet(
+      existing: existing,
+      initialGoalId: initialGoalId,
+      initial: initial,
+    ),
   );
 }
 
@@ -39,12 +48,23 @@ Future<Task?> taskSheetForGoal(BuildContext context, GoalRecord goal) =>
 const _presets = [15, 30, 45, 60, 90];
 
 class TaskFormSheet extends ConsumerStatefulWidget {
-  const TaskFormSheet({super.key, this.existing, this.initialGoalId});
+  const TaskFormSheet({
+    super.key,
+    this.existing,
+    this.initialGoalId,
+    this.initial,
+  });
 
   final Task? existing;
 
   /// The goal a new task starts linked to (ignored when editing).
   final String? initialGoalId;
+
+  /// Prefill a new task from a template (e.g. a calendar event being
+  /// adopted). Ignored when [existing] is set. Title, due date / time,
+  /// estimate and notes seed the form; `scheduledStart` / `scheduledEnd` /
+  /// `calendarEventId` / `lockedStart` are carried onto the created task.
+  final Task? initial;
 
   @override
   ConsumerState<TaskFormSheet> createState() => _TaskFormSheetState();
@@ -80,7 +100,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
   @override
   void initState() {
     super.initState();
-    final t = _existing;
+    // Seed from the existing task when editing; otherwise from [initial]
+    // (a template, e.g. an adopted calendar event) when provided, else blank.
+    final t = _existing ?? widget.initial;
     _title = TextEditingController(text: t?.title ?? '');
     _firstAction = TextEditingController(text: t?.firstAction ?? '');
     _notes = TextEditingController(text: t?.notes ?? '');
@@ -88,11 +110,11 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _customMode = !_presets.contains(_minutes);
     _custom = TextEditingController(text: _customMode ? '$_minutes' : '');
     _energy = t?.energy ?? Energy.light;
-    _goalId = t == null ? widget.initialGoalId : t.goalId;
+    _goalId = _existing == null ? widget.initialGoalId : _existing!.goalId;
     if (t == null) {
       _date = _today;
     } else {
-      _loadRule(t.id);
+      if (_existing != null) _loadRule(_existing!.id);
       final due = t.dueAt == null ? null : zoneWall(t.dueAt!, _location);
       if (due != null) {
         _date = DateTime(due.year, due.month, due.day);
@@ -107,6 +129,12 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         _date ??= DateTime(remind.year, remind.month, remind.day);
         _remindTime = TimeOfDay.fromDateTime(remind);
         _remindTouched = _remindTime != _dueTime;
+      }
+      // An adopted event seeds the date from its scheduled slot when no
+      // due / reminder time was set (the slot stays on the saved task).
+      if (_date == null && t.scheduledStart != null) {
+        final s = zoneWall(t.scheduledStart!, _location);
+        _date = DateTime(s.year, s.month, s.day);
       }
     }
   }
@@ -233,7 +261,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     final Task task;
     final existing = _existing;
     if (existing == null) {
-      task = actions.create(
+      var created = actions.create(
         title: title,
         dueAt: dueAt,
         remindAt: remindAt,
@@ -243,6 +271,16 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         notes: notes.isEmpty ? null : notes,
         goalId: _goalId,
       );
+      final init = widget.initial;
+      if (init != null) {
+        created = created.copyWith(
+          scheduledStart: init.scheduledStart,
+          scheduledEnd: init.scheduledEnd,
+          lockedStart: init.lockedStart,
+          calendarEventId: init.calendarEventId,
+        );
+      }
+      task = created;
     } else {
       task = existing.copyWith(
         title: title,
