@@ -325,7 +325,8 @@ class TaskDraftParser {
         ? before.substring(0, before.length - 1).trim()
         : before;
 
-    final formatted = '${lex.ifMarkerCanonical} $cond, ${lex.thenMarker} '
+    final formatted =
+        '${lex.ifMarkerCanonical} $cond, ${lex.thenMarker} '
         '$action';
     return _FirstActionResult(formatted, _squish(beforeClean));
   }
