@@ -122,7 +122,9 @@ MilestonePlan buildMilestonePlan({
 int _openFirst(Task a, Task b) {
   if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
   final c = a.createdAt.compareTo(b.createdAt);
-  return c != 0 ? c : a.id.compareTo(b.id);
+  if (c != 0) return c;
+  final t = a.title.compareTo(b.title);
+  return t != 0 ? t : a.id.compareTo(b.id);
 }
 
 /// The open task of [goalId] whose scheduled block is the soonest that has
