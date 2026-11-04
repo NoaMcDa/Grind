@@ -42,20 +42,13 @@ void main() {
     });
 
     test('rejects a missing or empty taskId', () {
+      expect(WidgetAction.tryDecode(jsonEncode({'kind': 'taskDone'})), isNull);
       expect(
-        WidgetAction.tryDecode(jsonEncode({'kind': 'taskDone'})),
+        WidgetAction.tryDecode(jsonEncode({'kind': 'taskDone', 'taskId': ''})),
         isNull,
       );
       expect(
-        WidgetAction.tryDecode(
-          jsonEncode({'kind': 'taskDone', 'taskId': ''}),
-        ),
-        isNull,
-      );
-      expect(
-        WidgetAction.tryDecode(
-          jsonEncode({'kind': 'taskDone', 'taskId': 42}),
-        ),
+        WidgetAction.tryDecode(jsonEncode({'kind': 'taskDone', 'taskId': 42})),
         isNull,
       );
     });
