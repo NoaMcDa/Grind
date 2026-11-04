@@ -10,14 +10,25 @@ import 'package:flutter_test/flutter_test.dart';
 /// before `flutter_bootstrap.js` and restores the original path with
 /// `history.replaceState` so go_router sees the real route.
 ///
+/// The JS redirect fixes the in-browser experience, but the HTTP response
+/// stays 404 — which the cloud QA sweep rightly flags (#162) and which also
+/// breaks crawlers, link previews and caches. So `.github/workflows/
+/// deploy-web.yml` also stamps a copy of `build/web/index.html` into
+/// `build/web/<route>/` for every static top-level route, so Pages serves
+/// HTTP 200 for them. The 404 fallback stays for dynamic routes
+/// (`/task/:id`, `/goals/:id`).
+///
 /// These tests pin the wiring — the base path both sides use, the load
-/// order of the decoder, and that it stays external so the CSP in
-/// `index.html` keeps working without `'unsafe-inline'`.
+/// order of the decoder, that it stays external so the CSP in
+/// `index.html` keeps working without `'unsafe-inline'`, and that the
+/// per-route stamp list matches the top-level static GoRoute paths in
+/// `lib/app/router.dart`.
 void main() {
   final indexHtml = File('web/index.html').readAsStringSync();
   final notFoundHtml = File('web/404.html').readAsStringSync();
   final decoderJs = File('web/spa_redirect.js').readAsStringSync();
   final deployYml = File('.github/workflows/deploy-web.yml').readAsStringSync();
+  final routerDart = File('lib/app/router.dart').readAsStringSync();
 
   test('404.html exists so GitHub Pages serves it on unknown paths', () {
     expect(notFoundHtml, isNotEmpty);
@@ -74,4 +85,46 @@ void main() {
       expect(inline, isEmpty);
     },
   );
+
+  test('per-route stamp list in deploy-web.yml matches the static top-level '
+      'go_router paths in router.dart', () {
+    // Reads the `for route in …; do` list out of deploy-web.yml's SPA-stamp
+    // step. Keep the loop a single-line `for route in a b c; do` form so
+    // this regex finds it.
+    final stampMatch = RegExp(
+      r'for\s+route\s+in\s+([^;]+?);\s*do',
+    ).firstMatch(deployYml);
+    expect(
+      stampMatch,
+      isNotNull,
+      reason:
+          'Could not find the per-route stamp loop in deploy-web.yml — '
+          'did the step name or shell syntax change?',
+    );
+    final stampRoutes = stampMatch!
+        .group(1)!
+        .trim()
+        .split(RegExp(r'\s+'))
+        .toSet();
+
+    // Pull every `GoRoute(path: '/<name>', …)` from router.dart whose path is
+    // a single flat segment (so `/today`, `/settings`), skipping nested
+    // routes (which appear as `path: ':id'` inside a parent's `routes: [
+    // … ]`) and dynamic top-level routes (`/task/:id`), which can't be
+    // enumerated at build time and keep relying on the 404.html fallback.
+    final routerRoutes = RegExp(r"GoRoute\(\s*path:\s*'/([a-z]+)'")
+        .allMatches(routerDart)
+        .map((m) => m.group(1)!)
+        .where((r) => r != 'onboarding') // first-run flow, not a QA route
+        .toSet();
+
+    expect(
+      stampRoutes,
+      equals(routerRoutes),
+      reason:
+          'The per-route stamp list in deploy-web.yml must match the static '
+          'top-level routes in lib/app/router.dart so every route the cloud '
+          'QA sweep hits (#162) gets a build/web/<route>/index.html on Pages.',
+    );
+  });
 }
