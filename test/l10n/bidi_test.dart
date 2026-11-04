@@ -6,15 +6,21 @@ import 'package:grind/l10n/bidi.dart';
 void main() {
   group('Bidi.isolate', () {
     test('wraps text in FSI..PDI by default', () {
-      expect(Bidi.isolate('John'), '⁨John⁩');
+      expect(Bidi.isolate('John'), '\u2068John\u2069');
     });
 
     test('uses LRI when direction is ltr', () {
-      expect(Bidi.isolate('John', direction: TextDirection.ltr), '⁦John⁩');
+      expect(
+        Bidi.isolate('John', direction: TextDirection.ltr),
+        '\u2066John\u2069',
+      );
     });
 
     test('uses RLI when direction is rtl', () {
-      expect(Bidi.isolate('שלום', direction: TextDirection.rtl), '⁧שלום⁩');
+      expect(
+        Bidi.isolate('שלום', direction: TextDirection.rtl),
+        '\u2067שלום\u2069',
+      );
     });
 
     test('leaves the empty string alone', () {
@@ -57,30 +63,30 @@ void main() {
 
   group('Bidi.wrapLatinRuns', () {
     test('wraps a single Latin word', () {
-      expect(Bidi.wrapLatinRuns('פגישה עם John'), 'פגישה עם ⁨John⁩');
+      expect(Bidi.wrapLatinRuns('פגישה עם John'), 'פגישה עם \u2068John\u2069');
     });
 
     test('wraps multiple Latin and digit runs', () {
       expect(
         Bidi.wrapLatinRuns('פגישה עם John ב-15:00'),
-        'פגישה עם ⁨John⁩ ב-⁨15:00⁩',
+        'פגישה עם \u2068John\u2069 ב-\u206815:00\u2069',
       );
     });
 
     test('keeps a clock time as one run', () {
-      // "15:00" contains an inner connector (":"), so the whole span
-      // sits inside a single isolate — not two separate digit isolates.
+      // 15:00 contains an inner connector so the whole span sits inside
+      // a single isolate - not two separate digit isolates.
       final out = Bidi.wrapLatinRuns('ב-15:00');
-      expect(out, 'ב-⁨15:00⁩');
-      expect('⁨'.allMatches(out).length, 1);
+      expect(out, 'ב-\u206815:00\u2069');
+      expect('\u2068'.allMatches(out).length, 1);
     });
 
     test('does not swallow trailing punctuation', () {
       // Trailing punctuation inside what would otherwise look like a
       // run must sit outside the isolate so the paragraph-level
       // punctuation stays at the paragraph level.
-      expect(Bidi.wrapLatinRuns('John.'), '⁨John⁩.');
-      expect(Bidi.wrapLatinRuns('John, '), '⁨John⁩, ');
+      expect(Bidi.wrapLatinRuns('John.'), '\u2068John\u2069.');
+      expect(Bidi.wrapLatinRuns('John, '), '\u2068John\u2069, ');
     });
 
     test('returns the original string when no LTR runs are present', () {
@@ -93,12 +99,16 @@ void main() {
     });
 
     test('an all-Latin string ends up in a single isolate', () {
-      expect(Bidi.wrapLatinRuns('Hello world'), '⁨Hello⁩ ⁨world⁩');
+      expect(
+        Bidi.wrapLatinRuns('Hello world'),
+        '\u2068Hello\u2069 \u2068world\u2069',
+      );
     });
 
     test('nothing in a wrapped string leaks across isolates', () {
       final out = Bidi.wrapLatinRuns('a שלום b');
-      // Every ⁨ must be matched by a ⁩ before the next ⁨.
+      // Every FSI (U+2068) must be matched by a PDI (U+2069) before the
+      // next FSI.
       var depth = 0;
       for (final r in out.runes) {
         if (r == 0x2068) depth++;

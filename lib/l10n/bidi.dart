@@ -6,36 +6,33 @@ import 'dart:ui' show TextDirection;
 /// Hebrew flows right-to-left while Latin words, ASCII digits and clock
 /// times flow left-to-right. Without isolation the Unicode Bidi algorithm
 /// (UAX #9) decides what to do on its own, and it often reorders digit
-/// runs and neutral punctuation in surprising ways — a task name like
-/// "פגישה עם John ב-15:00" can flip into "פגישה עם John ב15:00-" or
-/// worse once rendered.
-///
-/// Wrapping each LTR run in a First-Strong Isolate (FSI U+2068 … PDI
-/// U+2069) tells the algorithm to resolve that span on its own, keeping
-/// the surrounding Hebrew paragraph intact.
+/// runs and neutral punctuation in surprising ways. Wrapping each LTR
+/// run in a First-Strong Isolate (FSI U+2068 ... PDI U+2069) tells the
+/// algorithm to resolve that span on its own, keeping the surrounding
+/// Hebrew paragraph intact.
 ///
 /// References:
 ///   https://www.unicode.org/reports/tr9/ (UAX #9)
 ///   https://www.w3.org/International/articles/inline-bidi-markup/
 abstract final class Bidi {
-  /// First-Strong Isolate — direction inferred from the first strong
+  /// First-Strong Isolate - direction inferred from the first strong
   /// character inside the isolate. Pair with [pdi].
-  static const fsi = '⁨';
+  static const fsi = '\u2068';
 
   /// Left-to-Right Isolate. Pair with [pdi].
-  static const lri = '⁦';
+  static const lri = '\u2066';
 
   /// Right-to-Left Isolate. Pair with [pdi].
-  static const rli = '⁧';
+  static const rli = '\u2067';
 
-  /// Pop Directional Isolate — closes the nearest isolate.
-  static const pdi = '⁩';
+  /// Pop Directional Isolate - closes the nearest isolate.
+  static const pdi = '\u2069';
 
-  /// Left-to-Right Mark — zero-width strong LTR character.
-  static const lrm = '‎';
+  /// Left-to-Right Mark - zero-width strong LTR character.
+  static const lrm = '\u200E';
 
-  /// Right-to-Left Mark — zero-width strong RTL character.
-  static const rlm = '‏';
+  /// Right-to-Left Mark - zero-width strong RTL character.
+  static const rlm = '\u200F';
 
   /// Wrap [text] in a bidi isolate so it is laid out in its own direction
   /// inside a surrounding paragraph. When [direction] is null the renderer
@@ -54,7 +51,7 @@ abstract final class Bidi {
   }
 
   /// True when [s] contains any character in the Hebrew block
-  /// (U+0590 – U+05FF).
+  /// (U+0590 - U+05FF).
   static bool hasHebrew(String s) {
     for (final r in s.runes) {
       if (r >= 0x0590 && r <= 0x05FF) return true;
@@ -62,7 +59,7 @@ abstract final class Bidi {
     return false;
   }
 
-  /// True when [s] contains any Basic Latin letter (A–Z, a–z).
+  /// True when [s] contains any Basic Latin letter (A-Z, a-z).
   static bool hasLatin(String s) {
     for (final r in s.runes) {
       if (_isLatinLetter(r)) return true;
@@ -81,7 +78,7 @@ abstract final class Bidi {
     return TextDirection.ltr;
   }
 
-  /// Wrap every maximal Latin / digit run in [text] with FSI…PDI so each
+  /// Wrap every maximal Latin / digit run in [text] with FSI...PDI so each
   /// one renders in its own LTR span inside a Hebrew (or otherwise RTL)
   /// paragraph.
   ///
@@ -91,14 +88,8 @@ abstract final class Bidi {
   /// final punctuation stays on the paragraph level.
   ///
   /// Hebrew runs, whitespace and everything else pass through unchanged.
-  /// If [text] contains no LTR runs it is returned as-is — no isolates,
+  /// If [text] contains no LTR runs it is returned as-is - no isolates,
   /// no allocation of a new string.
-  ///
-  /// Example:
-  /// ```dart
-  /// Bidi.wrapLatinRuns('פגישה עם John ב-15:00');
-  /// // → 'פגישה עם ⁨John⁩ ב-⁨15:00⁩'
-  /// ```
   static String wrapLatinRuns(String text) {
     if (text.isEmpty) return text;
     final runes = text.runes.toList(growable: false);
@@ -172,7 +163,7 @@ bool _isConnector(int r) =>
     r == 0x5F; // _
 
 // Strong LTR covers the Basic Latin and Latin-1 Supplement letter ranges,
-// which is all we need for task names and the "app" languages in Grind.
+// which is all we need for task names and the 'app' languages in Grind.
 bool _isStrongLtr(int r) =>
     _isLatinLetter(r) ||
     (r >= 0x00C0 && r <= 0x00D6) ||
@@ -180,8 +171,8 @@ bool _isStrongLtr(int r) =>
     (r >= 0x00F8 && r <= 0x02AF);
 
 // Strong RTL covers Hebrew and Arabic (and their supplements). ASCII
-// digits are treated as weak here on purpose — a line that opens with
-// "15:00 פגישה" is still Hebrew-flavoured, not LTR.
+// digits are treated as weak here on purpose - a Hebrew paragraph that
+// opens with ASCII digits is still Hebrew-flavoured, not LTR.
 bool _isStrongRtl(int r) =>
     (r >= 0x0590 && r <= 0x05FF) || // Hebrew
     (r >= 0x0600 && r <= 0x06FF) || // Arabic
