@@ -259,9 +259,11 @@ class AssistantBudgetTracker {
   /// for a "resets in 4h" line in Settings.
   Duration untilReset() {
     final now = clock.now();
-    final tomorrow = DateTime(now.year, now.month, now.day).add(
-      const Duration(days: 1),
-    );
+    final tomorrow = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(const Duration(days: 1));
     return tomorrow.difference(now);
   }
 

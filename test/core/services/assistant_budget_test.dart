@@ -173,10 +173,7 @@ void main() {
         budget: AssistantDailyBudget.unlimited,
       );
       tracker.record('u1', inputTokens: 1000000, outputTokens: 1000000);
-      expect(
-        tracker.canSpend('u1', tokens: 1 << 30, calls: 1 << 20),
-        isTrue,
-      );
+      expect(tracker.canSpend('u1', tokens: 1 << 30, calls: 1 << 20), isTrue);
     });
 
     test('zero spend is always allowed', () {
