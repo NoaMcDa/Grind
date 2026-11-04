@@ -24,13 +24,17 @@ void main() {
         isFalse,
       );
       expect(
-        HardModeSelection(enabled: false, applicationTokens: const ['a'])
-            .isActive,
+        HardModeSelection(
+          enabled: false,
+          applicationTokens: const ['a'],
+        ).isActive,
         isFalse,
       );
       expect(
-        HardModeSelection(enabled: true, applicationTokens: const ['a'])
-            .isActive,
+        HardModeSelection(
+          enabled: true,
+          applicationTokens: const ['a'],
+        ).isActive,
         isTrue,
       );
     });
@@ -64,10 +68,7 @@ void main() {
         applicationTokens: const ['a', 'b'],
       );
       expect(s.copyWith(enabled: false).applicationTokens, ['a', 'b']);
-      expect(
-        s.copyWith(applicationTokens: const ['x']).enabled,
-        isTrue,
-      );
+      expect(s.copyWith(applicationTokens: const ['x']).enabled, isTrue);
     });
 
     test('equality is by value, including token order', () {
@@ -112,10 +113,7 @@ void main() {
     });
 
     test('fromJson reads the empty default when keys are missing', () {
-      expect(
-        HardModeSelection.fromJson(const {}),
-        HardModeSelection.empty,
-      );
+      expect(HardModeSelection.fromJson(const {}), HardModeSelection.empty);
     });
 
     test('fromJson rejects a non-bool enabled', () {

@@ -41,11 +41,13 @@ class HardModeSelection {
   /// ("Hard mode on · 3 apps shielded").
   int get shieldedCount => applicationTokens.length;
 
-  HardModeSelection copyWith({bool? enabled, List<String>? applicationTokens}) =>
-      HardModeSelection(
-        enabled: enabled ?? this.enabled,
-        applicationTokens: applicationTokens ?? this.applicationTokens,
-      );
+  HardModeSelection copyWith({
+    bool? enabled,
+    List<String>? applicationTokens,
+  }) => HardModeSelection(
+    enabled: enabled ?? this.enabled,
+    applicationTokens: applicationTokens ?? this.applicationTokens,
+  );
 
   Map<String, Object?> toJson() => {
     'enabled': enabled,
