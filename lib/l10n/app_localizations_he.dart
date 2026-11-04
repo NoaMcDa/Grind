@@ -1374,6 +1374,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get goalsTitle => 'יעדים';
 
   @override
+  String get goalsAllGoalsLink => 'כל היעדים';
+
+  @override
   String get goalsSubtitle => 'קרובים ורחוקים. כל צעד קטן נחשב.';
 
   @override
