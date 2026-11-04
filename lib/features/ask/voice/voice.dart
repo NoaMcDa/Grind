@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'voice_input_service.dart';
 import 'web_voice_input_service.dart';
 
+export 'voice_input_capability.dart';
 export 'voice_input_service.dart';
 export 'voice_session.dart';
 export 'voice_transcript_sanitizer.dart';
