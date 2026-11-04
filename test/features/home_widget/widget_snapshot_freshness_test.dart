@@ -17,10 +17,7 @@ void main() {
   group('grade (default thresholds)', () {
     test('null snapshot grades as expired', () {
       expect(
-        WidgetSnapshotFreshnessCalculator.grade(
-          snapshot: null,
-          now: writtenAt,
-        ),
+        WidgetSnapshotFreshnessCalculator.grade(snapshot: null, now: writtenAt),
         WidgetSnapshotFreshness.expired,
       );
     });
