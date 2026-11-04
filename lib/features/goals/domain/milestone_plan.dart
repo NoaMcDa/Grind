@@ -20,7 +20,8 @@ class MilestoneView {
 
   final Milestone milestone;
 
-  /// Non-deleted tasks linked to the milestone, open first, oldest first.
+  /// Non-deleted tasks linked to the milestone, open first, soonest due
+  /// first (undated last), oldest by creation when equal.
   final List<Task> tasks;
 
   /// Set when the milestone is open and its date is before today: the same
@@ -121,6 +122,14 @@ MilestonePlan buildMilestonePlan({
 
 int _openFirst(Task a, Task b) {
   if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
+  final aDue = a.dueAt;
+  final bDue = b.dueAt;
+  if (aDue != null || bDue != null) {
+    if (aDue == null) return 1;
+    if (bDue == null) return -1;
+    final c = aDue.compareTo(bDue);
+    if (c != 0) return c;
+  }
   final c = a.createdAt.compareTo(b.createdAt);
   return c != 0 ? c : a.id.compareTo(b.id);
 }
