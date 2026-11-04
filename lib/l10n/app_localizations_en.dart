@@ -1383,6 +1383,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goalsTitle => 'Goals';
 
   @override
+  String get goalsAllGoalsLink => 'All goals';
+
+  @override
   String get goalsSubtitle => 'Near and far. Every small step counts.';
 
   @override

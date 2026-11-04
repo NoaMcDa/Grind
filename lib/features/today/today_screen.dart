@@ -5,6 +5,10 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../../l10n/l10n.dart';
+import '../goals/domain/goal_area.dart';
+import '../goals/goal_providers.dart';
+import '../goals/presentation/goals_link_card.dart';
+import '../goals/presentation/goal_widgets.dart';
 import '../plan/plan_l10n.dart';
 import '../reminders/reminder_now_card.dart';
 import '../review/review.dart';
@@ -52,7 +56,6 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   void _add() => (widget.onAdd ?? () => showTaskSheet(context))();
 
   void _openSettings() => GoRouter.maybeOf(context)?.push('/settings');
-  void _openGoals() => GoRouter.maybeOf(context)?.push('/goals');
 
   void _open(Task t) {
     Navigator.of(context, rootNavigator: true).push(
@@ -98,26 +101,6 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                Semantics(
-                  button: true,
-                  label: l.goalsTitle,
-                  excludeSemantics: true,
-                  onTap: _openGoals,
-                  child: GestureDetector(
-                    key: const Key('today-goals'),
-                    onTap: _openGoals,
-                    behavior: HitTestBehavior.opaque,
-                    child: const SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Icon(
-                        Icons.flag_outlined,
-                        color: AppColors.ink,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ),
                 Semantics(
                   button: true,
                   label: l.settingsTitle,
@@ -173,6 +156,8 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            const GoalsLinkCard(),
             const SizedBox(height: 18),
             SectionLabel(l.upNext),
             const SizedBox(height: 10),
@@ -338,6 +323,17 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: AppText.body(size: 13, color: AppColors.muted),
                       ),
+                      if (_areaFor(t) != null) ...[
+                        const SizedBox(height: 6),
+                        GoalAreaChip(
+                          key: Key('task-goal-${t.id}'),
+                          area: _areaFor(t)!,
+                          height: 22,
+                          onTap: () => GoRouter.maybeOf(
+                            context,
+                          )?.push('/goals/${t.goalId}'),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -355,6 +351,16 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
         ),
       ),
     );
+  }
+
+  /// The task's goal area, if the task links to a goal that has one.
+  /// Null for tasks without a goal or whose goal has no area set.
+  GoalArea? _areaFor(Task t) {
+    final goalId = t.goalId;
+    if (goalId == null) return null;
+    final goal = ref.watch(goalByIdProvider(goalId));
+    if (goal == null) return null;
+    return GoalArea.resolve(goal.area);
   }
 
   Widget _swipeBackground(Color color, IconData icon, Alignment align) {

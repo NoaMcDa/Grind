@@ -1786,6 +1786,10 @@
   "@goalsTitle": {
     "description": "Goals screen title"
   },
+  "goalsAllGoalsLink": "All goals",
+  "@goalsAllGoalsLink": {
+    "description": "Text link next to the Highlights card on the Pip screen that opens the full goals list"
+  },
   "goalsSubtitle": "Near and far. Every small step counts.",
   "@goalsSubtitle": {
     "description": "Goals screen subtitle"

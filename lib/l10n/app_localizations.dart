@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// Quick prompt chip
   ///
   /// In en, this message translates to:
-  /// **'What's next?'**
+  /// **'What\'s next?'**
   String get quickWhatsNext;
 
   /// Composer placeholder
@@ -2413,6 +2413,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Goals'**
   String get goalsTitle;
+
+  /// Text link next to the Highlights card on the Pip screen that opens the full goals list
+  ///
+  /// In en, this message translates to:
+  /// **'All goals'**
+  String get goalsAllGoalsLink;
 
   /// Goals screen subtitle
   ///
