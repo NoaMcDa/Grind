@@ -84,16 +84,13 @@ void main() {
       addTearDown(sub.cancel);
 
       final locale = await controller.start('he');
-      // Broadcast stream delivers to subscribers as microtasks after the
-      // Future returned by start() completes, so flush once before the
-      // emission is asserted.
-      await Future<void>.delayed(Duration.zero);
 
       expect(locale, 'he-IL');
       expect(service.startCount, 1);
       expect(service.lastLocale, 'he-IL');
       expect(controller.state.phase, VoiceSessionPhase.listening);
       expect(controller.state.locale, 'he-IL');
+      await Future<void>.delayed(Duration.zero);
       expect(seen.single.phase, VoiceSessionPhase.listening);
     });
 
