@@ -126,11 +126,7 @@ void main() {
     test('folds a sequence left-to-right', () {
       const first = TaskDraft(title: 'Gym');
       const second = TaskDraft(title: 'Gym', date: '2026-11-05');
-      const third = TaskDraft(
-        title: 'Gym',
-        time: '07:00',
-        durationMinutes: 45,
-      );
+      const third = TaskDraft(title: 'Gym', time: '07:00', durationMinutes: 45);
       final merged = TaskDraftMerger.mergeAll(const [first, second, third]);
       expect(
         merged,
