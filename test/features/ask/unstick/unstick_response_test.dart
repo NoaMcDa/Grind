@@ -107,8 +107,7 @@ void main() {
       expect(decoded, res);
     });
 
-    test('defaults source to offline when the field is missing or unknown',
-        () {
+    test('defaults source to offline when the field is missing or unknown', () {
       final decoded = UnstickResponse.fromJson({
         'acknowledgement': 'ack',
         'options': [firstActionOption.toJson()],
