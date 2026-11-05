@@ -39,7 +39,10 @@ void main() {
 
     test('rejects a non-positive capacity', () {
       expect(() => ReplanAuditLog(capacity: 0), throwsA(isA<AssertionError>()));
-      expect(() => ReplanAuditLog(capacity: -1), throwsA(isA<AssertionError>()));
+      expect(
+        () => ReplanAuditLog(capacity: -1),
+        throwsA(isA<AssertionError>()),
+      );
     });
   });
 
