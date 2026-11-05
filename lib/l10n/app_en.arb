@@ -662,6 +662,10 @@
   "@tasksCustomDurationHint": {
     "description": "Hint for the custom duration field"
   },
+  "tasksCustomDurationInvalid": "Enter a duration like 4h, 1:30 or 90",
+  "@tasksCustomDurationInvalid": {
+    "description": "Error when the custom duration field cannot be parsed"
+  },
   "tasksFirstActionLabel": "First action",
   "@tasksFirstActionLabel": {
     "description": "First action field label"
@@ -1818,6 +1822,10 @@
   "goalsTitle": "Goals",
   "@goalsTitle": {
     "description": "Goals screen title"
+  },
+  "goalsAllGoalsLink": "All goals",
+  "@goalsAllGoalsLink": {
+    "description": "Text link next to the Highlights card on the Pip screen that opens the full goals list"
   },
   "goalsSubtitle": "Near and far. Every small step counts.",
   "@goalsSubtitle": {

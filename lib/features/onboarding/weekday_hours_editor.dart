@@ -150,15 +150,18 @@ class WeekdayHoursEditor extends StatelessWidget {
           width: 44,
           child: Text(name, style: AppText.bold(size: 15, height: 1)),
         ),
-        Switch(
-          key: ValueKey('day-switch-$day'),
-          value: on,
-          activeThumbColor: AppColors.card,
-          activeTrackColor: AppColors.violet,
-          inactiveThumbColor: AppColors.ink,
-          inactiveTrackColor: AppColors.lilac,
-          trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
-          onChanged: (v) => _set(day, v ? [defaultRange] : null),
+        Semantics(
+          label: name,
+          child: Switch(
+            key: ValueKey('day-switch-$day'),
+            value: on,
+            activeThumbColor: AppColors.card,
+            activeTrackColor: AppColors.violet,
+            inactiveThumbColor: AppColors.ink,
+            inactiveTrackColor: AppColors.lilac,
+            trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
+            onChanged: (v) => _set(day, v ? [defaultRange] : null),
+          ),
         ),
         const Spacer(),
         if (on) ...[

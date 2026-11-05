@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../l10n/l10n.dart';
 import '../../theme/app_text.dart';
@@ -27,6 +28,18 @@ class WeekCapacityScreen extends ConsumerStatefulWidget {
 class _WeekCapacityScreenState extends ConsumerState<WeekCapacityScreen> {
   late int _tab = widget.initialTab;
 
+  void _leave() {
+    // A deep link (e.g. `/#/week`) lands here with nothing to pop, so the
+    // user would be stranded without the tab bar. Fall back to `/plan` —
+    // the same pattern task and goal detail use to recover from a deep link.
+    final nav = Navigator.of(context);
+    if (nav.canPop()) {
+      nav.pop();
+    } else {
+      context.go('/plan');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -38,12 +51,11 @@ class _WeekCapacityScreenState extends ConsumerState<WeekCapacityScreen> {
           children: [
             Row(
               children: [
-                if (Navigator.of(context).canPop())
-                  IconButton(
-                    tooltip: l.capacityBack,
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const BackButtonIcon(),
-                  ),
+                IconButton(
+                  tooltip: l.capacityBack,
+                  onPressed: _leave,
+                  icon: const BackButtonIcon(),
+                ),
                 Expanded(
                   child: Text(
                     l.capacityTitle,

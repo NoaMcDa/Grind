@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../../core/core.dart';
 import '../../../core/notifications/time_zones.dart';
 import '../../analytics/analytics_providers.dart';
+import '../../calendar/sync/task_mirrors.dart';
 import '../../capacity/capacity_providers.dart';
 import '../../goals/domain/metric_ticks.dart';
 import '../../tasks/day_bounds.dart';
@@ -88,10 +89,11 @@ class DayDrafter {
     final loc = locationFor(prefs.timeZoneName);
     final nowUtc = _nowUtc;
     final bounds = localDayBoundsIn(nowUtc, loc);
-    final input = draftCandidates(await _tasks.getAll(), bounds, nowUtc);
-    final events = await _events.getBetween(
-      utcOf(bounds.start),
-      utcOf(bounds.end),
+    final all = await _tasks.getAll();
+    final input = draftCandidates(all, bounds, nowUtc);
+    final events = withoutTaskMirrors(
+      await _events.getBetween(utcOf(bounds.start), utcOf(bounds.end)),
+      all,
     );
     final localEvents = [for (final e in events) _wallEvent(e, loc)];
     final now = zoneWall(nowUtc, loc);

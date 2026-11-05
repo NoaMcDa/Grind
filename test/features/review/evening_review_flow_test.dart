@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/goals/domain/goal_metric.dart';
 import 'package:grind/features/goals/domain/goal_record.dart';
@@ -258,6 +259,55 @@ void main() {
     expect(ticks.single.goalId, 'g-workouts');
     expect(ticks.single.completedAt, isNotNull);
   });
+
+  testWidgets(
+    'Done on a deep-linked review entry falls back to /today (#212)',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      final router = GoRouter(
+        initialLocation: '/review',
+        routes: [
+          GoRoute(
+            path: '/today',
+            builder: (_, _) => const Scaffold(body: Text('today-screen')),
+          ),
+          GoRoute(
+            path: '/review',
+            builder: (_, _) => const EveningReviewEntry(),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            clockProvider.overrideWithValue(FixedClock(now)),
+            taskRepositoryProvider.overrideWithValue(InMemoryTaskRepository()),
+            reviewRepositoryProvider.overrideWithValue(
+              InMemoryReviewRepository(),
+            ),
+          ],
+          child: MaterialApp.router(
+            theme: buildAppTheme(),
+            localizationsDelegates: localizationsDelegates,
+            supportedLocales: supportedLocales,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // Skip through every step, then tap Done on the wrap page.
+      for (var i = 0; i < 4; i++) {
+        await tap(tester, const ValueKey('review-skip'));
+      }
+      expect(find.byKey(const ValueKey('review-praise')), findsOneWidget);
+      await tap(tester, primary('Done'));
+      expect(find.text('today-screen'), findsOneWidget);
+      expect(router.routerDelegate.currentConfiguration.uri.path, '/today');
+    },
+  );
 
   testWidgets('lays out in RTL at 390x844', (tester) async {
     final he = lookupAppLocalizations(const Locale('he'));

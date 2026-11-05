@@ -135,6 +135,10 @@ void main() {
           saved.calendarEventId,
           importedCalendarEventIdFor('seminar-ext'),
         );
+        // Issue #189: "Add as task" pins the new task at the event's time,
+        // so Re-plan with Pip keeps it there instead of re-fitting it over
+        // the busy event it was converted from.
+        expect(saved.lockedStart, isTrue);
       },
     );
 

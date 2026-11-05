@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grind/app/test_app.dart';
 import 'package:grind/core/core.dart';
+import 'package:grind/features/settings/settings_screen.dart';
 
 import '../test_fonts.dart';
 
@@ -88,5 +90,20 @@ void main() {
     expect(find.text('Lecture: Computer Vision'), findsOneWidget);
     expect(find.text('Thesis: write related-work section'), findsOneWidget);
     expect(find.text('2 of 5 done'), findsOneWidget);
+  });
+
+  // Regression: #218 — on a wide viewport Settings used to span the full
+  // width because it sat outside the tab shell's phone-column wrapper.
+  testWidgets('/settings renders in the phone-column on a wide viewport', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    await tester.pumpWidget(TestApp(initialLocation: '/settings'));
+    await tester.pumpAndSettle();
+
+    final settingsSize = tester.getSize(find.byType(SettingsScreen));
+    expect(settingsSize.width, lessThanOrEqualTo(480));
   });
 }
