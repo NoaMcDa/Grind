@@ -324,9 +324,7 @@ Map<String, Object?> _requireDescriptor(Map<String, Object?> j, String key) {
   for (final entry in v.entries) {
     final k = entry.key;
     if (k is! String) {
-      throw AssistantActionFormatException(
-        '"$key" map keys must be strings',
-      );
+      throw AssistantActionFormatException('"$key" map keys must be strings');
     }
     out[k] = entry.value;
   }

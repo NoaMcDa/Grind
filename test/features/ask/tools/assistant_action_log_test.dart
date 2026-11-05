@@ -339,9 +339,7 @@ void main() {
         },
       );
       final encoded = jsonEncode(a.toJson());
-      final decoded = AssistantAction.fromJson(
-        jsonDecode(encoded) as Object?,
-      );
+      final decoded = AssistantAction.fromJson(jsonDecode(encoded) as Object?);
       expect(decoded, a);
     });
 
@@ -469,9 +467,7 @@ void main() {
         throwsA(isA<AssistantActionFormatException>()),
       );
       expect(
-        () => AssistantAction.fromJson(
-          base(<String, Object?>{'kind': ''}),
-        ),
+        () => AssistantAction.fromJson(base(<String, Object?>{'kind': ''})),
         throwsA(isA<AssistantActionFormatException>()),
       );
     });
@@ -513,9 +509,9 @@ void main() {
       log
         ..append(a)
         ..append(b);
-      final encoded = jsonEncode(
-        <Object?>[for (final e in log.entries) e.toJson()],
-      );
+      final encoded = jsonEncode(<Object?>[
+        for (final e in log.entries) e.toJson(),
+      ]);
       final restored = (jsonDecode(encoded) as List<Object?>)
           .map(AssistantAction.fromJson)
           .toList();
