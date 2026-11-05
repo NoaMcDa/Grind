@@ -4019,6 +4019,37 @@
   "@followupUnknown": {
     "description": "Pip's follow-up answer when the task is not in the draft at all"
   },
+  "planDiffNothing": "Nothing shifted. Your plan stays as is.",
+  "@planDiffNothing": {
+    "description": "Pip's plan-diff summary when nothing moved, was added or removed"
+  },
+  "planDiffMoved": "{n, plural, =1{One task moved to a new time.} other{{n} tasks moved to new times.}}",
+  "@planDiffMoved": {
+    "description": "Pip's plan-diff summary: how many tasks shifted to new times",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planDiffAdded": "{n, plural, =1{One task joined your plan.} other{{n} tasks joined your plan.}}",
+  "@planDiffAdded": {
+    "description": "Pip's plan-diff summary: how many tasks newly joined the plan",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "planDiffRemoved": "{n, plural, =1{One task came off your plan.} other{{n} tasks came off your plan.}}",
+  "@planDiffRemoved": {
+    "description": "Pip's plan-diff summary: how many tasks came off the plan",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "voicePermissionTitle": "Dictate a task",
   "@voicePermissionTitle": {
     "description": "Microphone permission sheet title for assistant voice input"

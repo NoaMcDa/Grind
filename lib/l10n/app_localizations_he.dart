@@ -2821,6 +2821,42 @@ class AppLocalizationsHe extends AppLocalizations {
   String get followupUnknown => 'זה לא על התוכנית של היום.';
 
   @override
+  String get planDiffNothing => 'שום דבר לא זז. התוכנית שלך נשארת כמו שהיא.';
+
+  @override
+  String planDiffMoved(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות זזו לזמנים חדשים.',
+      one: 'משימה אחת זזה לזמן חדש.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDiffAdded(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות נכנסו לתוכנית שלך.',
+      one: 'משימה אחת נכנסה לתוכנית שלך.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planDiffRemoved(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n משימות יצאו מהתוכנית שלך.',
+      one: 'משימה אחת יצאה מהתוכנית שלך.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get voicePermissionTitle => 'הכתבת משימה';
 
   @override
