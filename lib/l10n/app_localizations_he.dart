@@ -475,6 +475,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
+  String get tasksCustomDurationInvalid => 'הזינו משך כמו 4h, 1:30 או 90';
+
+  @override
   String get tasksFirstActionLabel => 'צעד ראשון';
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/goals/domain/goal_metric.dart';
 import 'package:grind/features/goals/domain/goal_record.dart';
@@ -28,8 +29,12 @@ class EveningReviewEntry extends ConsumerWidget {
         ref.invalidate(eveningReviewDueProvider);
         if (onFinished != null) {
           onFinished!();
+        } else if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
         } else {
-          Navigator.of(context).maybePop();
+          // Deep-linked to /review: nothing on the stack to pop, so send the
+          // user to Today the way a tab tap would.
+          context.go('/today');
         }
       },
     );
