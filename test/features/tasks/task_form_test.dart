@@ -168,6 +168,43 @@ void main() {
     expect(find.byKey(const Key('task-form-goal')), findsNothing);
   });
 
+  testWidgets('hour presets save the right minute count', (t) async {
+    final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
+    await t.tap(find.bySemanticsLabel('Add a task'));
+    await t.pumpAndSettle();
+    await t.enterText(find.byType(TextField).first, 'Long deep work');
+    final estimate = find.bySemanticsLabel('4 h');
+    await t.ensureVisible(estimate);
+    await t.pumpAndSettle();
+    await t.tap(estimate);
+    await t.pumpAndSettle();
+    await _save(t);
+    final task = (await c.read(taskRepositoryProvider).getAll()).firstWhere(
+      (x) => x.title == 'Long deep work',
+    );
+    expect(task.estimatedMinutes, 240);
+  });
+
+  testWidgets('custom duration accepts hours text like 1:30', (t) async {
+    final c = await pumpGrindApp(t, overrides: [devicePrefsOverride()]);
+    await t.tap(find.bySemanticsLabel('Add a task'));
+    await t.pumpAndSettle();
+    await t.enterText(find.byType(TextField).first, 'Odd length');
+    final custom = find.bySemanticsLabel('Custom');
+    await t.ensureVisible(custom);
+    await t.pumpAndSettle();
+    await t.tap(custom);
+    await t.pumpAndSettle();
+    final field = find.widgetWithText(TextField, 'Duration');
+    await t.enterText(field, '1:30');
+    await t.pumpAndSettle();
+    await _save(t);
+    final task = (await c.read(taskRepositoryProvider).getAll()).firstWhere(
+      (x) => x.title == 'Odd length',
+    );
+    expect(task.estimatedMinutes, 90);
+  });
+
   // Issue #151: a timed task with a custom estimate was saved without
   // `scheduledStart` / `scheduledEnd`, so it never appeared on the Plan
   // timeline and was skipped by the calendar write-back push. Saving one
@@ -189,7 +226,9 @@ void main() {
     await t.pumpAndSettle();
     await t.tap(find.text('Custom'));
     await t.pumpAndSettle();
-    // Two fields are now on the sheet: the title (first) and Minutes (next).
+    // Two fields are now on the sheet: the title (first) and the duration
+    // field (next). The field accepts hour-shaped input too (#153), but
+    // digits alone are still a valid minute count.
     await t.enterText(find.byType(TextField).at(1), '240');
     await t.pumpAndSettle();
     await _save(t);
