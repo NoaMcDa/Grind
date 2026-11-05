@@ -120,6 +120,73 @@ class AssistantAction {
   @override
   String toString() =>
       'AssistantAction(id: $id, tool: $toolName, status: ${status.name})';
+
+  /// Serializes this entry as a JSON-shaped map so a later persistence
+  /// layer can round-trip the audit log without knowing its internals.
+  ///
+  /// Shape: `{"id", "timestamp", "toolName", "inverseDescriptor",
+  /// "humanLabel", "status"}` where `timestamp` is an ISO-8601 UTC
+  /// string (trailing `Z`) and `status` is the enum's
+  /// [AssistantActionStatus.name]. The [inverseDescriptor] is copied
+  /// through as-is — it was already validated as JSON-serializable at
+  /// construction time.
+  Map<String, Object?> toJson() => <String, Object?>{
+    'id': id,
+    'timestamp': _formatIsoUtc(timestamp),
+    'toolName': toolName,
+    'inverseDescriptor': inverseDescriptor,
+    'humanLabel': humanLabel,
+    'status': status.name,
+  };
+
+  /// Parses a JSON-shaped map produced by [toJson] back into an
+  /// [AssistantAction]. Throws [AssistantActionFormatException] on any
+  /// missing field, wrong type or value that fails the same checks
+  /// the constructor enforces (empty strings, non-UTC timestamp,
+  /// descriptor without a non-empty `kind`, non-JSON values).
+  ///
+  /// Unknown top-level fields are ignored so a newer writer can add
+  /// optional metadata without breaking older readers.
+  static AssistantAction fromJson(Object? json) {
+    if (json is! Map) {
+      throw const AssistantActionFormatException(
+        'AssistantAction JSON must be an object',
+      );
+    }
+    final j = json.cast<String, Object?>();
+    try {
+      return AssistantAction(
+        id: _requireNonEmptyString(j, 'id'),
+        timestamp: _requireUtcIso(j, 'timestamp'),
+        toolName: _requireNonEmptyString(j, 'toolName'),
+        inverseDescriptor: _requireDescriptor(j, 'inverseDescriptor'),
+        humanLabel: _requireNonEmptyString(j, 'humanLabel'),
+        status: _parseStatus(j['status']),
+      );
+    } on ArgumentError catch (e) {
+      // Constructor invariants fire after the per-field parse succeeds
+      // (e.g. an inverseDescriptor whose `kind` is the empty string).
+      // Re-wrap as the typed exception so callers only have to catch
+      // one thing.
+      throw AssistantActionFormatException(
+        e.message?.toString() ?? 'invalid AssistantAction payload',
+      );
+    }
+  }
+}
+
+/// Thrown by [AssistantAction.fromJson] when the payload is malformed
+/// — missing a required field, carrying the wrong type, or violating
+/// the same invariants the constructor enforces.
+///
+/// Carries just a message; the caller logs it and either drops the
+/// row or surfaces a one-line "couldn't restore an action" chip.
+@immutable
+class AssistantActionFormatException implements Exception {
+  const AssistantActionFormatException(this.message);
+  final String message;
+  @override
+  String toString() => 'AssistantActionFormatException: $message';
 }
 
 /// In-memory ring buffer of [AssistantAction]s, newest first. Fires
@@ -207,6 +274,76 @@ class AssistantActionLog extends ChangeNotifier {
     _entries.clear();
     notifyListeners();
   }
+}
+
+// ───────────────────────── serialization helpers ─────────────────────────
+
+/// ISO-8601 UTC string with a trailing `Z`, preserving seconds and
+/// milliseconds so a timestamp round-trips without loss.
+String _formatIsoUtc(DateTime t) => t.toUtc().toIso8601String();
+
+String _requireNonEmptyString(Map<String, Object?> j, String key) {
+  final v = j[key];
+  if (v is! String || v.isEmpty) {
+    throw AssistantActionFormatException('"$key" must be a non-empty string');
+  }
+  return v;
+}
+
+DateTime _requireUtcIso(Map<String, Object?> j, String key) {
+  final v = j[key];
+  if (v is! String || v.isEmpty) {
+    throw AssistantActionFormatException(
+      '"$key" must be an ISO-8601 timestamp string',
+    );
+  }
+  final DateTime parsed;
+  try {
+    parsed = DateTime.parse(v);
+  } on FormatException {
+    throw AssistantActionFormatException(
+      '"$key" is not a valid ISO-8601 timestamp',
+    );
+  }
+  if (!parsed.isUtc) {
+    throw AssistantActionFormatException(
+      '"$key" must be a UTC timestamp (trailing "Z" or explicit "+00:00")',
+    );
+  }
+  return parsed;
+}
+
+Map<String, Object?> _requireDescriptor(Map<String, Object?> j, String key) {
+  final v = j[key];
+  if (v is! Map) {
+    throw AssistantActionFormatException('"$key" must be a JSON object');
+  }
+  // Rebuild as Map<String, Object?> so the constructor's downstream
+  // validation sees the exact declared type (not Map<dynamic, dynamic>).
+  final out = <String, Object?>{};
+  for (final entry in v.entries) {
+    final k = entry.key;
+    if (k is! String) {
+      throw AssistantActionFormatException('"$key" map keys must be strings');
+    }
+    out[k] = entry.value;
+  }
+  return out;
+}
+
+AssistantActionStatus _parseStatus(Object? v) {
+  if (v == null) return AssistantActionStatus.applied;
+  if (v is! String || v.isEmpty) {
+    throw const AssistantActionFormatException(
+      '"status" must be "applied" or "undone" when set',
+    );
+  }
+  for (final s in AssistantActionStatus.values) {
+    if (s.name == v) return s;
+  }
+  throw AssistantActionFormatException(
+    '"status" must be one of ${[for (final s in AssistantActionStatus.values) s.name]}',
+  );
 }
 
 // ───────────────────────── validation helpers ─────────────────────────
