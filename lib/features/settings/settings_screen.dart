@@ -109,19 +109,23 @@ class SettingsScreen extends ConsumerWidget {
               SettingsRow(
                 label: l.settingsQuietHours,
                 subtitle: l.settingsQuietHoursHint,
-                trailing: Switch(
-                  key: const ValueKey('quiet-switch'),
-                  value: prefs.quietHours != null,
-                  activeThumbColor: AppColors.card,
-                  activeTrackColor: AppColors.violet,
-                  inactiveThumbColor: AppColors.ink,
-                  inactiveTrackColor: AppColors.lilac,
-                  trackOutlineColor: const WidgetStatePropertyAll(
-                    AppColors.ink,
-                  ),
-                  onChanged: (v) => _update(
-                    ref,
-                    (p) => p.copyWith(quietHours: v ? defaultQuietHours : null),
+                trailing: Semantics(
+                  label: l.settingsQuietHours,
+                  child: Switch(
+                    key: const ValueKey('quiet-switch'),
+                    value: prefs.quietHours != null,
+                    activeThumbColor: AppColors.card,
+                    activeTrackColor: AppColors.violet,
+                    inactiveThumbColor: AppColors.ink,
+                    inactiveTrackColor: AppColors.lilac,
+                    trackOutlineColor: const WidgetStatePropertyAll(
+                      AppColors.ink,
+                    ),
+                    onChanged: (v) => _update(
+                      ref,
+                      (p) =>
+                          p.copyWith(quietHours: v ? defaultQuietHours : null),
+                    ),
                   ),
                 ),
               ),
@@ -374,19 +378,22 @@ class _PromptTimesState extends ConsumerState<_PromptTimes> {
                 setState(() => set(v));
               },
             ),
-          Switch(
-            key: ValueKey('$keyName-switch'),
-            value: value != null,
-            activeThumbColor: AppColors.card,
-            activeTrackColor: AppColors.violet,
-            inactiveThumbColor: AppColors.ink,
-            inactiveTrackColor: AppColors.lilac,
-            trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
-            onChanged: (on) async {
-              final v = on ? fallback : null;
-              await save(v);
-              setState(() => set(v));
-            },
+          Semantics(
+            label: label,
+            child: Switch(
+              key: ValueKey('$keyName-switch'),
+              value: value != null,
+              activeThumbColor: AppColors.card,
+              activeTrackColor: AppColors.violet,
+              inactiveThumbColor: AppColors.ink,
+              inactiveTrackColor: AppColors.lilac,
+              trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
+              onChanged: (on) async {
+                final v = on ? fallback : null;
+                await save(v);
+                setState(() => set(v));
+              },
+            ),
           ),
         ],
       ),
@@ -508,26 +515,32 @@ class _SmallButton extends StatelessWidget {
   }
 
   Widget _pill() {
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: label,
       onTap: onPressed,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: primary ? AppColors.violet : AppColors.card,
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          border: Border.all(color: AppColors.ink, width: AppStroke.border),
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppText.bold(
-            size: 14,
-            height: 1,
-            color: primary ? Colors.white : AppColors.ink,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onPressed,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: primary ? AppColors.violet : AppColors.card,
+            borderRadius: BorderRadius.circular(AppRadii.pill),
+            border: Border.all(color: AppColors.ink, width: AppStroke.border),
+          ),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.bold(
+              size: 14,
+              height: 1,
+              color: primary ? Colors.white : AppColors.ink,
+            ),
           ),
         ),
       ),
