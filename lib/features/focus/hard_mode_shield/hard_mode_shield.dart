@@ -5,6 +5,7 @@ import 'method_channel_hard_mode_shield_service.dart';
 import 'platform_support.dart';
 
 export 'hard_mode_selection.dart';
+export 'hard_mode_selection_diff.dart';
 export 'hard_mode_shield_service.dart';
 export 'hard_mode_status.dart';
 export 'method_channel_hard_mode_shield_service.dart';

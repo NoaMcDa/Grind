@@ -144,6 +144,7 @@
   "tasksCustomMinutes": "דקות",
   "tasksCustomDuration": "משך",
   "tasksCustomDurationHint": "90, 4h, 1:30",
+  "tasksCustomDurationInvalid": "הזינו משך כמו 4h, 1:30 או 90",
   "tasksFirstActionLabel": "צעד ראשון",
   "tasksFirstActionHint": "אם השעה 7:00, אז לפתוח את קובץ התזה",
   "tasksNotesLabel": "הערות",

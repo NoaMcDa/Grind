@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
 import '../analytics/analytics_providers.dart';
+import '../calendar/sync/task_mirrors.dart';
 import '../goals/goal_providers.dart';
 import '../plan/plan_layout.dart' show dateOnly, nextDay, weekOf;
 import '../plan/scheduler/scheduler.dart'
@@ -134,8 +135,11 @@ final weekReportProvider = Provider.autoDispose<WeekReport>((ref) {
     weekEnd: range.end,
     now: zoneWall(ref.watch(clockProvider).now(), loc),
     prefs: prefs,
+    // The calendar copies of tasks (write-backs, "Add as task" imports)
+    // are booked through the tasks; counting the events too would double
+    // the planned time.
     events: [
-      for (final e in events)
+      for (final e in withoutTaskMirrors(events, tasks))
         e.copyWith(start: zoneWall(e.start, loc), end: zoneWall(e.end, loc)),
     ],
     tasks: [for (final t in tasks) taskToWall(t, loc)],

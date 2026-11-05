@@ -367,6 +367,7 @@ class _FocusScreenState extends ConsumerState<FocusScreen>
 
     switch (s.phase) {
       case FocusPhase.idle:
+        // Coarser steps above an hour so 1 h → 4 h is a handful of taps.
         final current = s.settings.focusMinutes;
         final downStep = FocusSettings.idleStepFor(current, up: false);
         final upStep = FocusSettings.idleStepFor(current, up: true);

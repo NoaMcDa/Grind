@@ -95,13 +95,6 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
 
   Task? get _existing => widget.existing;
 
-  /// Pre-fill text for the custom field: a round hour becomes `"2h"`, an
-  /// uneven value a plain minute count so the user can still read it.
-  static String _initialCustomText(int minutes) {
-    if (minutes >= 60 && minutes % 60 == 0) return '${minutes ~/ 60}h';
-    return '$minutes';
-  }
-
   /// Days and times in the form are in the user's zone.
   tz.Location get _location => ref.read(zoneLocationProvider);
 
@@ -114,6 +107,8 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     _notes = TextEditingController(text: t?.notes ?? '');
     _minutes = t?.estimatedMinutes ?? 30;
     _customMode = !_presets.contains(_minutes);
+    // Pre-fill the custom field with a readable form (e.g. "1h30" for 90
+    // min that isn't a preset), not raw minutes.
     _custom = TextEditingController(
       text: _customMode ? _initialCustomText(_minutes) : '',
     );
@@ -250,6 +245,17 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
     );
   }
 
+  /// How the custom field starts when an existing task's estimate is not a
+  /// preset: whole hours come out as `"2h"`, mixed as `"1h30"`, otherwise
+  /// as plain minutes. Parses back to the same minute count.
+  static String _initialCustomText(int minutes) {
+    if (minutes <= 0 || minutes < 60) return '$minutes';
+    final h = minutes ~/ 60;
+    final rem = minutes % 60;
+    if (rem == 0) return '${h}h';
+    return '${h}h$rem';
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     final title = _title.text.trim();
@@ -258,6 +264,10 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       return;
     }
     final minutes = _customMode ? parseDuration(_custom.text) : _minutes;
+    if (_customMode && minutes == null) {
+      setState(() => _showError = true);
+      return;
+    }
     final estimate = (minutes == null || minutes <= 0) ? 30 : minutes;
     final day = _date;
     final dueAt = day == null
@@ -294,8 +304,9 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
         goalId: _goalId,
       );
       // Carry over fields the form doesn't expose but [initial] may hold:
-      // the scheduled range (so "Add as task" from an event places it) and
-      // the calendar-event link (so push-back skips it).
+      // the scheduled range (so "Add as task" from an event places it), its
+      // pinned state (so Re-plan with Pip keeps it where the user chose
+      // — #189), and the calendar-event link (so push-back skips it).
       final init = widget.initial;
       task = init == null
           ? seeded
@@ -303,6 +314,7 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
               scheduledStart: init.scheduledStart,
               scheduledEnd: init.scheduledEnd,
               calendarEventId: init.calendarEventId,
+              lockedStart: init.lockedStart,
             );
     } else {
       task = existing.copyWith(
@@ -317,9 +329,13 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
       );
     }
     if (scheduledStart != null) {
+      // A time the user picked here pins the task on the Plan timeline, like
+      // a drag does: Re-plan with Pip then keeps it where the user chose
+      // instead of trying to re-fit it (#189).
       task = task.copyWith(
         scheduledStart: scheduledStart,
         scheduledEnd: scheduledEnd,
+        lockedStart: true,
       );
     }
     _saving = true;
@@ -521,12 +537,21 @@ class _TaskFormSheetState extends ConsumerState<TaskFormSheet> {
                       controller: _custom,
                       label: context.l10n.tasksCustomDuration,
                       hint: context.l10n.tasksCustomDurationHint,
-                      // Hours and colons are allowed, so plain text with a
-                      // number-friendly keyboard rather than digits-only.
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: false,
-                        signed: false,
-                      ),
+                      // Text-mode keyboard so "h" and ":" are reachable; the
+                      // filter still keeps the field to the shapes we parse.
+                      keyboardType: TextInputType.text,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[0-9hHmM:\s]'),
+                        ),
+                      ],
+                      errorText:
+                          _showError && parseDuration(_custom.text) == null
+                          ? context.l10n.tasksCustomDurationInvalid
+                          : null,
+                      onChanged: (_) {
+                        if (_showError) setState(() {});
+                      },
                       onSubmitted: (_) => _save(),
                     ),
                   ],
