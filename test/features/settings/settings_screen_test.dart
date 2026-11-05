@@ -428,6 +428,41 @@ void main() {
     );
   });
 
+  testWidgets('each Switch exposes its row title to accessibility', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs, store: InMemorySettingsStore());
+
+    // Scroll the morning/evening prompt rows into view so their switches build.
+    await _scrollTo(tester, find.byKey(const ValueKey('morning-switch')));
+
+    final l = lookupAppLocalizations(const Locale('en'));
+    // Quiet hours switch and prompt switches must each carry their row title.
+    for (final pair in <(Key, String)>[
+      (const ValueKey('quiet-switch'), l.settingsQuietHours),
+      (const ValueKey('morning-switch'), l.settingsMorningPrompt),
+      (const ValueKey('evening-switch'), l.settingsEveningPrompt),
+    ]) {
+      final sem = tester.getSemantics(find.byKey(pair.$1));
+      expect(
+        sem.label,
+        contains(pair.$2),
+        reason: 'switch ${pair.$1} must announce "${pair.$2}"',
+      );
+    }
+
+    // Day-off switches in the weekday hours editor likewise carry their day
+    // name.
+    await _scrollTo(tester, find.byKey(const ValueKey('day-switch-1')));
+    final monSem = tester.getSemantics(
+      find.byKey(const ValueKey('day-switch-1')),
+    );
+    expect(monSem.label, contains(l.commonWeekdayShortMon));
+    handle.dispose();
+  });
+
   testWidgets('settings chips hug their label instead of stretching', (
     tester,
   ) async {
