@@ -24,9 +24,7 @@ void main() {
 
     test('empty diff: Pip says nothing shifted (HE)', () {
       final s = summarizePlanDiff(diff: const PlanDiff(), l: he);
-      expect(s.sentences, [
-        'שום דבר לא זז. התוכנית שלך נשארת כמו שהיא.',
-      ]);
+      expect(s.sentences, ['שום דבר לא זז. התוכנית שלך נשארת כמו שהיא.']);
     });
   });
 
@@ -116,21 +114,23 @@ void main() {
   });
 
   group('three categories: least-impactful drops', () {
-    test('moved + added + removed: removed drops, summary stays at two sentences',
-        () {
-      final s = summarizePlanDiff(
-        diff: PlanDiff(
-          moved: [_move('a')],
-          added: const ['b'],
-          removed: [_removal('c')],
-        ),
-        l: en,
-      );
-      expect(s.sentences, [
-        'One task moved to a new time.',
-        'One task joined your plan.',
-      ]);
-    });
+    test(
+      'moved + added + removed: removed drops, summary stays at two sentences',
+      () {
+        final s = summarizePlanDiff(
+          diff: PlanDiff(
+            moved: [_move('a')],
+            added: const ['b'],
+            removed: [_removal('c')],
+          ),
+          l: en,
+        );
+        expect(s.sentences, [
+          'One task moved to a new time.',
+          'One task joined your plan.',
+        ]);
+      },
+    );
 
     test('the summary is never more than two sentences', () {
       final s = summarizePlanDiff(
