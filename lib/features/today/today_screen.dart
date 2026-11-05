@@ -14,7 +14,6 @@ import '../reminders/reminder_now_card.dart';
 import '../review/review.dart';
 import '../tasks/day_bounds.dart';
 import '../tasks/task_actions.dart';
-import '../tasks/task_detail_screen.dart';
 import '../tasks/task_form.dart';
 import 'plan_my_day_card.dart';
 import 'today_providers.dart';
@@ -58,9 +57,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   void _openSettings() => GoRouter.maybeOf(context)?.push('/settings');
 
   void _open(Task t) {
-    Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(taskId: t.id)),
-    );
+    // go_router.push so #/task/<id> lands in the URL and browser Back
+    // closes just the detail instead of also skipping over Today. See #213.
+    context.push('/task/${t.id}');
   }
 
   @override
