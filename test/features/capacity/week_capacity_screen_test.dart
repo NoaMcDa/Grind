@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:grind/core/core.dart';
 import 'package:grind/features/capacity/capacity.dart';
 import 'package:grind/l10n/l10n.dart';
@@ -206,6 +207,60 @@ void main() {
           expect(node.flagsCollection.isSlider, isTrue);
         }
         handle.dispose();
+      });
+
+      testWidgets('deep-link entry shows Back that falls back to /plan', (
+        tester,
+      ) async {
+        final container = ProviderContainer(
+          overrides: [
+            clockProvider.overrideWithValue(FixedClock(_now)),
+            taskRepositoryProvider.overrideWithValue(
+              InMemoryTaskRepository(const []),
+            ),
+            jsonDocStoreProvider.overrideWithValue(InMemoryJsonDocStore()),
+          ],
+        );
+        addTearDown(container.dispose);
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final router = GoRouter(
+          initialLocation: '/week',
+          routes: [
+            GoRoute(
+              path: '/week',
+              builder: (_, _) => const WeekCapacityScreen(),
+            ),
+            GoRoute(
+              path: '/plan',
+              builder: (_, _) => const Scaffold(body: Text('PLAN_MARKER')),
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp.router(
+              theme: buildAppTheme(),
+              locale: locale,
+              supportedLocales: supportedLocales,
+              localizationsDelegates: localizationsDelegates,
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Back control must be present even when the navigator cannot pop.
+        final back = find.byTooltip(l.capacityBack);
+        expect(back, findsOneWidget);
+        await tester.tap(back);
+        await tester.pumpAndSettle();
+
+        expect(find.text('PLAN_MARKER'), findsOneWidget);
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets('pin sheet sets a priority', (tester) async {
