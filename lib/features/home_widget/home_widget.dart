@@ -4,6 +4,7 @@
 /// `saveWidgetData` call and the Swift widget come in later slices.
 library;
 
+export 'widget_reminder_copy.dart';
 export 'widget_snapshot.dart';
 export 'widget_snapshot_builder.dart';
 export 'widget_snapshot_delta.dart';
