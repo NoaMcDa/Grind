@@ -962,6 +962,12 @@ abstract class AppLocalizations {
   /// **'90, 4h, 1:30'**
   String get tasksCustomDurationHint;
 
+  /// Error when the custom duration field cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a duration like 4h, 1:30 or 90'**
+  String get tasksCustomDurationInvalid;
+
   /// First action field label
   ///
   /// In en, this message translates to:
