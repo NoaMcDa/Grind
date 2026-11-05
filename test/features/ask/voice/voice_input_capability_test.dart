@@ -4,27 +4,21 @@ import 'package:grind/features/ask/voice/voice.dart';
 void main() {
   group('classifyVoiceInputCapability', () {
     group('hidden cases', () {
-      test(
-        'returns unsupportedPlatform when the native service is absent',
-        () {
-          final cap = classifyVoiceInputCapability(
-            isWeb: false,
-            serviceAvailable: false,
-          );
-          expect(cap, VoiceInputCapability.unsupportedPlatform);
-        },
-      );
+      test('returns unsupportedPlatform when the native service is absent', () {
+        final cap = classifyVoiceInputCapability(
+          isWeb: false,
+          serviceAvailable: false,
+        );
+        expect(cap, VoiceInputCapability.unsupportedPlatform);
+      });
 
-      test(
-        'returns unsupportedBrowser when the web service is absent',
-        () {
-          final cap = classifyVoiceInputCapability(
-            isWeb: true,
-            serviceAvailable: false,
-          );
-          expect(cap, VoiceInputCapability.unsupportedBrowser);
-        },
-      );
+      test('returns unsupportedBrowser when the web service is absent', () {
+        final cap = classifyVoiceInputCapability(
+          isWeb: true,
+          serviceAvailable: false,
+        );
+        expect(cap, VoiceInputCapability.unsupportedBrowser);
+      });
 
       test(
         'service absence wins over a granted permission on the native side',
@@ -137,10 +131,7 @@ void main() {
         VoiceInputCapability.unsupportedPlatform.shouldShowButton,
         isFalse,
       );
-      expect(
-        VoiceInputCapability.unsupportedBrowser.shouldShowButton,
-        isFalse,
-      );
+      expect(VoiceInputCapability.unsupportedBrowser.shouldShowButton, isFalse);
     });
   });
 

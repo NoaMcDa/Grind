@@ -71,8 +71,7 @@ enum VoiceInputCapability {
   /// prompt is part of the normal start path — the session kicks off
   /// once the user grants access. The disabled, denied and hidden
   /// cases return `false`.
-  bool get isUsable =>
-      this == available || this == permissionPending;
+  bool get isUsable => this == available || this == permissionPending;
 
   /// `true` when a capability indicates "the device has no recognizer"
   /// rather than "the user turned it off". Call sites use it to decide
