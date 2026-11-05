@@ -109,19 +109,23 @@ class SettingsScreen extends ConsumerWidget {
               SettingsRow(
                 label: l.settingsQuietHours,
                 subtitle: l.settingsQuietHoursHint,
-                trailing: Switch(
-                  key: const ValueKey('quiet-switch'),
-                  value: prefs.quietHours != null,
-                  activeThumbColor: AppColors.card,
-                  activeTrackColor: AppColors.violet,
-                  inactiveThumbColor: AppColors.ink,
-                  inactiveTrackColor: AppColors.lilac,
-                  trackOutlineColor: const WidgetStatePropertyAll(
-                    AppColors.ink,
-                  ),
-                  onChanged: (v) => _update(
-                    ref,
-                    (p) => p.copyWith(quietHours: v ? defaultQuietHours : null),
+                trailing: Semantics(
+                  label: l.settingsQuietHours,
+                  child: Switch(
+                    key: const ValueKey('quiet-switch'),
+                    value: prefs.quietHours != null,
+                    activeThumbColor: AppColors.card,
+                    activeTrackColor: AppColors.violet,
+                    inactiveThumbColor: AppColors.ink,
+                    inactiveTrackColor: AppColors.lilac,
+                    trackOutlineColor: const WidgetStatePropertyAll(
+                      AppColors.ink,
+                    ),
+                    onChanged: (v) => _update(
+                      ref,
+                      (p) =>
+                          p.copyWith(quietHours: v ? defaultQuietHours : null),
+                    ),
                   ),
                 ),
               ),
@@ -169,25 +173,31 @@ class SettingsScreen extends ConsumerWidget {
             ]),
             _section(l.settingsData, [const _DataActions()]),
             _section(l.settingsAbout, [
-              SettingsRow(
-                label: l.settingsVersion,
-                trailing: Pill(label: _appVersion),
-              ),
-              SettingsRow(
-                label: l.settingsLicences,
-                trailing: const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.ink,
-                ),
-                onTap: () => showLicensePage(
-                  context: context,
-                  applicationName: 'Grind',
-                  applicationVersion: _appVersion,
+              MergeSemantics(
+                child: SettingsRow(
+                  label: l.settingsVersion,
+                  trailing: Pill(label: _appVersion),
                 ),
               ),
-              SettingsRow(
-                label: l.settingsPrivacy,
-                subtitle: l.settingsPrivacyBody,
+              MergeSemantics(
+                child: SettingsRow(
+                  label: l.settingsLicences,
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.ink,
+                  ),
+                  onTap: () => showLicensePage(
+                    context: context,
+                    applicationName: 'Grind',
+                    applicationVersion: _appVersion,
+                  ),
+                ),
+              ),
+              MergeSemantics(
+                child: SettingsRow(
+                  label: l.settingsPrivacy,
+                  subtitle: l.settingsPrivacyBody,
+                ),
               ),
             ]),
           ],
@@ -374,19 +384,22 @@ class _PromptTimesState extends ConsumerState<_PromptTimes> {
                 setState(() => set(v));
               },
             ),
-          Switch(
-            key: ValueKey('$keyName-switch'),
-            value: value != null,
-            activeThumbColor: AppColors.card,
-            activeTrackColor: AppColors.violet,
-            inactiveThumbColor: AppColors.ink,
-            inactiveTrackColor: AppColors.lilac,
-            trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
-            onChanged: (on) async {
-              final v = on ? fallback : null;
-              await save(v);
-              setState(() => set(v));
-            },
+          Semantics(
+            label: label,
+            child: Switch(
+              key: ValueKey('$keyName-switch'),
+              value: value != null,
+              activeThumbColor: AppColors.card,
+              activeTrackColor: AppColors.violet,
+              inactiveThumbColor: AppColors.ink,
+              inactiveTrackColor: AppColors.lilac,
+              trackOutlineColor: const WidgetStatePropertyAll(AppColors.ink),
+              onChanged: (on) async {
+                final v = on ? fallback : null;
+                await save(v);
+                setState(() => set(v));
+              },
+            ),
           ),
         ],
       ),
@@ -503,7 +516,14 @@ class _SmallButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 140),
-      child: _pill(),
+      child: Semantics(
+        button: true,
+        enabled: true,
+        label: label,
+        excludeSemantics: true,
+        onTap: onPressed,
+        child: _pill(),
+      ),
     );
   }
 
@@ -630,55 +650,59 @@ class _CalendarProviderTileState extends ConsumerState<_CalendarProviderTile> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SettingsRow(
-          label: widget.label,
-          subtitle: _connected ? l.commonConnected : l.settingsNotConnected,
-          trailing: _SmallButton(
-            label: _connected ? l.settingsDisconnect : l.commonConnect,
-            primary: !_connected,
-            onPressed: _connected ? _disconnect : _connect,
-          ),
-        ),
-        if (_connected)
-          _SyncStatusPill(
-            source: _provider.source,
-            status: ref.watch(widget.statusOf),
-          ),
-        if (_failed)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Text(
-              l.settingsConnectFailed,
-              style: AppText.body(
-                size: 13,
-                weight: FontWeight.w500,
-                color: AppColors.muted,
-              ),
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SettingsRow(
+            label: widget.label,
+            subtitle: _connected ? l.commonConnected : l.settingsNotConnected,
+            trailing: _SmallButton(
+              label: _connected ? l.settingsDisconnect : l.commonConnect,
+              primary: !_connected,
+              onPressed: _connected ? _disconnect : _connect,
             ),
           ),
-        if (_connected && _selection != null) ...[
-          Text(l.settingsCalendarsToUse, style: AppText.label(size: 12)),
-          for (final c in _calendars)
-            CheckboxListTile(
-              key: ValueKey('cal-${widget.label}-${c.id}'),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              dense: true,
-              activeColor: AppColors.violet,
-              checkColor: Colors.white,
-              side: const BorderSide(
-                color: AppColors.ink,
-                width: AppStroke.border,
-              ),
-              title: Text(c.name, style: AppText.bold(size: 14)),
-              value: _selection!.contains(c.id),
-              onChanged: (_) => _toggle(c.id),
+          if (_connected)
+            _SyncStatusPill(
+              source: _provider.source,
+              status: ref.watch(widget.statusOf),
             ),
+          if (_failed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                l.settingsConnectFailed,
+                style: AppText.body(
+                  size: 13,
+                  weight: FontWeight.w500,
+                  color: AppColors.muted,
+                ),
+              ),
+            ),
+          if (_connected && _selection != null) ...[
+            Text(l.settingsCalendarsToUse, style: AppText.label(size: 12)),
+            for (final c in _calendars)
+              CheckboxListTile(
+                key: ValueKey('cal-${widget.label}-${c.id}'),
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                dense: true,
+                activeColor: AppColors.violet,
+                checkColor: Colors.white,
+                side: const BorderSide(
+                  color: AppColors.ink,
+                  width: AppStroke.border,
+                ),
+                title: Text(c.name, style: AppText.bold(size: 14)),
+                value: _selection!.contains(c.id),
+                onChanged: (_) => _toggle(c.id),
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
