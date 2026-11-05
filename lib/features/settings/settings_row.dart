@@ -62,6 +62,16 @@ class SettingsRow extends StatelessWidget {
       ),
     );
     if (onTap == null) return row;
-    return InkWell(onTap: onTap, child: row);
+    // Expose the row as a single button whose accessible name is the row
+    // title; decorative trailing icons (chevrons, action glyphs) are excluded
+    // so they do not pollute the button's name or split it into separate
+    // semantic nodes.
+    return Semantics(
+      button: true,
+      label: label,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: InkWell(onTap: onTap, child: row),
+    );
   }
 }

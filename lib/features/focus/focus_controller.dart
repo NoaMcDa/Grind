@@ -28,7 +28,8 @@ class FocusSettings {
   final int longBreakMinutes;
   final int sessionsPerCycle;
 
-  /// Bounds for the length picker on the idle screen.
+  /// Bounds for the length picker on the idle screen. Four hours gives room
+  /// for a long deep-work block without turning the picker into a slider.
   static const minFocusMinutes = 5;
   static const maxFocusMinutes = 240;
 
