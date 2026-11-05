@@ -253,7 +253,7 @@ void main() {
       );
       await tester.enterText(find.byType(TextField), 'Outline the report');
       await tester.tap(find.text(l.goalsMilestoneNextWeek));
-      await tester.tap(find.text(l.commonMinutes(60)));
+      await tester.tap(find.text(l.commonHours(1)));
       await tester.pump();
       await tester.tap(find.bySemanticsLabel(l.commonSave));
       await tester.pumpAndSettle();

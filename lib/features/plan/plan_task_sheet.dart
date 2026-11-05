@@ -298,6 +298,9 @@ Future<void> _addAsTask(
     estimatedMinutes: minutes,
     scheduledStart: e.start,
     scheduledEnd: e.end,
+    // Pin the conversion at the event's time: Re-plan with Pip keeps it
+    // there instead of re-fitting it over the busy event (#189).
+    lockedStart: true,
     calendarEventId: sentinel,
     createdAt: now,
     updatedAt: now,

@@ -475,6 +475,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tasksCustomDurationHint => '90, 4h, 1:30';
 
   @override
+  String get tasksCustomDurationInvalid =>
+      'Enter a duration like 4h, 1:30 or 90';
+
+  @override
   String get tasksFirstActionLabel => 'First action';
 
   @override
@@ -1388,6 +1392,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalsTitle => 'Goals';
+
+  @override
+  String get goalsAllGoalsLink => 'All goals';
 
   @override
   String get goalsSubtitle => 'Near and far. Every small step counts.';

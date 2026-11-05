@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/core.dart';
+import '../calendar/sync/calendar_sync_engine.dart'
+    show externalIdFromTaskCalendarEventId, isImportedCalendarEventId;
+import '../calendar/sync/task_mirrors.dart';
 import '../goals/domain/metric_ticks.dart';
 import '../tasks/day_bounds.dart';
 import 'plan_layout.dart';
@@ -65,6 +68,26 @@ List<Task> tasksOnDay(
     ..sort((a, b) => a.scheduledStart!.compareTo(b.scheduledStart!));
 }
 
+/// Events with any whose [CalendarEvent.externalId] is already linked to an
+/// "Add as task" imported task filtered out: the task card replaces the
+/// dashed event card so the day does not show the same thing twice.
+List<CalendarEvent> eventsWithoutLinkedTasks(
+  Iterable<CalendarEvent> events,
+  Iterable<Task> tasks,
+) {
+  final linked = <String>{};
+  for (final t in tasks) {
+    if (!isImportedCalendarEventId(t.calendarEventId)) continue;
+    final ext = externalIdFromTaskCalendarEventId(t.calendarEventId);
+    if (ext != null) linked.add(ext);
+  }
+  if (linked.isEmpty) return events.toList();
+  return [
+    for (final e in events)
+      if (!linked.contains(e.externalId)) e,
+  ];
+}
+
 /// Tasks scheduled on the selected day, ordered by start, live (from the
 /// repository's `watchAll`).
 final planTasksProvider = Provider.autoDispose<List<Task>>((ref) {
@@ -73,7 +96,9 @@ final planTasksProvider = Provider.autoDispose<List<Task>>((ref) {
   return tasksOnDay(tasks, day, ref.watch(zoneLocationProvider));
 });
 
-/// Calendar events on the selected day, live.
+/// Calendar events on the selected day, live, without the calendar copies
+/// of Grind tasks (write-backs and "Add as task" imports): the task is drawn
+/// in their place, so the day never shows the same block twice.
 final planEventsProvider = StreamProvider.autoDispose<List<CalendarEvent>>((
   ref,
 ) {
@@ -81,7 +106,11 @@ final planEventsProvider = StreamProvider.autoDispose<List<CalendarEvent>>((
     ref.watch(selectedDayProvider),
     ref.watch(zoneLocationProvider),
   );
-  return ref.watch(calendarRepositoryProvider).watchBetween(day.start, day.end);
+  final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
+  return ref
+      .watch(calendarRepositoryProvider)
+      .watchBetween(day.start, day.end)
+      .map((events) => withoutTaskMirrors(events, tasks));
 });
 
 /// The 7 days of the selected day's week, from `Preferences.weekStart`.
@@ -90,18 +119,21 @@ final planWeekProvider = Provider.autoDispose<List<DateTime>>((ref) {
   return weekOf(day, ref.watch(planPrefsProvider).weekStart);
 });
 
-/// Events across the shown week (for the load bars).
+/// Events across the shown week (for the load bars), without the calendar
+/// copies of tasks, which the tasks already count.
 final planWeekEventsProvider = StreamProvider.autoDispose<List<CalendarEvent>>((
   ref,
 ) {
   final week = ref.watch(planWeekProvider);
   final location = ref.watch(zoneLocationProvider);
+  final tasks = ref.watch(tasksProvider).valueOrNull ?? const <Task>[];
   return ref
       .watch(calendarRepositoryProvider)
       .watchBetween(
         planDayUtc(week.first, location).start,
         planDayUtc(week.last, location).end,
-      );
+      )
+      .map((events) => withoutTaskMirrors(events, tasks));
 });
 
 /// Booked share (0..1) per day of the shown week.
