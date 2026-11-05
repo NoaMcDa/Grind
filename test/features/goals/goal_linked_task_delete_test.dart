@@ -88,22 +88,16 @@ void main() {
       final tasks = InMemoryTaskRepository([_pilates()]);
       final rules = InMemoryReminderRepository();
       late BuildContext ctx;
-      final container = await _pump(
-        tester,
-        tasks,
-        rules,
-        grab: (c) => ctx = c,
-      );
+      final container = await _pump(tester, tasks, rules, grab: (c) => ctx = c);
 
       // Baseline: the task is linked to the goal.
       final sub = container.listen(goalLinkedTasksProvider('g'), (_, _) {});
       addTearDown(sub.close);
       await container.read(tasksProvider.future);
       await tester.pumpAndSettle();
-      expect(
-        container.read(goalLinkedTasksProvider('g')).map((t) => t.id),
-        ['pilates'],
-      );
+      expect(container.read(goalLinkedTasksProvider('g')).map((t) => t.id), [
+        'pilates',
+      ]);
 
       await container
           .read(taskActionsProvider)
@@ -131,21 +125,15 @@ void main() {
       ]);
       final rules = InMemoryReminderRepository([_weekly()]);
       late BuildContext ctx;
-      final container = await _pump(
-        tester,
-        tasks,
-        rules,
-        grab: (c) => ctx = c,
-      );
+      final container = await _pump(tester, tasks, rules, grab: (c) => ctx = c);
 
       final sub = container.listen(goalLinkedTasksProvider('g'), (_, _) {});
       addTearDown(sub.close);
       await container.read(tasksProvider.future);
       await tester.pumpAndSettle();
-      expect(
-        container.read(goalLinkedTasksProvider('g')).map((t) => t.id),
-        ['pilates'],
-      );
+      expect(container.read(goalLinkedTasksProvider('g')).map((t) => t.id), [
+        'pilates',
+      ]);
       expect(await rules.getForTask('pilates'), isNotNull);
 
       await container
