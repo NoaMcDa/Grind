@@ -37,7 +37,9 @@ void main() {
     });
 
     test('empty body is kept empty (no dangling separator)', () {
-      final copy = WidgetReminderCopy.of(_reminder(title: 'Call Sam', body: ''));
+      final copy = WidgetReminderCopy.of(
+        _reminder(title: 'Call Sam', body: ''),
+      );
       expect(copy.title, 'Call Sam');
       expect(copy.line, '');
       expect(copy.headline(), 'Call Sam');
@@ -119,9 +121,7 @@ void main() {
     });
 
     test('empty input yields empty output, not an ellipsis', () {
-      final copy = WidgetReminderCopy.of(
-        _reminder(title: '   ', body: '\n\t'),
-      );
+      final copy = WidgetReminderCopy.of(_reminder(title: '   ', body: '\n\t'));
       expect(copy.title, '');
       expect(copy.line, '');
       expect(copy.isEmpty, isTrue);

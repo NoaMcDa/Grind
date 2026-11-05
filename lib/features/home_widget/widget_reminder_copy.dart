@@ -105,9 +105,7 @@ class WidgetReminderCopy {
 
   @override
   bool operator ==(Object other) =>
-      other is WidgetReminderCopy &&
-      other.title == title &&
-      other.line == line;
+      other is WidgetReminderCopy && other.title == title && other.line == line;
 
   @override
   int get hashCode => Object.hash(title, line);
