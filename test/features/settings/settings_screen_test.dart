@@ -432,7 +432,6 @@ void main() {
     tester,
   ) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     final prefs = InMemoryPreferencesRepository();
     await _pump(tester, prefs: prefs, store: InMemorySettingsStore());
 
@@ -461,6 +460,7 @@ void main() {
       find.byKey(const ValueKey('day-switch-1')),
     );
     expect(monSem.label, contains(l.commonWeekdayShortMon));
+    handle.dispose();
   });
 
   testWidgets('settings chips hug their label instead of stretching', (
