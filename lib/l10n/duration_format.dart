@@ -10,6 +10,7 @@ import 'app_localizations.dart';
 int? parseDuration(String input) {
   final trimmed = input.trim();
   if (trimmed.isEmpty) return null;
+  const maxMinutes = 24 * 60;
   // Normalise: strip whitespace, lower-case, replace Hebrew abbreviations.
   var s = trimmed.toLowerCase();
   // Map Hebrew tokens to h / m so the grammar below handles both locales.
@@ -42,7 +43,9 @@ int? parseDuration(String input) {
     final h = int.parse(colon.group(1)!);
     final m = int.parse(colon.group(2)!);
     if (m >= 60) return null;
-    return h * 60 + m;
+    final total = h * 60 + m;
+    if (total <= 0 || total > maxMinutes) return null;
+    return total;
   }
 
   // "4h", "4h30", "4h30m", "30m", or bare "90".
@@ -50,7 +53,9 @@ int? parseDuration(String input) {
   if (hm != null && (hm.group(1) != null || hm.group(2) != null)) {
     final h = int.tryParse(hm.group(1) ?? '0') ?? 0;
     final m = int.tryParse(hm.group(2) ?? '0') ?? 0;
-    return h * 60 + m;
+    final total = h * 60 + m;
+    if (total <= 0 || total > maxMinutes) return null;
+    return total;
   }
   return null;
 }

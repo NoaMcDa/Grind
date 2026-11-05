@@ -61,7 +61,8 @@ GoRouter createRouter({
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        builder: (context, state) =>
+            const _PhoneColumn(child: SettingsScreen()),
       ),
       GoRoute(
         path: '/review',
@@ -143,17 +144,33 @@ class _Shell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _PhoneColumn(
+      child: Column(
+        children: [
+          Expanded(child: shell),
+          GrindShellTabBar(shell: shell),
+        ],
+      ),
+    );
+  }
+}
+
+/// Centers [child] in a phone-width column on wide viewports so screens
+/// reached outside the tab shell (e.g. `/settings`) match the tabbed screens'
+/// layout instead of spanning the full width.
+class _PhoneColumn extends StatelessWidget {
+  const _PhoneColumn({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.ground,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            children: [
-              Expanded(child: shell),
-              GrindShellTabBar(shell: shell),
-            ],
-          ),
+          child: child,
         ),
       ),
     );

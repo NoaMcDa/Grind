@@ -428,6 +428,41 @@ void main() {
     );
   });
 
+  testWidgets('each Switch exposes its row title to accessibility', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    final prefs = InMemoryPreferencesRepository();
+    await _pump(tester, prefs: prefs, store: InMemorySettingsStore());
+
+    // Scroll the morning/evening prompt rows into view so their switches build.
+    await _scrollTo(tester, find.byKey(const ValueKey('morning-switch')));
+
+    final l = lookupAppLocalizations(const Locale('en'));
+    // Quiet hours switch and prompt switches must each carry their row title.
+    for (final pair in <(Key, String)>[
+      (const ValueKey('quiet-switch'), l.settingsQuietHours),
+      (const ValueKey('morning-switch'), l.settingsMorningPrompt),
+      (const ValueKey('evening-switch'), l.settingsEveningPrompt),
+    ]) {
+      final sem = tester.getSemantics(find.byKey(pair.$1));
+      expect(
+        sem.label,
+        contains(pair.$2),
+        reason: 'switch ${pair.$1} must announce "${pair.$2}"',
+      );
+    }
+
+    // Day-off switches in the weekday hours editor likewise carry their day
+    // name.
+    await _scrollTo(tester, find.byKey(const ValueKey('day-switch-1')));
+    final monSem = tester.getSemantics(
+      find.byKey(const ValueKey('day-switch-1')),
+    );
+    expect(monSem.label, contains(l.commonWeekdayShortMon));
+    handle.dispose();
+  });
+
   testWidgets('settings chips hug their label instead of stretching', (
     tester,
   ) async {
@@ -441,6 +476,82 @@ void main() {
     );
     expect(chip.width, lessThan(label.width + 40));
     expect(chip.height, greaterThanOrEqualTo(44));
+  });
+
+  testWidgets('switches expose their row label as an accessible name (#217)', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    final prefs = InMemoryPreferencesRepository();
+    final store = InMemorySettingsStore();
+    await _pump(tester, prefs: prefs, store: store);
+
+    // Quiet hours switch.
+    await _scrollTo(tester, find.byKey(const ValueKey('quiet-switch')));
+    final quietNode = tester.getSemantics(
+      find.byKey(const ValueKey('quiet-switch')),
+    );
+    expect(quietNode.label, contains('Quiet hours'));
+
+    // Morning / evening prompt switches.
+    await _scrollTo(tester, find.byKey(const ValueKey('morning-switch')));
+    final morningNode = tester.getSemantics(
+      find.byKey(const ValueKey('morning-switch')),
+    );
+    expect(morningNode.label, contains('Morning'));
+
+    await _scrollTo(tester, find.byKey(const ValueKey('evening-switch')));
+    final eveningNode = tester.getSemantics(
+      find.byKey(const ValueKey('evening-switch')),
+    );
+    expect(eveningNode.label, contains('Evening'));
+
+    // Every day-of-week switch has the weekday short name as its label.
+    for (var d = 1; d <= 7; d++) {
+      await _scrollTo(tester, find.byKey(ValueKey('day-switch-$d')));
+      final node = tester.getSemantics(find.byKey(ValueKey('day-switch-$d')));
+      expect(node.label, isNotEmpty, reason: 'day-switch-$d has no label');
+    }
+
+    handle.dispose();
+  });
+
+  testWidgets(
+    'Google Calendar Connect button is its own semantic node (#217)',
+    (tester) async {
+      final handle = tester.ensureSemantics();
+      final google = FakeCalendarProvider(CalendarSource.google);
+      await _pump(
+        tester,
+        prefs: InMemoryPreferencesRepository(),
+        google: google,
+      );
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Connect')),
+        matchesSemantics(
+          label: 'Connect',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
+    },
+  );
+
+  testWidgets('About card: Licences is reachable as a separate button (#217)', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await _pump(tester, prefs: InMemoryPreferencesRepository());
+    await _scrollTo(tester, find.text('Licences'));
+    // Version, Licences and Privacy are each in their own semantic node.
+    expect(find.bySemanticsLabel(RegExp(r'^Version')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'^Licences')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp(r'^Privacy')), findsOneWidget);
+    handle.dispose();
   });
 }
 
